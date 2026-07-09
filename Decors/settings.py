@@ -39,6 +39,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "Decors.urls"
+AUTH_USER_MODEL = 'Ecom.User'
 
 import os
 TEMPLATES = [
@@ -87,12 +88,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
-
-TIME_ZONE = "UTC"
-
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
-
 USE_TZ = True
 
 
@@ -120,6 +118,13 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'projecttestmail02@gmail.com'
-EMAIL_HOST_PASSWORD = 'iizo uksz kyir'
+EMAIL_HOST_PASSWORD = 'iizo uksz ngai kyir'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# ========== LOGIN URL ==========
+LOGIN_URL = 'Ecom:login'
+LOGIN_REDIRECT_URL = 'Ecom:home'
+LOGOUT_REDIRECT_URL = 'Ecom:home'

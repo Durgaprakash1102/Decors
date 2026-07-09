@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - MyStore{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'Ecom:profile' %}">Profile</a></li>
+                    <li class="breadcrumb-item active">Edit Profile</li>
+                </ol>
+            </nav>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-edit text-primary"></i> Edit Profile</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        <h6 class="border-bottom pb-2">Personal Information</h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ user_form.full_name.id_for_label }}" class="form-label">
+                                    Full Name <span class="text-danger">*</span>
+                                </label>
+                                {{ user_form.full_name }}
+                                {% if user_form.full_name.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in user_form.full_name.errors %}
+                                            <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ user_form.phone.id_for_label }}" class="form-label">
+                                    Phone Number
+                                </label>
+                                {{ user_form.phone }}
+                                {% if user_form.phone.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in user_form.phone.errors %}
+                                            <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <h6 class="border-bottom pb-2 mt-3">Profile Details</h6>
+                        
+                        <div class="mb-3">
+                            <label for="{{ profile_form.profile_picture.id_for_label }}" class="form-label">
+                                Profile Picture
+                            </label>
+                            {% if user.profile.profile_picture %}
+                                <div class="mb-2">
+                                    <img src="{{ user.profile.profile_picture.url }}" 
+                                         alt="Current Profile Picture" 
+                                         style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%;">
+                                </div>
+                            {% endif %}
+                            {{ profile_form.profile_picture }}
+                            {% if profile_form.profile_picture.errors %}
+                                <div class="text-danger small">
+                                    {% for error in profile_form.profile_picture.errors %}
+                                        <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ profile_form.bio.id_for_label }}" class="form-label">
+                                Bio
+                            </label>
+                            {{ profile_form.bio }}
+                            {% if profile_form.bio.errors %}
+                                <div class="text-danger small">
+                                    {% for error in profile_form.bio.errors %}
+                                        <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.date_of_birth.id_for_label }}" class="form-label">
+                                    Date of Birth
+                                </label>
+                                {{ profile_form.date_of_birth }}
+                                {% if profile_form.date_of_birth.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in profile_form.date_of_birth.errors %}
+                                            <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.gender.id_for_label }}" class="form-label">
+                                    Gender
+                                </label>
+                                {{ profile_form.gender }}
+                                {% if profile_form.gender.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in profile_form.gender.errors %}
+                                            <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'Ecom:profile' %}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Update Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
