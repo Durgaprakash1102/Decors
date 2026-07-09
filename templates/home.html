@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<section class="container py-5">
+    <div class="text-center">
+        <h1>Welcome to Our Website</h1>
+        <p class="lead">
+            We provide high-quality products and services with a focus on customer satisfaction.
+        </p>
+
+        <a href="{% url 'about' %}" class="btn btn-primary">
+            Learn More
+        </a>
+    </div>
+</section>
+
+{% endblock %}

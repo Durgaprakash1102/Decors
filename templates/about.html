@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+
+<section class="container py-5">
+    <div class="text-center">
+        <h1>About Us</h1>
+
+        <p class="lead">
+            We are passionate about delivering quality solutions and creating exceptional user experiences.
+        </p>
+
+        <p>
+            Our mission is to build reliable, scalable, and innovative applications that help businesses grow.
+        </p>
+
+        <a href="{% url 'home' %}" class="btn btn-outline-primary">
+            Back to Home
+        </a>
+    </div>
+</section>
+
+{% endblock %}
