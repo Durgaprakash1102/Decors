@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Low Stock Alerts - MyStore{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-exclamation-triangle text-warning"></i> Low Stock Alerts</h2>
+        <a href="{% url 'Ecom:product_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Products
+        </a>
+    </div>
+
+    <!-- Out of Stock Products -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0"><i class="fas fa-times-circle"></i> Out of Stock Products</h5>
+        </div>
+        <div class="card-body">
+            {% if out_of_stock_products %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>SKU</th>
+                                <th>Category</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in out_of_stock_products %}
+                            <tr class="table-danger">
+                                <td>{{ product.name }}</td>
+                                <td><code>{{ product.sku }}</code></td>
+                                <td>{{ product.category.name }}</td>
+                                <td><span class="badge bg-danger">0</span></td>
+                                <td>
+                                    <a href="{% url 'Ecom:product_admin_detail' product.id %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'Ecom:product_smart_edit' product.id %}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-success mb-0"><i class="fas fa-check-circle"></i> No out of stock products.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Out of Stock Variants -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0"><i class="fas fa-times-circle"></i> Out of Stock Variants</h5>
+        </div>
+        <div class="card-body">
+            {% if out_of_stock_variants %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Variant</th>
+                                <th>SKU</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for variant in out_of_stock_variants %}
+                            <tr class="table-danger">
+                                <td>{{ variant.product.name }}</td>
+                                <td>
+                                    {% if variant.color %}{{ variant.color }} / {% endif %}
+                                    {% if variant.size %}{{ variant.size }}{% endif %}
+                                </td>
+                                <td><code>{{ variant.sku }}</code></td>
+                                <td><span class="badge bg-danger">0</span></td>
+                                <td>
+                                    <a href="{% url 'Ecom:product_admin_detail' variant.product.id %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'Ecom:product_smart_edit' variant.product.id %}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-success mb-0"><i class="fas fa-check-circle"></i> No out of stock variants.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Low Stock Products -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-warning">
+            <h5 class="mb-0"><i class="fas fa-exclamation-circle"></i> Low Stock Products</h5>
+        </div>
+        <div class="card-body">
+            {% if low_stock_products %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>SKU</th>
+                                <th>Category</th>
+                                <th>Stock</th>
+                                <th>Threshold</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in low_stock_products %}
+                            <tr class="table-warning">
+                                <td>{{ product.name }}</td>
+                                <td><code>{{ product.sku }}</code></td>
+                                <td>{{ product.category.name }}</td>
+                                <td><span class="badge bg-warning">{{ product.stock_quantity }}</span></td>
+                                <td>{{ product.low_stock_threshold }}</td>
+                                <td>
+                                    <a href="{% url 'Ecom:product_admin_detail' product.id %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'Ecom:product_smart_edit' product.id %}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-success mb-0"><i class="fas fa-check-circle"></i> No low stock products.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Low Stock Variants -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning">
+            <h5 class="mb-0"><i class="fas fa-exclamation-circle"></i> Low Stock Variants</h5>
+        </div>
+        <div class="card-body">
+            {% if low_stock_variants %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Variant</th>
+                                <th>SKU</th>
+                                <th>Stock</th>
+                                <th>Threshold</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for variant in low_stock_variants %}
+                            <tr class="table-warning">
+                                <td>{{ variant.product.name }}</td>
+                                <td>
+                                    {% if variant.color %}{{ variant.color }} / {% endif %}
+                                    {% if variant.size %}{{ variant.size }}{% endif %}
+                                </td>
+                                <td><code>{{ variant.sku }}</code></td>
+                                <td><span class="badge bg-warning">{{ variant.stock_quantity }}</span></td>
+                                <td>{{ variant.low_stock_threshold }}</td>
+                                <td>
+                                    <a href="{% url 'Ecom:product_admin_detail' variant.product.id %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'Ecom:product_smart_edit' variant.product.id %}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-success mb-0"><i class="fas fa-check-circle"></i> No low stock variants.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

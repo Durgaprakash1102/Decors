@@ -33,4 +33,46 @@ urlpatterns = [
     
     # Admin URLs
     path('admin_dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
+
+        # ========== CATEGORY URLs ==========
+    path('admin_categories/', views.category_list_view, name='category_list'),
+    path('admin_category/create/', views.category_create_view, name='category_create'),
+    path('admin_category/edit/<int:category_id>/', views.category_edit_view, name='category_edit'),
+    path('admin_category/delete/<int:category_id>/', views.category_delete_view, name='category_delete'),
+    
+    # ========== SUBCATEGORY URLs ==========
+    path('admin_subcategories/', views.subcategory_list_view, name='subcategory_list'),
+    path('admin_subcategory/create/', views.subcategory_create_view, name='subcategory_create'),
+    path('admin_subcategory/edit/<int:subcategory_id>/', views.subcategory_edit_view, name='subcategory_edit'),
+    path('admin_subcategory/delete/<int:subcategory_id>/', views.subcategory_delete_view, name='subcategory_delete'),
+    
+    # ========== PRODUCT URLs (Smart Unified) ==========
+    path('admin_products/', views.product_list_view, name='product_list'),
+    path('admin_product/create/', views.product_smart_create_view, name='product_smart_create'),
+    path('admin_product/edit/<int:product_id>/', views.product_smart_edit_view, name='product_smart_edit'),
+    path('admin_product/detail/<int:product_id>/', views.product_admin_detail_view, name='product_admin_detail'),
+    path('admin_product/delete/<int:product_id>/', views.product_delete_view, name='product_delete'),
+    path('admin/product/image/delete/<int:image_id>/', views.delete_product_image_ajax, name='delete_product_image'),
+    path('admin/variant/image/delete/<int:image_id>/', views.delete_variant_image_ajax, name='delete_variant_image'),
+    # ========== PUBLIC PRODUCT URLs ==========
+    path('product/<int:product_id>/', views.product_detail_view, name='product_detail'),
+    
+    # ========== REVIEW URLs ==========
+    path('admin_reviews/', views.review_list_view, name='review_list'),
+    path('admin_review/approve/<int:review_id>/', views.review_approve_view, name='review_approve'),
+    path('admin_review/delete/<int:review_id>/', views.review_delete_view, name='review_delete'),
+    path('product/<int:product_id>/add-review/', views.add_review_view, name='add_review'),
+    
+    
+    # ========== INVENTORY LOG URLs ==========
+    path('admin_inventory-log/', views.inventory_log_view, name='inventory_log'),
+    
+    # ========== LOW STOCK ALERT URLs ==========
+    path('admin_low-stock-alerts/', views.low_stock_alert_view, name='low_stock_alerts'),
+    
+    # ========== RECENTLY VIEWED URLs ==========
+    path('recently-viewed/', views.recently_viewed_view, name='recently_viewed'),
+    
+    # ========== AJAX URLs ==========
+    path('ajax/get-subcategories/', views.get_subcategories_ajax, name='get_subcategories'),
 ]

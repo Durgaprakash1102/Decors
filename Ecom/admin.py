@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Profile, Address, OTP
-
+from .models import *
 class CustomUserAdmin(UserAdmin):
     list_display = ['email', 'full_name', 'role', 'is_active', 'is_verified', 'date_joined']
     list_filter = ['role', 'is_active', 'is_verified']
@@ -45,3 +44,4 @@ class OTPAdmin(admin.ModelAdmin):
 
 # Register User with custom admin
 admin.site.register(User, CustomUserAdmin)
+admin.site.register(ProductReview)

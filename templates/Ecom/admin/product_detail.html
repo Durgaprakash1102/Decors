@@ -1,0 +1,504 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - MyStore{% endblock %}
+
+{% block extra_css %}
+<style>
+    .variant-detail-card {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: #f8f9fa;
+        transition: all 0.2s;
+    }
+    .variant-detail-card:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .variant-detail-card .variant-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .variant-detail-card .variant-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+    }
+    .variant-detail-card .variant-sku {
+        color: #6c757d;
+        font-size: 13px;
+    }
+    .variant-detail-card .variant-images {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+    }
+    .variant-detail-card .variant-images img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        transition: transform 0.2s;
+    }
+    .variant-detail-card .variant-images img:hover {
+        transform: scale(1.5);
+        z-index: 100;
+        position: relative;
+    }
+    .variant-detail-card .variant-attributes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 8px;
+    }
+    .variant-detail-card .variant-attributes .badge {
+        font-size: 11px;
+    }
+    .variant-detail-card .variant-stock {
+        font-size: 14px;
+    }
+    .variant-detail-card .variant-price {
+        font-size: 14px;
+        font-weight: 600;
+    }
+    .variant-detail-card .variant-warranty {
+        font-size: 13px;
+        color: #6c757d;
+    }
+    .image-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+    .image-gallery .image-item {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e9ecef;
+    }
+    .image-gallery .image-item img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+    }
+    .image-gallery .image-item .badge {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        font-size: 10px;
+    }
+    .stats-card {
+        border-left: 4px solid;
+        padding: 12px 15px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        margin-bottom: 10px;
+    }
+    .stats-card.primary { border-color: #0d6efd; }
+    .stats-card.success { border-color: #28a745; }
+    .stats-card.warning { border-color: #ffc107; }
+    .stats-card.danger { border-color: #dc3545; }
+    .stats-card.info { border-color: #17a2b8; }
+    .stats-card .label { font-size: 12px; color: #6c757d; }
+    .stats-card .value { font-size: 18px; font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-box text-primary"></i> {{ product.name }}</h2>
+        <div>
+            <a href="{% url 'Ecom:product_smart_edit' product.id %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="{% url 'Ecom:product_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- ============================================ -->
+        <!-- MAIN CONTENT (Left Column)                   -->
+        <!-- ============================================ -->
+        <div class="col-md-8">
+            
+            <!-- Product Images -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-images text-success"></i> Product Images</h5>
+                </div>
+                <div class="card-body">
+                    {% if product.images.exists %}
+                        <div class="image-gallery">
+                            {% for img in product.images.all %}
+                                <div class="image-item">
+                                    <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}">
+                                    {% if img.is_primary %}
+                                        <span class="badge bg-success">Primary</span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-3">No images uploaded.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Product Details -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle text-primary"></i> Product Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>SKU:</strong> <code>{{ product.sku }}</code></p>
+                            <p><strong>Brand:</strong> {{ product.brand|default:"-" }}</p>
+                            <p><strong>Category:</strong> {{ product.category.name }}</p>
+                            <p><strong>Subcategory:</strong> {{ product.subcategory.name|default:"-" }}</p>
+                            <p><strong>Color:</strong> {{ product.color|default:"-" }}</p>
+                            <p><strong>Size:</strong> {{ product.size|default:"-" }}</p>
+                            <p><strong>Material:</strong> {{ product.material|default:"-" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Weight:</strong> {{ product.weight|default:"-" }} kg</p>
+                            <p><strong>Dimensions:</strong> {{ product.dimensions|default:"-" }}</p>
+                            <p><strong>Warranty:</strong> {{ product.warranty_months }} months</p>
+                            <p><strong>Price:</strong> ₹{{ product.price }}</p>
+                            <p><strong>Discount:</strong> {{ product.discount_percentage }}%</p>
+                            <p><strong>Final Price:</strong> <span class="text-success fw-bold">₹{{ product.final_price|floatformat:2 }}</span></p>
+                            <p><strong>Stock:</strong> {{ product.stock_quantity }}</p>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    <h6>Short Description</h6>
+                    <p>{{ product.short_description }}</p>
+                    
+                    <hr>
+                    <h6>Description</h6>
+                    <div class="p-3 bg-light rounded">{{ product.description|safe }}</div>
+                    
+                    {% if product.specifications %}
+                    <hr>
+                    <h6>Specifications</h6>
+                    <div class="p-3 bg-light rounded">{{ product.specifications|safe }}</div>
+                    {% endif %}
+                    
+                    {% if product.features %}
+                    <hr>
+                    <h6>Features</h6>
+                    <div class="p-3 bg-light rounded">{{ product.features|safe }}</div>
+                    {% endif %}
+                    
+                    {% if product.warranty_details %}
+                    <hr>
+                    <h6>Warranty Details</h6>
+                    <p>{{ product.warranty_details }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Variants with Details -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-cubes text-warning"></i> Variants ({{ product.variants.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if product.variants.exists %}
+                        {% for variant in product.variants.all %}
+                            <div class="variant-detail-card">
+                                <div class="variant-header">
+                                    <div>
+                                        <span class="variant-name">
+                                            {% if variant.name %}
+                                                {{ variant.name }}
+                                            {% else %}
+                                                {% if variant.color and variant.size %}
+                                                    {{ variant.color }} / {{ variant.size }}
+                                                {% elif variant.color %}
+                                                    {{ variant.color }}
+                                                {% elif variant.size %}
+                                                    {{ variant.size }}
+                                                {% else %}
+                                                    Variant
+                                                {% endif %}
+                                            {% endif %}
+                                        </span>
+                                        <span class="variant-sku">({{ variant.sku }})</span>
+                                    </div>
+                                    <div>
+                                        {% if variant.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="variant-price">
+                                            Price: ₹{{ variant.price }}
+                                            {% if variant.discount_percentage > 0 %}
+                                                <span class="text-success">(₹{{ variant.final_price|floatformat:2 }})</span>
+                                                <span class="badge bg-danger ms-1">-{{ variant.discount_percentage }}%</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="variant-stock mt-1">
+                                            Stock: 
+                                            {% if variant.is_out_of_stock %}
+                                                <span class="text-danger fw-bold">Out of Stock</span>
+                                            {% elif variant.is_low_stock %}
+                                                <span class="text-warning fw-bold">{{ variant.stock_quantity }} left</span>
+                                                <span class="text-muted ms-1">(threshold: {{ variant.low_stock_threshold }})</span>
+                                            {% else %}
+                                                <span class="text-success fw-bold">{{ variant.stock_quantity }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="variant-warranty mt-1">
+                                            <i class="fas fa-shield-alt"></i> Warranty: {{ variant.warranty_months }} months
+                                            {% if variant.warranty_details %}
+                                                <span class="text-muted ms-1" title="{{ variant.warranty_details }}">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="variant-attributes">
+                                            {% if variant.color %}
+                                                <span class="badge bg-light text-dark border">{{ variant.color }}</span>
+                                            {% endif %}
+                                            {% if variant.size %}
+                                                <span class="badge bg-light text-dark border">{{ variant.size }}</span>
+                                            {% endif %}
+                                            {% if variant.material %}
+                                                <span class="badge bg-light text-dark border">{{ variant.material }}</span>
+                                            {% endif %}
+                                            {% if variant.weight %}
+                                                <span class="badge bg-light text-dark border">{{ variant.weight }} kg</span>
+                                            {% endif %}
+                                        </div>
+                                        {% if variant.description or variant.specifications or variant.features %}
+                                            <div class="mt-2">
+                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#variant-desc-{{ variant.id }}">
+                                                    <i class="fas fa-chevron-down"></i> Show Details
+                                                </button>
+                                                <div class="collapse mt-2" id="variant-desc-{{ variant.id }}">
+                                                    <div class="p-2 bg-light rounded">
+                                                        {% if variant.description %}
+                                                            <div><strong>Description:</strong> {{ variant.description|safe }}</div>
+                                                        {% endif %}
+                                                        {% if variant.specifications %}
+                                                            <div class="mt-1"><strong>Specifications:</strong> {{ variant.specifications|safe }}</div>
+                                                        {% endif %}
+                                                        {% if variant.features %}
+                                                            <div class="mt-1"><strong>Features:</strong> {{ variant.features|safe }}</div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="variant-images">
+                                            {% if variant.images.exists %}
+                                                {% for img in variant.images.all|slice:":4" %}
+                                                    <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:variant.sku }}" title="Variant image">
+                                                {% endfor %}
+                                                {% if variant.images.count > 4 %}
+                                                    <span class="badge bg-secondary d-flex align-items-center justify-content-center" style="width:60px;height:60px;border-radius:4px;">
+                                                        +{{ variant.images.count|add:"-4" }}
+                                                    </span>
+                                                {% endif %}
+                                            {% else %}
+                                                <div class="text-muted" style="font-size:12px;">No images</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">No variants for this product.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Reviews -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-star text-warning"></i> Reviews ({{ product.total_reviews }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if product.reviews.exists %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Rating</th>
+                                        <th>Title</th>
+                                        <th>Review</th>
+                                        <th>Verified</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for review in product.reviews.all|slice:":10" %}
+                                    <tr>
+                                        <td>{{ review.user.full_name }}</td>
+                                        <td>
+                                            <span class="text-warning">★ {{ review.rating }}</span>
+                                            <span class="text-muted small">{{ review.rating_stars }}</span>
+                                        </td>
+                                        <td>{{ review.title|default:"-" }}</td>
+                                        <td>{{ review.review_text|truncatechars:30 }}</td>
+                                        <td>
+                                            {% if review.is_verified_purchase %}
+                                                <span class="badge bg-success">Yes</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">No</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if review.is_approved %}
+                                                <span class="badge bg-success">Approved</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">Pending</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                {% if not review.is_approved %}
+                                                    <a href="{% url 'Ecom:review_approve' review.id %}" class="btn btn-sm btn-success" title="Approve">
+                                                        <i class="fas fa-check"></i>
+                                                    </a>
+                                                {% endif %}
+                                                <a href="{% url 'Ecom:review_delete' review.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if product.reviews.count > 10 %}
+                            <a href="{% url 'Ecom:review_list' %}" class="btn btn-sm btn-info">View All Reviews</a>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">No reviews yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SIDEBAR (Right Column)                      -->
+        <!-- ============================================ -->
+        <div class="col-md-4">
+            
+            <!-- Statistics -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar text-primary"></i> Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="stats-card primary">
+                        <div class="label">Average Rating</div>
+                        <div class="value">
+                            {% if product.average_rating > 0 %}
+                                ★ {{ product.average_rating }}
+                            {% else %}
+                                No ratings
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="stats-card info">
+                        <div class="label">Total Reviews</div>
+                        <div class="value">{{ product.total_reviews }}</div>
+                    </div>
+                    <div class="stats-card success">
+                        <div class="label">Total Variants</div>
+                        <div class="value">{{ product.variants.count }}</div>
+                    </div>
+                    <div class="stats-card warning">
+                        <div class="label">Total Images</div>
+                        <div class="value">{{ product.images.count }}</div>
+                    </div>
+                    <div class="stats-card {% if product.is_out_of_stock %}danger{% elif product.is_low_stock %}warning{% else %}success{% endif %}">
+                        <div class="label">Stock Status</div>
+                        <div class="value">
+                            {% if product.is_out_of_stock %}
+                                <span class="text-danger">Out of Stock</span>
+                            {% elif product.is_low_stock %}
+                                <span class="text-warning">Low Stock ({{ product.stock_quantity }})</span>
+                            {% else %}
+                                <span class="text-success">In Stock ({{ product.stock_quantity }})</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-cog text-primary"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'Ecom:product_smart_edit' product.id %}" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Edit Product
+                        </a>
+                        <a href="{% url 'Ecom:product_delete' product.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this product?')">
+                            <i class="fas fa-trash"></i> Delete Product
+                        </a>
+                        <a href="{% url 'Ecom:product_detail' product.id %}" class="btn btn-info" target="_blank">
+                            <i class="fas fa-eye"></i> View on Store
+                        </a>
+                        <button class="btn btn-outline-secondary" onclick="window.print()">
+                            <i class="fas fa-print"></i> Print Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Info -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-clock text-muted"></i> Quick Info</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Created:</strong> {{ product.created_at|date:"M d, Y H:i" }}</p>
+                    <p><strong>Last Updated:</strong> {{ product.updated_at|date:"M d, Y H:i" }}</p>
+                    <p><strong>Status:</strong> 
+                        {% if product.is_active %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                        {% endif %}
+                    </p>
+                    <p>
+                        {% if product.is_featured %}<span class="badge bg-warning">Featured</span>{% endif %}
+                        {% if product.is_new %}<span class="badge bg-info">New</span>{% endif %}
+                        {% if product.is_best_seller %}<span class="badge bg-danger">Best Seller</span>{% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

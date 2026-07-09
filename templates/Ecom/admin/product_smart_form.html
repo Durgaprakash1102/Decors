@@ -1,0 +1,893 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Edit{% else %}Add{% endif %} Product - MyStore{% endblock %}
+
+{% block extra_css %}
+<style>
+    .variant-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background: #f8f9fa;
+        position: relative;
+    }
+    .variant-card .remove-variant {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+    .image-preview {
+        max-width: 100px;
+        max-height: 100px;
+        margin: 5px;
+        border-radius: 4px;
+        object-fit: cover;
+        border: 2px solid #dee2e6;
+    }
+    .image-upload-box {
+        border: 2px dashed #dee2e6;
+        padding: 20px;
+        text-align: center;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .image-upload-box:hover {
+        border-color: #0d6efd;
+        background: #f0f7ff;
+    }
+    .image-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .image-item {
+        position: relative;
+        display: inline-block;
+    }
+    .image-item .remove-image {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #dc3545;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+        line-height: 20px;
+        text-align: center;
+        cursor: pointer;
+        border: none;
+        padding: 0;
+    }
+    .image-item .remove-image:hover {
+        background: #c82333;
+    }
+    .btn-add-variant {
+        width: 100%;
+        padding: 12px;
+        border: 2px dashed #28a745;
+        background: transparent;
+        color: #28a745;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+    .btn-add-variant:hover {
+        background: #28a745;
+        color: white;
+    }
+    .badge-primary {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        font-size: 10px;
+    }
+    .variant-deleted {
+        opacity: 0.5;
+        pointer-events: none;
+        background: #e9ecef;
+    }
+    .variant-deleted .remove-variant {
+        display: none;
+    }
+    .help-text {
+        font-size: 12px;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="fas fa-{% if is_edit %}edit{% else %}plus-circle{% endif %} text-primary"></i>
+                    {% if is_edit %}Edit{% else %}Add New{% endif %} Product
+                </h2>
+                <div>
+                    <a href="{% url 'Ecom:product_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Products
+                    </a>
+                </div>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" id="productForm">
+                {% csrf_token %}
+
+                <!-- ============================================ -->
+                <!-- PRODUCT BASIC INFORMATION                    -->
+                <!-- ============================================ -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle text-primary"></i> Product Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Name, SKU, Brand -->
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Product Name <span class="text-danger">*</span></label>
+                                {{ product_form.name }}
+                                {% if product_form.name.errors %}
+                                    <div class="text-danger small">{{ product_form.name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">SKU <span class="text-danger">*</span></label>
+                                {{ product_form.sku }}
+                                {% if product_form.sku.errors %}
+                                    <div class="text-danger small">{{ product_form.sku.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Brand</label>
+                                {{ product_form.brand }}
+                            </div>
+                        </div>
+
+                        <!-- Category & Subcategory -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Category <span class="text-danger">*</span></label>
+                                {{ product_form.category }}
+                                {% if product_form.category.errors %}
+                                    <div class="text-danger small">{{ product_form.category.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Subcategory</label>
+                                {{ product_form.subcategory }}
+                                {% if product_form.subcategory.errors %}
+                                    <div class="text-danger small">{{ product_form.subcategory.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Descriptions -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Short Description</label>
+                            {{ product_form.short_description }}
+                            <div class="help-text">Brief description shown in product listings.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Full Description <span class="text-muted">(HTML supported)</span></label>
+                            {{ product_form.description }}
+                            <div class="help-text">You can use HTML tags for formatting: &lt;b&gt;, &lt;i&gt;, &lt;ul&gt;, &lt;li&gt;, etc.</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Specifications <span class="text-muted">(HTML supported)</span></label>
+                                {{ product_form.specifications }}
+                                <div class="help-text">Technical specifications with HTML formatting.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Features <span class="text-muted">(HTML supported)</span></label>
+                                {{ product_form.features }}
+                                <div class="help-text">Key features with HTML formatting.</div>
+                            </div>
+                        </div>
+
+                        <!-- Attributes -->
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold">Color</label>
+                                {{ product_form.color }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold">Size</label>
+                                {{ product_form.size }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold">Weight (kg)</label>
+                                {{ product_form.weight }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold">Material</label>
+                                {{ product_form.material }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Dimensions (L x W x H cm)</label>
+                                {{ product_form.dimensions }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Warranty (Months)</label>
+                                {{ product_form.warranty_months }}
+                                <div class="help-text">Enter warranty period in months (e.g., 12, 24, 36).</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Price <span class="text-danger">*</span></label>
+                                {{ product_form.price }}
+                            </div>
+                        </div>
+
+                        <!-- Pricing & Stock -->
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Discount %</label>
+                                {{ product_form.discount_percentage }}
+                                <div class="help-text">Enter discount percentage (0-100).</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Stock Quantity</label>
+                                {{ product_form.stock_quantity }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Low Stock Threshold</label>
+                                {{ product_form.low_stock_threshold }}
+                                <div class="help-text">Alert when stock drops below this number.</div>
+                            </div>
+                        </div>
+
+                        <!-- Warranty Details -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Warranty Details</label>
+                            {{ product_form.warranty_details }}
+                            <div class="help-text">Detailed warranty information and terms.</div>
+                        </div>
+
+                        <!-- Status Checkboxes -->
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    {{ product_form.is_active }}
+                                    <label class="form-check-label fw-bold">Active</label>
+                                    <div class="help-text">Product visible on store.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    {{ product_form.is_featured }}
+                                    <label class="form-check-label fw-bold">Featured</label>
+                                    <div class="help-text">Show on featured section.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    {{ product_form.is_new }}
+                                    <label class="form-check-label fw-bold">New</label>
+                                    <div class="help-text">Mark as new product.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    {{ product_form.is_best_seller }}
+                                    <label class="form-check-label fw-bold">Best Seller</label>
+                                    <div class="help-text">Mark as best seller.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================ -->
+                <!-- PRODUCT IMAGES                              -->
+                <!-- ============================================ -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-images text-success"></i> Product Images</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if is_edit and product.images.exists %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Existing Images</label>
+                                <div class="image-list">
+                                    {% for img in product.images.all %}
+                                        <div class="image-item">
+                                            <img src="{{ img.image.url }}" class="image-preview" alt="{{ img.alt_text }}">
+                                            {% if img.is_primary %}
+                                                <span class="badge bg-success badge-primary">Primary</span>
+                                            {% endif %}
+                                            <button type="button" class="remove-image" onclick="deleteProductImage({{ img.id }})" title="Delete this image">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <hr>
+                        {% endif %}
+                        
+                        <div class="image-upload-box" onclick="document.getElementById('product_images').click()">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-muted"></i>
+                            <p class="mt-2 mb-0"><strong>Click to upload product images</strong></p>
+                            <small class="text-muted">You can select multiple images at once. First image will be primary.</small>
+                        </div>
+                        <input type="file" name="product_images" id="product_images" multiple accept="image/*" style="display:none">
+                        <div id="productImagePreview" class="image-list mt-3"></div>
+                    </div>
+                </div>
+
+                <!-- ============================================ -->
+                <!-- VARIANTS SECTION                            -->
+                <!-- ============================================ -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-cubes text-warning"></i> Variants</h5>
+                        <button type="button" class="btn btn-success btn-sm" onclick="addVariant()">
+                            <i class="fas fa-plus"></i> Add Variant
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="variantsContainer">
+                            <!-- Existing Variants (for edit mode) -->
+                            {% if is_edit %}
+                                {% for variant in product.variants.all %}
+                                    <div class="variant-card" id="variant-{{ variant.id }}">
+                                        <button type="button" class="btn btn-danger btn-sm remove-variant" onclick="toggleVariantDelete(this)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        <input type="hidden" name="variant_id[]" value="{{ variant.id }}">
+                                        <input type="hidden" name="variant_delete[]" value="">
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label fw-bold">Variant Name</label>
+                                                <input type="text" name="variant_name[]" class="form-control" value="{{ variant.name }}" placeholder="e.g., Red - Medium">
+                                                <div class="help-text">A descriptive name for this variant</div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label fw-bold">SKU <span class="text-danger">*</span></label>
+                                                <input type="text" name="variant_sku[]" class="form-control" value="{{ variant.sku }}" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label fw-bold">Color</label>
+                                                <input type="text" name="variant_color[]" class="form-control" value="{{ variant.color }}">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label fw-bold">Size</label>
+                                                <input type="text" name="variant_size[]" class="form-control" value="{{ variant.size }}">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label fw-bold">Material</label>
+                                                <input type="text" name="variant_material[]" class="form-control" value="{{ variant.material }}">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label fw-bold">Weight (kg)</label>
+                                                <input type="number" name="variant_weight[]" class="form-control" step="0.01" value="{{ variant.weight }}">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label fw-bold">Price <span class="text-danger">*</span></label>
+                                                <input type="number" name="variant_price[]" class="form-control" step="0.01" value="{{ variant.price }}" required>
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label fw-bold">Discount %</label>
+                                                <input type="number" name="variant_discount[]" class="form-control" step="0.01" value="{{ variant.discount_percentage }}">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label fw-bold">Stock</label>
+                                                <input type="number" name="variant_stock[]" class="form-control" value="{{ variant.stock_quantity }}">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label fw-bold">Low Stock Threshold</label>
+                                                <input type="number" name="variant_low_stock[]" class="form-control" value="{{ variant.low_stock_threshold }}">
+                                                <div class="help-text">Alert when stock drops below this</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label fw-bold">Description <span class="text-muted">(HTML)</span></label>
+                                                <textarea name="variant_description[]" class="form-control" rows="2">{{ variant.description }}</textarea>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label fw-bold">Specifications <span class="text-muted">(HTML)</span></label>
+                                                <textarea name="variant_specifications[]" class="form-control" rows="2">{{ variant.specifications }}</textarea>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label fw-bold">Features <span class="text-muted">(HTML)</span></label>
+                                                <textarea name="variant_features[]" class="form-control" rows="2">{{ variant.features }}</textarea>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label fw-bold">Warranty (Months)</label>
+                                                <input type="number" name="variant_warranty_months[]" class="form-control" value="{{ variant.warranty_months }}">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label fw-bold">Warranty Details</label>
+                                                <textarea name="variant_warranty_details[]" class="form-control" rows="2">{{ variant.warranty_details }}</textarea>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-12 mb-3">
+                                                <div class="form-check">
+                                                    <input type="checkbox" name="variant_is_active[]" class="form-check-input" {% if variant.is_active %}checked{% endif %}>
+                                                    <label class="form-check-label fw-bold">Active</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Variant Images -->
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Variant Images</label>
+                                            <div class="image-list mb-2" id="variant-image-list-{{ variant.id }}">
+                                                {% if variant.images.exists %}
+                                                    {% for img in variant.images.all %}
+                                                        <div class="image-item" id="variant-img-{{ img.id }}">
+                                                            <img src="{{ img.image.url }}" class="image-preview">
+                                                            {% if img.is_primary %}
+                                                                <span class="badge bg-success badge-primary">Primary</span>
+                                                            {% endif %}
+                                                            <button type="button" class="remove-image" onclick="deleteVariantImage({{ img.id }})" title="Delete this image">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+                                            <div class="image-upload-box" onclick="document.getElementById('variant_images_{{ forloop.counter0 }}').click()">
+                                                <i class="fas fa-cloud-upload-alt text-muted"></i>
+                                                <small>Click to upload variant images</small>
+                                            </div>
+                                            <input type="file" name="variant_images_{{ forloop.counter0 }}" id="variant_images_{{ forloop.counter0 }}" multiple accept="image/*" style="display:none" 
+                                                   onchange="previewVariantImages(this, 'variant-image-list-{{ variant.id }}')">
+                                            <div id="variant_image_preview_{{ forloop.counter0 }}" class="image-list mt-2"></div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
+                        <button type="button" class="btn-add-variant" onclick="addVariant()">
+                            <i class="fas fa-plus-circle"></i> Add Another Variant
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ============================================ -->
+                <!-- SUBMIT BUTTONS                              -->
+                <!-- ============================================ -->
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'Ecom:product_list' %}" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save"></i> 
+                        {% if is_edit %}Update Product{% else %}Create Product{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- JAVASCRIPT                                  -->
+<!-- ============================================ -->
+<script>
+    // ============================================
+    // CSRF TOKEN HELPER
+    // ============================================
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // ============================================
+    // PREVIEW VARIANT IMAGES
+    // ============================================
+    function previewVariantImages(input, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        // Remove existing preview images (keep existing images from DB)
+        const previews = container.querySelectorAll('.variant-preview-temp');
+        previews.forEach(el => el.remove());
+        
+        // Add new preview images
+        for (let i = 0; i < input.files.length; i++) {
+            const file = input.files[i];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const div = document.createElement('div');
+                div.className = 'image-item variant-preview-temp';
+                div.innerHTML = `
+                    <img src="${event.target.result}" class="image-preview" style="border: 2px solid #28a745;">
+                    <span class="badge bg-success badge-primary">New</span>
+                `;
+                container.appendChild(div);
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // ============================================
+    // VARIABLE TO TRACK VARIANT COUNT
+    // ============================================
+    let variantCounter = {{ product.variants.count|default:0 }};
+
+    // ============================================
+    // ADD NEW VARIANT
+    // ============================================
+    function addVariant() {
+        const container = document.getElementById('variantsContainer');
+        const currentCount = container.querySelectorAll('.variant-card').length;
+        const index = currentCount;
+        const newId = variantCounter;
+        
+        const variantHTML = `
+            <div class="variant-card">
+                <button type="button" class="btn btn-danger btn-sm remove-variant" onclick="removeVariant(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+                <input type="hidden" name="variant_id[]" value="">
+                <input type="hidden" name="variant_delete[]" value="">
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Variant Name</label>
+                        <input type="text" name="variant_name[]" class="form-control" placeholder="e.g., Red - Medium">
+                        <div class="help-text">A descriptive name for this variant</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">SKU <span class="text-danger">*</span></label>
+                        <input type="text" name="variant_sku[]" class="form-control" placeholder="e.g., TSHIRT-RED-M" required>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">Color</label>
+                        <input type="text" name="variant_color[]" class="form-control" placeholder="e.g., Red">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">Size</label>
+                        <input type="text" name="variant_size[]" class="form-control" placeholder="e.g., M">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">Material</label>
+                        <input type="text" name="variant_material[]" class="form-control" placeholder="e.g., Cotton">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">Weight (kg)</label>
+                        <input type="number" name="variant_weight[]" class="form-control" step="0.01" placeholder="0.50">
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">Price <span class="text-danger">*</span></label>
+                        <input type="number" name="variant_price[]" class="form-control" step="0.01" placeholder="499.99" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">Discount %</label>
+                        <input type="number" name="variant_discount[]" class="form-control" step="0.01" placeholder="10">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">Stock</label>
+                        <input type="number" name="variant_stock[]" class="form-control" placeholder="50">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">Low Stock Threshold</label>
+                        <input type="number" name="variant_low_stock[]" class="form-control" value="5" placeholder="5">
+                        <div class="help-text">Alert when stock drops below this</div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Description <span class="text-muted">(HTML)</span></label>
+                        <textarea name="variant_description[]" class="form-control" rows="2" placeholder="Variant description"></textarea>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Specifications <span class="text-muted">(HTML)</span></label>
+                        <textarea name="variant_specifications[]" class="form-control" rows="2" placeholder="Variant specifications"></textarea>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Features <span class="text-muted">(HTML)</span></label>
+                        <textarea name="variant_features[]" class="form-control" rows="2" placeholder="Variant features"></textarea>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Warranty (Months)</label>
+                        <input type="number" name="variant_warranty_months[]" class="form-control" placeholder="12">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Warranty Details</label>
+                        <textarea name="variant_warranty_details[]" class="form-control" rows="2" placeholder="Warranty details"></textarea>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" name="variant_is_active[]" class="form-check-input" checked>
+                            <label class="form-check-label fw-bold">Active</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Variant Images</label>
+                    <div id="variant-image-list-${newId}" class="image-list mb-2"></div>
+                    <div class="image-upload-box" onclick="document.getElementById('variant_images_${newId}').click()">
+                        <i class="fas fa-cloud-upload-alt text-muted"></i>
+                        <small>Click to upload variant images</small>
+                    </div>
+                    <input type="file" name="variant_images_${newId}" id="variant_images_${newId}" multiple accept="image/*" style="display:none" 
+                           onchange="previewVariantImages(this, 'variant-image-list-${newId}')">
+                    <div id="variant_image_preview_${newId}" class="image-list mt-2"></div>
+                </div>
+            </div>
+        `;
+        
+        container.insertAdjacentHTML('beforeend', variantHTML);
+        variantCounter++;
+    }
+
+    // ============================================
+    // REMOVE VARIANT
+    // ============================================
+    function removeVariant(button) {
+        const variantCard = button.closest('.variant-card');
+        variantCard.remove();
+    }
+
+    // ============================================
+    // TOGGLE VARIANT DELETE (for existing variants)
+    // ============================================
+    function toggleVariantDelete(button) {
+        const variantCard = button.closest('.variant-card');
+        const deleteInput = variantCard.querySelector('input[name="variant_delete[]"]');
+        if (deleteInput) {
+            if (deleteInput.value === 'on') {
+                deleteInput.value = '';
+                variantCard.classList.remove('variant-deleted');
+                button.innerHTML = '<i class="fas fa-times"></i>';
+                button.className = 'btn btn-danger btn-sm remove-variant';
+                button.title = 'Delete this variant';
+            } else {
+                deleteInput.value = 'on';
+                variantCard.classList.add('variant-deleted');
+                button.innerHTML = '<i class="fas fa-undo"></i>';
+                button.className = 'btn btn-warning btn-sm remove-variant';
+                button.title = 'Restore this variant';
+            }
+        }
+    }
+
+    // ============================================
+    // PRODUCT IMAGE PREVIEW
+    // ============================================
+    document.getElementById('product_images').addEventListener('change', function(e) {
+        const preview = document.getElementById('productImagePreview');
+        preview.innerHTML = '';
+        for (let i = 0; i < this.files.length; i++) {
+            const file = this.files[i];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = document.createElement('img');
+                img.src = event.target.result;
+                img.className = 'image-preview';
+                img.title = file.name;
+                preview.appendChild(img);
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // ============================================
+    // CATEGORY / SUBCATEGORY DYNAMIC LOADING
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const categorySelect = document.querySelector('select[name="category"]');
+        const subcategorySelect = document.querySelector('select[name="subcategory"]');
+        
+        if (categorySelect) {
+            categorySelect.addEventListener('change', function() {
+                const categoryId = this.value;
+                if (categoryId) {
+                    fetch(`/ajax/get-subcategories/?category_id=${categoryId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            subcategorySelect.innerHTML = '<option value="">---------</option>';
+                            data.forEach(sub => {
+                                const option = document.createElement('option');
+                                option.value = sub.id;
+                                option.textContent = sub.name;
+                                subcategorySelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => console.error('Error loading subcategories:', error));
+                } else {
+                    subcategorySelect.innerHTML = '<option value="">---------</option>';
+                }
+            });
+        }
+    });
+
+    // ============================================
+    // DELETE PRODUCT IMAGE VIA AJAX
+    // ============================================
+    function deleteProductImage(imageId) {
+        if (!confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
+            return;
+        }
+        
+        const button = document.querySelector(`button[onclick="deleteProductImage(${imageId})"]`);
+        if (button) {
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+        }
+        
+        fetch(`/admin/product/image/delete/${imageId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin',
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(text || 'Network response was not ok');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Unknown error occurred'));
+                if (button) {
+                    button.innerHTML = '<i class="fas fa-times"></i>';
+                    button.disabled = false;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting image. Please refresh and try again.\n\n' + error.message);
+            if (button) {
+                button.innerHTML = '<i class="fas fa-times"></i>';
+                button.disabled = false;
+            }
+        });
+    }
+
+    // ============================================
+    // DELETE VARIANT IMAGE VIA AJAX
+    // ============================================
+    function deleteVariantImage(imageId) {
+        if (!confirm('Are you sure you want to delete this variant image? This action cannot be undone.')) {
+            return;
+        }
+        
+        const button = document.querySelector(`button[onclick="deleteVariantImage(${imageId})"]`);
+        if (button) {
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+        }
+        
+        fetch(`/admin/variant/image/delete/${imageId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin',
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(text || 'Network response was not ok');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Remove the image from the DOM without reloading
+                const imgElement = document.getElementById(`variant-img-${imageId}`);
+                if (imgElement) {
+                    imgElement.remove();
+                }
+                // Show success message
+                alert('Image deleted successfully!');
+            } else {
+                alert('Error: ' + (data.error || 'Unknown error occurred'));
+                if (button) {
+                    button.innerHTML = '<i class="fas fa-times"></i>';
+                    button.disabled = false;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting variant image. Please refresh and try again.\n\n' + error.message);
+            if (button) {
+                button.innerHTML = '<i class="fas fa-times"></i>';
+                button.disabled = false;
+            }
+        });
+    }
+
+    // ============================================
+    // FORM VALIDATION
+    // ============================================
+    document.getElementById('productForm').addEventListener('submit', function(e) {
+        const variantSkus = document.querySelectorAll('input[name="variant_sku[]"]');
+        let hasValidVariant = false;
+        
+        variantSkus.forEach(input => {
+            if (input.value.trim() !== '') {
+                hasValidVariant = true;
+            }
+        });
+        
+        if (hasValidVariant) {
+            const variantPrices = document.querySelectorAll('input[name="variant_price[]"]');
+            let hasInvalidPrice = false;
+            
+            variantPrices.forEach((input, index) => {
+                const sku = variantSkus[index];
+                if (sku && sku.value.trim() !== '' && !input.value) {
+                    hasInvalidPrice = true;
+                }
+            });
+            
+            if (hasInvalidPrice) {
+                e.preventDefault();
+                alert('Please enter prices for all variants.');
+                return false;
+            }
+        }
+        
+        return true;
+    });
+</script>
+{% endblock %}

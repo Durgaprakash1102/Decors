@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inventory Log - MyStore{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-clipboard-list text-primary"></i> Inventory Log</h2>
+        <a href="{% url 'Ecom:product_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Products
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date/Time</th>
+                            <th>Product/Variant</th>
+                            <th>Action</th>
+                            <th>Quantity Change</th>
+                            <th>Previous Qty</th>
+                            <th>New Qty</th>
+                            <th>Note</th>
+                            <th>By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr>
+                            <td>{{ log.created_at|date:"Y-m-d H:i" }}</td>
+                            <td>
+                                {% if log.product %}
+                                    <strong>{{ log.product.name }}</strong>
+                                    <small class="text-muted d-block">{{ log.product.sku }}</small>
+                                {% elif log.variant %}
+                                    <strong>{{ log.variant.product.name }}</strong>
+                                    <small class="text-muted d-block">{{ log.variant.sku }}</small>
+                                    <small class="text-muted">
+                                        {% if log.variant.color %}{{ log.variant.color }} / {% endif %}
+                                        {% if log.variant.size %}{{ log.variant.size }}{% endif %}
+                                    </small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if log.action == 'purchase' %}bg-success
+                                    {% elif log.action == 'sale' %}bg-danger
+                                    {% elif log.action == 'return' %}bg-warning text-dark
+                                    {% elif log.action == 'restock' %}bg-info
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ log.get_action_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if log.quantity_change > 0 %}
+                                    <span class="text-success">+{{ log.quantity_change }}</span>
+                                {% else %}
+                                    <span class="text-danger">{{ log.quantity_change }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ log.previous_quantity }}</td>
+                            <td>{{ log.new_quantity }}</td>
+                            <td>{{ log.note|default:"-" }}</td>
+                            <td>{{ log.created_by.full_name|default:"System" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">
+                                <i class="fas fa-clipboard-list fa-3x text-muted"></i>
+                                <p class="mt-2">No inventory logs found.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if logs.has_other_pages %}
+            <nav>
+                <ul class="pagination justify-content-center">
+                    {% if logs.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ logs.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    {% for i in logs.paginator.page_range %}
+                        <li class="page-item {% if logs.number == i %}active{% endif %}">
+                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if logs.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ logs.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
