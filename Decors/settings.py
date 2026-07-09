@@ -117,3 +117,11 @@ RAZORPAY_KEY_ID = 'rzp_test_KdiESTDcHPC74B'
 RAZORPAY_KEY_SECRET = 'F8aPdLzdQKLt3RmgTWFcnYBG'
 RAZORPAY_CURRENCY = 'INR'
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'projecttestmail02@gmail.com'
+EMAIL_HOST_PASSWORD = 'iizo uksz kyir'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
