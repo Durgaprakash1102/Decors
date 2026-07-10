@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShubhDecor · Admin Sidebar</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f5f3f0;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+.sidebar-nav::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+        /* ===== ROOT VARIABLES ===== */
+        :root {
+            --primary: #5c121f;
+            --primary-light: #7a1a2b;
+            --secondary: #F4B400;
+            --accent: #D97706;
+            --text-dark: #1a1a1a;
+            --text-light: #6b6b6b;
+            --text-white: #ffffff;
+            --bg-white: #ffffff;
+            --bg-light: #f8f6f4;
+            --border: #eae6e2;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 8px 32px rgba(92, 18, 31, 0.12);
+            --radius: 10px;
+            --transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --sidebar-width: 240px;
+            --header-height: 50px;
+        }
+
+        /* ============================================================
+           ADMIN SIDEBAR - NO SCROLLBAR VISIBLE
+           ============================================================ */
+        .admin-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: var(--bg-white);
+            border-right: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- COMPLETELY REMOVE SCROLLBAR --- */
+        .admin-sidebar::-webkit-scrollbar {
+            width: 0px;
+            height: 0px;
+            background: transparent;
+        }
+        .admin-sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .admin-sidebar::-webkit-scrollbar-thumb {
+            background: transparent;
+        }
+        .admin-sidebar {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        /* --- Sidebar Header --- */
+        .sidebar-header {
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: var(--bg-white);
+            position: relative;
+                        background:var(--primary);
+                        padding:3px 0;
+
+        }
+        .sidebar-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 25%;
+            right: 25%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--secondary), transparent);
+            opacity: 0.4;
+        }
+       .sidebar-header .logo-img img {
+    height: 44px;
+    width: auto;
+    display: block;
+    object-fit: contain;
+    transition: var(--transition);
+
+    filter: brightness(0) invert(1);
+}
+
+.sidebar-header .logo-img img:hover {
+    transform: scale(1.05);
+    filter: brightness(0) invert(1)
+            drop-shadow(0 4px 16px rgba(255, 255, 255, 0.25));
+}
+
+        /* --- Sidebar Navigation --- */
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px 14px 12px;
+            overflow-y: auto;
+        }
+
+        /* --- Section Divider Line --- */
+       .section-divider{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin:24px 0;
+}
+
+.section-divider::before{
+    content:"";
+    width:100%;
+    height:1px;
+    background:linear-gradient(
+        to right,
+        transparent,
+        rgba(92,18,31,.18),
+        rgba(92,18,31,.45),
+        rgba(92,18,31,.18),
+        transparent
+    );
+}
+
+.section-divider .divider-dot{
+    position:absolute;
+    width:20px;
+    height:20px;
+    background:#fff;
+    border:1px solid rgba(244,180,0,.35);
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    box-shadow:0 4px 14px rgba(0,0,0,.06);
+}
+
+.section-divider .divider-dot::before{
+    content:"✦";
+    font-size:12px;
+    color:var(--secondary);
+}
+
+        /* --- Section Label - PRIMARY COLOR --- */
+        .sidebar-nav .nav-section-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1.8px;
+            padding: 8px 12px 4px;
+            opacity: 0.55;
+            white-space: nowrap;
+        }
+
+        /* --- ALL LINKS - SAME STARTING POINT --- */
+        .sidebar-nav .nav-item,
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 9px 14px;
+            border-radius: var(--radius);
+            color: var(--text-light);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            white-space: nowrap;
+            margin-bottom: 2px;
+            font-weight: 500;
+            font-size: 13px;
+            background: transparent;
+            border: 1px solid transparent;
+        }
+
+        .sidebar-nav .nav-item:hover,
+        .submenu-item:hover {
+            background: var(--bg-light);
+            color: var(--primary);
+            border-color: var(--border);
+            transform: translateX(4px);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        .sidebar-nav .nav-item.active,
+        .submenu-item.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 4px 20px rgba(92, 18, 31, 0.25);
+            transform: translateX(0);
+        }
+
+        .sidebar-nav .nav-item.active i,
+        .submenu-item.active i {
+            color: #fff;
+        }
+
+        .sidebar-nav .nav-item i,
+        .submenu-item i {
+            font-size: 17px;
+            width: 22px;
+            text-align: center;
+            flex-shrink: 0;
+            color: var(--text-light);
+            transition: var(--transition);
+        }
+
+        .sidebar-nav .nav-item:hover i,
+        .submenu-item:hover i {
+            color: var(--primary);
+        }
+
+        .sidebar-nav .nav-item.active i,
+        .submenu-item.active i {
+            color: #fff;
+        }
+
+        .sidebar-nav .nav-item .nav-text,
+        .submenu-item .nav-text {
+            font-size: 13px;
+            font-weight: 500;
+            flex: 1;
+            letter-spacing: 0.2px;
+        }
+
+        /* --- Submenu items - SAME PADDING AS MAIN --- */
+        .submenu-item {
+            font-weight: 400;
+            font-size: 13px;
+            padding: 9px 14px;
+        }
+
+        .submenu-item i {
+            font-size: 15px;
+            width: 22px;
+            opacity: 0.6;
+        }
+
+        .submenu-item.active i {
+            opacity: 1;
+        }
+
+        /* --- Small accent line for submenu items --- */
+        .submenu-item::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%) scaleX(0);
+            width: 2px;
+            height: 16px;
+            border-radius: 2px;
+            transition: var(--transition);
+        }
+
+        .submenu-item:hover::before {
+            transform: translateY(-50%) scaleX(1);
+        }
+
+        .submenu-item.active::before {
+            transform: translateY(-50%) scaleX(1);
+        }
+
+        /* ============================================================
+           SIDEBAR FOOTER - ATTRACTIVE LOGOUT
+           ============================================================ */
+        .sidebar-footer {
+            padding: 10px 14px 18px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+            background: var(--bg-white);
+        }
+
+        .sidebar-footer .logout-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: #fff;
+            transition: var(--transition);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 16px rgba(92, 18, 31, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-footer .logout-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: var(--transition);
+        }
+
+        .sidebar-footer .logout-wrapper:hover::before {
+            left: 100%;
+        }
+
+        .sidebar-footer .logout-wrapper:hover {
+            transform: translateX(4px);
+            box-shadow: 0 6px 24px rgba(92, 18, 31, 0.35);
+        }
+
+        .sidebar-footer .logout-wrapper i {
+            font-size: 18px;
+            width: 22px;
+            text-align: center;
+            color: var(--secondary);
+            transition: var(--transition);
+        }
+
+        .sidebar-footer .logout-wrapper:hover i {
+            transform: rotate(-15deg) scale(1.1);
+        }
+
+        .sidebar-footer .logout-wrapper .logout-text {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            flex: 1;
+        }
+
+        .sidebar-footer .logout-wrapper .logout-arrow {
+            font-size: 12px;
+            opacity: 0.7;
+            transition: var(--transition);
+        }
+
+        .sidebar-footer .logout-wrapper:hover .logout-arrow {
+            opacity: 1;
+            transform: translateX(4px);
+        }
+
+        /* ============================================================
+           HEADER
+           ============================================================ */
+        .admin-header {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--header-height);
+            background: var(--primary);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            box-shadow: 0 2px 20px rgba(92, 18, 31, 0.2);
+        }
+
+        .admin-header .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .admin-header .header-left .page-title {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.3px;
+        }
+        .admin-header .header-left .page-title i {
+            color: var(--secondary);
+            margin-right: 10px;
+        }
+
+        .admin-header .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .admin-header .header-right .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+        }
+
+        .admin-header .header-right .admin-info .admin-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            transition: var(--transition);
+        }
+        .admin-header .header-right .admin-info .admin-avatar:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--secondary);
+        }
+
+        .admin-header .header-right .admin-info .admin-name {
+            font-weight: 500;
+        }
+
+        .admin-header .header-right .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+        }
+        .admin-header .header-right .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: scale(1.03);
+        }
+        .admin-header .header-right .logout-btn i {
+            font-size: 14px;
+        }
+
+        /* ===== MOBILE OVERLAY ===== */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.35);
+            z-index: 998;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* ===== MOBILE HAMBURGER ===== */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 1002;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            border: none;
+            font-size: 17px;
+            cursor: pointer;
+            transition: var(--transition);
+            align-items: center;
+            justify-content: center;
+        }
+        .mobile-menu-btn:hover {
+            background: rgba(255, 255, 255, 0.22);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            padding: 20px 20px 30px;
+            flex: 1;
+            transition: margin-left 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            min-height: calc(100vh - var(--header-height));
+            width: 100%;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            .admin-sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .admin-header {
+                left: 0;
+                padding: 0 16px;
+                height: 54px;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                margin-top: 54px;
+                padding: 18px 16px 60px;
+            }
+
+            .mobile-menu-btn {
+                display: flex !important;
+            }
+
+            .admin-header .header-left .page-title {
+                margin-left: 44px;
+                font-size: 15px;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .admin-header .header-right .admin-info .admin-name {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .admin-sidebar {
+                width: 280px;
+            }
+            .main-content {
+                padding: 14px 14px 60px;
+            }
+            .admin-header {
+                padding: 0 12px;
+                height: 50px;
+            }
+            .admin-header .header-left .page-title {
+                font-size: 14px;
+                margin-left: 40px;
+            }
+            .admin-header .header-left .page-title i {
+                margin-right: 4px;
+            }
+            .admin-header .header-right .logout-btn span {
+                display: none;
+            }
+            .admin-header .header-right .logout-btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+            .admin-header .header-right .admin-info .admin-avatar {
+                width: 30px;
+                height: 30px;
+                font-size: 13px;
+            }
+            .mobile-menu-btn {
+                top: 9px;
+                left: 10px;
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
+            }
+            .main-content {
+                margin-top: 50px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .admin-sidebar {
+                width: 260px;
+            }
+            .admin-header .header-left .page-title {
+                font-size: 13px;
+                margin-left: 36px;
+            }
+            .admin-header .header-right .logout-btn {
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+            .main-content {
+                padding: 12px 12px 60px;
+            }
+        }
+        .menu-badge{
+    margin-left:auto;
+    min-width:22px;
+    height:22px;
+    padding:0 6px;
+    border-radius:50px;
+    background:#F4B400;
+    color:#5c121f;
+    font-size:11px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+    </style>
+</head>
+<body>
+
+    <!-- ===== MOBILE MENU BUTTON ===== -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Menu">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- ===== SIDEBAR OVERLAY ===== -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ============================================================
+    ADMIN HEADER
+    ============================================================ -->
+    <header class="admin-header">
+        <div class="header-left">
+            <span class="page-title"><i class="fa-solid fa-gem"></i>Welcome !</span>
+        </div>
+        <div class="header-right">
+            <div class="admin-info">
+                <div class="admin-avatar">
+                    <i class="fa-regular fa-user"></i>
+                </div>
+                <span class="admin-name">{{ user.full_name|default:"Admin" }}</span>
+            </div>
+            <a href="{% url 'Ecom:home' %}" class="logout-btn">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- ============================================================
+    ADMIN SIDEBAR
+    ============================================================ -->
+    <aside class="admin-sidebar" id="adminSidebar">
+
+        <!-- Sidebar Header - Logo -->
+        <div class="sidebar-header">
+            <div class="logo-img">
+                <img src="{% static 'images/logonobg.png' %}" alt="ShubhDecor" />
+            </div>
+        </div>
+
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar-nav">
+
+    <div class="nav-section-label">Main</div>
+
+    <a href="{% url 'Ecom:admin_dashboard' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span class="nav-text">Dashboard</span>
+    </a>
+
+    <a href="#"
+       class="nav-item {% if request.resolver_match.url_name == 'order_list' %}active{% endif %}">
+        <i class="fa-solid fa-box"></i>
+        <span class="nav-text">Orders</span>
+    </a>
+
+    <a href="{% url 'Ecom:product_list' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
+        <i class="fa-solid fa-box-open"></i>
+        <span class="nav-text">Products</span>
+    </a>
+
+    <a href="{% url 'Ecom:inventory_log' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'inventory_log' %}active{% endif %}">
+        <i class="fa-solid fa-boxes-stacked"></i>
+        <span class="nav-text">Inventory</span>
+    </a>
+
+    <!-- Section Divider -->
+    <div class="section-divider">
+        <span class="divider-dot"></span>
+        <span class="divider-line"></span>
+    </div>
+
+    <div class="nav-section-label">Management</div>
+
+    <a href="{% url 'Ecom:category_list' %}"
+       class="submenu-item {% if request.resolver_match.url_name == 'category_list' %}active{% endif %}">
+        <i class="fa-solid fa-layer-group"></i>
+        <span class="nav-text">Categories</span>
+    </a>
+
+    <a href="{% url 'Ecom:subcategory_list' %}"
+       class="submenu-item {% if request.resolver_match.url_name == 'subcategory_list' %}active{% endif %}">
+        <i class="fa-solid fa-diagram-project"></i>
+        <span class="nav-text">Sub Categories</span>
+    </a>
+
+    <a href="{% url 'Ecom:review_list' %}"
+       class="submenu-item {% if request.resolver_match.url_name == 'review_list' %}active{% endif %}">
+        <i class="fa-solid fa-star"></i>
+        <span class="nav-text">Reviews</span>
+    </a>
+
+    <a href="{% url 'Ecom:low_stock_alerts' %}"
+       class="submenu-item {% if request.resolver_match.url_name == 'low_stock_alerts' %}active{% endif %}">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+
+        <span class="nav-text">
+            Low Stock Items
+        </span>
+
+        {% if total_low_stock_count %}
+            <span class="menu-badge">{{ total_low_stock_count }}</span>
+        {% endif %}
+    </a>
+
+    <!-- Section Divider -->
+    <div class="section-divider">
+        <span class="divider-dot"></span>
+        <span class="divider-line"></span>
+    </div>
+
+    <div class="nav-section-label">Settings</div>
+
+    <a href="#"
+       class="nav-item {% if request.resolver_match.url_name == 'general_settings' %}active{% endif %}">
+        <i class="fa-solid fa-gear"></i>
+        <span class="nav-text">General Settings</span>
+    </a>
+
+    <a href="{% url 'Ecom:profile' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+        <i class="fa-regular fa-address-card"></i>
+        <span class="nav-text">Profile</span>
+    </a>
+
+</nav>
+
+        <!-- Sidebar Footer - Attractive Logout -->
+        <div class="sidebar-footer">
+            <a href="{% url 'Ecom:logout' %}" class="logout-wrapper">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="logout-text">Logout</span>
+                <span class="logout-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            </a>
+        </div>
+
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content" id="mainContent">
+        {% block content %}
+        <!-- Content from child templates will be injected here -->
+        {% endblock %}
+    </main>
+
+    <!-- ===== JAVASCRIPT ===== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const sidebar = document.getElementById('adminSidebar');
+            const mobileBtn = document.getElementById('mobileMenuBtn');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            mobileBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                sidebar.classList.toggle('mobile-open');
+                overlay.classList.toggle('active');
+                const icon = mobileBtn.querySelector('i');
+                icon.className = sidebar.classList.contains('mobile-open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+            });
+
+            overlay.addEventListener('click', function() {
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('active');
+                mobileBtn.querySelector('i').className = 'fa-solid fa-bars';
+            });
+
+            // Active link highlighting for main nav items
+            const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(i => i.classList.remove('active'));
+                    document.querySelectorAll('.submenu-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Active link highlighting for submenu items
+            const subItems = document.querySelectorAll('.submenu-item');
+            subItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    subItems.forEach(i => i.classList.remove('active'));
+                    document.querySelectorAll('.sidebar-nav .nav-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Close sidebar on link click (mobile)
+            document.querySelectorAll('.sidebar-nav .nav-item, .logout-wrapper, .submenu-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    if (window.innerWidth <= 900) {
+                        sidebar.classList.remove('mobile-open');
+                        overlay.classList.remove('active');
+                        mobileBtn.querySelector('i').className = 'fa-solid fa-bars';
+                    }
+                });
+            });
+
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 900) {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.remove('active');
+                    mobileBtn.querySelector('i').className = 'fa-solid fa-bars';
+                }
+            });
+
+        });
+    </script>
+
+</body>
+</html>

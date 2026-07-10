@@ -19,3 +19,4 @@ def header_categories(request):
         'subcategories': subcategories,
         'total_categories': categories.count(),
     }
+

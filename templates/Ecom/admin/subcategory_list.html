@@ -1,80 +1,820 @@
-{% extends 'base.html' %}
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
 {% block title %}Subcategories - MyStore{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-tag text-primary"></i> Subcategories</h2>
-        <a href="{% url 'Ecom:subcategory_create' %}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Add Subcategory
-        </a>
-    </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Image</th>
-                            <th>Name</th>
-                            <th>Category</th>
-                            <th>Slug</th>
-                            <th>Description</th>
-                            <th>Products</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for subcategory in subcategories %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>
-                                {% if subcategory.image %}
-                                    <img src="{{ subcategory.image.url }}" width="50" height="50" style="object-fit:cover; border-radius:4px;">
-                                {% else %}
-                                    <div class="bg-secondary" style="width:50px;height:50px;border-radius:4px;"></div>
-                                {% endif %}
-                            </td>
-                            <td>{{ subcategory.name }}</td>
-                            <td><span class="badge bg-info">{{ subcategory.category.name }}</span></td>
-                            <td><code>{{ subcategory.slug }}</code></td>
-                            <td>{{ subcategory.description|truncatechars:30 }}</td>
-                            <td><span class="badge bg-warning">{{ subcategory.products.count }}</span></td>
-                            <td>
-                                {% if subcategory.is_active %}
-                                    <span class="badge bg-success">Active</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">Inactive</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <div class="btn-group">
-                                    <a href="{% url 'Ecom:subcategory_edit' subcategory.id %}" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="{% url 'Ecom:subcategory_delete' subcategory.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="9" class="text-center py-4">
-                                <i class="fas fa-tag fa-3x text-muted"></i>
-                                <p class="mt-2">No subcategories found. <a href="{% url 'Ecom:subcategory_create' %}">Add your first subcategory</a></p>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+<style>
+:root{
+    --primary:#5c121f;
+    --primary-light:#7a1a2b;
+    --secondary:#F4B400;
+    --bg:#f6f4f2;
+    --white:#fff;
+    --border:#ebe7e3;
+    --text:#1d1d1d;
+    --text-light:#6d6d6d;
+    --text-muted:#888;
+    --text-gray:#666;
+    --success:#2e9d57;
+    --danger:#d64045;
+    --shadow:0 10px 28px rgba(0,0,0,.06);
+    --shadow-hover:0 18px 40px rgba(92,18,31,.12);
+    --transition:.35s ease;
+    --radius:16px;
+    --radius-sm:10px;
+    --radius-xs:8px;
+    --font-primary:'Inter',sans-serif;
+    --font-body:'Inter',sans-serif;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:var(--font-body);
+    background:var(--bg);
+    color:var(--text);
+}
+
+/* ===== PAGE HEADER ===== */
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:24px;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.page-title{
+    font-size:28px;
+    color:var(--primary);
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    font-family:var(--font-primary);
+    letter-spacing:-0.3px;
+}
+
+.page-title i{
+    color:var(--secondary);
+    font-size:26px;
+}
+
+.add-btn{
+    background:var(--primary);
+    color:var(--white);
+    text-decoration:none;
+    padding:11px 24px;
+    border-radius:var(--radius-sm);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    transition:var(--transition);
+    font-size:14px;
+    font-weight:600;
+    font-family:var(--font-body);
+    border:none;
+    cursor:pointer;
+    letter-spacing:0.2px;
+}
+
+.add-btn:hover{
+    background:var(--primary-light);
+    transform:translateY(-2px);
+    color:var(--white);
+    box-shadow:0 8px 24px rgba(92,18,31,.15);
+}
+
+.add-btn i{
+    font-size:14px;
+}
+
+/* ===== SEARCH BAR ===== */
+.search-bar{
+    background:var(--white);
+    padding:14px 20px;
+    border-radius:var(--radius-sm);
+    border:1px solid var(--border);
+    margin-bottom:24px;
+    box-shadow:var(--shadow);
+    display:flex;
+    gap:16px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.search-bar .search-wrap{
+    position:relative;
+    flex:1;
+    min-width:200px;
+}
+
+.search-bar .search-wrap input{
+    padding:10px 16px 10px 44px;
+    border:1px solid var(--border);
+    border-radius:var(--radius-xs);
+    font-size:14px;
+    font-family:var(--font-body);
+    color:var(--text);
+    background:var(--bg);
+    transition:var(--transition);
+    width:100%;
+    outline:none;
+}
+
+.search-bar .search-wrap input:focus{
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(92,18,31,.06);
+    background:var(--white);
+}
+
+.search-bar .search-wrap input::placeholder{
+    color:var(--text-muted);
+}
+
+.search-bar .search-wrap i{
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--text-muted);
+    font-size:16px;
+}
+
+.search-bar .search-reset{
+    color:var(--text-muted);
+    text-decoration:none;
+    font-size:13px;
+    font-weight:500;
+    transition:var(--transition);
+    padding:6px 16px;
+    border-radius:var(--radius-xs);
+    border:1px solid var(--border);
+    white-space:nowrap;
+}
+
+.search-bar .search-reset:hover{
+    color:var(--primary);
+    border-color:var(--primary);
+    background:var(--bg);
+}
+
+/* ============================================================
+   CATEGORY SECTION
+   ============================================================ */
+.category-section{
+    margin-bottom:24px;
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    overflow:hidden;
+    box-shadow:var(--shadow);
+}
+
+/* Section Header */
+.category-section .section-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 20px;
+    background:var(--primary);
+    color:var(--white);
+    flex-shrink:0;
+}
+
+.category-section .section-header .section-title{
+    font-size:16px;
+    font-weight:700;
+    font-family:var(--font-primary);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:var(--white);
+}
+
+.category-section .section-header .section-title i{
+    color:var(--secondary);
+    font-size:18px;
+}
+
+.category-section .section-header .count-badge{
+    font-size:11px;
+    font-weight:600;
+    color:var(--white);
+    background:rgba(255,255,255,.12);
+    padding:3px 14px;
+    border-radius:20px;
+    border:1px solid rgba(255,255,255,.08);
+}
+
+/* ============================================================
+   SUB CATEGORY CARDS - GRID LAYOUT
+   ============================================================ */
+.subcategory-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+    gap:0;
+    background:var(--white);
+}
+
+.subcategory-card{
+    background:var(--white);
+    padding:20px 22px 18px;
+    border-bottom:1px solid var(--border);
+    border-right:1px solid var(--border);
+    transition:var(--transition);
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    min-height:150px;
+}
+
+/* Remove right border for last column */
+.subcategory-card:nth-child(3n){
+    border-right:none;
+}
+
+/* Remove bottom border for last row */
+.subcategory-card:last-child{
+    border-bottom:none;
+}
+
+.subcategory-card:hover{
+    background:var(--bg);
+}
+
+/* ===== CARD TOP - VERTICAL LAYOUT ===== */
+.subcategory-card .card-top{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:8px;
+}
+
+/* ===== IMAGE - ROUND WITH BEAUTIFUL BORDER ===== */
+.subcategory-card .img-wrap{
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    overflow:hidden;
+    background:var(--bg);
+    border:2px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    transition:var(--transition);
+    position:relative;
+}
+
+.subcategory-card .img-wrap::after{
+    content:'';
+    position:absolute;
+    inset:-3px;
+    border-radius:50%;
+    border:2px solid transparent;
+    transition:var(--transition);
+}
+
+.subcategory-card:hover .img-wrap::after{
+    border-color:var(--secondary);
+}
+
+.subcategory-card .img-wrap:hover{
+    border-color:var(--secondary);
+    transform:scale(1.05);
+}
+
+.subcategory-card .img-wrap img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.subcategory-card .img-wrap .no-img{
+    font-size:18px;
+    color:var(--text-muted);
+}
+
+/* ===== NAME AND STATUS - STACKED VERTICALLY ===== */
+.subcategory-card .name-status-col{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    flex:1;
+    min-width:0;
+}
+
+.subcategory-card .name-value{
+    font-size:16px;
+    font-weight:700;
+    color:var(--primary);
+    font-family:var(--font-primary);
+    letter-spacing:-0.2px;
+    word-break:break-word;
+}
+
+/* Status badge - UNDER the name */
+.subcategory-card .status-badge-top{
+    display:inline-block;
+    padding:2px 12px;
+    border-radius:30px;
+    font-size:8px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    white-space:nowrap;
+    align-self:flex-start;
+}
+
+.status-badge-top.active{
+    background:rgba(46,157,87,.1);
+    color:var(--success);
+}
+
+.status-badge-top.inactive{
+    background:rgba(136,136,136,.1);
+    color:var(--text-muted);
+}
+
+/* ===== CARD DETAILS ROW ===== */
+.subcategory-card .card-details{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    padding:10px 0 8px;
+    border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+    margin-bottom:10px;
+}
+
+.subcategory-card .detail-item{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    color:var(--text-gray);
+}
+
+.subcategory-card .detail-item i{
+    color:var(--secondary);
+    font-size:11px;
+    width:14px;
+}
+
+.subcategory-card .detail-item strong{
+    color:var(--primary);
+    font-weight:600;
+}
+
+/* ===== DESCRIPTION ===== */
+.subcategory-card .desc-value{
+    color:var(--text-gray);
+    font-size:12px;
+    line-height:1.5;
+    max-height:38px;
+    overflow-y:auto;
+    padding-right:4px;
+    scrollbar-width:thin;
+    scrollbar-color:var(--border) transparent;
+    margin-bottom:8px;
+}
+
+.subcategory-card .desc-value::-webkit-scrollbar{
+    width:2px;
+}
+
+.subcategory-card .desc-value::-webkit-scrollbar-thumb{
+    background:var(--border);
+    border-radius:10px;
+}
+
+/* ===== CARD ACTIONS ===== */
+.subcategory-card .card-actions{
+    display:flex;
+    gap:8px;
+    margin-top:auto;
+}
+
+.subcategory-card .action-btn{
+    flex:1;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:8px 12px;
+    border-radius:var(--radius-xs);
+    border:none;
+    cursor:pointer;
+    transition:var(--transition);
+    text-decoration:none;
+    font-size:12px;
+    font-weight:600;
+    font-family:var(--font-body);
+}
+
+.subcategory-card .action-btn.edit-btn{
+    background:#eef3ff;
+    color:#2458ff;
+}
+
+.subcategory-card .action-btn.edit-btn:hover{
+    background:#2458ff;
+    color:var(--white);
+    transform:translateY(-1px);
+}
+
+.subcategory-card .action-btn.delete-btn{
+    background:#ffecec;
+    color:var(--danger);
+}
+
+.subcategory-card .action-btn.delete-btn:hover{
+    background:var(--danger);
+    color:var(--white);
+    transform:translateY(-1px);
+}
+
+/* ============================================================
+   EMPTY STATES
+   ============================================================ */
+.empty-box{
+    background:var(--white);
+    padding:80px 20px;
+    border-radius:var(--radius);
+    text-align:center;
+    border:1px solid var(--border);
+    box-shadow:var(--shadow);
+}
+
+.empty-box i{
+    font-size:72px;
+    color:var(--border);
+    margin-bottom:20px;
+}
+
+.empty-box h3{
+    color:var(--primary);
+    margin-bottom:10px;
+    font-family:var(--font-primary);
+    font-size:24px;
+    font-weight:700;
+}
+
+.empty-box p{
+    color:var(--text-gray);
+    font-family:var(--font-body);
+    font-size:15px;
+}
+
+.empty-box a{
+    color:var(--primary);
+    text-decoration:none;
+    font-weight:600;
+    transition:var(--transition);
+}
+
+.empty-box a:hover{
+    color:var(--primary-light);
+    text-decoration:underline;
+}
+
+.filter-empty-msg{
+    grid-column:1 / -1;
+    padding:60px 20px;
+    text-align:center;
+    background:var(--white);
+}
+
+.filter-empty-msg i{
+    font-size:48px;
+    color:var(--border);
+    margin-bottom:16px;
+    display:block;
+}
+
+.filter-empty-msg h4{
+    color:var(--text);
+    font-family:var(--font-primary);
+    font-size:20px;
+    margin-bottom:6px;
+}
+
+.filter-empty-msg p{
+    color:var(--text-muted);
+    font-family:var(--font-body);
+    font-size:14px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+/* Tablet */
+@media(max-width:992px){
+    .subcategory-grid{
+        grid-template-columns:repeat(auto-fill, minmax(250px, 1fr));
+    }
+
+    .subcategory-card:nth-child(3n){
+        border-right:1px solid var(--border);
+    }
+
+    .subcategory-card:nth-child(2n){
+        border-right:none;
+    }
+
+    .subcategory-card .card-details{
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+/* Mobile */
+@media(max-width:600px){
+    .page-header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .page-title{
+        font-size:22px;
+    }
+
+    .add-btn{
+        width:100%;
+        justify-content:center;
+    }
+
+    .search-bar{
+        flex-direction:column;
+        align-items:stretch;
+        padding:12px 16px;
+    }
+
+    .search-bar .search-wrap{
+        min-width:100%;
+    }
+
+    .search-bar .search-reset{
+        text-align:center;
+    }
+
+    .subcategory-grid{
+        grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+    }
+
+    .subcategory-card{
+        padding:16px 18px 14px;
+        min-height:120px;
+    }
+
+    .subcategory-card:nth-child(2n){
+        border-right:1px solid var(--border);
+    }
+
+    .subcategory-card:nth-child(1n){
+        border-right:none;
+    }
+
+    .subcategory-card .card-details{
+        grid-template-columns:1fr 1fr;
+        gap:6px;
+    }
+
+    .subcategory-card .img-wrap{
+        width:42px;
+        height:42px;
+    }
+
+    .subcategory-card .name-value{
+        font-size:14px;
+    }
+
+    .category-section .section-header{
+        padding:10px 16px;
+    }
+
+    .category-section .section-header .section-title{
+        font-size:14px;
+    }
+}
+
+@media(max-width:400px){
+    .subcategory-grid{
+        grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+    }
+
+    .subcategory-card .card-details{
+        grid-template-columns:1fr;
+        gap:4px;
+    }
+
+    .subcategory-card .card-actions{
+        flex-direction:column;
+    }
+
+    .subcategory-card .action-btn{
+        justify-content:center;
+    }
+
+    .page-title{
+        font-size:20px;
+    }
+
+    .subcategory-card{
+        padding:14px 14px 12px;
+        min-height:110px;
+    }
+
+    .subcategory-card .img-wrap{
+        width:36px;
+        height:36px;
+    }
+
+    .subcategory-card .name-value{
+        font-size:13px;
+    }
+
+    .subcategory-card .detail-item{
+        font-size:11px;
+    }
+}
+</style>
+
+<!-- ===== PAGE HEADER ===== -->
+<div class="page-header">
+    <h2 class="page-title">
+        <i class="fas fa-tag"></i>
+        Subcategories
+    </h2>
+    <a href="{% url 'Ecom:subcategory_create' %}" class="add-btn">
+        <i class="fas fa-plus"></i>
+        Add Subcategory
+    </a>
+</div>
+
+<!-- ===== SEARCH BAR ===== -->
+<div class="search-bar">
+    <div class="search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search subcategories by name or description..." onkeyup="filterCards()">
+    </div>
+    <a href="{% url 'Ecom:subcategory_list' %}" class="search-reset">
+        <i class="fas fa-undo"></i> Reset
+    </a>
+</div>
+
+<!-- ===== SUB CATEGORIES ===== -->
+{% if subcategories %}
+    {% regroup subcategories by category as category_list %}
+    {% for category_group in category_list %}
+    <div class="category-section" data-category="{{ category_group.grouper.id }}">
+        <!-- Section Header -->
+        <div class="section-header">
+            <span class="section-title">
+                <i class="fas fa-folder"></i>
+                {{ category_group.grouper.name }}
+            </span>
+            <span class="count-badge">{{ category_group.list|length }} subcategories</span>
+        </div>
+
+        <!-- Grid -->
+        <div class="subcategory-grid">
+            {% for subcategory in category_group.list %}
+            <div class="subcategory-card" 
+                 data-name="{{ subcategory.name|lower }}" 
+                 data-desc="{{ subcategory.description|lower|default:'' }}">
+                
+                <!-- Image + Name (Status UNDER name) -->
+                <div class="card-top">
+                    <div class="img-wrap">
+                        {% if subcategory.image %}
+                        <img src="{{ subcategory.image.url }}" alt="{{ subcategory.name }}">
+                        {% else %}
+                        <div class="no-img"><i class="fas fa-tag"></i></div>
+                        {% endif %}
+                    </div>
+                    <div class="name-status-col">
+                        <span class="name-value">{{ subcategory.name }}</span>
+                        <!-- Status badge UNDER the name -->
+                        <span class="status-badge-top {% if subcategory.is_active %}active{% else %}inactive{% endif %}">
+                            {% if subcategory.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Details -->
+                <div class="card-details">
+                    <span class="detail-item">
+                        <i class="fas fa-folder"></i>
+                        <strong>{{ subcategory.category.name }}</strong>
+                    </span>
+                    <span class="detail-item">
+                        <i class="fas fa-box"></i>
+                        <strong>{{ subcategory.products.count }}</strong> products
+                    </span>
+                </div>
+
+                <!-- Description -->
+                <div class="desc-value">
+                    {{ subcategory.description|default:"No description" }}
+                </div>
+
+                <!-- Actions -->
+                <div class="card-actions">
+                    <a href="{% url 'Ecom:subcategory_edit' subcategory.id %}" class="action-btn edit-btn">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{% url 'Ecom:subcategory_delete' subcategory.id %}"
+                       class="action-btn delete-btn"
+                       onclick="return confirm('Delete this subcategory?')">
+                        <i class="fas fa-trash"></i> Delete
+                    </a>
+                </div>
             </div>
+            {% endfor %}
         </div>
     </div>
+    {% endfor %}
+{% else %}
+<!-- ===== EMPTY STATE ===== -->
+<div class="empty-box">
+    <i class="fas fa-tag"></i>
+    <h3>No Subcategories Found</h3>
+    <p>
+        Create your first subcategory by
+        <a href="{% url 'Ecom:subcategory_create' %}">clicking here.</a>
+    </p>
 </div>
+{% endif %}
+
+<script>
+function filterCards() {
+    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.subcategory-card');
+    const sections = document.querySelectorAll('.category-section');
+    let totalVisible = 0;
+
+    cards.forEach(card => {
+        const cardName = card.getAttribute('data-name');
+        const cardDesc = card.getAttribute('data-desc') || '';
+        
+        let show = true;
+        
+        if (searchInput) {
+            const searchMatch = cardName.includes(searchInput) || cardDesc.includes(searchInput);
+            if (!searchMatch) {
+                show = false;
+            }
+        }
+        
+        if (show) {
+            card.style.display = 'flex';
+            totalVisible++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    sections.forEach(section => {
+        const cardsInSection = section.querySelectorAll('.subcategory-card');
+        let hasVisible = false;
+        cardsInSection.forEach(card => {
+            if (card.style.display !== 'none') {
+                hasVisible = true;
+            }
+        });
+        section.style.display = hasVisible ? 'block' : 'none';
+    });
+
+    const existingEmpty = document.querySelector('.filter-empty-msg');
+    
+    if (totalVisible === 0 && document.querySelectorAll('.subcategory-card').length > 0) {
+        if (!existingEmpty) {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.className = 'filter-empty-msg';
+            emptyMsg.innerHTML = `
+                <i class="fas fa-search"></i>
+                <h4>No matches found</h4>
+                <p>Try adjusting your search terms</p>
+            `;
+            const firstSection = document.querySelector('.category-section');
+            if (firstSection) {
+                firstSection.parentNode.insertBefore(emptyMsg, firstSection);
+            }
+        }
+    } else {
+        if (existingEmpty) {
+            existingEmpty.remove();
+        }
+    }
+}
+</script>
+
 {% endblock %}

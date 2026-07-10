@@ -772,7 +772,6 @@
             opacity: 0.5;
         }
 
-<<<<<<< HEAD
         /* ============================================================
                    TOAST NOTIFICATION - Glass Morphism Effect
                    ============================================================ */
@@ -924,11 +923,9 @@
         }
 
         /* ===== RESPONSIVE ===== */
-=======
         /* ============================================ */
         /* RESPONSIVE FIXES                            */
         /* ============================================ */
->>>>>>> 222bb351b1f41ae4216875232fc78d54871b179d
         @media (max-width: 1024px) {
             .tier-1,
             .tier-2,
@@ -1023,12 +1020,10 @@
             .account-dropdown .dropdown-menu {
                 min-width: 150px;
             }
-<<<<<<< HEAD
             .toast-container {
                 top: 80px;
                 right: 20px;
                 max-width: 320px;
-=======
             .search-suggestions {
                 max-height: 300px;
             }
@@ -1043,7 +1038,6 @@
             .category-dropdown > a {
                 font-size: 12px;
                 padding: 6px 14px;
->>>>>>> 222bb351b1f41ae4216875232fc78d54871b179d
             }
         }
 
@@ -1145,7 +1139,6 @@
             .scroll-hint {
                 display: none !important;
             }
-<<<<<<< HEAD
 
             .toast-container {
                 top: 75px;
@@ -1166,7 +1159,6 @@
             }
             .toast-notification .toast-content p {
                 font-size: 11px;
-=======
             .search-suggestions {
                 max-height: 250px;
                 top: calc(100% + 4px);
@@ -1189,7 +1181,6 @@
             .category-dropdown > a {
                 font-size: 12px;
                 padding: 6px 12px;
->>>>>>> 222bb351b1f41ae4216875232fc78d54871b179d
             }
         }
 
@@ -1253,7 +1244,6 @@
                 font-size: 12px;
                 padding: 6px 12px;
             }
-<<<<<<< HEAD
             .toast-notification {
                 padding: 10px 14px;
             }
@@ -1291,7 +1281,6 @@
         .demo-content .highlight {
             color: var(--primary);
             font-weight: 600;
-=======
             .category-dropdown > a {
                 font-size: 11px;
                 padding: 4px 10px;
@@ -1304,7 +1293,6 @@
                 min-width: 140px;
                 left: 80%;
             }
->>>>>>> 222bb351b1f41ae4216875232fc78d54871b179d
         }
         .demo-content .btn-toast {
             display: inline-block;
@@ -1356,10 +1344,7 @@
                     Featured
                 </a>
 
-<<<<<<< HEAD
                 <!-- Account Dropdown -->
-=======
->>>>>>> 222bb351b1f41ae4216875232fc78d54871b179d
                 <div class="account-dropdown icon-item" id="accountDropdown">
                     <div>
                         <i class="fa-regular fa-user"></i>
@@ -1373,39 +1358,30 @@
                     </div>
                     <div class="dropdown-menu">
                         {% if user.is_authenticated %}
-<<<<<<< HEAD
                             {% if user.is_staff or user.is_superuser %}
                                 <a href="{% url 'Ecom:admin_dashboard' %}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
                             {% else %}
                                 <a href="{% url 'Ecom:profile' %}"><i class="fa-regular fa-user"></i> Profile</a>
                             {% endif %}
-=======
                             <a href="{% url 'Ecom:profile' %}"><i class="fa-regular fa-user"></i> Profile</a>
                             <a href="{% url 'Ecom:change_password' %}"><i class="fa-solid fa-key"></i> Change Password</a>
                             <a href="{% url 'Ecom:recently_viewed' %}"><i class="fa-solid fa-clock-rotate-left"></i> Recently Viewed</a>
->>>>>>> 222bb351b1f41ae4216875232fc78d54871b179d
                             <div class="divider"></div>
                             <a href="{% url 'Ecom:logout' %}" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
                         {% else %}
-<<<<<<< HEAD
                             <a href="{% url 'Ecom:login' %}" id="loginLink"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
-=======
                             <a href="{% url 'Ecom:login' %}"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
                             <a href="{% url 'Ecom:customer_signup' %}"><i class="fa-solid fa-user-plus"></i> Register</a>
->>>>>>> 222bb351b1f41ae4216875232fc78d54871b179d
                         {% endif %}
                     </div>
                 </div>
 
                 <a href="{% url 'Ecom:shop' %}" class="icon-item" style="text-decoration:none;">
                     <i class="fa-solid fa-bag-shopping"></i>
-<<<<<<< HEAD
                     Cart
                 </div>
-=======
-                    Shop
+                    
                 </a>
->>>>>>> 222bb351b1f41ae4216875232fc78d54871b179d
             </div>
         </div>
 
@@ -1461,16 +1437,13 @@
         </div>
     </header>
 
-<<<<<<< HEAD
     <!-- ===== TOAST CONTAINER ===== -->
     <div class="toast-container" id="toastContainer"></div>
 
     
 
     <!-- ===== JAVASCRIPT ===== -->
-=======
     <!-- ===== JAVASCRIPT for Dropdown + Search ===== -->
->>>>>>> 222bb351b1f41ae4216875232fc78d54871b179d
     <script>
         // ============================================
         // ACCOUNT DROPDOWN TOGGLE
@@ -1497,7 +1470,6 @@
                 });
             }
 
-<<<<<<< HEAD
             // ===== Glass Toast System =====
             const container = document.getElementById('toastContainer');
 
@@ -1593,7 +1565,6 @@
                     showToast('Logging out...', 'See you soon!', 'success');
                 });
             }
-=======
             // ============================================
             // CATEGORY DROPDOWN - HOVER FUNCTIONALITY
             // ============================================
@@ -1854,7 +1825,6 @@
                     }, 2000);
                 }
             });
->>>>>>> 222bb351b1f41ae4216875232fc78d54871b179d
         });
     </script>
 

@@ -1,78 +1,536 @@
-{% extends 'base.html' %}
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
-{% block title %}Categories - MyStore{% endblock %}
+{% block title %}Categories{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-tags text-primary"></i> Categories</h2>
-        <a href="{% url 'Ecom:category_create' %}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Add Category
-        </a>
-    </div>
 
-    <div class="card shadow-sm">
+<style>
+:root{
+    --primary:#5c121f;
+    --primary-light:#7a1a2b;
+    --secondary:#F4B400;
+    --bg:#f6f4f2;
+    --white:#fff;
+    --border:#ebe7e3;
+    --text:#1d1d1d;
+    --text-light:#6d6d6d;
+    --text-muted:#888;
+    --text-gray:#666;
+    --success:#2e9d57;
+    --danger:#d64045;
+    --shadow:0 10px 28px rgba(0,0,0,.06);
+    --shadow-hover:0 18px 40px rgba(92,18,31,.12);
+    --transition:.35s ease;
+    --radius:16px;
+    --radius-sm:10px;
+    --radius-xs:8px;
+    --font-primary:'Inter',sans-serif;
+    --font-body:'Inter',sans-serif;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:var(--font-body);
+    background:var(--bg);
+    color:var(--text);
+}
+
+/* ===== PAGE HEADER ===== */
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:32px;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.page-title{
+    font-size:28px;
+    color:var(--primary);
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    font-family:var(--font-primary);
+    letter-spacing:-0.3px;
+}
+
+.page-title i{
+    color:var(--secondary);
+    font-size:26px;
+}
+
+.add-btn{
+    background:var(--primary);
+    color:var(--white);
+    text-decoration:none;
+    padding:11px 24px;
+    border-radius:var(--radius-sm);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    transition:var(--transition);
+    font-size:14px;
+    font-weight:600;
+    font-family:var(--font-body);
+    border:none;
+    cursor:pointer;
+    letter-spacing:0.2px;
+}
+
+.add-btn:hover{
+    background:var(--primary-light);
+    transform:translateY(-2px);
+    color:var(--white);
+    box-shadow:0 8px 24px rgba(92,18,31,.15);
+}
+
+.add-btn i{
+    font-size:14px;
+}
+
+/* ===== CATEGORY GRID ===== */
+.category-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:24px;
+}
+
+.category-card{
+    background:var(--white);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    transition:var(--transition);
+    display:flex;
+    flex-direction:column;
+}
+
+.category-card:hover{
+    transform:translateY(-6px);
+    box-shadow:var(--shadow-hover);
+}
+
+/* ===== CATEGORY IMAGE ===== */
+.category-image{
+    height:180px;
+    background:var(--border);
+    position:relative;
+    overflow:hidden;
+}
+
+.category-image img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:var(--transition);
+}
+
+.category-card:hover .category-image img{
+    transform:scale(1.04);
+}
+
+.no-image{
+    width:100%;
+    height:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:var(--border);
+    color:var(--text-muted);
+    font-size:44px;
+}
+
+/* ===== STATUS BADGE ===== */
+.status{
+    position:absolute;
+    top:14px;
+    right:14px;
+    padding:5px 14px;
+    border-radius:30px;
+    font-size:10px;
+    font-weight:700;
+    color:var(--white);
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+    font-family:var(--font-body);
+}
+
+.status.active{
+    background:var(--success);
+}
+
+.status.inactive{
+    background:var(--text-muted);
+}
+
+/* ===== CARD BODY ===== */
+.card-body{
+    padding:20px 22px 22px;
+    display:flex;
+    flex-direction:column;
+    flex:1;
+}
+
+.category-name{
+    font-size:20px;
+    color:var(--primary);
+    font-weight:700;
+    margin-bottom:10px;
+    font-family:var(--font-primary);
+    letter-spacing:-0.2px;
+}
+
+/* ===== DESCRIPTION WITH SCROLL ===== */
+.description-wrapper{
+    position:relative;
+    margin-bottom:16px;
+}
+
+.description{
+    color:var(--text-gray);
+    line-height:1.7;
+    font-size:14px;
+    font-family:var(--font-body);
+    font-weight:400;
+    max-height:52px;
+    overflow-y:auto;
+    padding-right:4px;
+    scrollbar-width:thin;
+    scrollbar-color:var(--border) transparent;
+}
+
+.description::-webkit-scrollbar{
+    width:3px;
+}
+
+.description::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.description::-webkit-scrollbar-thumb{
+    background:var(--border);
+    border-radius:10px;
+}
+
+.description::-webkit-scrollbar-thumb:hover{
+    background:var(--primary);
+}
+
+/* ===== INFO BOX ===== */
+.info-box{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:auto;
+}
+
+.info-item{
+    background:var(--bg);
+    border-radius:var(--radius-sm);
+    padding:14px 12px;
+    text-align:center;
+    transition:var(--transition);
+}
+
+.info-item:hover{
+    background:var(--border);
+}
+
+.info-item span{
+    display:block;
+    font-size:10px;
+    color:var(--text-muted);
+    margin-bottom:4px;
+    font-family:var(--font-body);
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+    font-weight:600;
+}
+
+.info-item strong{
+    font-size:20px;
+    color:var(--primary);
+    font-family:var(--font-primary);
+    font-weight:700;
+}
+
+.info-item strong .text-success{
+    color:var(--success);
+}
+
+.info-item strong .text-danger{
+    color:var(--danger);
+}
+
+/* ===== CARD ACTIONS ===== */
+.card-actions{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+}
+
+.action-btn{
+    flex:1;
+    text-decoration:none;
+    text-align:center;
+    padding:10px 16px;
+    border-radius:var(--radius-sm);
+    font-size:13px;
+    font-weight:600;
+    transition:var(--transition);
+    font-family:var(--font-body);
+    border:none;
+    cursor:pointer;
+    letter-spacing:0.2px;
+}
+
+.action-btn i{
+    margin-right:6px;
+    font-size:13px;
+}
+
+.edit-btn{
+    background:#eef3ff;
+    color:#2458ff;
+}
+
+.edit-btn:hover{
+    background:#2458ff;
+    color:var(--white);
+    transform:translateY(-1px);
+    box-shadow:0 4px 16px rgba(36,88,255,.2);
+}
+
+.delete-btn{
+    background:#ffecec;
+    color:var(--danger);
+}
+
+.delete-btn:hover{
+    background:var(--danger);
+    color:var(--white);
+    transform:translateY(-1px);
+    box-shadow:0 4px 16px rgba(214,64,69,.2);
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-box{
+    background:var(--white);
+    padding:80px 20px;
+    border-radius:var(--radius);
+    text-align:center;
+    box-shadow:var(--shadow);
+}
+
+.empty-box i{
+    font-size:72px;
+    color:var(--border);
+    margin-bottom:20px;
+}
+
+.empty-box h3{
+    color:var(--primary);
+    margin-bottom:10px;
+    font-family:var(--font-primary);
+    font-size:24px;
+    font-weight:700;
+}
+
+.empty-box p{
+    color:var(--text-gray);
+    font-family:var(--font-body);
+    font-size:15px;
+}
+
+.empty-box a{
+    color:var(--primary);
+    text-decoration:none;
+    font-weight:600;
+    transition:var(--transition);
+}
+
+.empty-box a:hover{
+    color:var(--primary-light);
+    text-decoration:underline;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+/* Tablet */
+@media(max-width:992px){
+    .category-grid{
+        grid-template-columns:repeat(2,1fr);
+        gap:20px;
+    }
+}
+
+/* Mobile */
+@media(max-width:600px){
+    .page-header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .page-title{
+        font-size:24px;
+    }
+
+    .add-btn{
+        width:100%;
+        justify-content:center;
+        padding:11px 20px;
+    }
+
+    .category-grid{
+        grid-template-columns:1fr;
+        gap:18px;
+    }
+
+    .card-actions{
+        flex-direction:column;
+    }
+
+    .info-box{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .category-image{
+        height:150px;
+    }
+
+    .category-name{
+        font-size:18px;
+    }
+}
+
+@media(max-width:420px){
+    .info-box{
+        grid-template-columns:1fr;
+    }
+
+    .category-name{
+        font-size:17px;
+    }
+
+    .description{
+        font-size:13px;
+        max-height:48px;
+    }
+
+    .card-body{
+        padding:16px 16px 18px;
+    }
+
+    .page-title{
+        font-size:22px;
+    }
+
+    .empty-box h3{
+        font-size:22px;
+    }
+}
+</style>
+
+<!-- ===== PAGE HEADER ===== -->
+<div class="page-header">
+    <h2 class="page-title">
+        <i class="fas fa-tags"></i>
+        Categories
+    </h2>
+    <a href="{% url 'Ecom:category_create' %}" class="add-btn">
+        <i class="fas fa-plus"></i>
+        Add Category
+    </a>
+</div>
+
+<!-- ===== CATEGORIES GRID ===== -->
+{% if categories %}
+<div class="category-grid">
+    {% for category in categories %}
+    <div class="category-card">
+        <!-- Image -->
+        <div class="category-image">
+            {% if category.image %}
+            <img src="{{ category.image.url }}" alt="{{ category.name }}">
+            {% else %}
+            <div class="no-image">
+                <i class="fas fa-image"></i>
+            </div>
+            {% endif %}
+
+            {% if category.is_active %}
+            <span class="status active">Active</span>
+            {% else %}
+            <span class="status inactive">Inactive</span>
+            {% endif %}
+        </div>
+
+        <!-- Body -->
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Image</th>
-                            <th>Name</th>
-                            <th>Slug</th>
-                            <th>Description</th>
-                            <th>Subcategories</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for category in categories %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>
-                                {% if category.image %}
-                                    <img src="{{ category.image.url }}" width="50" height="50" style="object-fit:cover; border-radius:4px;">
-                                {% else %}
-                                    <div class="bg-secondary" style="width:50px;height:50px;border-radius:4px;"></div>
-                                {% endif %}
-                            </td>
-                            <td>{{ category.name }}</td>
-                            <td><code>{{ category.slug }}</code></td>
-                            <td>{{ category.description|truncatechars:30 }}</td>
-                            <td><span class="badge bg-info">{{ category.subcategories.count }}</span></td>
-                            <td>
-                                {% if category.is_active %}
-                                    <span class="badge bg-success">Active</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">Inactive</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <div class="btn-group">
-                                    <a href="{% url 'Ecom:category_edit' category.id %}" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="{% url 'Ecom:category_delete' category.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure? This will delete all subcategories.')">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="8" class="text-center py-4">
-                                <i class="fas fa-tags fa-3x text-muted"></i>
-                                <p class="mt-2">No categories found. <a href="{% url 'Ecom:category_create' %}">Add your first category</a></p>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <div class="category-name">{{ category.name }}</div>
+
+            <!-- Description with scroll -->
+            <div class="description-wrapper">
+                <div class="description">
+                    {{ category.description|default:"No description provided." }}
+                </div>
+            </div>
+
+            <!-- Info -->
+            <div class="info-box">
+                <div class="info-item">
+                    <span>Subcategories</span>
+                    <strong>{{ category.subcategories.count }}</strong>
+                </div>
+                <div class="info-item">
+                    <span>Status</span>
+                    <strong>
+                        {% if category.is_active %}
+                        <span class="text-success">✓</span>
+                        {% else %}
+                        <span class="text-danger">✕</span>
+                        {% endif %}
+                    </strong>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card-actions">
+                <a href="{% url 'Ecom:category_edit' category.id %}" class="action-btn edit-btn">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="{% url 'Ecom:category_delete' category.id %}"
+                   class="action-btn delete-btn"
+                   onclick="return confirm('Delete this category?')">
+                    <i class="fas fa-trash"></i> Delete
+                </a>
             </div>
         </div>
     </div>
+    {% endfor %}
 </div>
+
+<!-- ===== EMPTY STATE ===== -->
+{% else %}
+<div class="empty-box">
+    <i class="fas fa-tags"></i>
+    <h3>No Categories Found</h3>
+    <p>
+        Create your first category by
+        <a href="{% url 'Ecom:category_create' %}">clicking here.</a>
+    </p>
+</div>
+{% endif %}
+
 {% endblock %}
