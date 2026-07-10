@@ -1,0 +1,785 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShubhDecor · Premium Header</title>
+
+    <!-- Google Fonts: Playfair Display + Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f7f5f2;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* ===== ROOT VARIABLES ===== */
+        :root {
+            --primary: #5c121f;
+            --secondary: #F4B400;
+            --accent: #D97706;
+            --text-dark: #1e1e1e;
+            --text-light: #5a5a5a;
+            --text-white: #ffffff;
+            --bg-white: #ffffff;
+            --bg-light: #f8f6f4;
+            --border: #e8e4e0;
+            --shadow: 0 6px 28px rgba(0, 0, 0, 0.07);
+            --radius: 50px;
+            --transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* ===== HEADER STACK ===== */
+        .header-stack {
+            background: var(--bg-white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* ===== TIER 1 : TOP BAR ===== */
+        .tier-1 {
+            background: var(--primary);
+            color: #fef6e8;
+            font-size: 12px;
+            padding: 8px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px 16px;
+            letter-spacing: 0.3px;
+            font-weight: 400;
+            font-family: 'Inter', sans-serif;
+        }
+        .tier-1 .left i,
+        .tier-1 .right i {
+            margin-right: 6px;
+            color: var(--secondary);
+            font-size: 13px;
+        }
+        .tier-1 .right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tier-1 .right i {
+            color: #fad87a;
+        }
+
+        /* ===== TIER 2 : LOGO + SEARCH + ICONS ===== */
+        .tier-2 {
+            padding: 8px 7%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            background: var(--bg-white);
+        }
+
+        /* --- Logo --- */
+        .logo-img {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .logo-img img {
+            height: 40px;
+            width: auto;
+            display: block;
+            object-fit: contain;
+            transition: var(--transition);
+        }
+        .logo-img img:hover {
+            filter: drop-shadow(0 4px 12px rgba(123, 30, 30, 0.15));
+        }
+
+        /* --- Clean Search Bar --- */
+        .search-box {
+            flex: 1 1 300px;
+            display: flex;
+            min-width: 160px;
+            max-width: 480px;
+            background: #f0edeb;
+            border-radius: var(--radius);
+            border: 2px solid transparent;
+            transition: var(--transition);
+            overflow: hidden;
+            height: 40px;
+        }
+        .search-box:focus-within {
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(123, 30, 30, 0.08);
+        }
+        .search-box input {
+            width: 100%;
+            padding: 0 18px;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--text-dark);
+            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+        }
+        .search-box input::placeholder {
+            color: #999;
+            font-weight: 300;
+            letter-spacing: 0.2px;
+        }
+        .search-box input:focus {
+            background: transparent;
+        }
+        .search-box button {
+            width: 46px;
+            border: none;
+            background: var(--primary);
+            color: #fff;
+            font-size: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .search-box button:hover {
+            background: var(--accent);
+        }
+        .search-box button i {
+            transition: var(--transition);
+        }
+        .search-box button:hover i {
+            transform: scale(1.1);
+        }
+
+        /* --- Icons with Dropdown --- */
+        .icons {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .icon-item {
+            text-align: center;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-dark);
+            transition: var(--transition);
+            cursor: pointer;
+            min-width: 38px;
+            letter-spacing: 0.2px;
+            position: relative;
+        }
+        .icon-item i {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 2px;
+            color: var(--text-dark);
+            transition: var(--transition);
+        }
+        .icon-item:hover i {
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+        .icon-item .badge {
+            background: var(--secondary);
+            color: #1e1e1e;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 1px 7px;
+            border-radius: 30px;
+            margin-left: 2px;
+            display: inline-block;
+            line-height: 1.5;
+        }
+
+        /* --- Account Dropdown - Click to toggle --- */
+        .account-dropdown {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .account-dropdown .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: #ffffff;
+            min-width: 160px;
+            padding: 8px 0;
+            border-radius: 12px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+            border: 1px solid var(--border);
+            z-index: 1000;
+        }
+        .account-dropdown .dropdown-menu::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: 20px;
+            transform: rotate(45deg);
+            width: 12px;
+            height: 12px;
+            background: #ffffff;
+            border-left: 1px solid var(--border);
+            border-top: 1px solid var(--border);
+        }
+        .account-dropdown .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 18px;
+            color: var(--text-dark);
+            font-size: 13px;
+            font-weight: 400;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+        }
+        .account-dropdown .dropdown-menu a i {
+            width: 18px;
+            color: var(--primary);
+            font-size: 14px;
+        }
+        .account-dropdown .dropdown-menu a:hover {
+            background: var(--bg-light);
+            color: var(--primary);
+        }
+        .account-dropdown .dropdown-menu .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 4px 12px;
+        }
+        .account-dropdown.active .dropdown-menu {
+            display: block;
+        }
+
+        /* Username display in account icon */
+        .account-username {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--primary);
+            display: block;
+            margin-top: -2px;
+            max-width: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ===== TIER 3 : FIXED HOME + SCROLLABLE CATEGORIES ===== */
+        .tier-3 {
+            background: #FEF7ED;
+            border-top: 1px solid var(--border);
+            padding: 0 7%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .nav-scroll {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            padding: 7px 0;
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            position: relative;
+        }
+        .nav-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* --- HOME - FIXED with stylish font, no underline --- */
+        .nav-home {
+            font-family: 'Playfair Display', serif;
+            font-size: 15px;
+            font-weight: 700;
+            font-style: italic;
+            color: var(--primary);
+            padding: 4px 18px 4px 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+            margin-right: 12px;
+            transition: var(--transition);
+            background: #FEF7ED;
+            border-right: 2px solid var(--border);
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            padding-left: 0;
+            box-shadow: 12px 0 20px -12px rgba(254, 247, 237, 0.98);
+            text-decoration: none;
+        }
+        .nav-home i {
+            font-size: 16px;
+            color: var(--primary);
+            transition: var(--transition);
+        }
+        .nav-home:hover {
+            color: var(--accent);
+            transform: translateY(-1px);
+        }
+        .nav-home:hover i {
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        /* --- Scrollable Items (no icons, clean typography) --- */
+        .scrollable-items {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            padding: 3px 0 3px 6px;
+            flex-shrink: 0;
+        }
+        .scrollable-items a {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-dark);
+            transition: var(--transition);
+            padding: 4px 0;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            position: relative;
+            text-decoration: none;
+        }
+        .scrollable-items a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2.5px;
+            background: var(--secondary);
+            transition: var(--transition);
+        }
+        .scrollable-items a:hover {
+            color: var(--primary);
+        }
+        .scrollable-items a:hover::after {
+            width: 100%;
+        }
+
+        /* --- Scroll Hint - hidden on mobile --- */
+        .scroll-hint {
+            display: none;
+            color: var(--text-light);
+            font-size: 11px;
+            font-weight: 400;
+            margin-left: auto;
+            flex-shrink: 0;
+            background: #FEF7ED;
+            padding-left: 14px;
+            letter-spacing: 0.3px;
+            align-items: center;
+            gap: 5px;
+            position: sticky;
+            right: 0;
+            z-index: 5;
+            box-shadow: -12px 0 20px -12px rgba(254, 247, 237, 0.98);
+        }
+        .scroll-hint i {
+            font-size: 14px;
+            color: var(--primary);
+            opacity: 0.5;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .tier-1,
+            .tier-2,
+            .tier-3 {
+                padding-left: 5%;
+                padding-right: 5%;
+            }
+            .scrollable-items {
+                gap: 22px;
+            }
+            .search-box {
+                flex: 1 1 240px;
+            }
+        }
+
+        @media (max-width: 820px) {
+            .tier-1 {
+                justify-content: center;
+                gap: 4px 12px;
+                font-size: 11px;
+                padding: 4px 5%;
+            }
+            .tier-2 {
+                gap: 10px;
+                padding: 6px 5%;
+            }
+            .logo-img img {
+                height: 34px;
+            }
+            .search-box {
+                flex: 1 1 180px;
+                min-width: 120px;
+                height: 36px;
+            }
+            .search-box input {
+                font-size: 12px;
+                padding: 0 14px;
+            }
+            .search-box button {
+                width: 40px;
+                font-size: 14px;
+            }
+            .icons {
+                gap: 10px;
+            }
+            .icon-item {
+                font-size: 10px;
+                min-width: 32px;
+            }
+            .icon-item i {
+                font-size: 16px;
+            }
+            .scrollable-items {
+                gap: 18px;
+            }
+            .scrollable-items a {
+                font-size: 12px;
+            }
+            .nav-home {
+                font-size: 14px;
+                padding-right: 14px;
+                gap: 6px;
+                margin-right: 10px;
+            }
+            .nav-home i {
+                font-size: 14px;
+            }
+            .account-username {
+                font-size: 9px;
+                max-width: 50px;
+            }
+            .account-dropdown .dropdown-menu {
+                min-width: 150px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .tier-1 {
+                flex-direction: column;
+                align-items: center;
+                padding: 4px 4%;
+                font-size: 10px;
+                gap: 2px;
+            }
+            .tier-1 .left i,
+            .tier-1 .right i {
+                font-size: 11px;
+                margin-right: 4px;
+            }
+
+            .tier-2 {
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+                padding: 6px 4%;
+            }
+            .logo-img {
+                flex: 0 0 auto;
+            }
+            .logo-img img {
+                height: 32px;
+            }
+
+            .search-box {
+                flex: 1 1 100%;
+                max-width: 100%;
+                height: 36px;
+                order: 3;
+            }
+            .search-box input {
+                font-size: 12px;
+                padding: 0 14px;
+            }
+            .search-box button {
+                width: 40px;
+                font-size: 14px;
+            }
+
+            .icons {
+                justify-content: flex-end;
+                gap: 10px;
+                flex: 0 0 auto;
+            }
+            .icon-item {
+                font-size: 9px;
+                min-width: 30px;
+            }
+            .icon-item i {
+                font-size: 15px;
+            }
+            .account-username {
+                font-size: 8px;
+                max-width: 40px;
+            }
+            .account-dropdown .dropdown-menu {
+                min-width: 140px;
+                right: -10px;
+            }
+            .account-dropdown .dropdown-menu::before {
+                right: 16px;
+            }
+
+            .tier-3 {
+                padding: 0 4%;
+            }
+            .scrollable-items {
+                gap: 12px;
+                padding: 2px 0 2px 4px;
+            }
+            .scrollable-items a {
+                font-size: 11px;
+                letter-spacing: 0.2px;
+            }
+            .nav-home {
+                font-size: 13px;
+                padding-right: 10px;
+                gap: 5px;
+                margin-right: 8px;
+            }
+            .nav-home i {
+                font-size: 13px;
+            }
+            .scroll-hint {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .scrollable-items {
+                gap: 10px;
+            }
+            .scrollable-items a {
+                font-size: 10px;
+            }
+            .nav-home {
+                font-size: 12px;
+                padding-right: 8px;
+                gap: 4px;
+                margin-right: 6px;
+            }
+            .nav-home i {
+                font-size: 12px;
+            }
+            .tier-1 {
+                font-size: 9px;
+            }
+            .icon-item {
+                font-size: 8px;
+                min-width: 26px;
+            }
+            .icon-item i {
+                font-size: 13px;
+            }
+            .logo-img img {
+                height: 28px;
+            }
+            .search-box {
+                height: 32px;
+            }
+            .search-box input {
+                font-size: 11px;
+                padding: 0 12px;
+            }
+            .search-box button {
+                width: 34px;
+                font-size: 12px;
+            }
+            .account-username {
+                font-size: 7px;
+                max-width: 32px;
+            }
+            .account-dropdown .dropdown-menu {
+                min-width: 120px;
+                right: -6px;
+            }
+            .account-dropdown .dropdown-menu a {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+        }
+
+        /* ===== DEMO CONTENT ===== */
+        .demo-content {
+            padding: 80px 7%;
+            text-align: center;
+            background: var(--bg-light);
+        }
+        .demo-content h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 28px;
+            letter-spacing: -0.3px;
+        }
+        .demo-content p {
+            color: var(--text-light);
+            max-width: 500px;
+            margin: 12px auto 0;
+            font-weight: 400;
+            line-height: 1.7;
+        }
+        .demo-content .highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 3‑TIER HEADER ===== -->
+    <header class="header-stack">
+
+        <!-- TIER 1 : Top Bar -->
+        <div class="tier-1">
+            <span class="left"><i class="fa-solid fa-truck"></i> Free Shipping on Orders Above ₹999</span>
+            <span class="right"><i class="fa-regular fa-calendar"></i> Festive Sale • Up to 30% OFF</span>
+        </div>
+
+        <!-- TIER 2 : Logo + Search + Icons -->
+        <div class="tier-2">
+            <div class="logo-img">
+                <img src="{% static 'images/decorlogo.png' %}" alt="ShubhDecor" />
+            </div>
+
+            <div class="search-box">
+                <input type="text" placeholder="Search for elegance..." />
+                <button><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
+
+            <div class="icons">
+                <div class="icon-item">
+                    <i class="fa-regular fa-heart"></i>
+                    Wishlist
+                </div>
+
+                <!-- Account Dropdown - Click to toggle -->
+                <div class="account-dropdown icon-item" id="accountDropdown">
+                    <div>
+                        <i class="fa-regular fa-user"></i>
+                        <span class="account-username">
+                            {% if user.is_authenticated %}
+                                {{ user.full_name|truncatechars:8 }}
+                            {% else %}
+                                Account
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="dropdown-menu">
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'Ecom:profile' %}"><i class="fa-regular fa-user"></i> Profile</a>
+                            <div class="divider"></div>
+                            <a href="{% url 'Ecom:logout' %}"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                        {% else %}
+                            <a href="{% url 'Ecom:login' %}"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="icon-item">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    Cart 
+                </div>
+            </div>
+        </div>
+
+        <!-- TIER 3 : Fixed HOME + Scrollable Categories -->
+        <div class="tier-3">
+            <div class="nav-scroll">
+                <a href="#" class="nav-home"><i class="fa-solid fa-house"></i> Home</a>
+                <div class="scrollable-items">
+                    <a href="#">Shop</a>
+                    <a href="#">Festival</a>
+                    <a href="#">New Arrivals</a>
+                    <a href="#">Offers</a>
+                    <a href="#">Blog</a>
+                    <a href="#">Living</a>
+                    <a href="#">Bedroom</a>
+                    <a href="#">Kitchen</a>
+                    <a href="#">Decor</a>
+                    <a href="#">Lighting</a>
+                    <a href="#">Gifting</a>
+                    <a href="#">Seasonal</a>
+                    <a href="#">Outdoor</a>
+                    <a href="#">Study</a>
+                </div>
+            </div>
+            <span class="scroll-hint"><i class="fa-regular fa-hand-pointer"></i> scroll</span>
+        </div>
+    </header>
+
+   
+
+    <!-- ===== JAVASCRIPT for Dropdown Toggle ===== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdown = document.getElementById('accountDropdown');
+            
+            dropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+                this.classList.toggle('active');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target)) {
+                    dropdown.classList.remove('active');
+                }
+            });
+
+            // Prevent dropdown from closing when clicking inside menu
+            const menu = dropdown.querySelector('.dropdown-menu');
+            if (menu) {
+                menu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>

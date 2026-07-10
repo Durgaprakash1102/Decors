@@ -117,7 +117,7 @@
             filter: drop-shadow(0 4px 12px rgba(123, 30, 30, 0.15));
         }
 
-        /* --- Clean Search Bar --- */
+        /* --- Clean Search Bar with Global Search --- */
         .search-box {
             flex: 1 1 300px;
             display: flex;
@@ -129,11 +129,17 @@
             transition: var(--transition);
             overflow: hidden;
             height: 40px;
+            position: relative;
         }
         .search-box:focus-within {
             border-color: var(--primary);
             background: #ffffff;
             box-shadow: 0 0 0 4px rgba(123, 30, 30, 0.08);
+        }
+        .search-box form {
+            display: flex;
+            width: 100%;
+            height: 100%;
         }
         .search-box input {
             width: 100%;
@@ -176,6 +182,151 @@
         }
         .search-box button:hover i {
             transform: scale(1.1);
+        }
+
+        /* Search Suggestions */
+        .search-suggestions {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            padding: 8px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            border: 1px solid var(--border);
+        }
+        .search-suggestions.active {
+            display: block;
+        }
+        .search-suggestions::-webkit-scrollbar {
+            width: 4px;
+        }
+        .search-suggestions::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 2px;
+        }
+        .search-suggestion-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            color: var(--text-dark);
+        }
+        .search-suggestion-item:hover {
+            background: var(--bg-light);
+        }
+        .search-suggestion-item .suggestion-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e7f1ff;
+            color: var(--primary);
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .search-suggestion-item .suggestion-icon.category {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .search-suggestion-item .suggestion-icon.subcategory {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .search-suggestion-item .suggestion-icon.product {
+            background: #d4edda;
+            color: #155724;
+        }
+        .search-suggestion-item .suggestion-icon.variant {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .search-suggestion-item .suggestion-info {
+            flex: 1;
+        }
+        .search-suggestion-item .suggestion-info .suggestion-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+        .search-suggestion-item .suggestion-info .suggestion-subtitle {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        .search-suggestion-item .suggestion-info .suggestion-type {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            background: #e9ecef;
+            padding: 1px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+        .search-suggestion-item .suggestion-price {
+            font-weight: 700;
+            color: #2d7d46;
+            font-size: 14px;
+        }
+        .search-suggestion-item .suggestion-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .search-suggestion-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 4px 16px;
+        }
+        .search-suggestion-header {
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+        }
+        .search-suggestion-empty {
+            padding: 20px;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        .search-suggestion-empty i {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 8px;
+            color: #adb5bd;
+        }
+        .search-loading {
+            text-align: center;
+            padding: 20px;
+        }
+        .search-loading .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #e9ecef;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* --- Icons with Dropdown --- */
@@ -292,7 +443,9 @@
             white-space: nowrap;
         }
 
-        /* ===== TIER 3 : FIXED HOME + SCROLLABLE CATEGORIES ===== */
+        /* ============================================ */
+        /* TIER 3 : SHOP + CATEGORIES + SUBCATEGORIES  */
+        /* ============================================ */
         .tier-3 {
             background: #FEF7ED;
             border-top: 1px solid var(--border);
@@ -320,7 +473,7 @@
             display: none;
         }
 
-        /* --- HOME - FIXED with stylish font, no underline --- */
+        /* --- HOME - FIXED --- */
         .nav-home {
             font-family: 'Playfair Display', serif;
             font-size: 15px;
@@ -358,7 +511,206 @@
             transform: scale(1.1);
         }
 
-        /* --- Scrollable Items (no icons, clean typography) --- */
+        /* --- SHOP LINK - FIXED --- */
+        .nav-shop {
+            font-family: 'Playfair Display', serif;
+            font-size: 15px;
+            font-weight: 700;
+            font-style: italic;
+            color: var(--primary);
+            padding: 4px 18px 4px 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+            margin-right: 12px;
+            transition: var(--transition);
+            background: #FEF7ED;
+            border-right: 2px solid var(--border);
+            position: sticky;
+            left: 60px;
+            z-index: 5;
+            box-shadow: 12px 0 20px -12px rgba(254, 247, 237, 0.98);
+            text-decoration: none;
+        }
+        .nav-shop i {
+            font-size: 16px;
+            color: var(--primary);
+            transition: var(--transition);
+        }
+        .nav-shop:hover {
+            color: var(--accent);
+            transform: translateY(-1px);
+        }
+        .nav-shop:hover i {
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        /* ============================================ */
+        /* SHOP BY CATEGORY DROPDOWN - FIXED            */
+        /* ============================================ */
+        .category-dropdown {
+            position: relative;
+            display: inline-block;
+            flex-shrink: 0;
+            margin-right: 12px;
+        }
+        .category-dropdown > a {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dark);
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .category-dropdown > a:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .category-dropdown > a i.fa-chevron-down {
+            transition: var(--transition);
+            font-size: 12px;
+        }
+        .category-dropdown:hover > a i.fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        /* Dropdown Menu */
+        .category-dropdown .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            background: #ffffff;
+            min-width: 240px;
+            padding: 8px 0;
+            border-radius: 12px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+        }
+        .category-dropdown .dropdown-menu::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 30px;
+            transform: rotate(45deg);
+            width: 12px;
+            height: 12px;
+            background: #ffffff;
+            border-left: 1px solid var(--border);
+            border-top: 1px solid var(--border);
+        }
+        .category-dropdown:hover .dropdown-menu,
+        .category-dropdown .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* Category Item with Subcategories */
+        .category-dropdown .dropdown-item {
+            position: relative;
+            padding: 0;
+        }
+        .category-dropdown .dropdown-item > a {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 18px;
+            color: var(--text-dark);
+            font-size: 13px;
+            font-weight: 500;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+            text-decoration: none;
+            border-radius: 0;
+        }
+        .category-dropdown .dropdown-item > a:hover {
+            background: var(--bg-light);
+            color: var(--primary);
+        }
+        .category-dropdown .dropdown-item > a i {
+            font-size: 12px;
+            color: var(--text-light);
+            transition: var(--transition);
+        }
+        .category-dropdown .dropdown-item:hover > a i {
+            transform: translateX(3px);
+            color: var(--primary);
+        }
+
+        /* Subcategory Dropdown (Nested) */
+        .category-dropdown .sub-dropdown {
+            position: absolute;
+            top: 0;
+            left: 100%;
+            background: #ffffff;
+            min-width: 220px;
+            padding: 8px 0;
+            border-radius: 12px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border);
+            z-index: 1001;
+            margin-left: 4px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+        }
+        .category-dropdown .sub-dropdown::before {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: -6px;
+            transform: rotate(45deg);
+            width: 10px;
+            height: 10px;
+            background: #ffffff;
+            border-left: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .category-dropdown .dropdown-item:hover .sub-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+        .category-dropdown .dropdown-item .sub-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+        .category-dropdown .sub-dropdown a {
+            display: block;
+            padding: 6px 18px;
+            color: var(--text-dark);
+            font-size: 13px;
+            font-weight: 400;
+            transition: var(--transition);
+            text-decoration: none;
+            font-family: 'Inter', sans-serif;
+        }
+        .category-dropdown .sub-dropdown a:hover {
+            background: var(--bg-light);
+            color: var(--primary);
+            padding-left: 24px;
+        }
+
+        /* Scrollable Categories */
         .scrollable-items {
             display: flex;
             align-items: center;
@@ -396,7 +748,7 @@
             width: 100%;
         }
 
-        /* --- Scroll Hint - hidden on mobile --- */
+        /* --- Scroll Hint --- */
         .scroll-hint {
             display: none;
             color: var(--text-light);
@@ -420,7 +772,9 @@
             opacity: 0.5;
         }
 
-        /* ===== RESPONSIVE ===== */
+        /* ============================================ */
+        /* RESPONSIVE FIXES                            */
+        /* ============================================ */
         @media (max-width: 1024px) {
             .tier-1,
             .tier-2,
@@ -433,6 +787,18 @@
             }
             .search-box {
                 flex: 1 1 240px;
+            }
+            .nav-shop {
+                left: 50px;
+                font-size: 14px;
+                padding-right: 14px;
+                padding-left: 10px;
+            }
+            .category-dropdown .dropdown-menu {
+                min-width: 220px;
+            }
+            .category-dropdown .sub-dropdown {
+                min-width: 200px;
             }
         }
 
@@ -485,7 +851,15 @@
                 gap: 6px;
                 margin-right: 10px;
             }
-            .nav-home i {
+            .nav-shop {
+                font-size: 14px;
+                padding-right: 14px;
+                padding-left: 10px;
+                left: 48px;
+                margin-right: 10px;
+            }
+            .nav-home i,
+            .nav-shop i {
                 font-size: 14px;
             }
             .account-username {
@@ -494,6 +868,21 @@
             }
             .account-dropdown .dropdown-menu {
                 min-width: 150px;
+            }
+            .search-suggestions {
+                max-height: 300px;
+            }
+            .category-dropdown .dropdown-menu {
+                min-width: 200px;
+                left: -10px;
+            }
+            .category-dropdown .sub-dropdown {
+                min-width: 180px;
+                left: 90%;
+            }
+            .category-dropdown > a {
+                font-size: 12px;
+                padding: 6px 14px;
             }
         }
 
@@ -581,11 +970,42 @@
                 gap: 5px;
                 margin-right: 8px;
             }
-            .nav-home i {
+            .nav-shop {
+                font-size: 13px;
+                padding-right: 10px;
+                padding-left: 8px;
+                left: 42px;
+                margin-right: 8px;
+            }
+            .nav-home i,
+            .nav-shop i {
                 font-size: 13px;
             }
             .scroll-hint {
                 display: none !important;
+            }
+            .search-suggestions {
+                max-height: 250px;
+                top: calc(100% + 4px);
+            }
+            .search-suggestion-item {
+                padding: 8px 12px;
+            }
+            .search-suggestion-item .suggestion-image {
+                width: 32px;
+                height: 32px;
+            }
+            .category-dropdown .dropdown-menu {
+                min-width: 180px;
+                left: -20px;
+            }
+            .category-dropdown .sub-dropdown {
+                min-width: 160px;
+                left: 85%;
+            }
+            .category-dropdown > a {
+                font-size: 12px;
+                padding: 6px 12px;
             }
         }
 
@@ -602,7 +1022,15 @@
                 gap: 4px;
                 margin-right: 6px;
             }
-            .nav-home i {
+            .nav-shop {
+                font-size: 12px;
+                padding-right: 8px;
+                padding-left: 6px;
+                left: 36px;
+                margin-right: 6px;
+            }
+            .nav-home i,
+            .nav-shop i {
                 font-size: 12px;
             }
             .tier-1 {
@@ -641,31 +1069,18 @@
                 font-size: 12px;
                 padding: 6px 12px;
             }
-        }
-
-        /* ===== DEMO CONTENT ===== */
-        .demo-content {
-            padding: 80px 7%;
-            text-align: center;
-            background: var(--bg-light);
-        }
-        .demo-content h3 {
-            font-family: 'Playfair Display', serif;
-            color: var(--primary);
-            font-weight: 600;
-            font-size: 28px;
-            letter-spacing: -0.3px;
-        }
-        .demo-content p {
-            color: var(--text-light);
-            max-width: 500px;
-            margin: 12px auto 0;
-            font-weight: 400;
-            line-height: 1.7;
-        }
-        .demo-content .highlight {
-            color: var(--primary);
-            font-weight: 600;
+            .category-dropdown > a {
+                font-size: 11px;
+                padding: 4px 10px;
+            }
+            .category-dropdown .dropdown-menu {
+                min-width: 160px;
+                left: -30px;
+            }
+            .category-dropdown .sub-dropdown {
+                min-width: 140px;
+                left: 80%;
+            }
         }
     </style>
 </head>
@@ -687,17 +1102,19 @@
             </div>
 
             <div class="search-box">
-                <input type="text" placeholder="Search for elegance..." />
-                <button><i class="fa-solid fa-magnifying-glass"></i></button>
+                <form method="GET" action="{% url 'Ecom:shop' %}" id="globalSearchForm">
+                    <input type="text" name="search" id="globalSearchInput" placeholder="Search for products, brands, categories..." autocomplete="off" />
+                    <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </form>
+                <div id="searchSuggestions" class="search-suggestions"></div>
             </div>
 
             <div class="icons">
-                <div class="icon-item">
-                    <i class="fa-regular fa-heart"></i>
-                    Wishlist
-                </div>
+                <a href="{% url 'Ecom:shop' %}?is_featured=1" class="icon-item" style="text-decoration:none;">
+                    <i class="fa-regular fa-star"></i>
+                    Featured
+                </a>
 
-                <!-- Account Dropdown - Click to toggle -->
                 <div class="account-dropdown icon-item" id="accountDropdown">
                     <div>
                         <i class="fa-regular fa-user"></i>
@@ -712,50 +1129,81 @@
                     <div class="dropdown-menu">
                         {% if user.is_authenticated %}
                             <a href="{% url 'Ecom:profile' %}"><i class="fa-regular fa-user"></i> Profile</a>
+                            <a href="{% url 'Ecom:change_password' %}"><i class="fa-solid fa-key"></i> Change Password</a>
+                            <a href="{% url 'Ecom:recently_viewed' %}"><i class="fa-solid fa-clock-rotate-left"></i> Recently Viewed</a>
                             <div class="divider"></div>
                             <a href="{% url 'Ecom:logout' %}"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
                         {% else %}
                             <a href="{% url 'Ecom:login' %}"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+                            <a href="{% url 'Ecom:customer_signup' %}"><i class="fa-solid fa-user-plus"></i> Register</a>
                         {% endif %}
                     </div>
                 </div>
 
-                <div class="icon-item">
+                <a href="{% url 'Ecom:shop' %}" class="icon-item" style="text-decoration:none;">
                     <i class="fa-solid fa-bag-shopping"></i>
-                    Cart 
-                </div>
+                    Shop
+                </a>
             </div>
         </div>
 
-        <!-- TIER 3 : Fixed HOME + Scrollable Categories -->
+        <!-- TIER 3 : Fixed HOME + SHOP + Category Dropdown + Dynamic Categories -->
         <div class="tier-3">
             <div class="nav-scroll">
-                <a href="#" class="nav-home"><i class="fa-solid fa-house"></i> Home</a>
+                <!-- Home Link -->
+                <a href="{% url 'Ecom:home' %}" class="nav-home"><i class="fa-solid fa-house"></i> Home</a>
+
+                <!-- Shop Link -->
+                <a href="{% url 'Ecom:shop' %}" class="nav-shop"><i class="fa-solid fa-store"></i> Shop</a>
+
+                <!-- Shop by Category Dropdown -->
+                <div class="category-dropdown">
+                    <a href="javascript:void(0)">
+                        <i class="fa-solid fa-bars"></i> Shop by Category <i class="fa-solid fa-chevron-down"></i>
+                    </a>
+                    <div class="dropdown-menu">
+                        {% if categories %}
+                            {% for category in categories %}
+                                <div class="dropdown-item">
+                                    <a href="{% url 'Ecom:category_shop' category.slug %}">
+                                        {{ category.name }}
+                                        <i class="fa-solid fa-chevron-right"></i>
+                                    </a>
+                                    {% if category.subcategories.exists %}
+                                        <div class="sub-dropdown">
+                                            {% for subcategory in category.subcategories.all %}
+                                                <a href="{% url 'Ecom:subcategory_shop' subcategory.slug %}">
+                                                    {{ subcategory.name }}
+                                                </a>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="dropdown-item">
+                                <a href="{% url 'Ecom:shop' %}">No Categories Found</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Scrollable Categories -->
                 <div class="scrollable-items">
-                    <a href="#">Shop</a>
-                    <a href="#">Festival</a>
-                    <a href="#">New Arrivals</a>
-                    <a href="#">Offers</a>
-                    <a href="#">Blog</a>
-                    <a href="#">Living</a>
-                    <a href="#">Bedroom</a>
-                    <a href="#">Kitchen</a>
-                    <a href="#">Decor</a>
-                    <a href="#">Lighting</a>
-                    <a href="#">Gifting</a>
-                    <a href="#">Seasonal</a>
-                    <a href="#">Outdoor</a>
-                    <a href="#">Study</a>
+                    {% for category in categories %}
+                        <a href="{% url 'Ecom:category_shop' category.slug %}">{{ category.name }}</a>
+                    {% endfor %}
                 </div>
             </div>
             <span class="scroll-hint"><i class="fa-regular fa-hand-pointer"></i> scroll</span>
         </div>
     </header>
 
-   
-
-    <!-- ===== JAVASCRIPT for Dropdown Toggle ===== -->
+    <!-- ===== JAVASCRIPT for Dropdown + Search ===== -->
     <script>
+        // ============================================
+        // ACCOUNT DROPDOWN TOGGLE
+        // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             const dropdown = document.getElementById('accountDropdown');
             
@@ -764,20 +1212,279 @@
                 this.classList.toggle('active');
             });
 
-            // Close dropdown when clicking outside
             document.addEventListener('click', function(e) {
                 if (!dropdown.contains(e.target)) {
                     dropdown.classList.remove('active');
                 }
             });
 
-            // Prevent dropdown from closing when clicking inside menu
             const menu = dropdown.querySelector('.dropdown-menu');
             if (menu) {
                 menu.addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
             }
+
+            // ============================================
+            // CATEGORY DROPDOWN - HOVER FUNCTIONALITY
+            // ============================================
+            const categoryDropdown = document.querySelector('.category-dropdown');
+            if (categoryDropdown) {
+                // For desktop hover
+                categoryDropdown.addEventListener('mouseenter', function() {
+                    const menu = this.querySelector('.dropdown-menu');
+                    if (menu) {
+                        menu.classList.add('show');
+                    }
+                });
+                categoryDropdown.addEventListener('mouseleave', function() {
+                    const menu = this.querySelector('.dropdown-menu');
+                    if (menu) {
+                        menu.classList.remove('show');
+                    }
+                });
+
+                // For mobile/click support
+                const dropdownLink = categoryDropdown.querySelector('> a');
+                if (dropdownLink) {
+                    dropdownLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const menu = categoryDropdown.querySelector('.dropdown-menu');
+                        if (menu) {
+                            menu.classList.toggle('show');
+                        }
+                    });
+                }
+            }
+
+            // ============================================
+            // SUBCATEGORY DROPDOWN - HOVER FUNCTIONALITY
+            // ============================================
+            document.querySelectorAll('.dropdown-item').forEach(function(item) {
+                const subDropdown = item.querySelector('.sub-dropdown');
+                if (subDropdown) {
+                    // For desktop hover
+                    item.addEventListener('mouseenter', function() {
+                        subDropdown.classList.add('show');
+                    });
+                    item.addEventListener('mouseleave', function() {
+                        subDropdown.classList.remove('show');
+                    });
+
+                    // For mobile/click support on the category link
+                    const categoryLink = item.querySelector('> a');
+                    if (categoryLink) {
+                        categoryLink.addEventListener('click', function(e) {
+                            // If there's a subdropdown, prevent navigation on click
+                            // and toggle the subdropdown instead
+                            if (subDropdown) {
+                                e.preventDefault();
+                                subDropdown.classList.toggle('show');
+                            }
+                        });
+                    }
+                }
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.category-dropdown')) {
+                    document.querySelectorAll('.category-dropdown .dropdown-menu').forEach(function(menu) {
+                        menu.classList.remove('show');
+                    });
+                }
+            });
+
+            // ============================================
+            // GLOBAL SEARCH WITH LIVE SUGGESTIONS
+            // ============================================
+            const searchInput = document.getElementById('globalSearchInput');
+            const suggestionsContainer = document.getElementById('searchSuggestions');
+            let debounceTimer;
+
+            if (!searchInput) return;
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                const query = this.value.trim();
+                
+                if (query.length < 2) {
+                    suggestionsContainer.classList.remove('active');
+                    return;
+                }
+
+                debounceTimer = setTimeout(function() {
+                    fetchSuggestions(query);
+                }, 300);
+            });
+
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    suggestionsContainer.classList.remove('active');
+                    searchInput.blur();
+                }
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.search-box')) {
+                    suggestionsContainer.classList.remove('active');
+                }
+            });
+
+            function fetchSuggestions(query) {
+                suggestionsContainer.innerHTML = `
+                    <div class="search-loading">
+                        <div class="spinner"></div>
+                    </div>
+                `;
+                suggestionsContainer.classList.add('active');
+
+                fetch(`/api/search/?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        renderSuggestions(data);
+                    })
+                    .catch(error => {
+                        console.error('Search error:', error);
+                        suggestionsContainer.innerHTML = `
+                            <div class="search-suggestion-empty">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>Error loading suggestions</span>
+                            </div>
+                        `;
+                    });
+            }
+
+            function renderSuggestions(data) {
+                if (!data.results || data.results.length === 0) {
+                    suggestionsContainer.innerHTML = `
+                        <div class="search-suggestion-empty">
+                            <i class="fas fa-search"></i>
+                            <span>No results found for "${data.query}"</span>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+
+                const categories = data.results.filter(r => r.type === 'category');
+                const subcategories = data.results.filter(r => r.type === 'subcategory');
+                const products = data.results.filter(r => r.type === 'product');
+                const variants = data.results.filter(r => r.type === 'variant');
+
+                if (categories.length > 0) {
+                    html += `<div class="search-suggestion-header">Categories</div>`;
+                    categories.forEach(item => {
+                        html += createSuggestionItem(item);
+                    });
+                    html += `<div class="search-suggestion-divider"></div>`;
+                }
+
+                if (subcategories.length > 0) {
+                    html += `<div class="search-suggestion-header">Subcategories</div>`;
+                    subcategories.forEach(item => {
+                        html += createSuggestionItem(item);
+                    });
+                    html += `<div class="search-suggestion-divider"></div>`;
+                }
+
+                if (products.length > 0) {
+                    html += `<div class="search-suggestion-header">Products</div>`;
+                    products.forEach(item => {
+                        html += createSuggestionItem(item);
+                    });
+                    html += `<div class="search-suggestion-divider"></div>`;
+                }
+
+                if (variants.length > 0) {
+                    html += `<div class="search-suggestion-header">Variants</div>`;
+                    variants.forEach(item => {
+                        html += createSuggestionItem(item);
+                    });
+                    html += `<div class="search-suggestion-divider"></div>`;
+                }
+
+                html += `
+                    <a href="/shop/?search=${encodeURIComponent(data.query)}" class="search-suggestion-item" style="justify-content:center;color:var(--primary);font-weight:600;">
+                        <span>View all results (${data.count})</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                `;
+
+                suggestionsContainer.innerHTML = html;
+                suggestionsContainer.classList.add('active');
+            }
+
+            function createSuggestionItem(item) {
+                const iconMap = {
+                    'category': 'fa-folder',
+                    'subcategory': 'fa-tag',
+                    'product': 'fa-box',
+                    'variant': 'fa-cube'
+                };
+                
+                const iconClass = iconMap[item.type] || 'fa-search';
+                const typeLabel = item.type.charAt(0).toUpperCase() + item.type.slice(1);
+                
+                let extraInfo = '';
+                let imageHtml = '';
+                let priceHtml = '';
+
+                if (item.type === 'product') {
+                    if (item.image) {
+                        imageHtml = `<img src="${item.image}" alt="${item.name}" class="suggestion-image">`;
+                    }
+                    if (item.price) {
+                        priceHtml = `<span class="suggestion-price">₹${parseFloat(item.price).toFixed(2)}</span>`;
+                    }
+                }
+
+                if (item.type === 'variant') {
+                    if (item.image) {
+                        imageHtml = `<img src="${item.image}" alt="${item.name}" class="suggestion-image">`;
+                    }
+                    if (item.price) {
+                        priceHtml = `<span class="suggestion-price">₹${parseFloat(item.price).toFixed(2)}</span>`;
+                    }
+                    extraInfo = `<span class="suggestion-subtitle">${item.product_name}</span>`;
+                }
+
+                if (item.type === 'subcategory') {
+                    extraInfo = `<span class="suggestion-subtitle">${item.category}</span>`;
+                }
+
+                if (item.type === 'category') {
+                    if (item.description) {
+                        extraInfo = `<span class="suggestion-subtitle">${item.description}</span>`;
+                    }
+                }
+
+                return `
+                    <a href="${item.url}" class="search-suggestion-item">
+                        ${imageHtml || `<div class="suggestion-icon ${item.type}"><i class="fas ${iconClass}"></i></div>`}
+                        <div class="suggestion-info">
+                            <div class="suggestion-title">${item.name}</div>
+                            ${extraInfo}
+                            <span class="suggestion-type">${typeLabel}</span>
+                        </div>
+                        ${priceHtml}
+                    </a>
+                `;
+            }
+
+            document.getElementById('globalSearchForm').addEventListener('submit', function(e) {
+                const input = document.getElementById('globalSearchInput');
+                if (input.value.trim().length < 2) {
+                    e.preventDefault();
+                    input.focus();
+                    input.style.borderColor = '#dc3545';
+                    setTimeout(() => {
+                        input.style.borderColor = '';
+                    }, 2000);
+                }
+            });
         });
     </script>
 

@@ -12,9 +12,107 @@ from .forms import (
 )
 from .utils import create_and_send_otp, verify_otp, delete_file_if_exists, get_user_by_identifier
 
-# ==================== HOME ====================
+
+from django.db.models import Q, Count, Avg, F, DecimalField
+from django.db.models.functions import Coalesce
+
+
 def home(request):
-    return render(request, "home.html")
+    """Home page with best sellers, featured, new arrivals, categories, subcategories, and deals of the day"""
+    
+    # Get active products
+    products = Product.objects.filter(is_active=True)
+    
+    # ============================================
+    # BEST SELLERS - products marked as best seller
+    # ============================================
+    best_sellers = products.filter(is_best_seller=True).order_by('-created_at')[:8]
+    
+    # ============================================
+    # FEATURED PRODUCTS
+    # ============================================
+    featured_products = products.filter(is_featured=True).order_by('-created_at')[:8]
+    
+    # ============================================
+    # NEW ARRIVALS - products marked as new
+    # ============================================
+    new_arrivals = products.filter(is_new=True).order_by('-created_at')[:8]
+    
+    # ============================================
+    # ALTERNATIVE: Get newest products regardless of is_new flag
+    # ============================================
+    newest_products = products.order_by('-created_at')[:8]
+    
+    # ============================================
+    # DEALS OF THE DAY - Products with highest discounts
+    # ============================================
+    # Get products with discount > 0, sorted by discount percentage (highest first)
+    deals_of_the_day = products.filter(
+        discount_percentage__gt=0
+    ).order_by('-discount_percentage')[:6]
+    
+    # If less than 6 products with discount, get some without discount to fill
+    if deals_of_the_day.count() < 6:
+        additional_products = products.exclude(
+            id__in=deals_of_the_day.values_list('id', flat=True)
+        ).order_by('-created_at')[:6 - deals_of_the_day.count()]
+        # Combine querysets
+        deals_of_the_day = list(deals_of_the_day) + list(additional_products)
+    else:
+        deals_of_the_day = list(deals_of_the_day)
+    
+    # ============================================
+    # CATEGORIES with product count
+    # ============================================
+    categories = Category.objects.filter(
+        is_active=True,
+        products__is_active=True
+    ).distinct().annotate(
+        product_count=Count('products')
+    ).order_by('name')
+    
+    # ============================================
+    # SUBCATEGORIES with product count
+    # ============================================
+    subcategories = SubCategory.objects.filter(
+        is_active=True,
+        products__is_active=True
+    ).distinct().annotate(
+        product_count=Count('products')
+    ).select_related('category').order_by('category__name', 'name')
+    
+    # ============================================
+    # TOP RATED PRODUCTS
+    # ============================================
+    top_rated = products.annotate(
+        avg_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True))
+    ).filter(
+        avg_rating__gte=4
+    ).order_by('-avg_rating')[:8]
+    
+    # ============================================
+    # RECENTLY VIEWED - if user is authenticated
+    # ============================================
+    recently_viewed = []
+    if request.user.is_authenticated:
+        from .models import RecentlyViewed
+        recently_viewed_items = RecentlyViewed.objects.filter(
+            user=request.user
+        ).select_related('product').order_by('-viewed_at')[:8]
+        recently_viewed = [item.product for item in recently_viewed_items]
+    
+    context = {
+        'best_sellers': best_sellers,
+        'featured_products': featured_products,
+        'new_arrivals': new_arrivals,
+        'newest_products': newest_products,
+        'deals_of_the_day': deals_of_the_day,
+        'top_rated': top_rated,
+        'categories': categories,
+        'subcategories': subcategories,
+        'recently_viewed': recently_viewed,
+    }
+    return render(request, 'home.html', context)
 
 def about(request):
     return render(request, "about.html")
@@ -1131,3 +1229,785 @@ def delete_variant_image_ajax(request, image_id):
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
 
+from django.shortcuts import render, get_object_or_404
+from django.db.models import Q, Count, Min, Max, F, Avg, Value, DecimalField
+from django.db.models.functions import Coalesce, Upper
+from django.core.paginator import Paginator
+from django.http import JsonResponse
+from .models import Product, Category, SubCategory, ProductVariant, ProductReview
+import re
+
+def normalize_value(value, attr_type='string'):
+    """
+    Universal normalization using regex patterns
+    Handles ANY value entered - no hardcoding!
+    """
+    if not value:
+        return ''
+    
+    value = str(value).strip()
+    
+    # Remove extra spaces (multiple spaces -> single space)
+    value = re.sub(r'\s+', ' ', value)
+    
+    # Remove leading/trailing spaces
+    value = value.strip()
+    
+    if attr_type == 'size':
+        # ============================================
+        # SIZE NORMALIZATION (Universal)
+        # ============================================
+        
+        # Convert to uppercase for consistent comparison
+        upper_value = value.upper()
+        
+        # Pattern 1: Numbers with measurements (1M, 1 M, 1m, 1 meter, 1metre)
+        # Captures: number + optional space + (M|METER|METRE)
+        measurement_pattern = re.compile(r'^(\d+)\s*[M|METER|METRE]+$', re.IGNORECASE)
+        match = measurement_pattern.match(upper_value)
+        if match:
+            number = match.group(1)
+            return f"{number} METER"
+        
+        # Pattern 2: Number followed by 'FT' or 'FEET' (5FT, 5 FT, 5feet)
+        feet_pattern = re.compile(r'^(\d+)\s*[F|FT|FEET]+$', re.IGNORECASE)
+        match = feet_pattern.match(upper_value)
+        if match:
+            number = match.group(1)
+            return f"{number} FEET"
+        
+        # Pattern 3: Number followed by 'IN' or 'INCH' (10IN, 10 IN, 10inch)
+        inch_pattern = re.compile(r'^(\d+)\s*[I|IN|INCH]+$', re.IGNORECASE)
+        match = inch_pattern.match(upper_value)
+        if match:
+            number = match.group(1)
+            return f"{number} INCH"
+        
+        # Pattern 4: Number followed by 'CM' (50CM, 50 CM, 50cm)
+        cm_pattern = re.compile(r'^(\d+)\s*[C|CM]+$', re.IGNORECASE)
+        match = cm_pattern.match(upper_value)
+        if match:
+            number = match.group(1)
+            return f"{number} CM"
+        
+        # Pattern 5: Number only (e.g., "42", "36", "38")
+        number_pattern = re.compile(r'^(\d+)$')
+        match = number_pattern.match(upper_value)
+        if match:
+            return upper_value
+        
+        # Pattern 6: Single letters with optional X prefix (S, M, L, XL, XXL, XXXL, XS)
+        size_letters = re.compile(r'^X*[SML]+$', re.IGNORECASE)
+        if size_letters.match(upper_value):
+            return upper_value
+        
+        # Pattern 7: Number with optional + (38+, 40+, XL+)
+        plus_pattern = re.compile(r'^(\d+)\+$')
+        match = plus_pattern.match(upper_value)
+        if match:
+            return f"{match.group(1)}+"
+        
+        # Pattern 8: Range like 38-40, S-M, XL-XXL
+        range_pattern = re.compile(r'^(.+)\s*[-–—]\s*(.+)$')
+        match = range_pattern.match(value)
+        if match:
+            left = normalize_value(match.group(1), 'size')
+            right = normalize_value(match.group(2), 'size')
+            return f"{left} - {right}"
+        
+        # If no pattern matches, return as-is (but uppercase)
+        return upper_value
+    
+    elif attr_type == 'color':
+        # ============================================
+        # COLOR NORMALIZATION (Universal)
+        # ============================================
+        
+        # Convert to Title Case (e.g., "red" -> "Red", "dark blue" -> "Dark Blue")
+        # But keep special cases like "Off-White", "Navy Blue"
+        words = value.split()
+        normalized_words = []
+        for word in words:
+            # Skip articles and prepositions
+            if word.lower() in ['of', 'the', 'and', 'or']:
+                normalized_words.append(word.lower())
+            else:
+                # Capitalize first letter
+                normalized_words.append(word.capitalize())
+        value = ' '.join(normalized_words)
+        
+        # Handle compound colors with hyphen (Off-White, Jet-Black)
+        hyphen_pattern = re.compile(r'^([A-Za-z]+)-([A-Za-z]+)$')
+        match = hyphen_pattern.match(value)
+        if match:
+            return f"{match.group(1).capitalize()}-{match.group(2).capitalize()}"
+        
+        return value
+    
+    elif attr_type == 'brand':
+        # ============================================
+        # BRAND NORMALIZATION (Universal)
+        # ============================================
+        
+        # Remove extra spaces
+        value = re.sub(r'\s+', ' ', value).strip()
+        
+        # Handle special cases like "McDonald's", "O'Reilly"
+        # Keep apostrophes and special characters
+        value = re.sub(r'\s+', ' ', value)
+        
+        # Title case for brands, but keep common abbreviations uppercase
+        words = value.split()
+        normalized_words = []
+        for word in words:
+            # Keep common abbreviations uppercase
+            if word.upper() in ['USA', 'UK', 'EU', 'US', 'NYC', 'LA', 'DIY', 'LED', 'LCD', 'OLED']:
+                normalized_words.append(word.upper())
+            else:
+                normalized_words.append(word.capitalize())
+        return ' '.join(normalized_words)
+    
+    elif attr_type == 'material':
+        # ============================================
+        # MATERIAL NORMALIZATION (Universal)
+        # ============================================
+        
+        # Title case for materials
+        words = value.split()
+        normalized_words = []
+        for word in words:
+            # Keep common materials in lowercase or specific case
+            if word.lower() in ['and', 'or', 'with']:
+                normalized_words.append(word.lower())
+            else:
+                normalized_words.append(word.capitalize())
+        return ' '.join(normalized_words)
+    
+    # Default: return as-is with proper formatting
+    return value.title()
+
+def get_unique_attribute_values(products, attr_name, attr_type='string'):
+    """Get unique normalized values for an attribute from products and variants"""
+    values = set()
+    
+    # Get from products
+    for product in products:
+        value = getattr(product, attr_name, '')
+        if value and value.strip():
+            normalized = normalize_value(value, attr_type)
+            if normalized:
+                values.add(normalized)
+    
+    # Get from variants
+    variant_values = ProductVariant.objects.filter(
+        product__in=products,
+        is_active=True
+    ).exclude(**{f'{attr_name}__isnull': True}).exclude(**{f'{attr_name}': ''}).values_list(attr_name, flat=True).distinct()
+    
+    for value in variant_values:
+        if value and value.strip():
+            normalized = normalize_value(value, attr_type)
+            if normalized:
+                values.add(normalized)
+    
+    # Also check product color/size fields if they exist
+    if attr_name == 'color':
+        product_colors = products.exclude(color__isnull=True).exclude(color='').values_list('color', flat=True).distinct()
+        for value in product_colors:
+            if value and value.strip():
+                normalized = normalize_value(value, 'color')
+                if normalized:
+                    values.add(normalized)
+    elif attr_name == 'size':
+        product_sizes = products.exclude(size__isnull=True).exclude(size='').values_list('size', flat=True).distinct()
+        for value in product_sizes:
+            if value and value.strip():
+                normalized = normalize_value(value, 'size')
+                if normalized:
+                    values.add(normalized)
+    elif attr_name == 'material':
+        product_materials = products.exclude(material__isnull=True).exclude(material='').values_list('material', flat=True).distinct()
+        for value in product_materials:
+            if value and value.strip():
+                normalized = normalize_value(value, 'material')
+                if normalized:
+                    values.add(normalized)
+    
+    return sorted(list(values))
+
+def get_unique_brands(products):
+    """Get unique normalized brands from products"""
+    brands = set()
+    for product in products:
+        if product.brand and product.brand.strip():
+            normalized = normalize_value(product.brand, 'brand')
+            if normalized:
+                brands.add(normalized)
+    return sorted(list(brands))
+
+def get_price_range(products):
+    """Get min and max price from products and variants"""
+    all_prices = []
+    
+    # Get product prices with discount applied
+    for product in products:
+        price = float(product.price)
+        discount = float(product.discount_percentage)
+        if discount > 0:
+            final_price = price - (price * discount / 100)
+        else:
+            final_price = price
+        all_prices.append(final_price)
+    
+    # Get variant prices with discount applied
+    variants = ProductVariant.objects.filter(
+        product__in=products,
+        is_active=True
+    )
+    for variant in variants:
+        price = float(variant.price)
+        discount = float(variant.discount_percentage)
+        if discount > 0:
+            final_price = price - (price * discount / 100)
+        else:
+            final_price = price
+        all_prices.append(final_price)
+    
+    if all_prices:
+        return {
+            'min': min(all_prices),
+            'max': max(all_prices)
+        }
+    return {'min': 0, 'max': 1000}
+
+def get_rating_options(products):
+    """Get rating distribution for products"""
+    rating_counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    
+    for product in products:
+        avg_rating = product.average_rating
+        if avg_rating > 0:
+            rating_key = int(avg_rating)
+            if rating_key in rating_counts:
+                rating_counts[rating_key] += 1
+    
+    return rating_counts
+
+def get_filtered_products(request, products, filters):
+    """Apply filters to products queryset"""
+    
+    # Category filter
+    if filters.get('category'):
+        products = products.filter(category_id=filters['category'])
+    
+    # Subcategory filter
+    if filters.get('subcategory'):
+        products = products.filter(subcategory_id=filters['subcategory'])
+    
+    # Brand filter - case insensitive
+    if filters.get('brands'):
+        # Get brands as list (handle both list and string)
+        brands = filters['brands']
+        if isinstance(brands, str):
+            brands = [brands]
+        brand_q = Q()
+        for brand in brands:
+            brand_q |= Q(brand__iexact=brand)
+        products = products.filter(brand_q)
+    
+    # Color filter - case insensitive with normalized values
+    if filters.get('colors'):
+        colors = filters['colors']
+        if isinstance(colors, str):
+            colors = [colors]
+        color_q = Q()
+        for color in colors:
+            color_q |= Q(color__iexact=color)
+        variant_products = ProductVariant.objects.filter(
+            product__in=products,
+            color__iexact=color
+        ).values_list('product_id', flat=True)
+        products = products.filter(color_q | Q(id__in=variant_products))
+    
+    # Size filter - case insensitive with normalized values
+    if filters.get('sizes'):
+        sizes = filters['sizes']
+        if isinstance(sizes, str):
+            sizes = [sizes]
+        size_q = Q()
+        for size in sizes:
+            size_q |= Q(size__iexact=size)
+        variant_products = ProductVariant.objects.filter(
+            product__in=products,
+            size__iexact=size
+        ).values_list('product_id', flat=True)
+        products = products.filter(size_q | Q(id__in=variant_products))
+    
+    # Material filter
+    if filters.get('materials'):
+        materials = filters['materials']
+        if isinstance(materials, str):
+            materials = [materials]
+        material_q = Q()
+        for material in materials:
+            material_q |= Q(material__iexact=material)
+        products = products.filter(material_q)
+    
+    # Price range filter
+    if filters.get('price_min') and filters.get('price_max'):
+        price_min = float(filters['price_min'])
+        price_max = float(filters['price_max'])
+        
+        filtered_products = []
+        for product in products:
+            if price_min <= float(product.final_price) <= price_max:
+                filtered_products.append(product.id)
+        
+        variant_product_ids = ProductVariant.objects.filter(
+            product__in=products,
+            is_active=True
+        )
+        for variant in variant_product_ids:
+            if price_min <= float(variant.final_price) <= price_max:
+                if variant.product_id not in filtered_products:
+                    filtered_products.append(variant.product_id)
+        
+        products = products.filter(id__in=filtered_products)
+    
+    # Rating filter
+    if filters.get('rating'):
+        rating = int(filters['rating'])
+        products = products.filter(avg_rating__gte=rating)
+    
+    # Stock status
+    if filters.get('in_stock'):
+        products = products.filter(is_in_stock=True)
+    
+    if filters.get('is_new'):
+        products = products.filter(is_new=True)
+    
+    # Best Seller filter
+    if filters.get('is_best_seller'):
+        products = products.filter(is_best_seller=True)
+    
+    # Featured filter
+    if filters.get('is_featured'):
+        products = products.filter(is_featured=True)
+    
+    # Search
+    if filters.get('search'):
+        search = filters['search']
+        products = products.filter(
+            Q(name__icontains=search) |
+            Q(sku__icontains=search) |
+            Q(brand__icontains=search) |
+            Q(description__icontains=search) |
+            Q(category__name__icontains=search) |
+            Q(subcategory__name__icontains=search) |
+            Q(color__icontains=search) |
+            Q(size__icontains=search)
+        )
+    
+    return products.distinct()
+
+def shop_view(request):
+    """Main shop page with all products and filters"""
+    
+    # Base queryset - only active products with average rating
+    products = Product.objects.filter(is_active=True).annotate(
+        avg_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True))
+    )
+    
+    # Get filter parameters from request.GET
+    # QueryDict has getlist() method
+    filters = {
+        'category': request.GET.get('category'),
+        'subcategory': request.GET.get('subcategory'),
+        'brands': request.GET.getlist('brands'),
+        'colors': request.GET.getlist('colors'),
+        'sizes': request.GET.getlist('sizes'),
+        'materials': request.GET.getlist('materials'),
+        'price_min': request.GET.get('price_min'),
+        'price_max': request.GET.get('price_max'),
+        'rating': request.GET.get('rating'),
+        'in_stock': request.GET.get('in_stock'),
+        'is_new': request.GET.get('is_new'),
+        'is_best_seller': request.GET.get('is_best_seller'),
+        'is_featured': request.GET.get('is_featured'),
+        'search': request.GET.get('search'),
+        'sort': request.GET.get('sort'),
+    }
+    
+    # Apply filters
+    products = get_filtered_products(request, products, filters)
+    
+    # Sorting
+    sort_by = filters.get('sort', 'newest')
+    
+    if sort_by == 'newest':
+        products = products.order_by('-created_at')
+    elif sort_by == 'oldest':
+        products = products.order_by('created_at')
+    elif sort_by == 'name_asc':
+        products = products.order_by('name')
+    elif sort_by == 'name_desc':
+        products = products.order_by('-name')
+    elif sort_by == 'popular':
+        products = products.order_by('-is_best_seller', '-created_at')
+    elif sort_by == 'rating_high':
+        products = products.order_by(F('avg_rating').desc(nulls_last=True))
+    elif sort_by == 'price_low':
+        products = list(products)
+        products.sort(key=lambda p: float(p.final_price))
+    elif sort_by == 'price_high':
+        products = list(products)
+        products.sort(key=lambda p: float(p.final_price), reverse=True)
+    
+    # Get filter options
+    all_products = Product.objects.filter(is_active=True)
+    filter_options = {
+        'brands': get_unique_brands(all_products),
+        'colors': get_unique_attribute_values(all_products, 'color', 'color'),
+        'sizes': get_unique_attribute_values(all_products, 'size', 'size'),
+        'materials': get_unique_attribute_values(all_products, 'material', 'material'),
+        'categories': Category.objects.filter(is_active=True, products__is_active=True).distinct().annotate(count=Count('products')),
+        'subcategories': SubCategory.objects.filter(is_active=True, products__is_active=True).distinct().annotate(count=Count('products')),
+        'rating_counts': get_rating_options(all_products),
+    }
+    
+    # Get price range
+    price_range = get_price_range(all_products)
+    
+    # Pagination
+    if isinstance(products, list):
+        paginator = Paginator(products, 24)
+    else:
+        paginator = Paginator(products, 24)
+    
+    page = request.GET.get('page')
+    products_page = paginator.get_page(page)
+    
+    # Get current filter values for template
+    current_filters = {
+        'category': filters.get('category'),
+        'subcategory': filters.get('subcategory'),
+        'brands': filters.get('brands'),
+        'colors': filters.get('colors'),
+        'sizes': filters.get('sizes'),
+        'materials': filters.get('materials'),
+        'price_min': filters.get('price_min', price_range['min']),
+        'price_max': filters.get('price_max', price_range['max']),
+        'rating': filters.get('rating'),
+        'in_stock': filters.get('in_stock'),
+        'is_new': filters.get('is_new'),
+        'is_best_seller': filters.get('is_best_seller'),
+        'is_featured': filters.get('is_featured'),
+        'search': filters.get('search'),
+        'sort': sort_by,
+    }
+    
+    context = {
+        'products': products_page,
+        'filter_options': filter_options,
+        'price_range': price_range,
+        'current_filters': current_filters,
+        'active_filters': filters,
+        'total_products': len(products) if isinstance(products, list) else products.count(),
+        'sort_by': sort_by,
+    }
+    return render(request, 'Ecom/shop.html', context)
+
+def category_shop_view(request, category_slug):
+    """Shop page filtered by category"""
+    category = get_object_or_404(Category, slug=category_slug, is_active=True)
+    
+    products = Product.objects.filter(category=category, is_active=True).annotate(
+        avg_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True))
+    )
+    
+    # Get filter parameters
+    filters = {
+        'category': category.id,
+        'subcategory': request.GET.get('subcategory'),
+        'brands': request.GET.getlist('brands'),
+        'colors': request.GET.getlist('colors'),
+        'sizes': request.GET.getlist('sizes'),
+        'materials': request.GET.getlist('materials'),
+        'price_min': request.GET.get('price_min'),
+        'price_max': request.GET.get('price_max'),
+        'rating': request.GET.get('rating'),
+        'in_stock': request.GET.get('in_stock'),
+        'is_new': request.GET.get('is_new'),
+        'is_best_seller': request.GET.get('is_best_seller'),
+        'is_featured': request.GET.get('is_featured'),
+        'search': request.GET.get('search'),
+        'sort': request.GET.get('sort'),
+    }
+    
+    # Apply filters
+    products = get_filtered_products(request, products, filters)
+    
+    # Sorting
+    sort_by = filters.get('sort', 'newest')
+    
+    if sort_by == 'newest':
+        products = products.order_by('-created_at')
+    elif sort_by == 'oldest':
+        products = products.order_by('created_at')
+    elif sort_by == 'name_asc':
+        products = products.order_by('name')
+    elif sort_by == 'name_desc':
+        products = products.order_by('-name')
+    elif sort_by == 'popular':
+        products = products.order_by('-is_best_seller', '-created_at')
+    elif sort_by == 'rating_high':
+        products = products.order_by(F('avg_rating').desc(nulls_last=True))
+    elif sort_by == 'price_low':
+        products = list(products)
+        products.sort(key=lambda p: float(p.final_price))
+    elif sort_by == 'price_high':
+        products = list(products)
+        products.sort(key=lambda p: float(p.final_price), reverse=True)
+    
+    # Get filter options for this category
+    category_products = Product.objects.filter(category=category, is_active=True)
+    filter_options = {
+        'brands': get_unique_brands(category_products),
+        'colors': get_unique_attribute_values(category_products, 'color', 'color'),
+        'sizes': get_unique_attribute_values(category_products, 'size', 'size'),
+        'materials': get_unique_attribute_values(category_products, 'material', 'material'),
+        'subcategories': category.subcategories.filter(is_active=True, products__is_active=True).distinct().annotate(count=Count('products')),
+        'rating_counts': get_rating_options(category_products),
+    }
+    
+    price_range = get_price_range(category_products)
+    
+    # Pagination
+    if isinstance(products, list):
+        paginator = Paginator(products, 24)
+    else:
+        paginator = Paginator(products, 24)
+    
+    page = request.GET.get('page')
+    products_page = paginator.get_page(page)
+    
+    current_filters = {
+        'category': category.id,
+        'subcategory': filters.get('subcategory'),
+        'brands': filters.get('brands'),
+        'colors': filters.get('colors'),
+        'sizes': filters.get('sizes'),
+        'materials': filters.get('materials'),
+        'price_min': filters.get('price_min', price_range['min']),
+        'price_max': filters.get('price_max', price_range['max']),
+        'rating': filters.get('rating'),
+        'in_stock': filters.get('in_stock'),
+        'is_new': filters.get('is_new'),
+        'is_best_seller': filters.get('is_best_seller'),
+        'is_featured': filters.get('is_featured'),
+        'search': filters.get('search'),
+        'sort': sort_by,
+    }
+    
+    context = {
+        'products': products_page,
+        'filter_options': filter_options,
+        'price_range': price_range,
+        'current_filters': current_filters,
+        'active_filters': filters,
+        'total_products': len(products) if isinstance(products, list) else products.count(),
+        'sort_by': sort_by,
+        'category': category,
+        'is_category_page': True,
+    }
+    return render(request, 'Ecom/shop.html', context)
+
+def subcategory_shop_view(request, subcategory_slug):
+    """Shop page filtered by subcategory"""
+    subcategory = get_object_or_404(SubCategory, slug=subcategory_slug, is_active=True)
+    
+    products = Product.objects.filter(subcategory=subcategory, is_active=True).annotate(
+        avg_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True))
+    )
+    
+    # Get filter parameters
+    filters = {
+        'category': subcategory.category.id,
+        'subcategory': subcategory.id,
+        'brands': request.GET.getlist('brands'),
+        'colors': request.GET.getlist('colors'),
+        'sizes': request.GET.getlist('sizes'),
+        'materials': request.GET.getlist('materials'),
+        'price_min': request.GET.get('price_min'),
+        'price_max': request.GET.get('price_max'),
+        'rating': request.GET.get('rating'),
+        'in_stock': request.GET.get('in_stock'),
+        'is_new': request.GET.get('is_new'),
+        'is_best_seller': request.GET.get('is_best_seller'),
+        'is_featured': request.GET.get('is_featured'),
+        'search': request.GET.get('search'),
+        'sort': request.GET.get('sort'),
+    }
+    
+    # Apply filters
+    products = get_filtered_products(request, products, filters)
+    
+    # Sorting
+    sort_by = filters.get('sort', 'newest')
+    
+    if sort_by == 'newest':
+        products = products.order_by('-created_at')
+    elif sort_by == 'oldest':
+        products = products.order_by('created_at')
+    elif sort_by == 'name_asc':
+        products = products.order_by('name')
+    elif sort_by == 'name_desc':
+        products = products.order_by('-name')
+    elif sort_by == 'popular':
+        products = products.order_by('-is_best_seller', '-created_at')
+    elif sort_by == 'rating_high':
+        products = products.order_by(F('avg_rating').desc(nulls_last=True))
+    elif sort_by == 'price_low':
+        products = list(products)
+        products.sort(key=lambda p: float(p.final_price))
+    elif sort_by == 'price_high':
+        products = list(products)
+        products.sort(key=lambda p: float(p.final_price), reverse=True)
+    
+    # Get filter options for this subcategory
+    subcategory_products = Product.objects.filter(subcategory=subcategory, is_active=True)
+    filter_options = {
+        'brands': get_unique_brands(subcategory_products),
+        'colors': get_unique_attribute_values(subcategory_products, 'color', 'color'),
+        'sizes': get_unique_attribute_values(subcategory_products, 'size', 'size'),
+        'materials': get_unique_attribute_values(subcategory_products, 'material', 'material'),
+        'rating_counts': get_rating_options(subcategory_products),
+    }
+    
+    price_range = get_price_range(subcategory_products)
+    
+    # Pagination
+    if isinstance(products, list):
+        paginator = Paginator(products, 24)
+    else:
+        paginator = Paginator(products, 24)
+    
+    page = request.GET.get('page')
+    products_page = paginator.get_page(page)
+    
+    current_filters = {
+        'category': subcategory.category.id,
+        'subcategory': subcategory.id,
+        'brands': filters.get('brands'),
+        'colors': filters.get('colors'),
+        'sizes': filters.get('sizes'),
+        'materials': filters.get('materials'),
+        'price_min': filters.get('price_min', price_range['min']),
+        'price_max': filters.get('price_max', price_range['max']),
+        'rating': filters.get('rating'),
+        'in_stock': filters.get('in_stock'),
+        'is_new': filters.get('is_new'),
+        'is_best_seller': filters.get('is_best_seller'),
+        'is_featured': filters.get('is_featured'),
+        'search': filters.get('search'),
+        'sort': sort_by,
+    }
+    
+    context = {
+        'products': products_page,
+        'filter_options': filter_options,
+        'price_range': price_range,
+        'current_filters': current_filters,
+        'active_filters': filters,
+        'total_products': len(products) if isinstance(products, list) else products.count(),
+        'sort_by': sort_by,
+        'subcategory': subcategory,
+        'category': subcategory.category,
+        'is_subcategory_page': True,
+    }
+    return render(request, 'Ecom/shop.html', context)
+
+def global_search_view(request):
+    """Global search across categories, subcategories, products, and variants"""
+    query = request.GET.get('q', '').strip()
+    
+    if not query:
+        return JsonResponse({'results': [], 'count': 0})
+    
+    results = []
+    
+    # Search Categories
+    categories = Category.objects.filter(
+        Q(name__icontains=query) | Q(description__icontains=query),
+        is_active=True
+    )[:5]
+    for cat in categories:
+        results.append({
+            'type': 'category',
+            'id': cat.id,
+            'name': cat.name,
+            'url': f'/shop/category/{cat.slug}/',
+            'description': cat.description[:100] if cat.description else '',
+        })
+    
+    # Search Subcategories
+    subcategories = SubCategory.objects.filter(
+        Q(name__icontains=query) | Q(description__icontains=query),
+        is_active=True
+    )[:5]
+    for sub in subcategories:
+        results.append({
+            'type': 'subcategory',
+            'id': sub.id,
+            'name': sub.name,
+            'category': sub.category.name,
+            'url': f'/shop/subcategory/{sub.slug}/',
+            'description': sub.description[:100] if sub.description else '',
+        })
+    
+    # Search Products
+    products = Product.objects.filter(
+        Q(name__icontains=query) |
+        Q(sku__icontains=query) |
+        Q(brand__icontains=query) |
+        Q(description__icontains=query) |
+        Q(short_description__icontains=query),
+        is_active=True
+    )[:10]
+    for product in products:
+        results.append({
+            'type': 'product',
+            'id': product.id,
+            'name': product.name,
+            'sku': product.sku,
+            'price': str(product.final_price),
+            'image': product.main_image,
+            'url': f'/product/{product.id}/',
+        })
+    
+    # Search Variants
+    variants = ProductVariant.objects.filter(
+        Q(sku__icontains=query) |
+        Q(color__icontains=query) |
+        Q(size__icontains=query) |
+        Q(name__icontains=query),
+        is_active=True
+    ).select_related('product')[:10]
+    for variant in variants:
+        if variant.product.is_active:
+            results.append({
+                'type': 'variant',
+                'id': variant.id,
+                'name': variant.name or f"{variant.color} {variant.size}".strip(),
+                'sku': variant.sku,
+                'product_name': variant.product.name,
+                'price': str(variant.final_price),
+                'image': variant.main_image or variant.product.main_image,
+                'url': f'/product/{variant.product.id}/',
+            })
+    
+    return JsonResponse({
+        'results': results,
+        'count': len(results),
+        'query': query,
+    })

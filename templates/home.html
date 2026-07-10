@@ -1,15 +1,1355 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}
-Home
+{% block title %}Welcome to MyStore{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ============================================ */
+    /* BASE STYLES                                 */
+    /* ============================================ */
+    .home-container {
+        background: #f8f9fa;
+        padding-bottom: 40px;
+    }
+    
+    /* ============================================ */
+    /* HERO BANNER                                 */
+    /* ============================================ */
+    .hero-section {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 50%, #084298 100%);
+        padding: 70px 0;
+        color: white;
+        border-radius: 20px;
+        margin-bottom: 40px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(13, 110, 253, 0.3);
+    }
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 50%;
+        z-index: 1;
+    }
+    .hero-section::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: 20%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255,255,255,0.03);
+        border-radius: 50%;
+        z-index: 1;
+    }
+    .hero-section .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+    .hero-section .hero-title {
+        font-size: 52px;
+        font-weight: 800;
+        margin-bottom: 15px;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .hero-section .hero-title .highlight {
+        color: #ffc107;
+    }
+    .hero-section .hero-subtitle {
+        font-size: 20px;
+        opacity: 0.95;
+        margin-bottom: 30px;
+        font-weight: 300;
+    }
+    .hero-section .hero-btn {
+        padding: 14px 40px;
+        border-radius: 50px;
+        background: linear-gradient(135deg, #ffc107, #ffb300);
+        color: #1a1a2e;
+        font-weight: 700;
+        border: none;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        font-size: 16px;
+        box-shadow: 0 4px 20px rgba(255, 193, 7, 0.4);
+    }
+    .hero-section .hero-btn:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 8px 30px rgba(255, 193, 7, 0.5);
+        color: #1a1a2e;
+    }
+    .hero-section .hero-image {
+        position: absolute;
+        right: 30px;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0.08;
+        font-size: 350px;
+        z-index: 1;
+    }
+    @media (max-width: 768px) {
+        .hero-section { padding: 40px 0; }
+        .hero-section .hero-title { font-size: 32px; }
+        .hero-section .hero-subtitle { font-size: 16px; }
+        .hero-section .hero-image { font-size: 150px; right: 10px; }
+    }
+    @media (max-width: 480px) {
+        .hero-section .hero-title { font-size: 26px; }
+        .hero-section .hero-btn { padding: 12px 28px; font-size: 14px; }
+    }
+    
+    /* ============================================ */
+    /* SECTION HEADERS                             */
+    /* ============================================ */
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .section-header .section-title {
+        font-size: 26px;
+        font-weight: 700;
+        color: #1a1a2e;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .section-header .section-title .icon-wrapper {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #e7f1ff, #d0e4ff);
+        color: #0d6efd;
+        font-size: 18px;
+    }
+    .section-header .view-all {
+        color: #0d6efd;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s;
+        padding: 8px 20px;
+        border-radius: 20px;
+        background: #e7f1ff;
+    }
+    .section-header .view-all:hover {
+        background: #0d6efd;
+        color: white;
+        transform: translateX(3px);
+    }
+    @media (max-width: 480px) {
+        .section-header .section-title { font-size: 20px; }
+        .section-header .section-title .icon-wrapper { width: 32px; height: 32px; font-size: 14px; }
+        .section-header .view-all { font-size: 12px; padding: 5px 14px; }
+    }
+    
+    /* ============================================ */
+    /* DEALS OF THE DAY                            */
+    /* ============================================ */
+    .deals-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+    }
+    .deal-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+    .deal-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 40px rgba(220, 53, 69, 0.15);
+        border-color: #dc3545;
+    }
+    .deal-card .deal-image {
+        height: 200px;
+        overflow: hidden;
+        background: #f8f9fa;
+        position: relative;
+    }
+    .deal-card .deal-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    .deal-card:hover .deal-image img {
+        transform: scale(1.08);
+    }
+    .deal-card .deal-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        padding: 10px 16px;
+        border-radius: 14px;
+        text-align: center;
+        z-index: 2;
+        box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);
+        animation: pulse-badge 2s ease-in-out infinite;
+        min-width: 65px;
+    }
+    @keyframes pulse-badge {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    .deal-card .deal-badge .deal-discount {
+        display: block;
+        font-size: 26px;
+        font-weight: 800;
+        line-height: 1;
+    }
+    .deal-card .deal-badge .deal-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 2px;
+    }
+    .deal-card .deal-body {
+        padding: 18px 20px 20px 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .deal-card .deal-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-bottom: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .deal-card .deal-name:hover {
+        color: #0d6efd;
+    }
+    .deal-card .deal-brand {
+        font-size: 12px;
+        color: #6c757d;
+        margin-bottom: 8px;
+    }
+    .deal-card .deal-rating {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 13px;
+        color: #ffc107;
+        margin-bottom: 8px;
+    }
+    .deal-card .deal-rating .count {
+        color: #6c757d;
+        font-size: 12px;
+    }
+    .deal-card .deal-price {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+    .deal-card .deal-price .current {
+        font-size: 24px;
+        font-weight: 800;
+        color: #dc3545;
+    }
+    .deal-card .deal-price .original {
+        font-size: 16px;
+        color: #999;
+        text-decoration: line-through;
+    }
+    .deal-card .deal-progress {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+    .deal-card .deal-progress .progress {
+        flex: 1;
+        height: 6px;
+        background: #e9ecef;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+    .deal-card .deal-progress .progress .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #28a745, #20c997);
+        border-radius: 3px;
+        transition: width 0.5s ease;
+    }
+    .deal-card .deal-progress .deal-stock-text {
+        font-size: 12px;
+        font-weight: 600;
+        color: #6c757d;
+        white-space: nowrap;
+    }
+    .deal-card .deal-btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        text-align: center;
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 14px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .deal-card .deal-btn:hover {
+        background: linear-gradient(135deg, #c82333, #a71d2a);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(220, 53, 69, 0.35);
+        color: white;
+    }
+    .deal-card .deal-btn i {
+        margin-right: 8px;
+    }
+    .deal-card .deal-stock-badge {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+        z-index: 2;
+    }
+    @media (max-width: 768px) {
+        .deals-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
+        .deal-card .deal-image { height: 150px; }
+        .deal-card .deal-price .current { font-size: 20px; }
+        .deal-card .deal-badge .deal-discount { font-size: 20px; }
+        .deal-card .deal-badge { padding: 8px 12px; min-width: 55px; }
+    }
+    @media (max-width: 480px) {
+        .deals-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .deal-card .deal-image { height: 120px; }
+        .deal-card .deal-body { padding: 12px; }
+        .deal-card .deal-name { font-size: 12px; }
+        .deal-card .deal-price .current { font-size: 16px; }
+        .deal-card .deal-price .original { font-size: 12px; }
+        .deal-card .deal-badge { top: 8px; left: 8px; padding: 4px 8px; min-width: 45px; }
+        .deal-card .deal-badge .deal-discount { font-size: 16px; }
+        .deal-card .deal-badge .deal-label { font-size: 8px; }
+        .deal-card .deal-btn { font-size: 12px; padding: 8px; }
+        .deal-card .deal-progress .deal-stock-text { font-size: 10px; }
+        .deal-card .deal-rating { font-size: 11px; }
+    }
+    
+    /* ============================================ */
+    /* PRODUCT CARDS (General)                     */
+    /* ============================================ */
+    .product-card {
+        background: white;
+        border-radius: 14px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .product-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 35px rgba(0,0,0,0.1);
+        border-color: transparent;
+    }
+    .product-card .product-image {
+        height: 180px;
+        overflow: hidden;
+        background: #f8f9fa;
+        position: relative;
+    }
+    .product-card .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .product-card:hover .product-image img {
+        transform: scale(1.05);
+    }
+    .product-card .product-image .badge-tag {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        padding: 4px 14px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        z-index: 2;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .product-card .product-image .badge-tag.best-seller {
+        background: linear-gradient(135deg, #ffc107, #ffb300);
+        color: #000;
+    }
+    .product-card .product-image .badge-tag.featured {
+        background: linear-gradient(135deg, #fd7e14, #e67e22);
+        color: white;
+    }
+    .product-card .product-image .badge-tag.new {
+        background: linear-gradient(135deg, #17a2b8, #0dcaf0);
+        color: white;
+    }
+    .product-card .product-image .badge-tag.top-rated {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+    }
+    .product-card .product-image .badge-stock {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+        z-index: 2;
+    }
+    .product-card .product-body {
+        padding: 15px 16px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .product-card .product-body .product-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-bottom: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .product-card .product-body .product-name:hover {
+        color: #0d6efd;
+    }
+    .product-card .product-body .product-brand {
+        font-size: 12px;
+        color: #6c757d;
+        margin-bottom: 6px;
+    }
+    .product-card .product-body .product-rating {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 13px;
+        color: #ffc107;
+        margin-bottom: 8px;
+    }
+    .product-card .product-body .product-rating .count {
+        color: #6c757d;
+        font-size: 12px;
+    }
+    .product-card .product-body .product-price {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .product-card .product-body .product-price .current {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2d7d46;
+    }
+    .product-card .product-body .product-price .original {
+        font-size: 14px;
+        color: #999;
+        text-decoration: line-through;
+    }
+    .product-card .product-actions {
+        padding: 10px 16px 16px 16px;
+        border-top: 1px solid #f0f0f0;
+        display: flex;
+        gap: 8px;
+    }
+    .product-card .product-actions .btn-view {
+        flex: 1;
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid #0d6efd;
+        background: transparent;
+        color: #0d6efd;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+        text-decoration: none;
+    }
+    .product-card .product-actions .btn-view:hover {
+        background: #0d6efd;
+        color: white;
+        box-shadow: 0 4px 15px rgba(13,110,253,0.3);
+    }
+    
+    /* ============================================ */
+    /* PRODUCT GRID (Scrollable)                  */
+    /* ============================================ */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+    .product-grid.scrollable {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+        padding-bottom: 15px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 4px;
+    }
+    .product-grid.scrollable .product-card {
+        min-width: 220px;
+        scroll-snap-align: start;
+        flex-shrink: 0;
+    }
+    .product-grid.scrollable::-webkit-scrollbar {
+        height: 6px;
+    }
+    .product-grid.scrollable::-webkit-scrollbar-track {
+        background: #e9ecef;
+        border-radius: 3px;
+    }
+    .product-grid.scrollable::-webkit-scrollbar-thumb {
+        background: #0d6efd;
+        border-radius: 3px;
+    }
+    @media (max-width: 768px) {
+        .product-grid.scrollable .product-card { min-width: 170px; gap: 15px; }
+    }
+    @media (max-width: 480px) {
+        .product-grid.scrollable .product-card { min-width: 150px; gap: 10px; }
+        .product-card .product-image { height: 140px; }
+        .product-card .product-body { padding: 10px 12px; }
+        .product-card .product-body .product-name { font-size: 12px; }
+        .product-card .product-body .product-price .current { font-size: 15px; }
+        .product-card .product-actions { padding: 8px 12px 12px 12px; }
+        .product-card .product-actions .btn-view { font-size: 11px; padding: 6px; }
+    }
+    
+    /* ============================================ */
+    /* CATEGORY GRID                               */
+    /* ============================================ */
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 20px;
+    }
+    .category-card {
+        background: white;
+        border-radius: 14px;
+        padding: 25px 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+        text-decoration: none;
+        color: #1a1a2e;
+        display: block;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        border-color: #0d6efd;
+    }
+    .category-card .category-icon {
+        font-size: 36px;
+        display: block;
+        margin-bottom: 10px;
+        color: #0d6efd;
+    }
+    .category-card .category-name {
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 4px;
+    }
+    .category-card .category-count {
+        font-size: 12px;
+        color: #6c757d;
+    }
+    .category-card .category-image {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 10px auto;
+        display: block;
+        border: 3px solid #e9ecef;
+        transition: border-color 0.3s;
+    }
+    .category-card:hover .category-image {
+        border-color: #0d6efd;
+    }
+    @media (max-width: 768px) {
+        .category-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .category-card { padding: 18px 10px; }
+        .category-card .category-image { width: 60px; height: 60px; }
+    }
+    @media (max-width: 480px) {
+        .category-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .category-card { padding: 15px 10px; }
+        .category-card .category-image { width: 50px; height: 50px; }
+        .category-card .category-name { font-size: 13px; }
+    }
+    
+    /* ============================================ */
+    /* SUBCATEGORY GRID                            */
+    /* ============================================ */
+    .subcategory-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 15px;
+    }
+    .subcategory-card {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+        text-decoration: none;
+        color: #1a1a2e;
+        display: block;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .subcategory-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        border-color: #0d6efd;
+    }
+    .subcategory-card .subcategory-name {
+        font-weight: 600;
+        font-size: 14px;
+    }
+    .subcategory-card .subcategory-category {
+        font-size: 11px;
+        color: #6c757d;
+        display: block;
+        margin-top: 3px;
+    }
+    .subcategory-card .subcategory-count {
+        font-size: 11px;
+        color: #6c757d;
+        display: block;
+        margin-top: 5px;
+    }
+    .subcategory-card .subcategory-image {
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 8px auto;
+        display: block;
+        border: 2px solid #e9ecef;
+    }
+    .subcategory-card:hover .subcategory-image {
+        border-color: #0d6efd;
+    }
+    @media (max-width: 768px) {
+        .subcategory-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    }
+    @media (max-width: 480px) {
+        .subcategory-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .subcategory-card { padding: 12px 8px; }
+        .subcategory-card .subcategory-name { font-size: 12px; }
+        .subcategory-card .subcategory-image { width: 45px; height: 45px; }
+    }
+    
+    /* ============================================ */
+    /* EMPTY STATE                                 */
+    /* ============================================ */
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+        background: white;
+        border-radius: 14px;
+        border: 1px dashed #dee2e6;
+    }
+    .empty-state i {
+        font-size: 48px;
+        color: #adb5bd;
+        display: block;
+        margin-bottom: 15px;
+    }
+    .empty-state h5 {
+        color: #1a1a2e;
+        font-weight: 600;
+    }
+    .empty-state p {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+    
+    /* ============================================ */
+    /* RESPONSIVE HELPERS                         */
+    /* ============================================ */
+    @media (max-width: 768px) {
+        .container { padding-left: 12px; padding-right: 12px; }
+        .mb-5 { margin-bottom: 30px !important; }
+    }
+    @media (max-width: 480px) {
+        .mb-5 { margin-bottom: 25px !important; }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
+<div class="home-container">
+    <div class="container py-4">
+        
+        <!-- ============================================ -->
+        <!-- HERO BANNER                                 -->
+        <!-- ============================================ -->
+        <div class="hero-section">
+            <div class="hero-content text-center">
+                <h1 class="hero-title">
+                    Welcome to <span class="highlight">MyStore</span>
+                </h1>
+                <p class="hero-subtitle">Discover amazing products at unbeatable prices</p>
+                <a href="{% url 'Ecom:shop' %}" class="hero-btn">
+                    <i class="fas fa-shopping-bag me-2"></i> Shop Now
+                </a>
+            </div>
+            <div class="hero-image">
+                <i class="fas fa-shopping-bag"></i>
+            </div>
+        </div>
 
-<h1>Welcome to MyShop</h1>
+        <!-- ============================================ -->
+        <!-- DEALS OF THE DAY - Highest Discounts        -->
+        <!-- ============================================ -->
+        <div class="mb-5">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span class="icon-wrapper"><i class="fas fa-fire" style="color:#dc3545;"></i></span>
+                    🔥 Deals of the Day
+                </h3>
+                <a href="{% url 'Ecom:shop' %}?sort=price_low" class="view-all">View All →</a>
+            </div>
+            
+            {% if deals_of_the_day %}
+                <div class="deals-grid">
+                    {% for product in deals_of_the_day %}
+                        <div class="deal-card">
+                            <div class="deal-image">
+                                <a href="{% url 'Ecom:product_detail' product.id %}">
+                                    {% if product.main_image %}
+                                        <img src="{{ product.main_image }}" alt="{{ product.name }}" loading="lazy">
+                                    {% else %}
+                                        <div style="height:100%;display:flex;align-items:center;justify-content:center;background:#f8f9fa;">
+                                            <i class="fas fa-image fa-3x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </a>
+                                {% if product.discount_percentage > 0 %}
+                                    <div class="deal-badge">
+                                        <span class="deal-discount">{{ product.discount_percentage|floatformat:0 }}%</span>
+                                        <span class="deal-label">OFF</span>
+                                    </div>
+                                {% endif %}
+                                <span class="deal-stock-badge 
+                                    {% if product.is_out_of_stock %}out-of-stock
+                                    {% elif product.is_low_stock %}low-stock
+                                    {% else %}in-stock{% endif %}"
+                                    style="
+                                    {% if product.is_out_of_stock %}background:#f8d7da;color:#721c24;
+                                    {% elif product.is_low_stock %}background:#fff3cd;color:#856404;
+                                    {% else %}background:#d4edda;color:#155724;{% endif %}">
+                                    {% if product.is_out_of_stock %}Out of Stock
+                                    {% elif product.is_low_stock %}Low Stock
+                                    {% else %}In Stock{% endif %}
+                                </span>
+                            </div>
+                            <div class="deal-body">
+                                <a href="{% url 'Ecom:product_detail' product.id %}" class="deal-name">{{ product.name }}</a>
+                                {% if product.brand %}<div class="deal-brand">{{ product.brand }}</div>{% endif %}
+                                <div class="deal-rating">
+                                    {% with avg=product.average_rating|default:0|floatformat:"0" %}
+                                        {% for i in "12345"|slice:avg %}<i class="fas fa-star"></i>{% endfor %}
+                                        {% for i in "12345"|slice:avg %}<i class="far fa-star"></i>{% endfor %}
+                                    {% endwith %}
+                                    <span class="count">({{ product.total_reviews }})</span>
+                                </div>
+                                <div class="deal-price">
+                                    <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
+                                    {% if product.discount_percentage > 0 %}
+                                        <span class="original">₹{{ product.price }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="deal-progress">
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: {% widthratio product.stock_quantity 100 100 %}%;"></div>
+                                    </div>
+                                    <span class="deal-stock-text">{{ product.stock_quantity }} left</span>
+                                </div>
+                                <a href="{% url 'Ecom:product_detail' product.id %}" class="deal-btn">
+                                    <i class="fas fa-shopping-bag"></i> Shop Now
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-fire"></i>
+                    <h5>No Deals Available</h5>
+                    <p>Check back later for exciting deals!</p>
+                </div>
+            {% endif %}
+        </div>
 
-<p>
-    This is the Home Page.
-</p>
+        <!-- ============================================ -->
+        <!-- CATEGORIES                                  -->
+        <!-- ============================================ -->
+        <div class="mb-5">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span class="icon-wrapper"><i class="fas fa-th-large"></i></span>
+                    Shop by Category
+                </h3>
+                <a href="{% url 'Ecom:shop' %}" class="view-all">View All →</a>
+            </div>
+            {% if categories %}
+                <div class="category-grid">
+                    {% for category in categories %}
+                        <a href="{% url 'Ecom:category_shop' category.slug %}" class="category-card">
+                            {% if category.image %}
+                                <img src="{{ category.image.url }}" alt="{{ category.name }}" class="category-image" loading="lazy">
+                            {% else %}
+                                <span class="category-icon"><i class="fas fa-folder"></i></span>
+                            {% endif %}
+                            <div class="category-name">{{ category.name }}</div>
+                            <div class="category-count">{{ category.product_count }} Products</div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-folder-open"></i>
+                    <h5>No Categories Available</h5>
+                    <p>Categories will appear here once added by the admin.</p>
+                </div>
+            {% endif %}
+        </div>
 
+        <!-- ============================================ -->
+        <!-- SUBCATEGORIES                               -->
+        <!-- ============================================ -->
+        <div class="mb-5">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span class="icon-wrapper"><i class="fas fa-tags"></i></span>
+                    Shop by Subcategory
+                </h3>
+                <a href="{% url 'Ecom:shop' %}" class="view-all">View All →</a>
+            </div>
+            {% if subcategories %}
+                <div class="subcategory-grid">
+                    {% for subcategory in subcategories %}
+                        <a href="{% url 'Ecom:subcategory_shop' subcategory.slug %}" class="subcategory-card">
+                            {% if subcategory.image %}
+                                <img src="{{ subcategory.image.url }}" alt="{{ subcategory.name }}" class="subcategory-image" loading="lazy">
+                            {% else %}
+                                <span style="font-size:24px;display:block;margin-bottom:6px;">📁</span>
+                            {% endif %}
+                            <div class="subcategory-name">{{ subcategory.name }}</div>
+                            <span class="subcategory-category">{{ subcategory.category.name }}</span>
+                            <span class="subcategory-count">{{ subcategory.product_count }} Products</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-tags"></i>
+                    <h5>No Subcategories Available</h5>
+                    <p>Subcategories will appear here once added by the admin.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- ============================================ -->
+        <!-- BEST SELLERS                                -->
+        <!-- ============================================ -->
+        <div class="mb-5">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span class="icon-wrapper" style="background:linear-gradient(135deg,#fff3cd,#ffe69b);color:#ffc107;"><i class="fas fa-trophy"></i></span>
+                    Best Sellers
+                </h3>
+                <a href="{% url 'Ecom:shop' %}?is_best_seller=1" class="view-all">View All →</a>
+            </div>
+            {% if best_sellers %}
+                <div class="product-grid scrollable">
+                    {% for product in best_sellers %}
+                        <div class="product-card">
+                            <div class="product-image">
+                                <a href="{% url 'Ecom:product_detail' product.id %}">
+                                    {% if product.main_image %}
+                                        <img src="{{ product.main_image }}" alt="{{ product.name }}" loading="lazy">
+                                    {% else %}
+                                        <div style="height:100%;display:flex;align-items:center;justify-content:center;background:#f8f9fa;">
+                                            <i class="fas fa-image fa-2x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </a>
+                                <span class="badge-tag best-seller"><i class="fas fa-trophy"></i> Best Seller</span>
+                                {% if product.discount_percentage > 0 %}
+                                    <span class="badge-tag" style="background:linear-gradient(135deg,#dc3545,#c82333);color:white;top:45px;left:10px;">-{{ product.discount_percentage|floatformat:0 }}%</span>
+                                {% endif %}
+                                <span class="badge-stock 
+                                    {% if product.is_out_of_stock %}out-of-stock
+                                    {% elif product.is_low_stock %}low-stock
+                                    {% else %}in-stock{% endif %}"
+                                    style="
+                                    {% if product.is_out_of_stock %}background:#f8d7da;color:#721c24;
+                                    {% elif product.is_low_stock %}background:#fff3cd;color:#856404;
+                                    {% else %}background:#d4edda;color:#155724;{% endif %}">
+                                    {% if product.is_out_of_stock %}Out of Stock
+                                    {% elif product.is_low_stock %}Low Stock
+                                    {% else %}In Stock{% endif %}
+                                </span>
+                            </div>
+                            <div class="product-body">
+                                <a href="{% url 'Ecom:product_detail' product.id %}" class="product-name">{{ product.name }}</a>
+                                {% if product.brand %}<div class="product-brand">{{ product.brand }}</div>{% endif %}
+                                <div class="product-rating">
+                                    {% with avg=product.average_rating|default:0|floatformat:"0" %}
+                                        {% for i in "12345"|slice:avg %}<i class="fas fa-star"></i>{% endfor %}
+                                        {% for i in "12345"|slice:avg %}<i class="far fa-star"></i>{% endfor %}
+                                    {% endwith %}
+                                    <span class="count">({{ product.total_reviews }})</span>
+                                </div>
+                                <div class="product-price">
+                                    <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
+                                    {% if product.discount_percentage > 0 %}
+                                        <span class="original">₹{{ product.price }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="product-actions">
+                                <a href="{% url 'Ecom:product_detail' product.id %}" class="btn-view">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-trophy"></i>
+                    <h5>No Best Sellers Yet</h5>
+                    <p>Best selling products will appear here once available.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- ============================================ -->
+        <!-- FEATURED PRODUCTS                           -->
+        <!-- ============================================ -->
+        <div class="mb-5">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span class="icon-wrapper" style="background:linear-gradient(135deg,#fff3e0,#ffe0b2);color:#fd7e14;"><i class="fas fa-star"></i></span>
+                    Featured Products
+                </h3>
+                <a href="{% url 'Ecom:shop' %}?is_featured=1" class="view-all">View All →</a>
+            </div>
+            {% if featured_products %}
+                <div class="product-grid scrollable">
+                    {% for product in featured_products %}
+                        <div class="product-card">
+                            <div class="product-image">
+                                <a href="{% url 'Ecom:product_detail' product.id %}">
+                                    {% if product.main_image %}
+                                        <img src="{{ product.main_image }}" alt="{{ product.name }}" loading="lazy">
+                                    {% else %}
+                                        <div style="height:100%;display:flex;align-items:center;justify-content:center;background:#f8f9fa;">
+                                            <i class="fas fa-image fa-2x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </a>
+                                <span class="badge-tag featured"><i class="fas fa-star"></i> Featured</span>
+                                {% if product.discount_percentage > 0 %}
+                                    <span class="badge-tag" style="background:linear-gradient(135deg,#dc3545,#c82333);color:white;top:45px;left:10px;">-{{ product.discount_percentage|floatformat:0 }}%</span>
+                                {% endif %}
+                                <span class="badge-stock 
+                                    {% if product.is_out_of_stock %}out-of-stock
+                                    {% elif product.is_low_stock %}low-stock
+                                    {% else %}in-stock{% endif %}"
+                                    style="
+                                    {% if product.is_out_of_stock %}background:#f8d7da;color:#721c24;
+                                    {% elif product.is_low_stock %}background:#fff3cd;color:#856404;
+                                    {% else %}background:#d4edda;color:#155724;{% endif %}">
+                                    {% if product.is_out_of_stock %}Out of Stock
+                                    {% elif product.is_low_stock %}Low Stock
+                                    {% else %}In Stock{% endif %}
+                                </span>
+                            </div>
+                            <div class="product-body">
+                                <a href="{% url 'Ecom:product_detail' product.id %}" class="product-name">{{ product.name }}</a>
+                                {% if product.brand %}<div class="product-brand">{{ product.brand }}</div>{% endif %}
+                                <div class="product-rating">
+                                    {% with avg=product.average_rating|default:0|floatformat:"0" %}
+                                        {% for i in "12345"|slice:avg %}<i class="fas fa-star"></i>{% endfor %}
+                                        {% for i in "12345"|slice:avg %}<i class="far fa-star"></i>{% endfor %}
+                                    {% endwith %}
+                                    <span class="count">({{ product.total_reviews }})</span>
+                                </div>
+                                <div class="product-price">
+                                    <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
+                                    {% if product.discount_percentage > 0 %}
+                                        <span class="original">₹{{ product.price }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="product-actions">
+                                <a href="{% url 'Ecom:product_detail' product.id %}" class="btn-view">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-star"></i>
+                    <h5>No Featured Products</h5>
+                    <p>Featured products will appear here once available.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- ============================================ -->
+        <!-- NEW ARRIVALS                                -->
+        <!-- ============================================ -->
+        <div class="mb-5">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span class="icon-wrapper" style="background:linear-gradient(135deg,#d1ecf1,#aee2ea);color:#17a2b8;"><i class="fas fa-clock"></i></span>
+                    New Arrivals
+                </h3>
+                <a href="{% url 'Ecom:shop' %}?is_new=1" class="view-all">View All →</a>
+            </div>
+            {% if new_arrivals %}
+                <div class="product-grid scrollable">
+                    {% for product in new_arrivals %}
+                        <div class="product-card">
+                            <div class="product-image">
+                                <a href="{% url 'Ecom:product_detail' product.id %}">
+                                    {% if product.main_image %}
+                                        <img src="{{ product.main_image }}" alt="{{ product.name }}" loading="lazy">
+                                    {% else %}
+                                        <div style="height:100%;display:flex;align-items:center;justify-content:center;background:#f8f9fa;">
+                                            <i class="fas fa-image fa-2x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </a>
+                                <span class="badge-tag new"><i class="fas fa-clock"></i> New</span>
+                                {% if product.discount_percentage > 0 %}
+                                    <span class="badge-tag" style="background:linear-gradient(135deg,#dc3545,#c82333);color:white;top:45px;left:10px;">-{{ product.discount_percentage|floatformat:0 }}%</span>
+                                {% endif %}
+                                <span class="badge-stock 
+                                    {% if product.is_out_of_stock %}out-of-stock
+                                    {% elif product.is_low_stock %}low-stock
+                                    {% else %}in-stock{% endif %}"
+                                    style="
+                                    {% if product.is_out_of_stock %}background:#f8d7da;color:#721c24;
+                                    {% elif product.is_low_stock %}background:#fff3cd;color:#856404;
+                                    {% else %}background:#d4edda;color:#155724;{% endif %}">
+                                    {% if product.is_out_of_stock %}Out of Stock
+                                    {% elif product.is_low_stock %}Low Stock
+                                    {% else %}In Stock{% endif %}
+                                </span>
+                            </div>
+                            <div class="product-body">
+                                <a href="{% url 'Ecom:product_detail' product.id %}" class="product-name">{{ product.name }}</a>
+                                {% if product.brand %}<div class="product-brand">{{ product.brand }}</div>{% endif %}
+                                <div class="product-rating">
+                                    {% with avg=product.average_rating|default:0|floatformat:"0" %}
+                                        {% for i in "12345"|slice:avg %}<i class="fas fa-star"></i>{% endfor %}
+                                        {% for i in "12345"|slice:avg %}<i class="far fa-star"></i>{% endfor %}
+                                    {% endwith %}
+                                    <span class="count">({{ product.total_reviews }})</span>
+                                </div>
+                                <div class="product-price">
+                                    <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
+                                    {% if product.discount_percentage > 0 %}
+                                        <span class="original">₹{{ product.price }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="product-actions">
+                                <a href="{% url 'Ecom:product_detail' product.id %}" class="btn-view">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-clock"></i>
+                    <h5>No New Arrivals</h5>
+                    <p>New products will appear here once added.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- ============================================ -->
+        <!-- TOP RATED PRODUCTS                          -->
+        <!-- ============================================ -->
+        <div class="mb-5">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span class="icon-wrapper" style="background:linear-gradient(135deg,#fff3cd,#ffe69b);color:#ffc107;"><i class="fas fa-star"></i></span>
+                    Top Rated
+                </h3>
+                <a href="{% url 'Ecom:shop' %}?rating=4" class="view-all">View All →</a>
+            </div>
+            {% if top_rated %}
+                <div class="product-grid scrollable">
+                    {% for product in top_rated %}
+                        <div class="product-card">
+                            <div class="product-image">
+                                <a href="{% url 'Ecom:product_detail' product.id %}">
+                                    {% if product.main_image %}
+                                        <img src="{{ product.main_image }}" alt="{{ product.name }}" loading="lazy">
+                                    {% else %}
+                                        <div style="height:100%;display:flex;align-items:center;justify-content:center;background:#f8f9fa;">
+                                            <i class="fas fa-image fa-2x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </a>
+                                <span class="badge-tag top-rated"><i class="fas fa-star"></i> Top Rated</span>
+                                {% if product.discount_percentage > 0 %}
+                                    <span class="badge-tag" style="background:linear-gradient(135deg,#dc3545,#c82333);color:white;top:45px;left:10px;">-{{ product.discount_percentage|floatformat:0 }}%</span>
+                                {% endif %}
+                                <span class="badge-stock 
+                                    {% if product.is_out_of_stock %}out-of-stock
+                                    {% elif product.is_low_stock %}low-stock
+                                    {% else %}in-stock{% endif %}"
+                                    style="
+                                    {% if product.is_out_of_stock %}background:#f8d7da;color:#721c24;
+                                    {% elif product.is_low_stock %}background:#fff3cd;color:#856404;
+                                    {% else %}background:#d4edda;color:#155724;{% endif %}">
+                                    {% if product.is_out_of_stock %}Out of Stock
+                                    {% elif product.is_low_stock %}Low Stock
+                                    {% else %}In Stock{% endif %}
+                                </span>
+                            </div>
+                            <div class="product-body">
+                                <a href="{% url 'Ecom:product_detail' product.id %}" class="product-name">{{ product.name }}</a>
+                                {% if product.brand %}<div class="product-brand">{{ product.brand }}</div>{% endif %}
+                                <div class="product-rating">
+                                    {% with avg=product.average_rating|default:0|floatformat:"0" %}
+                                        {% for i in "12345"|slice:avg %}<i class="fas fa-star"></i>{% endfor %}
+                                        {% for i in "12345"|slice:avg %}<i class="far fa-star"></i>{% endfor %}
+                                    {% endwith %}
+                                    <span class="count">({{ product.total_reviews }})</span>
+                                </div>
+                                <div class="product-price">
+                                    <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
+                                    {% if product.discount_percentage > 0 %}
+                                        <span class="original">₹{{ product.price }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="product-actions">
+                                <a href="{% url 'Ecom:product_detail' product.id %}" class="btn-view">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-star"></i>
+                    <h5>No Top Rated Products</h5>
+                    <p>Products with 4+ star ratings will appear here.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- ============================================ -->
+        <!-- RECENTLY VIEWED (Only for logged-in users)  -->
+        <!-- ============================================ -->
+        {% if user.is_authenticated and recently_viewed %}
+        <div class="mb-5">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span class="icon-wrapper" style="background:#e9ecef;color:#6c757d;"><i class="fas fa-history"></i></span>
+                    Recently Viewed
+                </h3>
+                <a href="{% url 'Ecom:recently_viewed' %}" class="view-all">View All →</a>
+            </div>
+            <div class="product-grid scrollable">
+                {% for product in recently_viewed %}
+                    <div class="product-card">
+                        <div class="product-image">
+                            <a href="{% url 'Ecom:product_detail' product.id %}">
+                                {% if product.main_image %}
+                                    <img src="{{ product.main_image }}" alt="{{ product.name }}" loading="lazy">
+                                {% else %}
+                                    <div style="height:100%;display:flex;align-items:center;justify-content:center;background:#f8f9fa;">
+                                        <i class="fas fa-image fa-2x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                            </a>
+                            {% if product.discount_percentage > 0 %}
+                                <span class="badge-tag" style="background:linear-gradient(135deg,#dc3545,#c82333);color:white;top:10px;left:10px;">-{{ product.discount_percentage|floatformat:0 }}%</span>
+                            {% endif %}
+                            <span class="badge-stock 
+                                {% if product.is_out_of_stock %}out-of-stock
+                                {% elif product.is_low_stock %}low-stock
+                                {% else %}in-stock{% endif %}"
+                                style="
+                                {% if product.is_out_of_stock %}background:#f8d7da;color:#721c24;
+                                {% elif product.is_low_stock %}background:#fff3cd;color:#856404;
+                                {% else %}background:#d4edda;color:#155724;{% endif %}">
+                                {% if product.is_out_of_stock %}Out of Stock
+                                {% elif product.is_low_stock %}Low Stock
+                                {% else %}In Stock{% endif %}
+                            </span>
+                        </div>
+                        <div class="product-body">
+                            <a href="{% url 'Ecom:product_detail' product.id %}" class="product-name">{{ product.name }}</a>
+                            {% if product.brand %}<div class="product-brand">{{ product.brand }}</div>{% endif %}
+                            <div class="product-rating">
+                                {% with avg=product.average_rating|default:0|floatformat:"0" %}
+                                    {% for i in "12345"|slice:avg %}<i class="fas fa-star"></i>{% endfor %}
+                                    {% for i in "12345"|slice:avg %}<i class="far fa-star"></i>{% endfor %}
+                                {% endwith %}
+                                <span class="count">({{ product.total_reviews }})</span>
+                            </div>
+                            <div class="product-price">
+                                <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
+                                {% if product.discount_percentage > 0 %}
+                                    <span class="original">₹{{ product.price }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="product-actions">
+                            <a href="{% url 'Ecom:product_detail' product.id %}" class="btn-view">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ============================================
+    // SMOOTH SCROLL FOR PRODUCT CARDS
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add drag scroll for product grids
+        document.querySelectorAll('.product-grid.scrollable').forEach(function(grid) {
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+
+            grid.addEventListener('mousedown', function(e) {
+                isDown = true;
+                startX = e.pageX - grid.offsetLeft;
+                scrollLeft = grid.scrollLeft;
+                grid.style.cursor = 'grabbing';
+            });
+
+            grid.addEventListener('mouseleave', function() {
+                isDown = false;
+                grid.style.cursor = 'grab';
+            });
+
+            grid.addEventListener('mouseup', function() {
+                isDown = false;
+                grid.style.cursor = 'grab';
+            });
+
+            grid.addEventListener('mousemove', function(e) {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - grid.offsetLeft;
+                const walk = (x - startX) * 2;
+                grid.scrollLeft = scrollLeft - walk;
+            });
+
+            // Touch support for mobile
+            let touchStartX = 0;
+            let touchScrollLeft = 0;
+
+            grid.addEventListener('touchstart', function(e) {
+                touchStartX = e.touches[0].pageX - grid.offsetLeft;
+                touchScrollLeft = grid.scrollLeft;
+            });
+
+            grid.addEventListener('touchmove', function(e) {
+                const x = e.touches[0].pageX - grid.offsetLeft;
+                const walk = (x - touchStartX) * 2;
+                grid.scrollLeft = touchScrollLeft - walk;
+            });
+        });
+        
+        // Add fade-in animation for cards
+        const cards = document.querySelectorAll('.deal-card, .product-card, .category-card, .subcategory-card');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }, index * 50);
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    });
+</script>
 {% endblock %}

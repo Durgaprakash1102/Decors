@@ -72,6 +72,13 @@ urlpatterns = [
     
     # ========== RECENTLY VIEWED URLs ==========
     path('recently-viewed/', views.recently_viewed_view, name='recently_viewed'),
+
+     path('shop/', views.shop_view, name='shop'),
+    path('shop/category/<slug:category_slug>/', views.category_shop_view, name='category_shop'),
+    path('shop/subcategory/<slug:subcategory_slug>/', views.subcategory_shop_view, name='subcategory_shop'),
+    
+    # ========== GLOBAL SEARCH URL ==========
+    path('api/search/', views.global_search_view, name='global_search'),
     
     # ========== AJAX URLs ==========
     path('ajax/get-subcategories/', views.get_subcategories_ajax, name='get_subcategories'),
