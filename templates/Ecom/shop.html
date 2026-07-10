@@ -1,0 +1,1377 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if category %}
+        {{ category.name }} - MyStore
+    {% elif subcategory %}
+        {{ subcategory.name }} - MyStore
+    {% else %}
+        Shop - MyStore
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ============================================ */
+    /* SHOP PAGE STYLES                            */
+    /* ============================================ */
+    .shop-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 20px 0;
+    }
+    
+    /* ============================================ */
+    /* FILTER SIDEBAR                              */
+    /* ============================================ */
+    .filter-sidebar {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        position: sticky;
+        top: 20px;
+        max-height: calc(100vh - 40px);
+        overflow-y: auto;
+    }
+    .filter-sidebar::-webkit-scrollbar {
+        width: 4px;
+    }
+    .filter-sidebar::-webkit-scrollbar-thumb {
+        background: #ced4da;
+        border-radius: 4px;
+    }
+    
+    .filter-section {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .filter-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    .filter-section .filter-title {
+        font-weight: 700;
+        font-size: 16px;
+        color: #1a1a2e;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+    }
+    .filter-section .filter-title .count {
+        font-size: 12px;
+        color: #6c757d;
+        font-weight: 400;
+    }
+    
+    .filter-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 0;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-radius: 4px;
+        padding: 6px 10px;
+    }
+    .filter-option:hover {
+        background: #f8f9fa;
+    }
+    .filter-option input[type="checkbox"],
+    .filter-option input[type="radio"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: #0d6efd;
+        flex-shrink: 0;
+    }
+    .filter-option label {
+        cursor: pointer;
+        font-size: 14px;
+        color: #4a4a5a;
+        margin-bottom: 0;
+        flex: 1;
+    }
+    .filter-option .badge-count {
+        background: #e9ecef;
+        padding: 1px 8px;
+        border-radius: 10px;
+        font-size: 11px;
+        color: #6c757d;
+    }
+    
+    .color-swatch {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #e9ecef;
+        flex-shrink: 0;
+        display: inline-block;
+    }
+    
+    /* ============================================ */
+    /* PRICE RANGE SLIDER                         */
+    /* ============================================ */
+    .price-range {
+        padding: 10px 0;
+    }
+    .price-range .price-inputs {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .price-range .price-inputs input {
+        width: 100%;
+        padding: 6px 10px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+    .price-range .price-inputs input:focus {
+        outline: none;
+        border-color: #0d6efd;
+    }
+    .price-range .price-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 4px;
+        background: #e9ecef;
+        outline: none;
+        border-radius: 2px;
+        margin: 15px 0;
+    }
+    .price-range .price-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #0d6efd;
+        cursor: pointer;
+    }
+    .price-range .price-slider::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #0d6efd;
+        cursor: pointer;
+        border: none;
+    }
+    
+    /* ============================================ */
+    /* PRODUCT GRID                                */
+    /* ============================================ */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+    
+    .product-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        border-color: transparent;
+    }
+    .product-card .product-image {
+        height: 200px;
+        overflow: hidden;
+        background: #f8f9fa;
+        position: relative;
+    }
+    .product-card .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .product-card:hover .product-image img {
+        transform: scale(1.05);
+    }
+    .product-card .product-image .badge-stock {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .product-card .product-image .badge-stock.in-stock {
+        background: #d4edda;
+        color: #155724;
+    }
+    .product-card .product-image .badge-stock.low-stock {
+        background: #fff3cd;
+        color: #856404;
+    }
+    .product-card .product-image .badge-stock.out-of-stock {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    .product-card .product-image .badge-discount {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: #dc3545;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .product-card .product-image .badge-new {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: #17a2b8;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .product-card .product-image .badge-featured {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: #fd7e14;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .product-card .product-image .badge-best-seller {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: #ffc107;
+        color: #000;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .product-card .product-body {
+        padding: 15px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .product-card .product-body .product-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-bottom: 5px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .product-card .product-body .product-name:hover {
+        color: #0d6efd;
+    }
+    .product-card .product-body .product-brand {
+        font-size: 12px;
+        color: #6c757d;
+        margin-bottom: 8px;
+    }
+    .product-card .product-body .product-rating {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 13px;
+        color: #ffc107;
+        margin-bottom: 8px;
+    }
+    .product-card .product-body .product-rating .count {
+        color: #6c757d;
+        font-size: 12px;
+    }
+    .product-card .product-body .product-price {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .product-card .product-body .product-price .current {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2d7d46;
+    }
+    .product-card .product-body .product-price .original {
+        font-size: 14px;
+        color: #999;
+        text-decoration: line-through;
+    }
+    .product-card .product-body .product-variants {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid #f0f0f0;
+    }
+    .product-card .product-body .product-variants .variant-dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 1px solid #e9ecef;
+        display: inline-block;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .product-card .product-body .product-variants .variant-dot:hover {
+        border-color: #0d6efd;
+        transform: scale(1.1);
+    }
+    .product-card .product-body .product-variants .variant-dot.more {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #e9ecef;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 600;
+        color: #6c757d;
+    }
+    
+    .product-card .product-actions {
+        padding: 10px 15px 15px 15px;
+        border-top: 1px solid #f0f0f0;
+        display: flex;
+        gap: 8px;
+    }
+    .product-card .product-actions .btn-view {
+        flex: 1;
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid #0d6efd;
+        background: transparent;
+        color: #0d6efd;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+        text-decoration: none;
+    }
+    .product-card .product-actions .btn-view:hover {
+        background: #0d6efd;
+        color: white;
+    }
+    .product-card .product-actions .btn-cart {
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: none;
+        background: #0d6efd;
+        color: white;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .product-card .product-actions .btn-cart:hover {
+        background: #0b5ed7;
+    }
+    .product-card .product-actions .btn-cart:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+    }
+    
+    /* ============================================ */
+    /* TOP BAR                                      */
+    /* ============================================ */
+    .shop-top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding: 15px 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .shop-top-bar .results-count {
+        font-size: 14px;
+        color: #6c757d;
+    }
+    .shop-top-bar .results-count strong {
+        color: #1a1a2e;
+    }
+    .shop-top-bar .sort-options {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .shop-top-bar .sort-options label {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+    .shop-top-bar .sort-options select {
+        padding: 6px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        cursor: pointer;
+    }
+    .shop-top-bar .sort-options select:focus {
+        outline: none;
+        border-color: #0d6efd;
+    }
+    
+    /* ============================================ */
+    /* ACTIVE FILTERS                              */
+    /* ============================================ */
+    .active-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 15px;
+        padding: 10px 15px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+    }
+    .active-filters .filter-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        background: #e7f1ff;
+        color: #0d6efd;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 500;
+    }
+    .active-filters .filter-tag .remove {
+        cursor: pointer;
+        font-size: 14px;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+    .active-filters .filter-tag .remove:hover {
+        opacity: 1;
+    }
+    .active-filters .clear-all {
+        color: #dc3545;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        padding: 4px 12px;
+        border-radius: 12px;
+        transition: background 0.2s;
+    }
+    .active-filters .clear-all:hover {
+        background: #f8d7da;
+    }
+    
+    /* ============================================ */
+    /* MOBILE TOGGLE                               */
+    /* ============================================ */
+    .filter-toggle-btn {
+        display: none;
+        padding: 10px 20px;
+        background: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 15px;
+    }
+    .filter-toggle-btn:hover {
+        background: #0b5ed7;
+    }
+    
+    /* ============================================ */
+    /* EMPTY STATE                                  */
+    /* ============================================ */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 12px;
+    }
+    .empty-state i {
+        font-size: 64px;
+        color: #adb5bd;
+        display: block;
+        margin-bottom: 20px;
+    }
+    .empty-state h4 {
+        color: #1a1a2e;
+        margin-bottom: 10px;
+    }
+    .empty-state p {
+        color: #6c757d;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    .empty-state .btn-primary {
+        background: #0d6efd;
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-block;
+        font-weight: 600;
+        transition: background 0.3s;
+    }
+    .empty-state .btn-primary:hover {
+        background: #0b5ed7;
+    }
+    
+    /* ============================================ */
+    /* RESPONSIVE                                  */
+    /* ============================================ */
+    @media (max-width: 992px) {
+        .filter-sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 300px;
+            height: 100vh;
+            z-index: 1050;
+            background: white;
+            padding: 20px;
+            transition: left 0.3s ease;
+            border-radius: 0;
+            max-height: 100vh;
+            overflow-y: auto;
+            box-shadow: 0 0 30px rgba(0,0,0,0.2);
+        }
+        .filter-sidebar.open {
+            left: 0;
+        }
+        .filter-toggle-btn {
+            display: block;
+        }
+        .filter-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+        }
+        .filter-overlay.active {
+            display: block;
+        }
+        .product-grid {
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+        }
+        .product-card .product-image {
+            height: 150px;
+        }
+        .shop-top-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .product-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .product-card .product-image {
+            height: 120px;
+        }
+        .product-card .product-body {
+            padding: 10px;
+        }
+        .product-card .product-body .product-name {
+            font-size: 12px;
+        }
+        .product-card .product-body .product-price .current {
+            font-size: 15px;
+        }
+        .product-card .product-actions {
+            padding: 8px 10px 10px 10px;
+            flex-direction: column;
+        }
+        .product-card .product-actions .btn-view,
+        .product-card .product-actions .btn-cart {
+            font-size: 11px;
+            padding: 6px;
+        }
+        .filter-sidebar {
+            width: 280px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="shop-container">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb bg-transparent p-0">
+                <li class="breadcrumb-item"><a href="{% url 'Ecom:home' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'Ecom:shop' %}">Shop</a></li>
+                {% if category %}
+                    <li class="breadcrumb-item active">{{ category.name }}</li>
+                {% elif subcategory %}
+                    <li class="breadcrumb-item"><a href="{% url 'Ecom:category_shop' subcategory.category.slug %}">{{ subcategory.category.name }}</a></li>
+                    <li class="breadcrumb-item active">{{ subcategory.name }}</li>
+                {% else %}
+                    <li class="breadcrumb-item active">All Products</li>
+                {% endif %}
+            </ol>
+        </nav>
+
+        <!-- Category/Subcategory Header -->
+        {% if category %}
+            <div class="mb-4">
+                <h1 class="display-6">{{ category.name }}</h1>
+                {% if category.description %}
+                    <p class="text-muted">{{ category.description }}</p>
+                {% endif %}
+                {% if category.image %}
+                    <img src="{{ category.image.url }}" alt="{{ category.name }}" style="max-height:200px;width:100%;object-fit:cover;border-radius:12px;" class="mt-2">
+                {% endif %}
+            </div>
+        {% elif subcategory %}
+            <div class="mb-4">
+                <h1 class="display-6">{{ subcategory.name }}</h1>
+                <p class="text-muted">Category: <a href="{% url 'Ecom:category_shop' subcategory.category.slug %}">{{ subcategory.category.name }}</a></p>
+                {% if subcategory.description %}
+                    <p class="text-muted">{{ subcategory.description }}</p>
+                {% endif %}
+                {% if subcategory.image %}
+                    <img src="{{ subcategory.image.url }}" alt="{{ subcategory.name }}" style="max-height:200px;width:100%;object-fit:cover;border-radius:12px;" class="mt-2">
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Mobile Filter Toggle -->
+        <button class="filter-toggle-btn" onclick="toggleFilter()">
+            <i class="fas fa-filter"></i> Filter Products
+        </button>
+        <div class="filter-overlay" id="filterOverlay" onclick="toggleFilter()"></div>
+
+        <div class="row">
+            <!-- Filter Sidebar -->
+            <div class="col-lg-3">
+                <div class="filter-sidebar" id="filterSidebar">
+                    <div class="d-flex justify-content-between align-items-center d-lg-none mb-3">
+                        <h5 class="mb-0">Filters</h5>
+                        <button class="btn-close" onclick="toggleFilter()"></button>
+                    </div>
+
+                    <!-- ============================================ -->
+                    <!-- SEARCH FILTER                               -->
+                    <!-- ============================================ -->
+                    <div class="filter-section">
+                        <div class="filter-title">Search</div>
+                        <form method="GET" id="searchForm">
+                            {% for key, value in current_filters.items %}
+                                {% if key != 'search' and value %}
+                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                {% endif %}
+                            {% endfor %}
+                            <div class="input-group">
+                                <input type="text" name="search" class="form-control" placeholder="Search products..." value="{{ current_filters.search|default:'' }}">
+                                <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- ============================================ -->
+                    <!-- CATEGORY FILTER (Main Shop Only)             -->
+                    <!-- ============================================ -->
+                    {% if not category and not subcategory %}
+                    <div class="filter-section">
+                        <div class="filter-title">
+                            Categories
+                            <span class="count">{{ filter_options.categories.count }}</span>
+                        </div>
+                        {% for cat in filter_options.categories %}
+                            <a href="{% url 'Ecom:category_shop' cat.slug %}" class="filter-option" style="text-decoration:none;">
+                                <input type="checkbox" disabled {% if current_filters.category == cat.id|stringformat:"s" %}checked{% endif %}>
+                                <label>{{ cat.name }}</label>
+                                <span class="badge-count">{{ cat.count }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- ============================================ -->
+                    <!-- SUBCATEGORY FILTER                           -->
+                    <!-- ============================================ -->
+                    {% if not subcategory and filter_options.subcategories %}
+                    <div class="filter-section">
+                        <div class="filter-title">
+                            Subcategories
+                            <span class="count">{{ filter_options.subcategories.count }}</span>
+                        </div>
+                        {% for sub in filter_options.subcategories %}
+                            <a href="{% url 'Ecom:subcategory_shop' sub.slug %}" class="filter-option" style="text-decoration:none;">
+                                <input type="checkbox" disabled {% if current_filters.subcategory == sub.id|stringformat:"s" %}checked{% endif %}>
+                                <label>{{ sub.name }}</label>
+                                <span class="badge-count">{{ sub.count }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- ============================================ -->
+                    <!-- BRAND FILTER                                -->
+                    <!-- ============================================ -->
+                    {% if filter_options.brands %}
+                    <div class="filter-section">
+                        <div class="filter-title">
+                            Brands
+                            <span class="count">{{ filter_options.brands|length }}</span>
+                        </div>
+                        <form method="GET" id="brandFilterForm">
+                            {% for key, value in current_filters.items %}
+                                {% if key != 'brands' and value %}
+                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                {% endif %}
+                            {% endfor %}
+                            {% for brand in filter_options.brands %}
+                                <div class="filter-option">
+                                    <input type="checkbox" name="brands" value="{{ brand }}" 
+                                           onchange="this.form.submit()"
+                                           {% if brand in current_filters.brands %}checked{% endif %}>
+                                    <label>{{ brand }}</label>
+                                </div>
+                            {% endfor %}
+                        </form>
+                    </div>
+                    {% endif %}
+
+                    <!-- ============================================ -->
+                    <!-- COLOR FILTER                                -->
+                    <!-- ============================================ -->
+                    {% if filter_options.colors %}
+                    <div class="filter-section">
+                        <div class="filter-title">
+                            Colors
+                            <span class="count">{{ filter_options.colors|length }}</span>
+                        </div>
+                        <form method="GET" id="colorFilterForm">
+                            {% for key, value in current_filters.items %}
+                                {% if key != 'colors' and value %}
+                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                {% endif %}
+                            {% endfor %}
+                            {% for color in filter_options.colors %}
+                                <div class="filter-option">
+                                    <input type="checkbox" name="colors" value="{{ color }}" 
+                                           onchange="this.form.submit()"
+                                           {% if color in current_filters.colors %}checked{% endif %}>
+                                    <span class="color-swatch" style="background:{{ color|lower }};"></span>
+                                    <label>{{ color }}</label>
+                                </div>
+                            {% endfor %}
+                        </form>
+                    </div>
+                    {% endif %}
+
+                    <!-- ============================================ -->
+                    <!-- SIZE FILTER                                 -->
+                    <!-- ============================================ -->
+                    {% if filter_options.sizes %}
+                    <div class="filter-section">
+                        <div class="filter-title">
+                            Sizes
+                            <span class="count">{{ filter_options.sizes|length }}</span>
+                        </div>
+                        <form method="GET" id="sizeFilterForm">
+                            {% for key, value in current_filters.items %}
+                                {% if key != 'sizes' and value %}
+                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                {% endif %}
+                            {% endfor %}
+                            {% for size in filter_options.sizes %}
+                                <div class="filter-option">
+                                    <input type="checkbox" name="sizes" value="{{ size }}" 
+                                           onchange="this.form.submit()"
+                                           {% if size in current_filters.sizes %}checked{% endif %}>
+                                    <label>{{ size }}</label>
+                                </div>
+                            {% endfor %}
+                        </form>
+                    </div>
+                    {% endif %}
+
+                    <!-- ============================================ -->
+                    <!-- MATERIAL FILTER                             -->
+                    <!-- ============================================ -->
+                    {% if filter_options.materials %}
+                    <div class="filter-section">
+                        <div class="filter-title">
+                            Materials
+                            <span class="count">{{ filter_options.materials|length }}</span>
+                        </div>
+                        <form method="GET" id="materialFilterForm">
+                            {% for key, value in current_filters.items %}
+                                {% if key != 'materials' and value %}
+                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                {% endif %}
+                            {% endfor %}
+                            {% for material in filter_options.materials %}
+                                <div class="filter-option">
+                                    <input type="checkbox" name="materials" value="{{ material }}" 
+                                           onchange="this.form.submit()"
+                                           {% if material in current_filters.materials %}checked{% endif %}>
+                                    <label>{{ material }}</label>
+                                </div>
+                            {% endfor %}
+                        </form>
+                    </div>
+                    {% endif %}
+
+                    <!-- ============================================ -->
+                    <!-- PRICE RANGE                                 -->
+                    <!-- ============================================ -->
+                    <div class="filter-section">
+                        <div class="filter-title">Price Range</div>
+                        <form method="GET" id="priceFilterForm" onsubmit="return false;">
+                            {% for key, value in current_filters.items %}
+                                {% if key != 'price_min' and key != 'price_max' and value %}
+                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                {% endif %}
+                            {% endfor %}
+                            <div class="price-range">
+                                <input type="range" class="price-slider" id="priceSlider" 
+                                       min="{{ price_range.min }}" max="{{ price_range.max }}" 
+                                       value="{{ current_filters.price_max|default:price_range.max }}" 
+                                       oninput="updatePriceDisplay(this.value)">
+                                <div class="price-inputs">
+                                    <input type="number" id="priceMin" name="price_min" 
+                                           value="{{ current_filters.price_min|default:price_range.min }}" 
+                                           min="{{ price_range.min }}" max="{{ price_range.max }}">
+                                    <span style="display:flex;align-items:center;color:#6c757d;">-</span>
+                                    <input type="number" id="priceMax" name="price_max" 
+                                           value="{{ current_filters.price_max|default:price_range.max }}" 
+                                           min="{{ price_range.min }}" max="{{ price_range.max }}">
+                                </div>
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-primary btn-sm w-100" onclick="applyPriceFilter()">
+                                        Apply Price Filter
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- ============================================ -->
+                    <!-- RATING FILTER                               -->
+                    <!-- ============================================ -->
+                    <div class="filter-section">
+                        <div class="filter-title">
+                            Rating
+                            <span class="count">{{ filter_options.rating_counts|length }}</span>
+                        </div>
+                        <form method="GET" id="ratingFilterForm">
+                            {% for key, value in current_filters.items %}
+                                {% if key != 'rating' and value %}
+                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                {% endif %}
+                            {% endfor %}
+                            <div class="filter-option">
+                                <input type="radio" name="rating" value="" 
+                                       onchange="this.form.submit()"
+                                       {% if not current_filters.rating %}checked{% endif %}>
+                                <label>All Ratings</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" name="rating" value="4" 
+                                       onchange="this.form.submit()"
+                                       {% if current_filters.rating == '4' %}checked{% endif %}>
+                                <label>
+                                    <i class="fas fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    <i class="fas fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    <i class="fas fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    <i class="fas fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    <i class="far fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    &amp; Up
+                                </label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" name="rating" value="3" 
+                                       onchange="this.form.submit()"
+                                       {% if current_filters.rating == '3' %}checked{% endif %}>
+                                <label>
+                                    <i class="fas fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    <i class="fas fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    <i class="fas fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    <i class="far fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    <i class="far fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    &amp; Up
+                                </label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" name="rating" value="2" 
+                                       onchange="this.form.submit()"
+                                       {% if current_filters.rating == '2' %}checked{% endif %}>
+                                <label>
+                                    <i class="fas fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    <i class="fas fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    <i class="far fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    <i class="far fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    <i class="far fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    &amp; Up
+                                </label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="radio" name="rating" value="1" 
+                                       onchange="this.form.submit()"
+                                       {% if current_filters.rating == '1' %}checked{% endif %}>
+                                <label>
+                                    <i class="fas fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    <i class="far fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    <i class="far fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    <i class="far fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    <i class="far fa-star" style="color:#ffc107;font-size:14px;"></i>
+                                    &amp; Up
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- ============================================ -->
+                    <!-- STOCK & STATUS FILTERS                      -->
+                    <!-- ============================================ -->
+                    <div class="filter-section">
+                        <div class="filter-title">Product Status</div>
+                        <form method="GET" id="statusFilterForm">
+                            {% for key, value in current_filters.items %}
+                                {% if key != 'in_stock' and key != 'is_new' and value %}
+                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                {% endif %}
+                            {% endfor %}
+                            <div class="filter-option">
+                                <input type="checkbox" name="in_stock" value="1" 
+                                       onchange="this.form.submit()"
+                                       {% if current_filters.in_stock %}checked{% endif %}>
+                                <label><i class="fas fa-check-circle" style="color:#28a745;"></i> In Stock Only</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="checkbox" name="is_new" value="1" 
+                                       onchange="this.form.submit()"
+                                       {% if current_filters.is_new %}checked{% endif %}>
+                                <label><i class="fas fa-clock" style="color:#17a2b8;"></i> New Arrivals</label>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- ============================================ -->
+                    <!-- POPULARITY FILTERS                          -->
+                    <!-- ============================================ -->
+                    <div class="filter-section">
+                        <div class="filter-title">Popularity</div>
+                        <form method="GET" id="popularityFilterForm">
+                            {% for key, value in current_filters.items %}
+                                {% if key != 'is_best_seller' and key != 'is_featured' and value %}
+                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                {% endif %}
+                            {% endfor %}
+                            <div class="filter-option">
+                                <input type="checkbox" name="is_best_seller" value="1" 
+                                       onchange="this.form.submit()"
+                                       {% if current_filters.is_best_seller %}checked{% endif %}>
+                                <label><i class="fas fa-trophy" style="color:#ffc107;"></i> Best Sellers</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="checkbox" name="is_featured" value="1" 
+                                       onchange="this.form.submit()"
+                                       {% if current_filters.is_featured %}checked{% endif %}>
+                                <label><i class="fas fa-star" style="color:#0d6efd;"></i> Featured Products</label>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- ============================================ -->
+                    <!-- CLEAR ALL FILTERS                           -->
+                    <!-- ============================================ -->
+                    {% if active_filters %}
+                    <div class="filter-section">
+                        <a href="{% if category %}{% url 'Ecom:category_shop' category.slug %}{% elif subcategory %}{% url 'Ecom:subcategory_shop' subcategory.slug %}{% else %}{% url 'Ecom:shop' %}{% endif %}" 
+                           class="btn btn-outline-danger btn-sm w-100">
+                            <i class="fas fa-times-circle"></i> Clear All Filters
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- PRODUCT GRID                                 -->
+            <!-- ============================================ -->
+            <div class="col-lg-9">
+                <!-- Top Bar -->
+                <div class="shop-top-bar">
+                    <div class="results-count">
+                        Showing <strong>{{ products|length }}</strong> of <strong>{{ total_products }}</strong> products
+                    </div>
+                    <div class="sort-options">
+                        <label for="sortSelect">Sort by:</label>
+                        <select id="sortSelect" onchange="window.location.href=this.value">
+                            <option value="?sort=newest{% for key, value in current_filters.items %}{% if key != 'sort' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                                    {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+                            <option value="?sort=popular{% for key, value in current_filters.items %}{% if key != 'sort' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                                    {% if sort_by == 'popular' %}selected{% endif %}>Popular</option>
+                            <option value="?sort=rating_high{% for key, value in current_filters.items %}{% if key != 'sort' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                                    {% if sort_by == 'rating_high' %}selected{% endif %}>Highest Rated</option>
+                            <option value="?sort=price_low{% for key, value in current_filters.items %}{% if key != 'sort' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                                    {% if sort_by == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                            <option value="?sort=price_high{% for key, value in current_filters.items %}{% if key != 'sort' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                                    {% if sort_by == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                            <option value="?sort=name_asc{% for key, value in current_filters.items %}{% if key != 'sort' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                                    {% if sort_by == 'name_asc' %}selected{% endif %}>Name: A to Z</option>
+                            <option value="?sort=name_desc{% for key, value in current_filters.items %}{% if key != 'sort' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                                    {% if sort_by == 'name_desc' %}selected{% endif %}>Name: Z to A</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Active Filters -->
+                {% if active_filters %}
+                <div class="active-filters">
+                    {% for key, values in active_filters.items %}
+                        {% if key == 'brands' %}
+                            {% for value in values %}
+                                <span class="filter-tag">
+                                    Brand: {{ value }}
+                                    <span class="remove" onclick="removeFilter('brands','{{ value }}')">&times;</span>
+                                </span>
+                            {% endfor %}
+                        {% elif key == 'colors' %}
+                            {% for value in values %}
+                                <span class="filter-tag">
+                                    Color: {{ value }}
+                                    <span class="remove" onclick="removeFilter('colors','{{ value }}')">&times;</span>
+                                </span>
+                            {% endfor %}
+                        {% elif key == 'sizes' %}
+                            {% for value in values %}
+                                <span class="filter-tag">
+                                    Size: {{ value }}
+                                    <span class="remove" onclick="removeFilter('sizes','{{ value }}')">&times;</span>
+                                </span>
+                            {% endfor %}
+                        {% elif key == 'materials' %}
+                            {% for value in values %}
+                                <span class="filter-tag">
+                                    Material: {{ value }}
+                                    <span class="remove" onclick="removeFilter('materials','{{ value }}')">&times;</span>
+                                </span>
+                            {% endfor %}
+                        {% elif key == 'rating' %}
+                            <span class="filter-tag">
+                                Rating: {{ value }}★ &amp; Up
+                                <span class="remove" onclick="removeFilter('rating','')">&times;</span>
+                            </span>
+                        {% elif key == 'price_min' and active_filters.price_max %}
+                            <span class="filter-tag">
+                                Price: ₹{{ active_filters.price_min }} - ₹{{ active_filters.price_max }}
+                                <span class="remove" onclick="removePriceFilter()">&times;</span>
+                            </span>
+                        {% elif key == 'in_stock' %}
+                            <span class="filter-tag">
+                                <i class="fas fa-check-circle" style="color:#28a745;"></i> In Stock
+                                <span class="remove" onclick="removeFilter('in_stock','')">&times;</span>
+                            </span>
+                        {% elif key == 'is_new' %}
+                            <span class="filter-tag">
+                                <i class="fas fa-clock" style="color:#17a2b8;"></i> New Arrivals
+                                <span class="remove" onclick="removeFilter('is_new','')">&times;</span>
+                            </span>
+                        {% elif key == 'is_best_seller' %}
+                            <span class="filter-tag">
+                                <i class="fas fa-trophy" style="color:#ffc107;"></i> Best Sellers
+                                <span class="remove" onclick="removeFilter('is_best_seller','')">&times;</span>
+                            </span>
+                        {% elif key == 'is_featured' %}
+                            <span class="filter-tag">
+                                <i class="fas fa-star" style="color:#0d6efd;"></i> Featured
+                                <span class="remove" onclick="removeFilter('is_featured','')">&times;</span>
+                            </span>
+                        {% elif key == 'search' %}
+                            <span class="filter-tag">
+                                Search: "{{ value }}"
+                                <span class="remove" onclick="removeFilter('search','')">&times;</span>
+                            </span>
+                        {% endif %}
+                    {% endfor %}
+                    <a href="{% if category %}{% url 'Ecom:category_shop' category.slug %}{% elif subcategory %}{% url 'Ecom:subcategory_shop' subcategory.slug %}{% else %}{% url 'Ecom:shop' %}{% endif %}" class="clear-all">
+                        Clear All
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Products -->
+                {% if products %}
+                    <div class="product-grid">
+                        {% for product in products %}
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <a href="{% url 'Ecom:product_detail' product.id %}">
+                                        {% if product.main_image %}
+                                            <img src="{{ product.main_image }}" alt="{{ product.name }}">
+                                        {% else %}
+                                            <div style="height:100%;display:flex;align-items:center;justify-content:center;background:#f8f9fa;">
+                                                <i class="fas fa-image fa-2x text-muted"></i>
+                                            </div>
+                                        {% endif %}
+                                    </a>
+                                    {% if product.discount_percentage > 0 %}
+                                        <span class="badge-discount">-{{ product.discount_percentage|floatformat:0 }}%</span>
+                                    {% endif %}
+                                    {% if product.is_new %}
+                                        <span class="badge-new">New</span>
+                                    {% endif %}
+                                    {% if product.is_featured %}
+                                        <span class="badge-featured">Featured</span>
+                                    {% endif %}
+                                    {% if product.is_best_seller %}
+                                        <span class="badge-best-seller">Best Seller</span>
+                                    {% endif %}
+                                    <span class="badge-stock 
+                                        {% if product.is_out_of_stock %}out-of-stock
+                                        {% elif product.is_low_stock %}low-stock
+                                        {% else %}in-stock{% endif %}">
+                                        {% if product.is_out_of_stock %}
+                                            Out of Stock
+                                        {% elif product.is_low_stock %}
+                                            Low Stock
+                                        {% else %}
+                                            In Stock
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="product-body">
+                                    <a href="{% url 'Ecom:product_detail' product.id %}" class="product-name">
+                                        {{ product.name }}
+                                    </a>
+                                    {% if product.brand %}
+                                        <div class="product-brand">{{ product.brand }}</div>
+                                    {% endif %}
+                                    <div class="product-rating">
+                                        {% with avg=product.average_rating|default:0|floatformat:"0" %}
+                                            {% for i in "12345"|slice:avg %}
+                                                <i class="fas fa-star"></i>
+                                            {% endfor %}
+                                            {% for i in "12345"|slice:avg %}
+                                                <i class="far fa-star"></i>
+                                            {% endfor %}
+                                        {% endwith %}
+                                        <span class="count">({{ product.total_reviews }})</span>
+                                    </div>
+                                    <div class="product-price">
+                                        <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
+                                        {% if product.discount_percentage > 0 %}
+                                            <span class="original">₹{{ product.price }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if product.variants.exists %}
+                                        <div class="product-variants">
+                                            {% for variant in product.variants.all|slice:":4" %}
+                                                {% if variant.color %}
+                                                    <span class="variant-dot" style="background:{{ variant.color|lower }};" title="{{ variant.color }}"></span>
+                                                {% endif %}
+                                            {% endfor %}
+                                            {% if product.variants.count > 4 %}
+                                                <span class="variant-dot more">+{{ product.variants.count|add:"-4" }}</span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="product-actions">
+                                    <a href="{% url 'Ecom:product_detail' product.id %}" class="btn-view">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <button class="btn-cart" {% if product.is_out_of_stock %}disabled{% endif %} onclick="addToCart({{ product.id }})">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if products.has_other_pages %}
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if products.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ products.previous_page_number }}{% for key, value in current_filters.items %}{% if key != 'page' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        Previous
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% for i in products.paginator.page_range %}
+                                <li class="page-item {% if products.number == i %}active{% endif %}">
+                                    <a class="page-link" href="?page={{ i }}{% for key, value in current_filters.items %}{% if key != 'page' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        {{ i }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                            {% if products.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ products.next_page_number }}{% for key, value in current_filters.items %}{% if key != 'page' and value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        Next
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <h4>No Products Found</h4>
+                        <p>We couldn't find any products matching your criteria. Try adjusting your filters.</p>
+                        <a href="{% if category %}{% url 'Ecom:category_shop' category.slug %}{% elif subcategory %}{% url 'Ecom:subcategory_shop' subcategory.slug %}{% else %}{% url 'Ecom:shop' %}{% endif %}" class="btn-primary">
+                            <i class="fas fa-times-circle"></i> Clear All Filters
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- JAVASCRIPT                                  -->
+<!-- ============================================ -->
+<script>
+    // ============================================
+    // TOGGLE FILTER SIDEBAR (Mobile)
+    // ============================================
+    function toggleFilter() {
+        const sidebar = document.getElementById('filterSidebar');
+        const overlay = document.getElementById('filterOverlay');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+    }
+
+    // ============================================
+    // PRICE RANGE SLIDER
+    // ============================================
+    function updatePriceDisplay(value) {
+        document.getElementById('priceMax').value = value;
+    }
+
+    function applyPriceFilter() {
+        const min = document.getElementById('priceMin').value;
+        const max = document.getElementById('priceMax').value;
+        if (min && max) {
+            const form = document.getElementById('priceFilterForm');
+            // Remove existing price inputs and add new ones
+            const existingMin = form.querySelector('input[name="price_min"]');
+            const existingMax = form.querySelector('input[name="price_max"]');
+            if (existingMin) existingMin.remove();
+            if (existingMax) existingMax.remove();
+            
+            const minInput = document.createElement('input');
+            minInput.type = 'hidden';
+            minInput.name = 'price_min';
+            minInput.value = min;
+            form.appendChild(minInput);
+            
+            const maxInput = document.createElement('input');
+            maxInput.type = 'hidden';
+            maxInput.name = 'price_max';
+            maxInput.value = max;
+            form.appendChild(maxInput);
+            
+            form.submit();
+        }
+    }
+
+    // ============================================
+    // REMOVE SINGLE FILTER
+    // ============================================
+    function removeFilter(filterKey, filterValue) {
+        const url = new URL(window.location.href);
+        if (filterValue) {
+            // For array filters (brands, colors, sizes, materials)
+            const values = url.searchParams.getAll(filterKey);
+            const newValues = values.filter(v => v !== filterValue);
+            url.searchParams.delete(filterKey);
+            newValues.forEach(v => url.searchParams.append(filterKey, v));
+        } else {
+            url.searchParams.delete(filterKey);
+        }
+        window.location.href = url.toString();
+    }
+
+    function removePriceFilter() {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('price_min');
+        url.searchParams.delete('price_max');
+        window.location.href = url.toString();
+    }
+
+    // ============================================
+    // ADD TO CART
+    // ============================================
+    function addToCart(productId) {
+        alert('Product ' + productId + ' added to cart!');
+    }
+
+    // ============================================
+    // AUTO-SUBMIT FORMS ON CHANGE
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-submit checkbox forms
+        document.querySelectorAll('form input[type="checkbox"], form input[type="radio"]').forEach(function(input) {
+            if (input.closest('#brandFilterForm') || 
+                input.closest('#colorFilterForm') || 
+                input.closest('#sizeFilterForm') || 
+                input.closest('#materialFilterForm') ||
+                input.closest('#ratingFilterForm') || 
+                input.closest('#statusFilterForm') ||
+                input.closest('#popularityFilterForm')) {
+                // Already handled by onchange attribute
+            }
+        });
+    });
+
+    // ============================================
+    // SEARCH FORM SUBMIT ON ENTER
+    // ============================================
+    document.querySelector('#searchForm input[name="search"]')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            this.closest('form').submit();
+        }
+    });
+</script>
+{% endblock %}
