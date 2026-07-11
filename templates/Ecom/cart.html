@@ -10,19 +10,6 @@
     .cart-item:hover {
         background: #f8f9fa;
     }
-    .offer-badge {
-        background: #ffc107;
-        color: #1a1a2e;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 600;
-        display: inline-block;
-    }
-    .savings-text {
-        font-size: 13px;
-        font-weight: 600;
-    }
     .price-breakdown {
         display: flex;
         align-items: center;
@@ -37,8 +24,8 @@
     }
     .price-breakdown .discounted {
         color: #28a745;
-        font-weight: 600;
-        font-size: 15px;
+        font-weight: 700;
+        font-size: 16px;
     }
     .price-breakdown .offer-tag {
         background: #ffc107;
@@ -56,9 +43,21 @@
         font-size: 11px;
         font-weight: 600;
     }
-    .summary-savings {
-        color: #28a745;
+    .price-breakdown .best-discount-tag {
+        background: #28a745;
+        color: white;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 11px;
         font-weight: 600;
+    }
+    .price-breakdown .best-discount-tag i {
+        margin-right: 3px;
+    }
+    .price-breakdown .savings-text {
+        font-size: 13px;
+        font-weight: 600;
+        color: #28a745;
     }
     .offer-banner {
         background: linear-gradient(135deg, #fff3cd, #ffe69b);
@@ -160,31 +159,48 @@
                                 <h6 class="mb-1">{{ data.item.item_name }}</h6>
                                 <small class="text-muted">SKU: {{ data.item.item_sku }}</small>
                                 
-                                <!-- Price Breakdown with Offers -->
+                                <!-- ============================================ -->
+                                <!-- PRICE BREAKDOWN - CORRECT SAVINGS           -->
+                                <!-- ============================================ -->
                                 <div class="price-breakdown">
-                                    {% if data.has_product_discount %}
-                                        <span class="original">₹{{ data.original_price|floatformat:2 }}</span>
-                                        <span class="discounted">₹{{ data.product_discounted_price|floatformat:2 }}</span>
-                                        <span class="product-discount-tag">
-                                            <i class="fas fa-tags"></i> {{ data.item.product_discount_percentage|floatformat:0 }}% OFF
-                                        </span>
-                                    {% endif %}
+                                    <!-- Original Price -->
+                                    <span class="original">₹{{ data.original_price|floatformat:2 }}</span>
                                     
-                                    {% if data.offer_name and data.offer_name != "Product Discount" %}
-                                        <span class="original ms-2">₹{{ data.product_discounted_price|floatformat:2 }}</span>
-                                        <span class="discounted">₹{{ data.final_price|floatformat:2 }}</span>
+                                    <!-- Final Price -->
+                                    <span class="discounted">₹{{ data.final_price|floatformat:2 }}</span>
+                                    
+                                    <!-- DISPLAY ONLY THE APPLIED DISCOUNT -->
+                                    {% if data.has_offer %}
+                                        <!-- Offer Applied -->
                                         <span class="offer-tag">
                                             <i class="fas fa-gift"></i> {{ data.offer_name }}
                                         </span>
-                                        <span class="text-success savings-text">
+                                        <span class="savings-text">
                                             Save ₹{{ data.offer_discount|floatformat:2 }}
                                         </span>
+                                    {% elif data.has_product_discount %}
+                                        <!-- Product Discount Applied -->
+                                        <span class="product-discount-tag">
+                                            <i class="fas fa-tags"></i> Product Discount
+                                        </span>
+                                        <span class="savings-text">
+                                            Save ₹{{ data.product_discount_amount|floatformat:2 }}
+                                        </span>
+                                    {% else %}
+                                        <!-- No Discount -->
+                                        <span class="text-muted">No discount</span>
                                     {% endif %}
                                     
-                                    {% if not data.has_product_discount and not data.offer_name %}
-                                        <span class="fw-bold">₹{{ data.final_price|floatformat:2 }}</span>
+                                    <!-- Show Best Deal tag if both existed -->
+                                    {% if data.has_product_discount and data.has_offer %}
+                                        <span class="best-discount-tag">
+                                            <i class="fas fa-crown"></i> Best Deal
+                                        </span>
                                     {% endif %}
                                 </div>
+                                <!-- ============================================ -->
+                                <!-- END PRICE BREAKDOWN                        -->
+                                <!-- ============================================ -->
                             </div>
                             
                             <!-- Quantity & Actions -->
@@ -199,11 +215,13 @@
                                 </button>
                             </div>
                             
-                            <!-- Total -->
+                            <!-- Item Total -->
                             <div class="ms-3 text-end" style="min-width:80px;">
-                                <strong>₹{{ data.item.total_price|floatformat:2 }}</strong>
-                                {% if data.offer_discount %}
+                                <strong>₹{{ data.item_total|floatformat:2 }}</strong>
+                                {% if data.has_offer %}
                                     <br><small class="text-success">Save ₹{{ data.offer_discount|floatformat:2 }}</small>
+                                {% elif data.has_product_discount %}
+                                    <br><small class="text-success">Save ₹{{ data.product_discount_amount|floatformat:2 }}</small>
                                 {% endif %}
                             </div>
                         </div>
@@ -219,15 +237,17 @@
                         <h5 class="mb-0">Order Summary</h5>
                     </div>
                     <div class="card-body">
-                        <!-- Active Offers Banner -->
-                        {% if total_offer_savings > 0 %}
-                            <div class="offer-banner">
-                                <i class="fas fa-gift"></i>
-                                <span class="offer-text">
-                                    You saved ₹{{ total_offer_savings|floatformat:2 }} with offers!
-                                </span>
-                            </div>
-                        {% endif %}
+                        <!-- Total Savings Banner -->
+                        {% with total_savings=total_product_discount_savings|add:total_offer_savings %}
+                            {% if total_savings > 0 %}
+                                <div class="offer-banner">
+                                    <i class="fas fa-gift"></i>
+                                    <span class="offer-text">
+                                        🎉 You saved <strong>₹{{ total_savings|floatformat:2 }}</strong> today!
+                                    </span>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
                         
                         <!-- Price Breakdown -->
                         <div class="d-flex justify-content-between mb-2">
@@ -235,6 +255,15 @@
                             <span>₹{{ subtotal_without_offers|floatformat:2 }}</span>
                         </div>
                         
+                        <!-- Product Discounts (Only if applied) -->
+                        {% if total_product_discount_savings > 0 %}
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <span><i class="fas fa-tags"></i> Product Discount</span>
+                            <span>-₹{{ total_product_discount_savings|floatformat:2 }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Offer Savings (Only if applied) -->
                         {% if total_offer_savings > 0 %}
                         <div class="d-flex justify-content-between mb-2 text-success">
                             <span><i class="fas fa-gift"></i> Offer Savings</span>
@@ -243,10 +272,11 @@
                         {% endif %}
                         
                         <div class="d-flex justify-content-between mb-2 fw-bold">
-                            <span>Subtotal after offers</span>
+                            <span>Subtotal after discounts</span>
                             <span>₹{{ subtotal_with_offers|floatformat:2 }}</span>
                         </div>
                         
+                        <!-- Coupon Discount -->
                         {% if coupon_discount > 0 %}
                         <div class="d-flex justify-content-between mb-2 text-success">
                             <span><i class="fas fa-ticket-alt"></i> Coupon Discount</span>
@@ -259,6 +289,15 @@
                             <span class="h5">Total</span>
                             <span class="h5 text-success">₹{{ total|floatformat:2 }}</span>
                         </div>
+                        
+                        <!-- Total Savings Summary -->
+                        {% with total_actual_savings=total_product_discount_savings|add:total_offer_savings|add:coupon_discount %}
+                            {% if total_actual_savings > 0 %}
+                                <div class="text-success text-center mb-2">
+                                    <small>You saved ₹{{ total_actual_savings|floatformat:2 }} today!</small>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
                         
                         <!-- Coupon Section -->
                         {% if cart.coupon %}
@@ -328,6 +367,7 @@
     // ============================================
     function showToast(message, type = 'success') {
         const container = document.getElementById('toastContainer');
+        if (!container) return;
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         const icons = {
@@ -369,7 +409,6 @@
             return;
         }
         
-        // Disable input
         input.disabled = true;
         
         fetch('{% url "Ecom:update_cart_item" %}', {

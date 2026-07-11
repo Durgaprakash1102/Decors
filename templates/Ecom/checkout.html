@@ -1,3 +1,4 @@
+
 {% load static %}
 
 {% block title %}Checkout - MyStore{% endblock %}
@@ -148,7 +149,11 @@
         color: #1a1a2e;
         white-space: nowrap;
     }
-    .order-summary-item .offer-tag {
+    
+    /* ============================================ */
+    /* DISCOUNT TAGS                               */
+    /* ============================================ */
+    .offer-tag {
         font-size: 10px;
         background: #ffc107;
         color: #1a1a2e;
@@ -157,6 +162,31 @@
         font-weight: 600;
         margin-left: 4px;
         white-space: nowrap;
+    }
+    .product-discount-tag {
+        font-size: 10px;
+        background: #dc3545;
+        color: white;
+        padding: 1px 8px;
+        border-radius: 10px;
+        font-weight: 600;
+        margin-left: 4px;
+        white-space: nowrap;
+    }
+    .best-deal-tag {
+        font-size: 10px;
+        background: #28a745;
+        color: white;
+        padding: 1px 8px;
+        border-radius: 10px;
+        font-weight: 600;
+        margin-left: 4px;
+        white-space: nowrap;
+    }
+    .savings-badge {
+        font-size: 11px;
+        color: #28a745;
+        font-weight: 600;
     }
 
     .offer-banner {
@@ -280,6 +310,11 @@
             flex-direction: column;
             gap: 4px;
             text-align: center;
+        }
+        .product-discount-tag,
+        .best-deal-tag {
+            font-size: 8px;
+            padding: 1px 4px;
         }
     }
 </style>
@@ -453,21 +488,24 @@
                     <h5 class="mb-0">Order Summary</h5>
                 </div>
                 <div class="card-body">
-                    <!-- Offer Savings Banner -->
-                    {% if offer_savings > 0 %}
-                        <div class="offer-banner">
-                            <i class="fas fa-gift"></i>
-                            <span class="offer-text">
-                                🎉 You saved <strong>₹{{ offer_savings|floatformat:2 }}</strong> with offers!
-                            </span>
-                        </div>
-                    {% endif %}
+                    <!-- Total Savings Banner -->
+                    {% with total_savings=product_discount_savings|add:offer_savings %}
+                        {% if total_savings > 0 %}
+                            <div class="offer-banner">
+                                <i class="fas fa-gift"></i>
+                                <span class="offer-text">
+                                    🎉 You saved <strong>₹{{ total_savings|floatformat:2 }}</strong> today!
+                                </span>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
 
                     <!-- Items List -->
                     <div class="mb-3">
                         <h6>Items ({{ total_items }})</h6>
                         {% for data in items_data %}
                             <div class="order-summary-item">
+                                <!-- Product Image -->
                                 {% if data.item.main_image %}
                                     <img src="{{ data.item.main_image }}" alt="{{ data.item.item_name }}" class="item-image">
                                 {% else %}
@@ -475,20 +513,40 @@
                                         <i class="fas fa-image text-muted"></i>
                                     </div>
                                 {% endif %}
+                                
+                                <!-- Product Details -->
                                 <div class="item-details">
                                     <div class="item-name">
                                         {{ data.item.item_name|truncatechars:25 }}
+                                        
+                                        <!-- ============================================ -->
+                                        <!-- DISPLAY ONLY THE APPLIED DISCOUNT            -->
+                                        <!-- ============================================ -->
                                         {% if data.offer_name and data.offer_name != "Product Discount" %}
+                                            <!-- Offer Applied -->
                                             <span class="offer-tag">{{ data.offer_name }}</span>
+                                        {% elif data.product_discount_amount > 0 and not data.offer_name %}
+                                            <!-- Product Discount Applied -->
+                                            <span class="product-discount-tag">Product Discount</span>
+                                        {% endif %}
+                                        
+                                        <!-- Show Best Deal tag if both existed -->
+                                        {% if data.product_discount_amount > 0 and data.offer_discount > 0 %}
+                                            <span class="best-deal-tag">
+                                                <i class="fas fa-crown"></i> Best Deal
+                                            </span>
                                         {% endif %}
                                     </div>
                                     <div class="item-meta">
                                         Qty: {{ data.item.quantity }} × 
-                                        {% if data.offer_name and data.offer_name != "Product Discount" %}
-                                            <span class="fw-bold">₹{{ data.final_price|floatformat:2 }}</span>
-                                            <span class="text-muted text-decoration-line-through ms-1">₹{{ data.product_discounted_price|floatformat:2 }}</span>
-                                        {% else %}
-                                            <span class="fw-bold">₹{{ data.item.price|floatformat:2 }}</span>
+                                        <span class="fw-bold">₹{{ data.final_price|floatformat:2 }}</span>
+                                        
+                                        <!-- Show original price if discounted -->
+                                        {% if data.final_price < data.original_price %}
+                                            <span class="text-muted text-decoration-line-through ms-1">₹{{ data.original_price|floatformat:2 }}</span>
+                                            <span class="savings-badge ms-1">
+                                                Save ₹{{ data.actual_savings|floatformat:2 }}
+                                            </span>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -507,6 +565,15 @@
                         <span>₹{{ subtotal_without_offers|floatformat:2 }}</span>
                     </div>
                     
+                    <!-- Product Discounts (Only if applied) -->
+                    {% if product_discount_savings > 0 %}
+                    <div class="d-flex justify-content-between mb-2 text-success">
+                        <span><i class="fas fa-tags"></i> Product Discounts</span>
+                        <span>-₹{{ product_discount_savings|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Offer Savings (Only if applied) -->
                     {% if offer_savings > 0 %}
                     <div class="d-flex justify-content-between mb-2 text-success">
                         <span><i class="fas fa-gift"></i> Offer Savings</span>
@@ -515,10 +582,11 @@
                     {% endif %}
                     
                     <div class="d-flex justify-content-between mb-2 fw-bold">
-                        <span>Subtotal after offers</span>
+                        <span>Subtotal after discounts</span>
                         <span>₹{{ subtotal_with_offers|floatformat:2 }}</span>
                     </div>
                     
+                    <!-- Coupon Discount -->
                     {% if coupon_discount > 0 %}
                     <div class="d-flex justify-content-between mb-2 text-success">
                         <span><i class="fas fa-ticket-alt"></i> Coupon Discount</span>
@@ -537,14 +605,21 @@
                         <span class="h5 text-success">₹{{ total|floatformat:2 }}</span>
                     </div>
                     
+                    <!-- Total Savings Summary -->
+                    {% with total_actual_savings=product_discount_savings|add:offer_savings|add:coupon_discount %}
+                        {% if total_actual_savings > 0 %}
+                            <div class="text-success text-center mb-2">
+                                <small>You saved ₹{{ total_actual_savings|floatformat:2 }} today!</small>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    
                     <div class="alert alert-info small">
                         <i class="fas fa-info-circle"></i> 
                         Payment will be processed securely via Razorpay
                     </div>
                     
-                    <!-- ============================================ -->
-                    <!-- COUPON SECTION - SHOW ONLY IF APPLIED        -->
-                    <!-- ============================================ -->
+                    <!-- Coupon Section -->
                     {% if cart.coupon %}
                         <div class="coupon-applied">
                             <span>
@@ -557,9 +632,6 @@
                             </span>
                         </div>
                     {% endif %}
-                    <!-- ============================================ -->
-                    <!-- END COUPON SECTION                           -->
-                    <!-- ============================================ -->
                 </div>
             </div>
         </div>

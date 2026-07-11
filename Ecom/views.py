@@ -2063,7 +2063,7 @@ def get_or_create_cart(request):
 
 @login_required
 def cart_view(request):
-    """View cart page with offers applied"""
+    """View cart page with offers applied - Best discount only (product OR offer, not both)"""
     cart = get_or_create_cart(request)
     cart_items = cart.items.select_related('product', 'variant')
     
@@ -2075,26 +2075,33 @@ def cart_view(request):
     
     coupon_form = CouponApplyForm()
     
-    # Calculate totals with offers
-    subtotal_without_offers = 0
-    subtotal_with_offers = 0
-    total_offer_savings = 0
+    subtotal_without_offers = Decimal('0')
+    subtotal_with_offers = Decimal('0')
+    total_offer_savings = Decimal('0')
+    total_product_discount_savings = Decimal('0')
     items_data = []
     
     for item in cart_items:
-        # Get product and variant info
         product = item.product
         if not product:
             continue
-            
-        # Original price
-        original_price = item.original_price
         
-        # Product discounted price (if any)
-        product_discounted_price = item.price
+        original_price = Decimal(str(item.original_price))
+        product_discounted_price = Decimal(str(item.price))
+        quantity = Decimal(str(item.quantity))
         
-        # Calculate offer discount
+        # Calculate final price with best discount
         final_price, offer_name, offer_discount = calculate_offer_discount(product, product_discounted_price)
+        
+        # Calculate product discount amount
+        product_discount_amount = original_price - product_discounted_price
+        
+        # Determine which discount is applied
+        has_product_discount = product_discount_amount > 0
+        has_offer = offer_name is not None and offer_name != "Product Discount"
+        
+        # Calculate actual savings
+        actual_savings = original_price - final_price
         
         items_data.append({
             'item': item,
@@ -2103,15 +2110,24 @@ def cart_view(request):
             'final_price': final_price,
             'offer_name': offer_name,
             'offer_discount': offer_discount,
-            'has_product_discount': original_price > product_discounted_price,
+            'product_discount_amount': product_discount_amount,
+            'has_product_discount': has_product_discount,
+            'has_offer': has_offer,
+            'actual_savings': actual_savings,
+            'item_total': final_price * quantity,
         })
         
-        subtotal_without_offers += original_price * item.quantity
-        subtotal_with_offers += final_price * item.quantity
-        total_offer_savings += offer_discount * item.quantity
+        subtotal_without_offers += original_price * quantity
+        subtotal_with_offers += final_price * quantity
+        
+        if has_offer:
+            total_offer_savings += offer_discount * quantity
+        elif has_product_discount:
+            total_product_discount_savings += product_discount_amount * quantity
     
-    # Apply coupon on subtotal with offers
-    total_after_coupon = subtotal_with_offers - cart.discount_amount
+    # Apply coupon
+    coupon_discount = Decimal(str(cart.discount_amount)) if cart.discount_amount else Decimal('0')
+    total_after_coupon = subtotal_with_offers - coupon_discount
     
     context = {
         'cart': cart,
@@ -2122,7 +2138,8 @@ def cart_view(request):
         'subtotal_without_offers': subtotal_without_offers,
         'subtotal_with_offers': subtotal_with_offers,
         'total_offer_savings': total_offer_savings,
-        'coupon_discount': cart.discount_amount,
+        'total_product_discount_savings': total_product_discount_savings,
+        'coupon_discount': coupon_discount,
         'total': total_after_coupon,
         'total_items': cart.total_items,
     }
@@ -2408,19 +2425,22 @@ def checkout_view(request):
         return redirect('Ecom:cart')
     
     # Calculate totals with offers
-    subtotal_without_offers = 0
-    subtotal_with_offers = 0
-    total_offer_savings = 0
-    total_product_discount = 0
+    subtotal_without_offers = Decimal('0')
+    subtotal_with_offers = Decimal('0')
+    total_offer_savings = Decimal('0')
+    total_product_discount = Decimal('0')
     items_data = []
     applied_offer = None
-    best_offer_discount = 0
+    applied_offer_name = None
+    best_offer_discount = Decimal('0')
     
     for item in cart.items.all():
         if item.product:
-            original_price = item.original_price
-            product_discounted_price = item.price
+            original_price = Decimal(str(item.original_price))
+            product_discounted_price = Decimal(str(item.price))
             product_discount_amount = original_price - product_discounted_price
+            
+            # Calculate final price with best discount
             final_price, offer_name, offer_discount = calculate_offer_discount(item.product, product_discounted_price)
             
             # Track the best offer applied
@@ -2434,10 +2454,18 @@ def checkout_view(request):
                     ).first()
                     if offer_obj:
                         applied_offer = offer_obj
+                        applied_offer_name = offer_name
                         if offer_discount > best_offer_discount:
                             best_offer_discount = offer_discount
                 except Offer.DoesNotExist:
                     pass
+            
+            # Determine which discount is applied
+            has_product_discount = product_discount_amount > 0
+            has_offer = offer_name is not None and offer_name != "Product Discount"
+            
+            # Calculate actual savings
+            actual_savings = original_price - final_price
             
             items_data.append({
                 'item': item,
@@ -2447,28 +2475,38 @@ def checkout_view(request):
                 'offer_name': offer_name,
                 'offer_discount': offer_discount,
                 'product_discount_amount': product_discount_amount,
-                'item_total': final_price * item.quantity,
+                'has_product_discount': has_product_discount,
+                'has_offer': has_offer,
+                'actual_savings': actual_savings,
+                'item_total': final_price * Decimal(str(item.quantity)),
             })
             
-            subtotal_without_offers += original_price * item.quantity
-            subtotal_with_offers += final_price * item.quantity
-            total_offer_savings += offer_discount * item.quantity
-            total_product_discount += product_discount_amount * item.quantity
+            subtotal_without_offers += original_price * Decimal(str(item.quantity))
+            subtotal_with_offers += final_price * Decimal(str(item.quantity))
+            
+            if has_offer:
+                total_offer_savings += offer_discount * Decimal(str(item.quantity))
+            elif has_product_discount:
+                total_product_discount += product_discount_amount * Decimal(str(item.quantity))
         else:
+            # Fallback for items without product
             items_data.append({
                 'item': item,
-                'original_price': item.price,
-                'product_discounted_price': item.price,
-                'final_price': item.price,
+                'original_price': Decimal(str(item.price)),
+                'product_discounted_price': Decimal(str(item.price)),
+                'final_price': Decimal(str(item.price)),
                 'offer_name': None,
-                'offer_discount': 0,
-                'product_discount_amount': 0,
-                'item_total': item.price * item.quantity,
+                'offer_discount': Decimal('0'),
+                'product_discount_amount': Decimal('0'),
+                'has_product_discount': False,
+                'has_offer': False,
+                'actual_savings': Decimal('0'),
+                'item_total': Decimal(str(item.price)) * Decimal(str(item.quantity)),
             })
-            subtotal_without_offers += item.price * item.quantity
-            subtotal_with_offers += item.price * item.quantity
+            subtotal_without_offers += Decimal(str(item.price)) * Decimal(str(item.quantity))
+            subtotal_with_offers += Decimal(str(item.price)) * Decimal(str(item.quantity))
     
-    total_after_coupon = subtotal_with_offers - cart.discount_amount
+    total_after_coupon = subtotal_with_offers - Decimal(str(cart.discount_amount))
     
     # Get user's addresses
     addresses = request.user.addresses.filter(is_active=True) if hasattr(request.user, 'addresses') else []
@@ -2512,7 +2550,7 @@ def checkout_view(request):
                 subtotal=subtotal_without_offers,
                 product_discount_total=total_product_discount,
                 offer_discount=total_offer_savings,
-                coupon_discount=cart.discount_amount,
+                coupon_discount=Decimal(str(cart.discount_amount)),
                 coupon=cart.coupon,
                 offer=applied_offer,
                 total_amount=total_after_coupon,
@@ -2587,14 +2625,13 @@ def checkout_view(request):
         'subtotal_with_offers': subtotal_with_offers,
         'product_discount_savings': total_product_discount,
         'offer_savings': total_offer_savings,
-        'coupon_discount': cart.discount_amount,
+        'coupon_discount': Decimal(str(cart.discount_amount)),
         'total': total_after_coupon,
         'addresses': addresses,
         'total_items': cart.total_items,
         'form': form,
     }
     return render(request, 'Ecom/checkout.html', context)
-
 
 @login_required
 @csrf_exempt
@@ -3094,13 +3131,11 @@ def offer_toggle_status_view(request, offer_id):
 
 from decimal import Decimal
 
-from decimal import Decimal
-
 def calculate_offer_discount(product, price):
     """
     Calculate if any offer applies to this product
     Rules:
-    1. If product already has a discount, compare product discount vs offer discount
+    1. Compare product discount vs offer discount on the ORIGINAL price
     2. Apply the BEST discount (higher discount amount)
     3. Do NOT stack discounts
     
@@ -3116,21 +3151,28 @@ def calculate_offer_discount(product, price):
     best_offer_discount = Decimal('0')
     best_offer_name = None
     
-    # Convert price to Decimal
+    # Get original price
+    original_price = Decimal(str(product.price))
+    
+    # Convert price to Decimal (this is already product-discounted price from CartItem)
     if not isinstance(price, Decimal):
         price = Decimal(str(price))
     
+    # Calculate product discount amount
+    product_discount_amount = original_price - price
+    
     # ============================================
     # 1. FIND THE BEST OFFER DISCOUNT
+    #    Calculate offer on ORIGINAL price
     # ============================================
     for offer in offers:
         discount_value = Decimal(str(offer.discount_value))
         
         if offer.offer_type == 'product':
-            # Product-specific offer
             if offer.product and offer.product.id == product.id:
                 if offer.discount_type == 'percentage':
-                    discount = (price * discount_value) / Decimal('100')
+                    # Calculate on ORIGINAL price
+                    discount = (original_price * discount_value) / Decimal('100')
                     if offer.max_discount:
                         max_disc = Decimal(str(offer.max_discount))
                         if discount > max_disc:
@@ -3143,10 +3185,9 @@ def calculate_offer_discount(product, price):
                     best_offer_name = offer.name
                     
         elif offer.offer_type == 'category':
-            # Category offer
             if product.category and offer.category and offer.category.id == product.category.id:
                 if offer.discount_type == 'percentage':
-                    discount = (price * discount_value) / Decimal('100')
+                    discount = (original_price * discount_value) / Decimal('100')
                     if offer.max_discount:
                         max_disc = Decimal(str(offer.max_discount))
                         if discount > max_disc:
@@ -3157,44 +3198,35 @@ def calculate_offer_discount(product, price):
                 if discount > best_offer_discount:
                     best_offer_discount = discount
                     best_offer_name = offer.name
-                    
-        elif offer.offer_type == 'cart':
-            # Cart-level offers (handled separately at cart level)
-            pass
     
     # ============================================
-    # 2. CHECK PRODUCT DISCOUNT
-    # ============================================
-    product_discount_percentage = Decimal(str(product.discount_percentage)) if product.discount_percentage else Decimal('0')
-    product_discount_amount = Decimal('0')
-    
-    if product_discount_percentage > 0:
-        product_discount_amount = (price * product_discount_percentage) / Decimal('100')
-    
-    # ============================================
-    # 3. APPLY THE BEST DISCOUNT (NOT BOTH)
+    # 2. APPLY THE BEST DISCOUNT ON ORIGINAL PRICE
     # ============================================
     
     # Case 1: No product discount, no offer
     if product_discount_amount == 0 and best_offer_discount == 0:
         return price, None, Decimal('0')
     
-    # Case 2: Only product discount exists
+    # Case 2: Only product discount exists (no offer)
     if product_discount_amount > 0 and best_offer_discount == 0:
-        return price - product_discount_amount, "Product Discount", product_discount_amount
+        return price, "Product Discount", Decimal('0')
     
-    # Case 3: Only offer exists
+    # Case 3: Only offer exists (no product discount)
     if product_discount_amount == 0 and best_offer_discount > 0:
-        return price - best_offer_discount, best_offer_name, best_offer_discount
+        final_price = original_price - best_offer_discount
+        return final_price, best_offer_name, best_offer_discount
     
-    # Case 4: Both exist - apply the better one
+    # Case 4: Both exist - apply the better one on ORIGINAL price
     if product_discount_amount > 0 and best_offer_discount > 0:
-        if best_offer_discount > product_discount_amount:
+        product_final_price = original_price - product_discount_amount
+        offer_final_price = original_price - best_offer_discount
+        
+        if offer_final_price < product_final_price:
             # Offer gives better discount
-            return price - best_offer_discount, best_offer_name, best_offer_discount
+            return offer_final_price, best_offer_name, best_offer_discount
         else:
             # Product discount gives better discount
-            return price - product_discount_amount, "Product Discount", product_discount_amount
+            return product_final_price, "Product Discount", Decimal('0')
     
     # Fallback
     return price, None, Decimal('0')
