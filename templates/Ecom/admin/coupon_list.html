@@ -1,0 +1,689 @@
+{% load static %}
+
+{% block title %}Manage Coupons - MyStore{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ============================================ */
+    /* RESET & BASE                                */
+    /* ============================================ */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    .container-fluid {
+        padding: 20px 30px;
+        max-width: 1400px;
+        margin: 0 auto;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+    
+    /* ============================================ */
+    /* HEADER                                       */
+    /* ============================================ */
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    .header-section h2 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin: 0;
+    }
+    .header-section h2 i {
+        color: #0d6efd;
+        margin-right: 12px;
+    }
+    .btn-primary {
+        background: #0d6efd;
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-primary:hover {
+        background: #0b5ed7;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(13,110,253,0.3);
+    }
+    .btn-primary i {
+        font-size: 14px;
+    }
+
+    /* ============================================ */
+    /* STATS CARDS                                 */
+    /* ============================================ */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .stats-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px 24px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border-left: 4px solid;
+    }
+    .stats-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .stats-card.total { border-color: #0d6efd; }
+    .stats-card.active { border-color: #28a745; }
+    .stats-card.inactive { border-color: #dc3545; }
+    .stats-card.expired { border-color: #ffc107; }
+    .stats-card .number {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1a1a2e;
+        line-height: 1.2;
+    }
+    .stats-card .label {
+        font-size: 14px;
+        color: #6c757d;
+        margin-top: 4px;
+    }
+    .stats-card .label i {
+        margin-right: 6px;
+    }
+    .stats-card .label .text-success { color: #28a745; }
+    .stats-card .label .text-danger { color: #dc3545; }
+    .stats-card .label .text-warning { color: #ffc107; }
+
+    /* ============================================ */
+    /* TABLE                                        */
+    /* ============================================ */
+    .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    .card-body {
+        padding: 24px;
+    }
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+    thead {
+        background: #f8f9fa;
+        border-bottom: 2px solid #e9ecef;
+    }
+    thead th {
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 600;
+        color: #1a1a2e;
+        white-space: nowrap;
+    }
+    tbody tr {
+        border-bottom: 1px solid #e9ecef;
+        transition: background 0.2s;
+    }
+    tbody tr:hover {
+        background: #f8f9fa;
+    }
+    tbody td {
+        padding: 12px 16px;
+        vertical-align: middle;
+    }
+    .text-center {
+        text-align: center;
+    }
+    .text-muted {
+        color: #6c757d;
+    }
+    .text-success {
+        color: #28a745;
+    }
+    .fw-bold {
+        font-weight: 600;
+    }
+
+    /* Image */
+    .coupon-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 6px;
+        object-fit: cover;
+        border: 1px solid #e9ecef;
+    }
+    .image-placeholder {
+        width: 50px;
+        height: 50px;
+        border-radius: 6px;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #adb5bd;
+        border: 1px dashed #ced4da;
+    }
+
+    /* Badges */
+    .badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    .badge-success {
+        background: #d4edda;
+        color: #155724;
+    }
+    .badge-secondary {
+        background: #e9ecef;
+        color: #6c757d;
+    }
+    .badge-warning {
+        background: #fff3cd;
+        color: #856404;
+    }
+    .badge-info {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    /* Buttons */
+    .btn-group {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+    .btn-sm {
+        padding: 6px 10px;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        text-decoration: none;
+    }
+    .btn-sm:hover {
+        transform: translateY(-1px);
+    }
+    .btn-primary {
+        background: #0d6efd;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #0b5ed7;
+    }
+    .btn-warning {
+        background: #ffc107;
+        color: #1a1a2e;
+    }
+    .btn-warning:hover {
+        background: #e0a800;
+    }
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+    .btn-success:hover {
+        background: #1e7e34;
+    }
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+    .btn-danger:hover {
+        background: #bd2130;
+    }
+
+    /* ============================================ */
+    /* EMPTY STATE                                 */
+    /* ============================================ */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    .empty-state i {
+        font-size: 48px;
+        color: #adb5bd;
+        display: block;
+        margin-bottom: 15px;
+    }
+    .empty-state p {
+        color: #6c757d;
+        margin-bottom: 15px;
+    }
+
+    /* ============================================ */
+    /* MODAL (Pure CSS)                            */
+    /* ============================================ */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+    }
+    .modal-overlay.active {
+        display: flex;
+    }
+    .modal {
+        background: white;
+        border-radius: 16px;
+        padding: 0;
+        max-width: 450px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        animation: slideUp 0.3s ease;
+    }
+    .modal-header {
+        padding: 20px 24px 16px 24px;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .modal-header h5 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin: 0;
+    }
+    .modal-header h5 i {
+        color: #dc3545;
+        margin-right: 8px;
+    }
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #6c757d;
+        transition: color 0.2s;
+    }
+    .modal-close:hover {
+        color: #1a1a2e;
+    }
+    .modal-body {
+        padding: 20px 24px;
+    }
+    .modal-body p {
+        margin-bottom: 8px;
+        color: #1a1a2e;
+    }
+    .modal-body .text-danger {
+        color: #dc3545;
+        font-size: 13px;
+    }
+    .modal-body .highlight {
+        color: #0d6efd;
+        font-weight: 600;
+    }
+    .modal-footer {
+        padding: 16px 24px 20px 24px;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn-danger:hover {
+        background: #bd2130;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* ============================================ */
+    /* RESPONSIVE                                  */
+    /* ============================================ */
+    @media (max-width: 1200px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .container-fluid {
+            padding: 15px;
+        }
+        .header-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .header-section h2 {
+            font-size: 22px;
+        }
+        .btn-primary {
+            justify-content: center;
+        }
+        .stats-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .stats-card {
+            padding: 15px 18px;
+        }
+        .stats-card .number {
+            font-size: 24px;
+        }
+        .card-body {
+            padding: 15px;
+        }
+        table {
+            font-size: 13px;
+        }
+        thead th,
+        tbody td {
+            padding: 8px 10px;
+        }
+        .btn-group {
+            flex-direction: column;
+            gap: 4px;
+        }
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        .modal {
+            width: 95%;
+            margin: 10px;
+        }
+        .modal-header,
+        .modal-body,
+        .modal-footer {
+            padding: 15px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .stats-card {
+            padding: 12px 14px;
+        }
+        .stats-card .number {
+            font-size: 20px;
+        }
+        .stats-card .label {
+            font-size: 12px;
+        }
+        .coupon-image,
+        .image-placeholder {
+            width: 40px;
+            height: 40px;
+        }
+        .badge {
+            font-size: 10px;
+            padding: 2px 8px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- ============================================ -->
+    <!-- HEADER                                       -->
+    <!-- ============================================ -->
+    <div class="header-section">
+        <h2><i class="fas fa-ticket-alt"></i> Coupons</h2>
+        <a href="{% url 'Ecom:coupon_create' %}" class="btn-primary">
+            <i class="fas fa-plus"></i> Add New Coupon
+        </a>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- STATS                                        -->
+    <!-- ============================================ -->
+    <div class="stats-grid">
+        <div class="stats-card total">
+            <div class="number">{{ total_count|default:0 }}</div>
+            <div class="label"><i class="fas fa-ticket-alt"></i> Total Coupons</div>
+        </div>
+        <div class="stats-card active">
+            <div class="number">{{ active_count|default:0 }}</div>
+            <div class="label"><i class="fas fa-check-circle text-success"></i> Active</div>
+        </div>
+        <div class="stats-card inactive">
+            <div class="number">{{ inactive_count|default:0 }}</div>
+            <div class="label"><i class="fas fa-times-circle text-danger"></i> Inactive</div>
+        </div>
+        <div class="stats-card expired">
+            <div class="number">{{ expired_count|default:0 }}</div>
+            <div class="label"><i class="fas fa-clock text-warning"></i> Expired</div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- TABLE                                        -->
+    <!-- ============================================ -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Code</th>
+                            <th>Discount</th>
+                            <th>Min Order</th>
+                            <th>Uses</th>
+                            <th>Valid</th>
+                            <th>Status</th>
+                            <th style="min-width:150px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for coupon in coupons %}
+                        <tr>
+                            <td>
+                                {% if coupon.image %}
+                                    <img src="{{ coupon.image.url }}" alt="{{ coupon.code }}" class="coupon-image">
+                                {% else %}
+                                    <div class="image-placeholder">
+                                        <i class="fas fa-ticket-alt"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ coupon.code }}</strong></td>
+                            <td>
+                                <span class="fw-bold text-success">
+                                    {{ coupon.discount_display }}
+                                </span>
+                                {% if coupon.max_discount %}
+                                    <br><small class="text-muted">Max: ₹{{ coupon.max_discount }}</small>
+                                {% endif %}
+                            </td>
+                            <td>₹{{ coupon.min_order_amount }}</td>
+                            <td>
+                                {{ coupon.used_count }}
+                                {% if coupon.usage_limit %}
+                                    / {{ coupon.usage_limit }}
+                                {% else %}
+                                    / ∞
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small>
+                                    {{ coupon.valid_from|date:"M d" }} - {{ coupon.valid_to|date:"M d" }}
+                                </small>
+                            </td>
+                            <td>
+                                <span class="badge {% if coupon.is_active %}badge-success{% else %}badge-secondary{% endif %}">
+                                    {% if coupon.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                                {% if coupon.valid_to < now %}
+                                    <span class="badge badge-warning">Expired</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'Ecom:coupon_edit' coupon.id %}" class="btn-sm btn-primary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button class="btn-sm {% if coupon.is_active %}btn-warning{% else %}btn-success{% endif %}" 
+                                            onclick="toggleStatus('{{ coupon.id }}', '{{ coupon.code }}')" title="Toggle Status">
+                                        <i class="fas fa-{% if coupon.is_active %}pause{% else %}play{% endif %}"></i>
+                                    </button>
+                                    <button class="btn-sm btn-danger" 
+                                            onclick="confirmDelete('{{ coupon.id }}', '{{ coupon.code }}')" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <i class="fas fa-ticket-alt"></i>
+                                    <p>No coupons created yet.</p>
+                                    <a href="{% url 'Ecom:coupon_create' %}" class="btn-primary" style="display:inline-flex; padding:8px 20px; font-size:14px;">
+                                        <i class="fas fa-plus"></i> Create Coupon
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- DELETE CONFIRMATION MODAL (Pure CSS)        -->
+<!-- ============================================ -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h5><i class="fas fa-exclamation-triangle"></i> Confirm Delete</h5>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete coupon <span class="highlight" id="deleteItemName"></span>?</p>
+            <p class="text-danger"><i class="fas fa-exclamation-circle"></i> This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+            <form method="POST" id="deleteForm" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-danger">Yes, Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- JAVASCRIPT                                   -->
+<!-- ============================================ -->
+<script>
+    // ============================================
+    // CONFIRM DELETE
+    // ============================================
+    function confirmDelete(id, name) {
+        document.getElementById('deleteItemName').textContent = name;
+        document.getElementById('deleteForm').action = '/admin/coupon/delete/' + id + '/';
+        document.getElementById('deleteModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // ============================================
+    // CLOSE MODAL
+    // ============================================
+    function closeModal() {
+        document.getElementById('deleteModal').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // Close modal on overlay click
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+
+    // ============================================
+    // TOGGLE STATUS
+    // ============================================
+    function toggleStatus(id, name) {
+        if (confirm('Toggle status for coupon "' + name + '"?')) {
+            window.location.href = '/admin/coupon/toggle/' + id + '/';
+        }
+    }
+</script>
+
+{% endblock %}

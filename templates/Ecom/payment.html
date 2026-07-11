@@ -1,0 +1,107 @@
+
+{% load static %}
+
+{% block title %}Payment - MyStore{% endblock %}
+
+{% block extra_js %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0"><i class="fas fa-credit-card text-primary"></i> Complete Payment</h4>
+                </div>
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-lock fa-4x text-primary mb-4"></i>
+                    <h5>Order #{{ order.order_number }}</h5>
+                    <p class="text-muted">Amount: <strong>₹{{ order.total_amount|floatformat:2 }}</strong></p>
+                    <p class="text-muted small">You will be redirected to Razorpay secure payment gateway</p>
+                    <button id="payBtn" class="btn btn-primary btn-lg mt-3">
+                        <i class="fas fa-credit-card"></i> Pay ₹{{ order.total_amount|floatformat:2 }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('payBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    var options = {
+        key: '{{ razorpay_key }}',
+        amount: {{ amount }},
+        currency: '{{ currency }}',
+        name: 'MyStore',
+        description: 'Order #{{ order.order_number }}',
+        order_id: '{{ order.razorpay_order_id }}',
+        prefill: {
+            name: '{{ request.user.full_name }}',
+            email: '{{ request.user.email }}',
+            contact: '{{ request.user.phone|default:"" }}'
+        },
+        notes: {
+            order_id: '{{ order.id }}'
+        },
+        theme: {
+            color: '#0d6efd'
+        },
+        modal: {
+            ondismiss: function() {
+                window.location.href = "{% url 'Ecom:cart' %}";
+            }
+        },
+        // ============================================
+        // IMPORTANT: Handler for successful payment
+        // ============================================
+        handler: function(response) {
+            // Create a form and submit it to the success URL
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{% url 'Ecom:payment_success' %}";
+            
+            // Add CSRF token
+            var csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = '{{ csrf_token }}';
+            form.appendChild(csrfInput);
+            
+            // Add payment response data
+            var orderIdInput = document.createElement('input');
+            orderIdInput.type = 'hidden';
+            orderIdInput.name = 'razorpay_order_id';
+            orderIdInput.value = response.razorpay_order_id;
+            form.appendChild(orderIdInput);
+            
+            var paymentIdInput = document.createElement('input');
+            paymentIdInput.type = 'hidden';
+            paymentIdInput.name = 'razorpay_payment_id';
+            paymentIdInput.value = response.razorpay_payment_id;
+            form.appendChild(paymentIdInput);
+            
+            var signatureInput = document.createElement('input');
+            signatureInput.type = 'hidden';
+            signatureInput.name = 'razorpay_signature';
+            signatureInput.value = response.razorpay_signature;
+            form.appendChild(signatureInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+    };
+    
+    var rzp = new Razorpay(options);
+    rzp.on('payment.failed', function(response) {
+        alert('Payment failed! Please try again.');
+        window.location.href = "{% url 'Ecom:cart' %}";
+    });
+    rzp.open();
+});
+</script>
+{% endblock %}

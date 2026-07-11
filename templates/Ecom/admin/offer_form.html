@@ -1,0 +1,244 @@
+{% load static %}
+
+{% block title %}{{ action }} Offer - MyStore{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    .form-section .section-title {
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-bottom: 15px;
+        font-size: 16px;
+    }
+    .form-section .section-title i {
+        color: #fd7e14;
+        margin-right: 8px;
+    }
+    .image-preview {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        margin-bottom: 10px;
+        object-fit: cover;
+    }
+    .help-text {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="fas fa-gift text-warning"></i> 
+                    {{ action }} Offer
+                </h2>
+                <a href="{% url 'Ecom:offer_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" id="offerForm">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Information -->
+                        <div class="form-section">
+                            <div class="section-title"><i class="fas fa-info-circle"></i> Basic Information</div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Offer Name <span class="text-danger">*</span></label>
+                                    {{ form.name }}
+                                    {% if form.name.errors %}
+                                        <div class="text-danger small">{{ form.name.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Status</label>
+                                    <div class="form-check mt-2">
+                                        {{ form.is_active }}
+                                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Active</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Offer Type <span class="text-danger">*</span></label>
+                                    {{ form.offer_type }}
+                                    {% if form.offer_type.errors %}
+                                        <div class="text-danger small">{{ form.offer_type.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Priority</label>
+                                    {{ form.priority }}
+                                    {% if form.priority.errors %}
+                                        <div class="text-danger small">{{ form.priority.errors }}</div>
+                                    {% endif %}
+                                    <div class="help-text">Higher number = higher priority</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Target Selection -->
+                        <div class="form-section" id="targetSection">
+                            <div class="section-title"><i class="fas fa-bullseye"></i> Target</div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3" id="productField">
+                                    <label class="form-label fw-bold">Product</label>
+                                    {{ form.product }}
+                                    {% if form.product.errors %}
+                                        <div class="text-danger small">{{ form.product.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3" id="categoryField">
+                                    <label class="form-label fw-bold">Category</label>
+                                    {{ form.category }}
+                                    {% if form.category.errors %}
+                                        <div class="text-danger small">{{ form.category.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Discount Details -->
+                        <div class="form-section">
+                            <div class="section-title"><i class="fas fa-percent"></i> Discount Details</div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Discount Type <span class="text-danger">*</span></label>
+                                    {{ form.discount_type }}
+                                    {% if form.discount_type.errors %}
+                                        <div class="text-danger small">{{ form.discount_type.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Discount Value <span class="text-danger">*</span></label>
+                                    {{ form.discount_value }}
+                                    {% if form.discount_value.errors %}
+                                        <div class="text-danger small">{{ form.discount_value.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Max Discount</label>
+                                    {{ form.max_discount }}
+                                    {% if form.max_discount.errors %}
+                                        <div class="text-danger small">{{ form.max_discount.errors }}</div>
+                                    {% endif %}
+                                    <div class="help-text">Only for percentage discounts</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Minimum Order Amount</label>
+                                    {{ form.min_order_amount }}
+                                    {% if form.min_order_amount.errors %}
+                                        <div class="text-danger small">{{ form.min_order_amount.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Validity -->
+                        <div class="form-section">
+                            <div class="section-title"><i class="fas fa-calendar-alt"></i> Validity</div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Valid From <span class="text-danger">*</span></label>
+                                    {{ form.valid_from }}
+                                    {% if form.valid_from.errors %}
+                                        <div class="text-danger small">{{ form.valid_from.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Valid To <span class="text-danger">*</span></label>
+                                    {{ form.valid_to }}
+                                    {% if form.valid_to.errors %}
+                                        <div class="text-danger small">{{ form.valid_to.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description & Image -->
+                        <div class="form-section">
+                            <div class="section-title"><i class="fas fa-image"></i> Description & Image</div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Description</label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger small">{{ form.description.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Banner Image</label>
+                                {% if offer and offer.banner_image %}
+                                    <div class="mb-2">
+                                        <img src="{{ offer.banner_image.url }}" alt="{{ offer.name }}" class="image-preview">
+                                    </div>
+                                {% endif %}
+                                {{ form.banner_image }}
+                                {% if form.banner_image.errors %}
+                                    <div class="text-danger small">{{ form.banner_image.errors }}</div>
+                                {% endif %}
+                                <div class="help-text">Recommended size: 800x400px</div>
+                            </div>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'Ecom:offer_list' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> 
+                                {% if action == 'Create' %}Create Offer{% else %}Update Offer{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const offerType = document.getElementById('offer_type');
+        const productField = document.getElementById('productField');
+        const categoryField = document.getElementById('categoryField');
+        
+        function toggleTargetFields() {
+            const type = offerType.value;
+            if (type === 'product') {
+                productField.style.display = 'block';
+                categoryField.style.display = 'none';
+                document.getElementById('category_select').value = '';
+            } else if (type === 'category') {
+                productField.style.display = 'none';
+                categoryField.style.display = 'block';
+                document.getElementById('product_select').value = '';
+            } else {
+                productField.style.display = 'none';
+                categoryField.style.display = 'none';
+            }
+        }
+        
+        offerType.addEventListener('change', toggleTargetFields);
+        toggleTargetFields();
+    });
+</script>
+{% endblock %}

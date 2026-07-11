@@ -424,6 +424,42 @@
         color: #dc3545;
     }
 
+    /* Toast Notification */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+    .toast {
+        padding: 15px 25px;
+        border-radius: 10px;
+        color: white;
+        font-weight: 500;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        animation: slideInRight 0.5s ease;
+        min-width: 280px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .toast.success { background: #28a745; }
+    .toast.error { background: #dc3545; }
+    .toast.info { background: #17a2b8; }
+    .toast.warning { background: #ffc107; color: #1a1a2e; }
+    .toast .toast-close {
+        margin-left: auto;
+        cursor: pointer;
+        opacity: 0.8;
+        font-size: 18px;
+    }
+    .toast .toast-close:hover { opacity: 1; }
+    @keyframes slideInRight {
+        from { transform: translateX(100px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
     /* ============================================ */
     /* TABS - PURE CSS TABS                        */
     /* ============================================ */
@@ -900,6 +936,44 @@
     }
 
     /* ============================================ */
+    /* TOAST NOTIFICATIONS                         */
+    /* ============================================ */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+    .toast {
+        padding: 15px 25px;
+        border-radius: 10px;
+        color: white;
+        font-weight: 500;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        animation: slideInRight 0.5s ease;
+        min-width: 280px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .toast.success { background: #28a745; }
+    .toast.error { background: #dc3545; }
+    .toast.info { background: #17a2b8; }
+    .toast.warning { background: #ffc107; color: #1a1a2e; }
+    .toast .toast-close {
+        margin-left: auto;
+        cursor: pointer;
+        opacity: 0.8;
+        font-size: 18px;
+    }
+    .toast .toast-close:hover { opacity: 1; }
+    @keyframes slideInRight {
+        from { transform: translateX(100px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* ============================================ */
     /* RESPONSIVE                                  */
     /* ============================================ */
     @media (max-width: 992px) {
@@ -925,6 +999,8 @@
         .similar-grid { grid-template-columns: repeat(2, 1fr); }
         .rating-summary { flex-direction: column; align-items: center; }
         .rating-summary .rating-bars { width: 100%; }
+        .toast-container { top: 10px; right: 10px; }
+        .toast { min-width: 200px; padding: 12px 18px; font-size: 14px; }
     }
     
     @media (max-width: 480px) {
@@ -938,6 +1014,7 @@
         .tabs-input:checked + .tabs-label { border-bottom: 2px solid #0d6efd; }
         .tab-content { border-radius: 8px; border: 1px solid #e9ecef; margin-top: 0; }
         .product-card { padding: 20px; }
+        .toast { min-width: 160px; padding: 10px 14px; font-size: 13px; }
     }
 </style>
 {% endblock %}
@@ -947,14 +1024,19 @@
     <div class="container">
         
         <!-- ============================================ -->
+        <!-- TOAST CONTAINER                              -->
+        <!-- ============================================ -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- ============================================ -->
         <!-- BREADCRUMB                                   -->
         <!-- ============================================ -->
         <nav aria-label="Breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{% url 'Ecom:home' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="#">{{ product.category.name }}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'Ecom:category_shop' product.category.slug %}">{{ product.category.name }}</a></li>
                 {% if product.subcategory %}
-                    <li class="breadcrumb-item"><a href="#">{{ product.subcategory.name }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'Ecom:subcategory_shop' product.subcategory.slug %}">{{ product.subcategory.name }}</a></li>
                 {% endif %}
                 <li class="breadcrumb-item active">{{ product.name|truncatechars:30 }}</li>
             </ol>
@@ -1140,16 +1222,16 @@
                             <span class="quantity-label">Quantity</span>
                             <div class="qty-group">
                                 <button class="qty-btn" onclick="updateQuantity(-1)">−</button>
-                                <input type="number" class="qty-input" id="quantityInput" value="1" min="1" max="99">
+                                <input type="number" class="qty-input" id="quantityInput" value="1" min="1" max="{{ product.stock_quantity|default:99 }}">
                                 <button class="qty-btn" onclick="updateQuantity(1)">+</button>
                             </div>
                         </div>
 
                         <div class="action-buttons">
-                            <button class="btn btn-cart btn-lg" {% if product.is_out_of_stock %}disabled{% endif %} onclick="addToCart()">
+                            <button class="btn btn-cart btn-lg" id="addToCartBtn" {% if product.is_out_of_stock %}disabled{% endif %} onclick="addToCart()">
                                 <i class="fas fa-shopping-cart"></i> Add to Cart
                             </button>
-                            <button class="btn btn-wishlist" onclick="toggleWishlist(this)">
+                            <button class="btn btn-wishlist" id="wishlistBtn" onclick="toggleWishlist()">
                                 <i class="fas fa-heart"></i> <span class="wishlist-text">Add to Wishlist</span>
                             </button>
                         </div>
@@ -1392,6 +1474,52 @@
 <!-- ============================================ -->
 <script>
     // ============================================
+    // CSRF TOKEN HELPER
+    // ============================================
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // ============================================
+    // TOAST NOTIFICATION
+    // ============================================
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            info: 'fa-info-circle',
+            warning: 'fa-exclamation-triangle'
+        };
+        toast.innerHTML = `
+            <i class="fas ${icons[type] || icons.info}"></i>
+            <span>${message}</span>
+            <span class="toast-close" onclick="this.parentElement.remove()">&times;</span>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 5000);
+    }
+
+    // ============================================
     // CHANGE MAIN IMAGE
     // ============================================
     function changeMainImage(element, src) {
@@ -1403,7 +1531,6 @@
                 mainImg.style.opacity = '1';
             }, 200);
         }
-        // Update active thumbnail
         document.querySelectorAll('.thumbnail-wrapper .thumb').forEach(function(el) {
             el.classList.remove('active');
         });
@@ -1442,24 +1569,123 @@
     }
 
     // ============================================
-    // ADD TO CART
+    // ADD TO CART WITH AJAX
     // ============================================
     function addToCart() {
         const quantity = document.getElementById('quantityInput').value;
-        alert('Added to cart! Quantity: ' + quantity);
+        const productId = {{ product.id }};
+        const variantElements = document.querySelectorAll('.variant-option.selected');
+        let variantId = null;
+        if (variantElements.length > 0) {
+            const onclickAttr = variantElements[0].getAttribute('onclick');
+            if (onclickAttr) {
+                const match = onclickAttr.match(/selectVariant\(this, (\d+)\)/);
+                if (match) variantId = match[1];
+            }
+        }
+
+        if (parseInt(quantity) <= 0) {
+            showToast('Please select a valid quantity', 'warning');
+            return;
+        }
+
+        const button = document.getElementById('addToCartBtn');
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+        button.disabled = true;
+
+        fetch('{% url "Ecom:add_to_cart" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                variant_id: variantId,
+                quantity: quantity
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.requires_login) {
+                showToast('Please login to add items to cart', 'warning');
+                setTimeout(() => {
+                    window.location.href = '{% url "Ecom:login" %}?next={{ request.path }}';
+                }, 1500);
+            } else if (data.success) {
+                showToast(data.message, 'success');
+                // Update cart count in header
+                const cartBadge = document.querySelector('.cart-count');
+                if (cartBadge) {
+                    cartBadge.textContent = data.cart_count;
+                }
+            } else {
+                showToast(data.error || 'Failed to add to cart', 'error');
+            }
+        })
+        .catch(error => {
+            showToast('Network error. Please try again.', 'error');
+            console.error('Error:', error);
+        })
+        .finally(() => {
+            button.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+            button.disabled = false;
+        });
     }
 
     // ============================================
-    // TOGGLE WISHLIST
+    // TOGGLE WISHLIST WITH AJAX
     // ============================================
-    function toggleWishlist(button) {
-        button.classList.toggle('liked');
-        var textSpan = button.querySelector('.wishlist-text');
-        if (button.classList.contains('liked')) {
-            button.innerHTML = '<i class="fas fa-heart" style="color:#dc3545;"></i> <span class="wishlist-text">Remove from Wishlist</span>';
-        } else {
-            button.innerHTML = '<i class="fas fa-heart"></i> <span class="wishlist-text">Add to Wishlist</span>';
+    function toggleWishlist() {
+        const productId = {{ product.id }};
+        const variantElements = document.querySelectorAll('.variant-option.selected');
+        let variantId = null;
+        if (variantElements.length > 0) {
+            const onclickAttr = variantElements[0].getAttribute('onclick');
+            if (onclickAttr) {
+                const match = onclickAttr.match(/selectVariant\(this, (\d+)\)/);
+                if (match) variantId = match[1];
+            }
         }
+
+        const button = document.getElementById('wishlistBtn');
+        const originalHtml = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+        button.disabled = true;
+
+        fetch('{% url "Ecom:add_to_wishlist" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                variant_id: variantId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message, 'success');
+                if (data.in_wishlist) {
+                    button.innerHTML = '<i class="fas fa-heart" style="color:#dc3545;"></i> <span class="wishlist-text">Remove from Wishlist</span>';
+                    button.classList.add('liked');
+                } else {
+                    button.innerHTML = '<i class="fas fa-heart"></i> <span class="wishlist-text">Add to Wishlist</span>';
+                    button.classList.remove('liked');
+                }
+            } else {
+                showToast(data.error || 'Failed to update wishlist', 'error');
+            }
+        })
+        .catch(error => {
+            showToast('Network error. Please try again.', 'error');
+            console.error('Error:', error);
+        })
+        .finally(() => {
+            button.disabled = false;
+        });
     }
 
     // ============================================

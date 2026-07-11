@@ -5,12 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
 from .models import User, Profile, Address, OTP
-from .forms import (
-    CustomerSignupForm, AdminSignupForm, LoginForm, OTPVerificationForm,
-    ForgotPasswordForm, ResetPasswordForm, ChangePasswordForm,
-    ProfileUpdateForm, UserUpdateForm, AddressForm
-)
+from .forms import *
 from .utils import create_and_send_otp, verify_otp, delete_file_if_exists, get_user_by_identifier
+from decimal import Decimal
 
 
 from django.db.models import Q, Count, Avg, F, DecimalField
@@ -2011,3 +2008,1193 @@ def global_search_view(request):
         'count': len(results),
         'query': query,
     })
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import JsonResponse
+from django.db import transaction as db_transaction
+from django.utils import timezone
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from .models import (
+    Cart, CartItem, Wishlist, WishlistItem, 
+    Coupon, Offer, Order, OrderItem, Product, ProductVariant, Transaction
+)
+from .forms import CouponApplyForm, CheckoutForm
+import json
+import razorpay
+import uuid
+
+# Initialize Razorpay client
+razorpay_client = razorpay.Client(
+    auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+)
+
+
+def get_or_create_cart(request):
+    """Get or create cart for user or session"""
+    if request.user.is_authenticated:
+        cart, created = Cart.objects.get_or_create(user=request.user)
+        if request.session.get('cart_session_id'):
+            session_cart = Cart.objects.filter(session_id=request.session['cart_session_id']).first()
+            if session_cart and session_cart != cart:
+                for item in session_cart.items.all():
+                    cart_item, _ = CartItem.objects.get_or_create(
+                        cart=cart,
+                        product=item.product,
+                        variant=item.variant,
+                        defaults={'quantity': item.quantity}
+                    )
+                    if not _ and cart_item:
+                        cart_item.quantity += item.quantity
+                        cart_item.save()
+                session_cart.delete()
+            request.session.pop('cart_session_id', None)
+        return cart
+    else:
+        session_id = request.session.get('cart_session_id')
+        if not session_id:
+            session_id = str(uuid.uuid4())
+            request.session['cart_session_id'] = session_id
+        cart, created = Cart.objects.get_or_create(session_id=session_id)
+        return cart
+
+
+@login_required
+def cart_view(request):
+    """View cart page with offers applied"""
+    cart = get_or_create_cart(request)
+    cart_items = cart.items.select_related('product', 'variant')
+    
+    offers = Offer.objects.filter(
+        is_active=True,
+        valid_from__lte=timezone.now(),
+        valid_to__gte=timezone.now()
+    ).order_by('-priority')
+    
+    coupon_form = CouponApplyForm()
+    
+    # Calculate totals with offers
+    subtotal_without_offers = 0
+    subtotal_with_offers = 0
+    total_offer_savings = 0
+    items_data = []
+    
+    for item in cart_items:
+        # Get product and variant info
+        product = item.product
+        if not product:
+            continue
+            
+        # Original price
+        original_price = item.original_price
+        
+        # Product discounted price (if any)
+        product_discounted_price = item.price
+        
+        # Calculate offer discount
+        final_price, offer_name, offer_discount = calculate_offer_discount(product, product_discounted_price)
+        
+        items_data.append({
+            'item': item,
+            'original_price': original_price,
+            'product_discounted_price': product_discounted_price,
+            'final_price': final_price,
+            'offer_name': offer_name,
+            'offer_discount': offer_discount,
+            'has_product_discount': original_price > product_discounted_price,
+        })
+        
+        subtotal_without_offers += original_price * item.quantity
+        subtotal_with_offers += final_price * item.quantity
+        total_offer_savings += offer_discount * item.quantity
+    
+    # Apply coupon on subtotal with offers
+    total_after_coupon = subtotal_with_offers - cart.discount_amount
+    
+    context = {
+        'cart': cart,
+        'cart_items': cart_items,
+        'items_data': items_data,
+        'offers': offers,
+        'coupon_form': coupon_form,
+        'subtotal_without_offers': subtotal_without_offers,
+        'subtotal_with_offers': subtotal_with_offers,
+        'total_offer_savings': total_offer_savings,
+        'coupon_discount': cart.discount_amount,
+        'total': total_after_coupon,
+        'total_items': cart.total_items,
+    }
+    return render(request, 'Ecom/cart.html', context)
+
+def add_to_cart(request):
+    """Add product to cart"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            product_id = data.get('product_id')
+            variant_id = data.get('variant_id')
+            quantity = int(data.get('quantity', 1))
+            
+            product = None
+            variant = None
+            
+            if variant_id:
+                variant = get_object_or_404(ProductVariant, id=variant_id, is_active=True)
+                product = variant.product
+            elif product_id:
+                product = get_object_or_404(Product, id=product_id, is_active=True)
+            else:
+                return JsonResponse({'success': False, 'error': 'Product ID required'})
+            
+            if not request.user.is_authenticated:
+                return JsonResponse({
+                    'success': False, 
+                    'requires_login': True,
+                    'message': 'Please login to add items to cart'
+                })
+            
+            stock = variant.stock_quantity if variant else product.stock_quantity
+            if stock < quantity:
+                return JsonResponse({'success': False, 'error': f'Only {stock} items available'})
+            
+            cart = get_or_create_cart(request)
+            cart_item, created = CartItem.objects.get_or_create(
+                cart=cart,
+                product=product,
+                variant=variant,
+                defaults={'quantity': quantity}
+            )
+            
+            if not created:
+                if cart_item.quantity + quantity > stock:
+                    return JsonResponse({'success': False, 'error': f'Only {stock} items available'})
+                cart_item.quantity += quantity
+                cart_item.save()
+            
+            if cart.coupon:
+                cart.remove_coupon()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Item added to cart successfully!',
+                'cart_count': cart.total_items,
+                'item_name': product.name
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
+@login_required
+def update_cart_item(request):
+    """Update cart item quantity"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            item_id = data.get('item_id')
+            quantity = int(data.get('quantity', 1))
+            
+            cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+            
+            if quantity > cart_item.stock_available:
+                return JsonResponse({
+                    'success': False, 
+                    'error': f'Only {cart_item.stock_available} items available'
+                })
+            
+            if quantity <= 0:
+                cart_item.delete()
+            else:
+                cart_item.quantity = quantity
+                cart_item.save()
+            
+            if cart_item.cart.coupon:
+                cart_item.cart.remove_coupon()
+            
+            cart = cart_item.cart
+            return JsonResponse({
+                'success': True,
+                'subtotal': float(cart.subtotal),
+                'total': float(cart.total_price),
+                'discount': float(cart.discount_amount),
+                'cart_count': cart.total_items,
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
+@login_required
+def remove_from_cart(request, item_id):
+    """Remove item from cart"""
+    if request.method == 'POST':
+        try:
+            cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+            cart = cart_item.cart
+            if cart.coupon:
+                cart.remove_coupon()
+            cart_item.delete()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Item removed from cart',
+                'subtotal': float(cart.subtotal),
+                'total': float(cart.total_price),
+                'discount': float(cart.discount_amount),
+                'cart_count': cart.total_items
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
+@login_required
+def apply_coupon(request):
+    """Apply coupon to cart"""
+    if request.method == 'POST':
+        form = CouponApplyForm(request.POST)
+        if form.is_valid():
+            code = form.cleaned_data['code']
+            cart = get_or_create_cart(request)
+            success, message = cart.apply_coupon(code)
+            if success:
+                messages.success(request, message)
+            else:
+                messages.error(request, message)
+            return redirect('Ecom:cart')
+    return redirect('Ecom:cart')
+
+
+@login_required
+def remove_coupon(request):
+    """Remove coupon from cart"""
+    if request.method == 'POST':
+        cart = get_or_create_cart(request)
+        success, message = cart.remove_coupon()
+        if success:
+            messages.success(request, message)
+        else:
+            messages.error(request, message)
+        return redirect('Ecom:cart')
+    return redirect('Ecom:cart')
+
+
+@login_required
+def get_cart_count(request):
+    cart = get_or_create_cart(request)
+    return JsonResponse({'count': cart.total_items})
+
+
+# ============================================
+# WISHLIST VIEWS
+# ============================================
+
+@login_required
+def wishlist_view(request):
+    wishlist, created = Wishlist.objects.get_or_create(user=request.user)
+    items = wishlist.items.select_related('product', 'variant')
+    context = {
+        'wishlist': wishlist,
+        'items': items,
+        'total_items': wishlist.total_items
+    }
+    return render(request, 'Ecom/wishlist.html', context)
+
+
+@login_required
+def add_to_wishlist(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            product_id = data.get('product_id')
+            variant_id = data.get('variant_id')
+            
+            product = get_object_or_404(Product, id=product_id, is_active=True)
+            variant = None
+            if variant_id:
+                variant = get_object_or_404(ProductVariant, id=variant_id, is_active=True)
+            
+            wishlist, _ = Wishlist.objects.get_or_create(user=request.user)
+            wishlist_item, created = WishlistItem.objects.get_or_create(
+                wishlist=wishlist,
+                product=product,
+                variant=variant
+            )
+            
+            if created:
+                message = 'Added to wishlist!'
+            else:
+                wishlist_item.delete()
+                message = 'Removed from wishlist!'
+            
+            return JsonResponse({
+                'success': True,
+                'message': message,
+                'in_wishlist': created,
+                'count': wishlist.total_items
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
+@login_required
+def remove_from_wishlist(request, item_id):
+    if request.method == 'POST':
+        try:
+            item = get_object_or_404(WishlistItem, id=item_id, wishlist__user=request.user)
+            item.delete()
+            return JsonResponse({'success': True, 'message': 'Item removed from wishlist'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
+@login_required
+def move_to_cart(request, item_id):
+    try:
+        wishlist_item = get_object_or_404(WishlistItem, id=item_id, wishlist__user=request.user)
+        cart = get_or_create_cart(request)
+        
+        stock = wishlist_item.variant.stock_quantity if wishlist_item.variant else wishlist_item.product.stock_quantity
+        if stock <= 0:
+            messages.error(request, 'Item is out of stock')
+            return redirect('Ecom:wishlist')
+        
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            product=wishlist_item.product,
+            variant=wishlist_item.variant,
+            defaults={'quantity': 1}
+        )
+        
+        if not created:
+            if cart_item.quantity + 1 <= stock:
+                cart_item.quantity += 1
+                cart_item.save()
+            else:
+                messages.error(request, 'Not enough stock available')
+                return redirect('Ecom:wishlist')
+        
+        wishlist_item.delete()
+        messages.success(request, f'"{wishlist_item.product.name}" moved to cart!')
+        return redirect('Ecom:wishlist')
+        
+    except Exception as e:
+        messages.error(request, str(e))
+        return redirect('Ecom:wishlist')
+
+
+# ============================================
+# CHECKOUT & PAYMENT VIEWS WITH TRANSACTIONS
+# ============================================
+
+@login_required
+def checkout_view(request):
+    cart = get_or_create_cart(request)
+    
+    if cart.total_items == 0:
+        messages.warning(request, 'Your cart is empty!')
+        return redirect('Ecom:cart')
+    
+    # Calculate totals with offers
+    subtotal_without_offers = 0
+    subtotal_with_offers = 0
+    total_offer_savings = 0
+    total_product_discount = 0
+    items_data = []
+    applied_offer = None
+    best_offer_discount = 0
+    
+    for item in cart.items.all():
+        if item.product:
+            original_price = item.original_price
+            product_discounted_price = item.price
+            product_discount_amount = original_price - product_discounted_price
+            final_price, offer_name, offer_discount = calculate_offer_discount(item.product, product_discounted_price)
+            
+            # Track the best offer applied
+            if offer_discount > 0 and offer_name and offer_name != "Product Discount":
+                try:
+                    offer_obj = Offer.objects.filter(
+                        name=offer_name,
+                        is_active=True,
+                        valid_from__lte=timezone.now(),
+                        valid_to__gte=timezone.now()
+                    ).first()
+                    if offer_obj:
+                        applied_offer = offer_obj
+                        if offer_discount > best_offer_discount:
+                            best_offer_discount = offer_discount
+                except Offer.DoesNotExist:
+                    pass
+            
+            items_data.append({
+                'item': item,
+                'original_price': original_price,
+                'product_discounted_price': product_discounted_price,
+                'final_price': final_price,
+                'offer_name': offer_name,
+                'offer_discount': offer_discount,
+                'product_discount_amount': product_discount_amount,
+                'item_total': final_price * item.quantity,
+            })
+            
+            subtotal_without_offers += original_price * item.quantity
+            subtotal_with_offers += final_price * item.quantity
+            total_offer_savings += offer_discount * item.quantity
+            total_product_discount += product_discount_amount * item.quantity
+        else:
+            items_data.append({
+                'item': item,
+                'original_price': item.price,
+                'product_discounted_price': item.price,
+                'final_price': item.price,
+                'offer_name': None,
+                'offer_discount': 0,
+                'product_discount_amount': 0,
+                'item_total': item.price * item.quantity,
+            })
+            subtotal_without_offers += item.price * item.quantity
+            subtotal_with_offers += item.price * item.quantity
+    
+    total_after_coupon = subtotal_with_offers - cart.discount_amount
+    
+    # Get user's addresses
+    addresses = request.user.addresses.filter(is_active=True) if hasattr(request.user, 'addresses') else []
+    
+    if request.method == 'POST':
+        address_id = request.POST.get('address_id')
+        new_address = request.POST.get('new_address')
+        
+        # Determine shipping address
+        if address_id:
+            try:
+                address = Address.objects.get(id=address_id, user=request.user)
+                shipping_address = f"{address.full_name}\n{address.address_line1}\n{address.address_line2}\n{address.city}, {address.state} - {address.pincode}\n{address.country}\nPhone: {address.phone}"
+            except Address.DoesNotExist:
+                messages.error(request, 'Selected address not found!')
+                return redirect('Ecom:checkout')
+        elif new_address:
+            shipping_address = new_address
+        else:
+            messages.error(request, 'Please select or enter an address.')
+            return redirect('Ecom:checkout')
+        
+        billing_address = request.POST.get('billing_address', shipping_address)
+        notes = request.POST.get('notes', '')
+        
+        with db_transaction.atomic():
+            razorpay_order = razorpay_client.order.create({
+                'amount': int(total_after_coupon * 100),
+                'currency': 'INR',
+                'payment_capture': '1',
+                'notes': {
+                    'user_email': request.user.email,
+                    'order_type': 'ecommerce'
+                }
+            })
+            
+            # Create order with complete discount breakdown
+            order = Order.objects.create(
+                user=request.user,
+                razorpay_order_id=razorpay_order['id'],
+                subtotal=subtotal_without_offers,
+                product_discount_total=total_product_discount,
+                offer_discount=total_offer_savings,
+                coupon_discount=cart.discount_amount,
+                coupon=cart.coupon,
+                offer=applied_offer,
+                total_amount=total_after_coupon,
+                shipping_address=shipping_address,
+                billing_address=billing_address or shipping_address,
+                notes=notes,
+                status='pending',
+                payment_status='pending'
+            )
+            
+            # Create order items with complete discount breakdown
+            for item_data in items_data:
+                item = item_data['item']
+                
+                # Find the offer object for this item
+                offer_obj = None
+                if item_data['offer_name'] and item_data['offer_name'] != "Product Discount":
+                    try:
+                        offer_obj = Offer.objects.filter(
+                            name=item_data['offer_name'],
+                            is_active=True,
+                            valid_from__lte=timezone.now(),
+                            valid_to__gte=timezone.now()
+                        ).first()
+                    except Offer.DoesNotExist:
+                        pass
+                
+                OrderItem.objects.create(
+                    order=order,
+                    product=item.product,
+                    variant=item.variant,
+                    product_name=item.item_name,
+                    sku=item.item_sku,
+                    quantity=item.quantity,
+                    original_price=item_data['original_price'],
+                    product_discounted_price=item_data['product_discounted_price'],
+                    offer_discounted_price=item_data['final_price'],
+                    final_price=item_data['final_price'],
+                    total=item_data['item_total'],
+                    product_discount=item_data['product_discount_amount'],
+                    offer_discount=item_data['offer_discount'],
+                    offer=offer_obj,
+                    offer_name=item_data['offer_name'] or '',
+                )
+            
+            Transaction.objects.create(
+                order=order,
+                transaction_type='payment',
+                razorpay_transaction_id=razorpay_order['id'],
+                amount=total_after_coupon,
+                status='pending',
+                response_data=razorpay_order,
+                notes='Payment initiated'
+            )
+            
+            context = {
+                'order': order,
+                'razorpay_key': settings.RAZORPAY_KEY_ID,
+                'amount': int(total_after_coupon * 100),
+                'currency': 'INR',
+            }
+            return render(request, 'Ecom/payment.html', context)
+    else:
+        form = CheckoutForm()
+    
+    context = {
+        'cart': cart,
+        'cart_items': cart.items.all(),
+        'items_data': items_data,
+        'subtotal': cart.subtotal,
+        'subtotal_without_offers': subtotal_without_offers,
+        'subtotal_with_offers': subtotal_with_offers,
+        'product_discount_savings': total_product_discount,
+        'offer_savings': total_offer_savings,
+        'coupon_discount': cart.discount_amount,
+        'total': total_after_coupon,
+        'addresses': addresses,
+        'total_items': cart.total_items,
+        'form': form,
+    }
+    return render(request, 'Ecom/checkout.html', context)
+
+
+@login_required
+@csrf_exempt
+def payment_success(request):
+    """Handle successful payment with transaction tracking and refund on order failure"""
+    if request.method == 'POST':
+        razorpay_order_id = request.POST.get('razorpay_order_id')
+        razorpay_payment_id = request.POST.get('razorpay_payment_id')
+        razorpay_signature = request.POST.get('razorpay_signature')
+        
+        # Verify payment signature
+        params_dict = {
+            'razorpay_order_id': razorpay_order_id,
+            'razorpay_payment_id': razorpay_payment_id,
+            'razorpay_signature': razorpay_signature
+        }
+        
+        try:
+            razorpay_client.utility.verify_payment_signature(params_dict)
+        except Exception as e:
+            messages.error(request, f'Payment verification failed: {str(e)}')
+            return redirect('Ecom:cart')
+        
+        try:
+            order = Order.objects.get(razorpay_order_id=razorpay_order_id, user=request.user)
+        except Order.DoesNotExist:
+            messages.error(request, 'Order not found! Please contact support.')
+            return redirect('Ecom:cart')
+        
+        # Get the transaction record
+        transaction_record = Transaction.objects.filter(
+            order=order,
+            razorpay_transaction_id=razorpay_order_id,
+            transaction_type='payment'
+        ).first()
+        
+        # Check if already processed
+        if order.payment_status == 'paid':
+            messages.success(request, f'Order #{order.order_number} already confirmed!')
+            return redirect('Ecom:order_success', order_id=order.id)
+        
+        # ============================================
+        # TRY TO PLACE ORDER
+        # ============================================
+        try:
+            with db_transaction.atomic():
+                # Update order
+                order.razorpay_payment_id = razorpay_payment_id
+                order.razorpay_signature = razorpay_signature
+                order.payment_status = 'paid'
+                order.status = 'processing'
+                order.save()
+                
+                # Update transaction
+                if transaction_record:
+                    transaction_record.razorpay_payment_id = razorpay_payment_id
+                    transaction_record.status = 'success'
+                    transaction_record.response_data = {
+                        'payment_id': razorpay_payment_id,
+                        'signature': razorpay_signature,
+                        'status': 'success'
+                    }
+                    transaction_record.save()
+                
+                # ============================================
+                # UPDATE STOCK FOR PRODUCTS AND VARIANTS
+                # ============================================
+                for item in order.items.all():
+                    if item.variant:
+                        # Update variant stock
+                        variant = ProductVariant.objects.get(id=item.variant.id)
+                        variant.stock_quantity -= item.quantity
+                        variant.save()
+                        
+                        # Also update parent product stock
+                        if variant.product:
+                            variant.product.stock_quantity -= item.quantity
+                            variant.product.save()
+                    elif item.product:
+                        # Update product stock
+                        product = Product.objects.get(id=item.product.id)
+                        product.stock_quantity -= item.quantity
+                        product.save()
+                
+                # Clear cart
+                cart = get_or_create_cart(request)
+                cart.items.all().delete()
+                if cart.coupon:
+                    cart.coupon = None
+                cart.discount_amount = 0
+                cart.save()
+                
+                # Update coupon usage
+                if order.coupon:
+                    order.coupon.used_count += 1
+                    order.coupon.save()
+                
+                messages.success(request, f'Payment successful! Order #{order.order_number} confirmed.')
+                return redirect('Ecom:order_success', order_id=order.id)
+                
+        except Exception as e:
+            # ============================================
+            # ORDER PLACEMENT FAILED - INITIATE REFUND
+            # ============================================
+            try:
+                # Initiate refund with Razorpay
+                refund = razorpay_client.payment.refund(razorpay_payment_id, {
+                    'amount': int(order.total_amount * 100),
+                    'speed': 'normal',
+                    'notes': {
+                        'reason': 'Order placement failed after successful payment',
+                        'order_id': order.order_number,
+                        'user_email': request.user.email
+                    }
+                })
+                
+                # Update order
+                order.payment_status = 'refunded'
+                order.status = 'failed'
+                order.save()
+                
+                # Update transaction
+                if transaction_record:
+                    transaction_record.status = 'refunded'
+                    transaction_record.razorpay_refund_id = refund['id']
+                    transaction_record.response_data = {
+                        'refund_id': refund['id'],
+                        'refund_status': refund['status'],
+                        'reason': 'Order placement failed'
+                    }
+                    transaction_record.save()
+                
+                # Create Refund Transaction Record
+                Transaction.objects.create(
+                    order=order,
+                    transaction_type='refund',
+                    razorpay_transaction_id=refund['id'],
+                    razorpay_payment_id=razorpay_payment_id,
+                    razorpay_refund_id=refund['id'],
+                    amount=order.total_amount,
+                    status='success',
+                    response_data=refund,
+                    notes=f'Refund initiated due to order placement failure. Payment ID: {razorpay_payment_id}'
+                )
+                
+                messages.error(request, 
+                    f'Order placement failed! Your payment of ₹{order.total_amount} has been refunded. '
+                    'Please try again or contact support.'
+                )
+                return redirect('Ecom:cart')
+                
+            except Exception as refund_error:
+                # ============================================
+                # REFUND ALSO FAILED - CRITICAL ERROR
+                # ============================================
+                order.status = 'failed'
+                order.save()
+                
+                if transaction_record:
+                    transaction_record.status = 'failed'
+                    transaction_record.response_data = {
+                        'error': str(refund_error),
+                        'payment_id': razorpay_payment_id,
+                        'refund_failed': True
+                    }
+                    transaction_record.save()
+                
+                Transaction.objects.create(
+                    order=order,
+                    transaction_type='refund',
+                    razorpay_payment_id=razorpay_payment_id,
+                    amount=order.total_amount,
+                    status='failed',
+                    response_data={'error': str(refund_error)},
+                    notes=f'Refund FAILED! Payment captured but order failed. Payment ID: {razorpay_payment_id}'
+                )
+                
+                messages.error(request, 
+                    'Order placement failed AND refund failed! Please contact support immediately. '
+                    'Your payment has been captured but we could not process your order.'
+                )
+                return redirect('Ecom:cart')
+    
+    # If GET request, redirect to orders
+    return redirect('Ecom:orders')
+
+
+@login_required
+def order_success_view(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'Ecom/order_success.html', {'order': order})
+
+
+@login_required
+def orders_view(request):
+    """View orders - Admin sees all, Customers see only their orders"""
+    if request.user.is_admin or request.user.is_superuser:
+        orders = Order.objects.all().order_by('-created_at')
+    else:
+        orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    
+    return render(request, 'Ecom/orders.html', {'orders': orders})
+
+
+@login_required
+def order_detail_view(request, order_id):
+    """View order details - Admin can view any, Customers only their own"""
+    if request.user.is_admin or request.user.is_superuser:
+        order = get_object_or_404(Order, id=order_id)
+    else:
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    transactions = order.transactions.all()
+    context = {
+        'order': order,
+        'transactions': transactions,
+        'is_admin_view': request.user.is_admin or request.user.is_superuser,
+    }
+    return render(request, 'Ecom/order_detail.html', context)
+
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import Address
+
+@login_required
+def add_address_ajax(request):
+    """Add new address via AJAX"""
+    if request.method == 'POST':
+        import json
+        data = json.loads(request.body)
+        
+        try:
+            address = Address.objects.create(
+                user=request.user,
+                full_name=data.get('full_name'),
+                phone=data.get('phone'),
+                address_line1=data.get('address_line1'),
+                address_line2=data.get('address_line2', ''),
+                landmark=data.get('landmark', ''),
+                city=data.get('city'),
+                state=data.get('state'),
+                pincode=data.get('pincode'),
+                country=data.get('country', 'India'),
+                address_type=data.get('address_type', 'shipping'),
+                is_default=data.get('is_default', False)
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'address_id': address.id,
+                'message': 'Address added successfully'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            })
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+# ============================================
+# COUPON MANAGEMENT VIEWS
+# ============================================
+
+@login_required
+def coupon_list_view(request):
+    """List all coupons - Admin only"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin only.')
+        return redirect('Ecom:home')
+    
+    coupons = Coupon.objects.all().order_by('-created_at')
+    
+    # Calculate stats
+    active_count = coupons.filter(is_active=True).count()
+    inactive_count = coupons.filter(is_active=False).count()
+    expired_count = coupons.filter(valid_to__lt=timezone.now()).count()
+    
+    context = {
+        'coupons': coupons,
+        'active_count': active_count,
+        'inactive_count': inactive_count,
+        'expired_count': expired_count,
+        'total_count': coupons.count(),
+    }
+    return render(request, 'Ecom/admin/coupon_list.html', context)
+
+
+@login_required
+def coupon_create_view(request):
+    """Create a new coupon - Admin only"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin only.')
+        return redirect('Ecom:home')
+    
+    if request.method == 'POST':
+        form = CouponForm(request.POST, request.FILES)
+        if form.is_valid():
+            coupon = form.save(commit=False)
+            coupon.code = coupon.code.upper().strip()
+            coupon.save()
+            messages.success(request, f'Coupon "{coupon.code}" created successfully!')
+            return redirect('Ecom:coupon_list')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+    else:
+        form = CouponForm()
+    
+    return render(request, 'Ecom/admin/coupon_form.html', {
+        'form': form,
+        'action': 'Create',
+        'coupon': None
+    })
+
+
+@login_required
+def coupon_edit_view(request, coupon_id):
+    """Edit an existing coupon - Admin only"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin only.')
+        return redirect('Ecom:home')
+    
+    coupon = get_object_or_404(Coupon, id=coupon_id)
+    
+    if request.method == 'POST':
+        form = CouponForm(request.POST, request.FILES, instance=coupon)
+        if form.is_valid():
+            coupon = form.save(commit=False)
+            coupon.code = coupon.code.upper().strip()
+            coupon.save()
+            messages.success(request, f'Coupon "{coupon.code}" updated successfully!')
+            return redirect('Ecom:coupon_list')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+    else:
+        form = CouponForm(instance=coupon)
+    
+    return render(request, 'Ecom/admin/coupon_form.html', {
+        'form': form,
+        'action': 'Edit',
+        'coupon': coupon
+    })
+
+
+@login_required
+def coupon_delete_view(request, coupon_id):
+    """Delete a coupon - Admin only (with modal confirmation)"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin only.')
+        return redirect('Ecom:home')
+    
+    coupon = get_object_or_404(Coupon, id=coupon_id)
+    
+    if request.method == 'POST':
+        code = coupon.code
+        coupon.delete()
+        messages.success(request, f'Coupon "{code}" deleted successfully!')
+        return redirect('Ecom:coupon_list')
+    
+    # GET request - redirect to list (modal handles confirmation)
+    return redirect('Ecom:coupon_list')
+
+
+@login_required
+def coupon_toggle_status_view(request, coupon_id):
+    """Toggle coupon active status - Admin only"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin only.')
+        return redirect('Ecom:home')
+    
+    coupon = get_object_or_404(Coupon, id=coupon_id)
+    coupon.is_active = not coupon.is_active
+    coupon.save()
+    
+    status = 'activated' if coupon.is_active else 'deactivated'
+    messages.success(request, f'Coupon "{coupon.code}" {status} successfully!')
+    return redirect('Ecom:coupon_list')
+
+
+# ============================================
+# OFFER MANAGEMENT VIEWS
+# ============================================
+
+@login_required
+def offer_list_view(request):
+    """List all offers - Admin only"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin only.')
+        return redirect('Ecom:home')
+    
+    offers = Offer.objects.all().order_by('-priority', '-created_at')
+    
+    active_count = offers.filter(is_active=True).count()
+    inactive_count = offers.filter(is_active=False).count()
+    
+    context = {
+        'offers': offers,
+        'active_count': active_count,
+        'inactive_count': inactive_count,
+        'total_count': offers.count(),
+    }
+    return render(request, 'Ecom/admin/offer_list.html', context)
+
+
+@login_required
+def offer_create_view(request):
+    """Create a new offer - Admin only"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin only.')
+        return redirect('Ecom:home')
+    
+    if request.method == 'POST':
+        form = OfferForm(request.POST, request.FILES)
+        if form.is_valid():
+            offer = form.save()
+            messages.success(request, f'Offer "{offer.name}" created successfully!')
+            return redirect('Ecom:offer_list')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+    else:
+        form = OfferForm()
+    
+    return render(request, 'Ecom/admin/offer_form.html', {
+        'form': form,
+        'action': 'Create',
+        'offer': None
+    })
+
+
+@login_required
+def offer_edit_view(request, offer_id):
+    """Edit an existing offer - Admin only"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin only.')
+        return redirect('Ecom:home')
+    
+    offer = get_object_or_404(Offer, id=offer_id)
+    
+    if request.method == 'POST':
+        form = OfferForm(request.POST, request.FILES, instance=offer)
+        if form.is_valid():
+            offer = form.save()
+            messages.success(request, f'Offer "{offer.name}" updated successfully!')
+            return redirect('Ecom:offer_list')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+    else:
+        form = OfferForm(instance=offer)
+    
+    return render(request, 'Ecom/admin/offer_form.html', {
+        'form': form,
+        'action': 'Edit',
+        'offer': offer
+    })
+
+
+@login_required
+def offer_delete_view(request, offer_id):
+    """Delete an offer - Admin only (with modal confirmation)"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin only.')
+        return redirect('Ecom:home')
+    
+    offer = get_object_or_404(Offer, id=offer_id)
+    
+    if request.method == 'POST':
+        name = offer.name
+        offer.delete()
+        messages.success(request, f'Offer "{name}" deleted successfully!')
+        return redirect('Ecom:offer_list')
+    
+    return redirect('Ecom:offer_list')
+
+
+@login_required
+def offer_toggle_status_view(request, offer_id):
+    """Toggle offer active status - Admin only"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin only.')
+        return redirect('Ecom:home')
+    
+    offer = get_object_or_404(Offer, id=offer_id)
+    offer.is_active = not offer.is_active
+    offer.save()
+    
+    status = 'activated' if offer.is_active else 'deactivated'
+    messages.success(request, f'Offer "{offer.name}" {status} successfully!')
+    return redirect('Ecom:offer_list')
+
+from decimal import Decimal
+
+from decimal import Decimal
+
+def calculate_offer_discount(product, price):
+    """
+    Calculate if any offer applies to this product
+    Rules:
+    1. If product already has a discount, compare product discount vs offer discount
+    2. Apply the BEST discount (higher discount amount)
+    3. Do NOT stack discounts
+    
+    Returns: (final_price, offer_name, discount_amount)
+    """
+    # Get all active offers
+    offers = Offer.objects.filter(
+        is_active=True,
+        valid_from__lte=timezone.now(),
+        valid_to__gte=timezone.now()
+    ).order_by('-priority')
+    
+    best_offer_discount = Decimal('0')
+    best_offer_name = None
+    
+    # Convert price to Decimal
+    if not isinstance(price, Decimal):
+        price = Decimal(str(price))
+    
+    # ============================================
+    # 1. FIND THE BEST OFFER DISCOUNT
+    # ============================================
+    for offer in offers:
+        discount_value = Decimal(str(offer.discount_value))
+        
+        if offer.offer_type == 'product':
+            # Product-specific offer
+            if offer.product and offer.product.id == product.id:
+                if offer.discount_type == 'percentage':
+                    discount = (price * discount_value) / Decimal('100')
+                    if offer.max_discount:
+                        max_disc = Decimal(str(offer.max_discount))
+                        if discount > max_disc:
+                            discount = max_disc
+                else:
+                    discount = discount_value
+                
+                if discount > best_offer_discount:
+                    best_offer_discount = discount
+                    best_offer_name = offer.name
+                    
+        elif offer.offer_type == 'category':
+            # Category offer
+            if product.category and offer.category and offer.category.id == product.category.id:
+                if offer.discount_type == 'percentage':
+                    discount = (price * discount_value) / Decimal('100')
+                    if offer.max_discount:
+                        max_disc = Decimal(str(offer.max_discount))
+                        if discount > max_disc:
+                            discount = max_disc
+                else:
+                    discount = discount_value
+                
+                if discount > best_offer_discount:
+                    best_offer_discount = discount
+                    best_offer_name = offer.name
+                    
+        elif offer.offer_type == 'cart':
+            # Cart-level offers (handled separately at cart level)
+            pass
+    
+    # ============================================
+    # 2. CHECK PRODUCT DISCOUNT
+    # ============================================
+    product_discount_percentage = Decimal(str(product.discount_percentage)) if product.discount_percentage else Decimal('0')
+    product_discount_amount = Decimal('0')
+    
+    if product_discount_percentage > 0:
+        product_discount_amount = (price * product_discount_percentage) / Decimal('100')
+    
+    # ============================================
+    # 3. APPLY THE BEST DISCOUNT (NOT BOTH)
+    # ============================================
+    
+    # Case 1: No product discount, no offer
+    if product_discount_amount == 0 and best_offer_discount == 0:
+        return price, None, Decimal('0')
+    
+    # Case 2: Only product discount exists
+    if product_discount_amount > 0 and best_offer_discount == 0:
+        return price - product_discount_amount, "Product Discount", product_discount_amount
+    
+    # Case 3: Only offer exists
+    if product_discount_amount == 0 and best_offer_discount > 0:
+        return price - best_offer_discount, best_offer_name, best_offer_discount
+    
+    # Case 4: Both exist - apply the better one
+    if product_discount_amount > 0 and best_offer_discount > 0:
+        if best_offer_discount > product_discount_amount:
+            # Offer gives better discount
+            return price - best_offer_discount, best_offer_name, best_offer_discount
+        else:
+            # Product discount gives better discount
+            return price - product_discount_amount, "Product Discount", product_discount_amount
+    
+    # Fallback
+    return price, None, Decimal('0')

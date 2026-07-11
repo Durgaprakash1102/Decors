@@ -422,3 +422,244 @@ class ProductReviewForm(forms.ModelForm):
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Review title'}),
             'review_text': forms.Textarea(attrs={'class': 'form-control', 'rows': 5, 'placeholder': 'Write your review...'}),
         }
+
+from django import forms
+
+class CouponApplyForm(forms.Form):
+    code = forms.CharField(
+        max_length=50,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter coupon code',
+            'autocomplete': 'off'
+        })
+    )
+
+
+class CheckoutForm(forms.Form):
+    shipping_address = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 4,
+            'placeholder': 'Enter your shipping address'
+        })
+    )
+    billing_address = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 4,
+            'placeholder': 'Enter your billing address (same as shipping if not specified)'
+        }),
+        required=False
+    )
+    notes = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 3,
+            'placeholder': 'Any special instructions?'
+        }),
+        required=False
+    )
+
+from django import forms
+from .models import Coupon, Offer
+
+# ============================================
+# COUPON FORM
+# ============================================
+
+class CouponForm(forms.ModelForm):
+    class Meta:
+        model = Coupon
+        fields = [
+            'code', 'discount_type', 'discount_value', 'max_discount',
+            'min_order_amount', 'usage_limit', 'valid_from', 'valid_to',
+            'is_active', 'description', 'image'
+        ]
+        widgets = {
+            'code': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., SAVE20',
+                'style': 'text-transform:uppercase;'
+            }),
+            'discount_type': forms.Select(attrs={'class': 'form-control'}),
+            'discount_value': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'e.g., 20'
+            }),
+            'max_discount': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'e.g., 500'
+            }),
+            'min_order_amount': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'e.g., 1000'
+            }),
+            'usage_limit': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., 100'
+            }),
+            'valid_from': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'valid_to': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Coupon description...'
+            }),
+            'image': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+    
+    def clean_code(self):
+        code = self.cleaned_data.get('code', '').upper().strip()
+        if Coupon.objects.filter(code=code).exclude(id=self.instance.id).exists():
+            raise forms.ValidationError('This coupon code already exists.')
+        return code
+    
+    def clean_discount_value(self):
+        value = self.cleaned_data.get('discount_value')
+        if value and value <= 0:
+            raise forms.ValidationError('Discount value must be greater than 0.')
+        return value
+    
+    def clean_valid_from(self):
+        valid_from = self.cleaned_data.get('valid_from')
+        if valid_from:
+            # Ensure timezone awareness
+            from django.utils import timezone
+            if timezone.is_naive(valid_from):
+                valid_from = timezone.make_aware(valid_from)
+        return valid_from
+    
+    def clean_valid_to(self):
+        valid_to = self.cleaned_data.get('valid_to')
+        if valid_to:
+            from django.utils import timezone
+            if timezone.is_naive(valid_to):
+                valid_to = timezone.make_aware(valid_to)
+        return valid_to
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        valid_from = cleaned_data.get('valid_from')
+        valid_to = cleaned_data.get('valid_to')
+        
+        if valid_from and valid_to and valid_from >= valid_to:
+            raise forms.ValidationError('Valid To date must be after Valid From date.')
+        
+        return cleaned_data
+
+
+# ============================================
+# OFFER FORM
+# ============================================
+
+class OfferForm(forms.ModelForm):
+    class Meta:
+        model = Offer
+        fields = [
+            'name', 'offer_type', 'product', 'category',
+            'discount_type', 'discount_value', 'max_discount',
+            'min_order_amount', 'valid_from', 'valid_to',
+            'is_active', 'description', 'banner_image', 'priority'
+        ]
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Summer Sale'
+            }),
+            'offer_type': forms.Select(attrs={
+                'class': 'form-control',
+                'id': 'offer_type'
+            }),
+            'product': forms.Select(attrs={
+                'class': 'form-control',
+                'id': 'product_select'
+            }),
+            'category': forms.Select(attrs={
+                'class': 'form-control',
+                'id': 'category_select'
+            }),
+            'discount_type': forms.Select(attrs={'class': 'form-control'}),
+            'discount_value': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'e.g., 20'
+            }),
+            'max_discount': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'e.g., 500'
+            }),
+            'min_order_amount': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'e.g., 1000'
+            }),
+            'valid_from': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'valid_to': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Offer description...'
+            }),
+            'banner_image': forms.FileInput(attrs={'class': 'form-control'}),
+            'priority': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': '0'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Initially hide product and category fields
+        self.fields['product'].required = False
+        self.fields['category'].required = False
+    
+    def clean_name(self):
+        name = self.cleaned_data.get('name', '').strip()
+        if not name:
+            raise forms.ValidationError('Name is required.')
+        return name
+    
+    def clean_discount_value(self):
+        value = self.cleaned_data.get('discount_value')
+        if value and value <= 0:
+            raise forms.ValidationError('Discount value must be greater than 0.')
+        return value
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        offer_type = cleaned_data.get('offer_type')
+        product = cleaned_data.get('product')
+        category = cleaned_data.get('category')
+        valid_from = cleaned_data.get('valid_from')
+        valid_to = cleaned_data.get('valid_to')
+        
+        # Validate product/category based on offer type
+        if offer_type == 'product' and not product:
+            self.add_error('product', 'Please select a product for product offer.')
+        elif offer_type == 'category' and not category:
+            self.add_error('category', 'Please select a category for category offer.')
+        
+        # Validate dates
+        if valid_from and valid_to and valid_from >= valid_to:
+            raise forms.ValidationError('Valid To date must be after Valid From date.')
+        
+        return cleaned_data

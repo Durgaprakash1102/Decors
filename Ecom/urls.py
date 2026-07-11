@@ -82,4 +82,40 @@ urlpatterns = [
     
     # ========== AJAX URLs ==========
     path('ajax/get-subcategories/', views.get_subcategories_ajax, name='get_subcategories'),
+
+        # ========== CART URLs ==========
+    path('cart/', views.cart_view, name='cart'),
+    path('cart/add/', views.add_to_cart, name='add_to_cart'),
+    path('cart/update/', views.update_cart_item, name='update_cart_item'),
+    path('cart/remove/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
+    path('cart/apply-coupon/', views.apply_coupon, name='apply_coupon'),
+    path('cart/remove-coupon/', views.remove_coupon, name='remove_coupon'),
+    path('cart/count/', views.get_cart_count, name='cart_count'),
+    
+    # ========== WISHLIST URLs ==========
+    path('wishlist/', views.wishlist_view, name='wishlist'),
+    path('wishlist/add/', views.add_to_wishlist, name='add_to_wishlist'),
+    path('wishlist/remove/<int:item_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),
+    path('wishlist/move-to-cart/<int:item_id>/', views.move_to_cart, name='move_to_cart'),
+    
+    # ========== CHECKOUT & PAYMENT URLs ==========
+    path('checkout/', views.checkout_view, name='checkout'),
+    path('payment/success/', views.payment_success, name='payment_success'),
+    path('order/success/<int:order_id>/', views.order_success_view, name='order_success'),
+    path('orders/', views.orders_view, name='orders'),
+    path('order/<int:order_id>/', views.order_detail_view, name='order_detail'),
+    path('address/add-ajax/', views.add_address_ajax, name='add_address'),
+    # ========== COUPON MANAGEMENT URLs ==========
+path('admin/coupons/', views.coupon_list_view, name='coupon_list'),
+path('admin/coupon/create/', views.coupon_create_view, name='coupon_create'),
+path('admin/coupon/edit/<int:coupon_id>/', views.coupon_edit_view, name='coupon_edit'),
+path('admin/coupon/delete/<int:coupon_id>/', views.coupon_delete_view, name='coupon_delete'),
+path('admin/coupon/toggle/<int:coupon_id>/', views.coupon_toggle_status_view, name='coupon_toggle'),
+
+# ========== OFFER MANAGEMENT URLs ==========
+path('admin/offers/', views.offer_list_view, name='offer_list'),
+path('admin/offer/create/', views.offer_create_view, name='offer_create'),
+path('admin/offer/edit/<int:offer_id>/', views.offer_edit_view, name='offer_edit'),
+path('admin/offer/delete/<int:offer_id>/', views.offer_delete_view, name='offer_delete'),
+path('admin/offer/toggle/<int:offer_id>/', views.offer_toggle_status_view, name='offer_toggle'),
 ]

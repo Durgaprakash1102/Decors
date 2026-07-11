@@ -119,6 +119,7 @@ class Address(models.Model):
     is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
     
     class Meta:
         db_table = 'addresses'
@@ -647,3 +648,538 @@ class RecentlyViewed(models.Model):
     def get_recently_viewed(cls, user, limit=10):
         """Get recently viewed products for a user"""
         return cls.objects.filter(user=user).select_related('product')[:limit]
+    
+# ============================================
+# CART MODELS
+# ============================================
+
+class Cart(models.Model):
+    user = models.OneToOneField('User', on_delete=models.CASCADE, related_name='cart', null=True, blank=True)
+    session_id = models.CharField(max_length=100, blank=True, null=True)
+    coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, null=True, blank=True)
+    discount_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'carts'
+    
+    def __str__(self):
+        if self.user:
+            return f"Cart - {self.user.email}"
+        return f"Cart - {self.session_id}"
+    
+    @property
+    def subtotal(self):
+        total = sum(item.total_price for item in self.items.all())
+        return total
+    
+    @property
+    def total_items(self):
+        return sum(item.quantity for item in self.items.all())
+    
+    @property
+    def total_price(self):
+        return self.subtotal - self.discount_amount
+    
+    def apply_coupon(self, coupon_code):
+        try:
+            coupon = Coupon.objects.get(
+                code__iexact=coupon_code,
+                is_active=True,
+                valid_from__lte=timezone.now(),
+                valid_to__gte=timezone.now()
+            )
+            if coupon.usage_limit and coupon.used_count >= coupon.usage_limit:
+                return False, "Coupon usage limit exceeded"
+            if self.subtotal < coupon.min_order_amount:
+                return False, f"Minimum order amount of ₹{coupon.min_order_amount} required"
+            
+            if coupon.discount_type == 'percentage':
+                discount = (self.subtotal * coupon.discount_value) / 100
+                if coupon.max_discount and discount > coupon.max_discount:
+                    discount = coupon.max_discount
+            else:
+                discount = coupon.discount_value
+            
+            self.coupon = coupon
+            self.discount_amount = discount
+            self.save()
+            return True, f"Coupon applied! You saved ₹{discount:.2f}"
+        except Coupon.DoesNotExist:
+            return False, "Invalid coupon code"
+    
+    def remove_coupon(self):
+        self.coupon = None
+        self.discount_amount = 0
+        self.save()
+        return True, "Coupon removed"
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, null=True, blank=True)
+    variant = models.ForeignKey('ProductVariant', on_delete=models.CASCADE, null=True, blank=True)
+    quantity = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'cart_items'
+        unique_together = ['cart', 'product', 'variant']
+    
+    def __str__(self):
+        if self.product:
+            return f"{self.quantity} x {self.product.name}"
+        return f"{self.quantity} x {self.variant.sku}"
+    
+    @property
+    def item_name(self):
+        if self.product:
+            return self.product.name
+        return self.variant.product.name
+    
+    @property
+    def item_sku(self):
+        if self.product:
+            return self.product.sku
+        return self.variant.sku
+    
+    @property
+    def price(self):
+        if self.product:
+            return self.product.final_price
+        return self.variant.final_price
+    
+    @property
+    def original_price(self):
+        if self.product:
+            return self.product.price
+        return self.variant.price
+    
+    @property
+    def total_price(self):
+        return self.price * self.quantity
+    
+    @property
+    def stock_available(self):
+        if self.product:
+            return self.product.stock_quantity
+        return self.variant.stock_quantity
+    
+    @property
+    def main_image(self):
+        if self.product:
+            return self.product.main_image
+        return self.variant.main_image or self.variant.product.main_image
+    
+    @property
+    def has_product_discount(self):
+        return self.original_price > self.price
+    
+    @property
+    def offer_price(self):
+        """Get price after offer discount"""
+        from .views import calculate_offer_discount
+        if self.product:
+            price, offer_name, discount = calculate_offer_discount(self.product, self.price)
+            return price
+        return self.price
+    
+    @property
+    def offer_name(self):
+        """Get offer name if applied"""
+        from .views import calculate_offer_discount
+        if self.product:
+            price, offer_name, discount = calculate_offer_discount(self.product, self.price)
+            return offer_name
+        return None
+    
+    @property
+    def offer_discount(self):
+        """Get offer discount amount"""
+        from .views import calculate_offer_discount
+        if self.product:
+            price, offer_name, discount = calculate_offer_discount(self.product, self.price)
+            return discount
+        return 0
+    
+    @property
+    def total_offer_price(self):
+        """Total price after offer discount"""
+        return self.offer_price * self.quantity
+
+
+# ============================================
+# WISHLIST MODELS
+# ============================================
+
+class Wishlist(models.Model):
+    user = models.OneToOneField('User', on_delete=models.CASCADE, related_name='wishlist')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'wishlists'
+    
+    @property
+    def total_items(self):
+        return self.items.count()
+
+
+class WishlistItem(models.Model):
+    wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey('Product', on_delete=models.CASCADE)
+    variant = models.ForeignKey('ProductVariant', on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'wishlist_items'
+        unique_together = ['wishlist', 'product', 'variant']
+    
+    @property
+    def price(self):
+        if self.variant:
+            return self.variant.final_price
+        return self.product.final_price
+    
+    @property
+    def main_image(self):
+        if self.variant:
+            return self.variant.main_image or self.variant.product.main_image
+        return self.product.main_image
+
+
+# ============================================
+# COUPON MODELS
+# ============================================
+
+class Coupon(models.Model):
+    DISCOUNT_TYPES = [
+        ('percentage', 'Percentage'),
+        ('fixed', 'Fixed Amount'),
+    ]
+    
+    code = models.CharField(max_length=50, unique=True)
+    discount_type = models.CharField(max_length=10, choices=DISCOUNT_TYPES, default='percentage')
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2)
+    max_discount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    min_order_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    usage_limit = models.PositiveIntegerField(null=True, blank=True)
+    used_count = models.PositiveIntegerField(default=0)
+    valid_from = models.DateTimeField()
+    valid_to = models.DateTimeField()
+    is_active = models.BooleanField(default=True)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to='coupons/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'coupons'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.code} ({self.discount_value}{'%' if self.discount_type == 'percentage' else '₹'})"
+    
+    @property
+    def discount_display(self):
+        if self.discount_type == 'percentage':
+            return f"{self.discount_value}% OFF"
+        return f"₹{self.discount_value} OFF"
+    
+    @property
+    def is_valid(self):
+        if not self.is_active:
+            return False
+        if timezone.now() < self.valid_from:
+            return False
+        if timezone.now() > self.valid_to:
+            return False
+        if self.usage_limit and self.used_count >= self.usage_limit:
+            return False
+        return True
+    
+    def calculate_discount(self, subtotal):
+        if self.discount_type == 'percentage':
+            discount = (subtotal * self.discount_value) / 100
+            if self.max_discount and discount > self.max_discount:
+                discount = self.max_discount
+        else:
+            discount = self.discount_value
+        return min(discount, subtotal)
+    
+    def delete(self, *args, **kwargs):
+        if self.image:
+            import os
+            from django.conf import settings
+            if os.path.isfile(self.image.path):
+                os.remove(self.image.path)
+        super().delete(*args, **kwargs)
+
+
+# ============================================
+# OFFER MODELS
+# ============================================
+
+class Offer(models.Model):
+    OFFER_TYPES = [
+        ('product', 'Product Offer'),
+        ('category', 'Category Offer'),
+        ('cart', 'Cart Offer'),
+    ]
+    
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=220, unique=True, blank=True)
+    offer_type = models.CharField(max_length=20, choices=OFFER_TYPES, default='product')
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, null=True, blank=True)
+    category = models.ForeignKey('Category', on_delete=models.CASCADE, null=True, blank=True)
+    discount_type = models.CharField(max_length=10, choices=Coupon.DISCOUNT_TYPES, default='percentage')
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2)
+    max_discount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    min_order_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    valid_from = models.DateTimeField()
+    valid_to = models.DateTimeField()
+    is_active = models.BooleanField(default=True)
+    banner_image = models.ImageField(upload_to='offers/', null=True, blank=True)
+    description = models.TextField(blank=True)
+    priority = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'offers'
+        ordering = ['-priority', '-created_at']
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            from django.utils.text import slugify
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+    
+    def is_valid(self):
+        if not self.is_active:
+            return False
+        if timezone.now() < self.valid_from:
+            return False
+        if timezone.now() > self.valid_to:
+            return False
+        return True
+
+
+# ============================================
+# ORDER MODELS
+# ============================================
+
+class Order(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+        ('failed', 'Failed'),
+    ]
+    
+    PAYMENT_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('failed', 'Failed'),
+        ('refunded', 'Refunded'),
+    ]
+    
+    # User & Order Identification
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='orders')
+    order_number = models.CharField(max_length=20, unique=True)
+    
+    # Payment Gateway Details
+    razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_signature = models.CharField(max_length=200, blank=True, null=True)
+    
+    # Pricing Breakdown
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Total before any discounts")
+    product_discount_total = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Total discount from product-level discounts")
+    offer_discount = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Total discount from offers")
+    coupon_discount = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Total discount from coupons")
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Final amount paid by customer")
+    
+    # Applied Discounts
+    coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
+    offer = models.ForeignKey('Offer', on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
+    
+    # Status
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
+    
+    # Addresses
+    shipping_address = models.TextField()
+    billing_address = models.TextField()
+    
+    # Additional
+    notes = models.TextField(blank=True)
+    tracking_number = models.CharField(max_length=100, blank=True, null=True)
+    delivery_date = models.DateTimeField(null=True, blank=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'orders'
+        verbose_name = 'Order'
+        verbose_name_plural = 'Orders'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Order #{self.order_number} - {self.user.email}"
+    
+    def save(self, *args, **kwargs):
+        if not self.order_number:
+            import random
+            import string
+            self.order_number = 'ORD' + ''.join(random.choices(string.digits, k=8))
+        super().save(*args, **kwargs)
+    
+    @property
+    def total_discount(self):
+        """Total discount from all sources"""
+        return self.product_discount_total + self.offer_discount + self.coupon_discount
+    
+    @property
+    def total_savings(self):
+        """Alias for total_discount"""
+        return self.total_discount
+    
+    @property
+    def item_count(self):
+        """Total number of items in the order"""
+        return sum(item.quantity for item in self.items.all())
+    
+    @property
+    def is_paid(self):
+        """Check if order is paid"""
+        return self.payment_status == 'paid'
+    
+    @property
+    def is_delivered(self):
+        """Check if order is delivered"""
+        return self.status == 'delivered'
+    
+    @property
+    def can_cancel(self):
+        """Check if order can be cancelled"""
+        return self.status in ['pending', 'processing'] and self.payment_status != 'refunded'
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    
+    # Product Information
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, null=True, blank=True)
+    variant = models.ForeignKey('ProductVariant', on_delete=models.CASCADE, null=True, blank=True)
+    product_name = models.CharField(max_length=200)
+    sku = models.CharField(max_length=50)
+    
+    # Quantity & Pricing
+    quantity = models.PositiveIntegerField(default=1)
+    
+    # Price Breakdown
+    original_price = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Original price before any discount")
+    product_discounted_price = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Price after product-level discount")
+    offer_discounted_price = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Price after offer discount")
+    final_price = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Final price after all discounts")
+    total = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Final price × quantity")
+    
+    # Discount Breakdown
+    product_discount = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Discount from product level")
+    offer_discount = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Discount from offers")
+    
+    # Applied Offers
+    offer = models.ForeignKey('Offer', on_delete=models.SET_NULL, null=True, blank=True, related_name='order_items')
+    offer_name = models.CharField(max_length=200, blank=True, help_text="Name of offer applied (cached)")
+    
+    # Status
+    is_returned = models.BooleanField(default=False)
+    return_reason = models.TextField(blank=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'order_items'
+        verbose_name = 'Order Item'
+        verbose_name_plural = 'Order Items'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.quantity} x {self.product_name} ({self.order.order_number})"
+    
+    @property
+    def total_discount(self):
+        """Total discount for this item"""
+        return self.product_discount + self.offer_discount
+    
+    @property
+    def discount_percentage(self):
+        """Calculate discount percentage"""
+        if self.original_price > 0:
+            return ((self.original_price - self.final_price) / self.original_price) * 100
+        return 0
+    
+    @property
+    def has_offer(self):
+        """Check if offer was applied"""
+        return self.offer_discount > 0
+    
+    @property
+    def has_product_discount(self):
+        """Check if product discount was applied"""
+        return self.product_discount > 0
+    
+# ============================================
+# TRANSACTION MODEL - Track all payments & refunds
+# ============================================
+
+class Transaction(models.Model):
+    TRANSACTION_TYPES = [
+        ('payment', 'Payment'),
+        ('refund', 'Refund'),
+    ]
+    
+    TRANSACTION_STATUS = [
+        ('pending', 'Pending'),
+        ('success', 'Success'),
+        ('failed', 'Failed'),
+        ('refunded', 'Refunded'),
+    ]
+    
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='transactions')
+    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES, default='payment')
+    razorpay_transaction_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_refund_id = models.CharField(max_length=100, blank=True, null=True)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    status = models.CharField(max_length=20, choices=TRANSACTION_STATUS, default='pending')
+    response_data = models.JSONField(default=dict, blank=True)  # Store full response from Razorpay
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'transactions'
+        verbose_name = 'Transaction'
+        verbose_name_plural = 'Transactions'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.transaction_type} - {self.order.order_number} - ₹{self.amount}"
+    
+    @property
+    def is_payment(self):
+        return self.transaction_type == 'payment'
+    
+    @property
+    def is_refund(self):
+        return self.transaction_type == 'refund'
