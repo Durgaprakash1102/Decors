@@ -745,7 +745,6 @@ def product_list_view(request):
     
     # Offer filter
     if offer_filter == 'has_offer':
-        # Products with offer (using offer_name property)
         products = products.filter(
             models.Q(discount_percentage__gt=0) | 
             models.Q(id__in=Offer.objects.filter(
@@ -755,7 +754,6 @@ def product_list_view(request):
             ).values_list('product_id', flat=True))
         )
     elif offer_filter == 'no_offer':
-        # Products without offer
         products = products.exclude(
             models.Q(discount_percentage__gt=0) | 
             models.Q(id__in=Offer.objects.filter(
@@ -795,7 +793,16 @@ def product_list_view(request):
     # GET FILTER OPTIONS
     # ============================================
     categories = Category.objects.filter(is_active=True).order_by('name')
-    subcategories = SubCategory.objects.filter(is_active=True).order_by('name')
+    
+    # Get subcategories based on selected category
+    if category_filter:
+        subcategories = SubCategory.objects.filter(
+            is_active=True,
+            category_id=category_filter
+        ).order_by('name')
+    else:
+        subcategories = SubCategory.objects.filter(is_active=True).order_by('name')
+    
     brands = Product.objects.exclude(brand__isnull=True).exclude(brand='').values_list('brand', flat=True).distinct().order_by('brand')
     
     # ============================================
@@ -3485,3 +3492,24 @@ def calculate_offer_discount(product, price, variant=None):
     
     # Fallback
     return price, None, Decimal('0')
+
+from django.http import JsonResponse
+from .models import SubCategory
+
+def get_subcategories_ajax(request):
+    """Get subcategories based on category selection"""
+    category_id = request.GET.get('category_id')
+    if category_id:
+        subcategories = SubCategory.objects.filter(
+            category_id=category_id, 
+            is_active=True
+        ).values('id', 'name').order_by('name')
+        return JsonResponse(list(subcategories), safe=False)
+    return JsonResponse([], safe=False)
+
+def get_all_subcategories_ajax(request):
+    """Get all subcategories (fallback)"""
+    subcategories = SubCategory.objects.filter(
+        is_active=True
+    ).values('id', 'name').order_by('name')
+    return JsonResponse(list(subcategories), safe=False)

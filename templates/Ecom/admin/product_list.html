@@ -222,6 +222,17 @@
         color: #1a1a2e;
     }
     
+    /* Subcategory loading indicator */
+    .subcategory-loading {
+        display: none;
+        font-size: 12px;
+        color: #6c757d;
+        padding: 5px 10px;
+    }
+    .subcategory-loading.active {
+        display: inline-block;
+    }
+    
     @media (max-width: 768px) {
         .filter-bar .filter-row {
             flex-direction: column;
@@ -285,7 +296,7 @@
                        value="{{ search_query }}">
                 
                 <!-- Category Filter -->
-                <select name="category" class="form-select form-select-sm">
+                <select name="category" class="form-select form-select-sm" id="categoryFilter">
                     <option value="">All Categories</option>
                     {% for category in categories %}
                         <option value="{{ category.id }}" {% if category_filter == category.id|stringformat:"s" %}selected{% endif %}>
@@ -294,8 +305,8 @@
                     {% endfor %}
                 </select>
                 
-                <!-- Subcategory Filter -->
-                <select name="subcategory" class="form-select form-select-sm">
+                <!-- Subcategory Filter - Dynamically Updated -->
+                <select name="subcategory" class="form-select form-select-sm" id="subcategoryFilter">
                     <option value="">All Subcategories</option>
                     {% for subcategory in subcategories %}
                         <option value="{{ subcategory.id }}" {% if subcategory_filter == subcategory.id|stringformat:"s" %}selected{% endif %}>
@@ -303,6 +314,9 @@
                         </option>
                     {% endfor %}
                 </select>
+                <span class="subcategory-loading" id="subcategoryLoading">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </span>
                 
                 <!-- Brand Filter -->
                 <select name="brand" class="form-select form-select-sm">
@@ -755,14 +769,94 @@
         }
     });
     
-    // Auto-submit form on select change (optional)
+    // ============================================
+    // DYNAMIC SUBCATEGORY FILTER
+    // ============================================
     document.addEventListener('DOMContentLoaded', function() {
-        const selects = document.querySelectorAll('#productFilterForm select');
-        selects.forEach(function(select) {
-            select.addEventListener('change', function() {
-                // Uncomment below to auto-submit on change
-                // document.getElementById('productFilterForm').submit();
-            });
+        const categorySelect = document.getElementById('categoryFilter');
+        const subcategorySelect = document.getElementById('subcategoryFilter');
+        const loadingIndicator = document.getElementById('subcategoryLoading');
+        
+        // Function to load subcategories
+        function loadSubcategories(categoryId) {
+            // Show loading indicator
+            loadingIndicator.classList.add('active');
+            subcategorySelect.disabled = true;
+            
+            // Clear current subcategories except the default option
+            subcategorySelect.innerHTML = '<option value="">All Subcategories</option>';
+            
+            if (!categoryId) {
+                // If no category selected, load all subcategories
+                fetchAllSubcategories();
+                return;
+            }
+            
+            // Fetch subcategories for selected category
+            fetch(`/get-subcategories-ajax/?category_id=${categoryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(function(subcategory) {
+                        const option = document.createElement('option');
+                        option.value = subcategory.id;
+                        option.textContent = subcategory.name;
+                        // Preserve selected subcategory if it matches
+                        if ('{{ subcategory_filter }}' == subcategory.id) {
+                            option.selected = true;
+                        }
+                        subcategorySelect.appendChild(option);
+                    });
+                    
+                    // If subcategory_filter is set but not in the new list, clear it
+                    const hasSelected = Array.from(subcategorySelect.options).some(opt => opt.value == '{{ subcategory_filter }}');
+                    if ('{{ subcategory_filter }}' && !hasSelected) {
+                        subcategorySelect.value = '';
+                    }
+                    
+                    loadingIndicator.classList.remove('active');
+                    subcategorySelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error loading subcategories:', error);
+                    loadingIndicator.classList.remove('active');
+                    subcategorySelect.disabled = false;
+                    // Fallback: load all subcategories
+                    fetchAllSubcategories();
+                });
+        }
+        
+        // Function to fetch all subcategories (fallback)
+        function fetchAllSubcategories() {
+            fetch('/get-all-subcategories-ajax/')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(function(subcategory) {
+                        const option = document.createElement('option');
+                        option.value = subcategory.id;
+                        option.textContent = subcategory.name;
+                        if ('{{ subcategory_filter }}' == subcategory.id) {
+                            option.selected = true;
+                        }
+                        subcategorySelect.appendChild(option);
+                    });
+                    loadingIndicator.classList.remove('active');
+                    subcategorySelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error loading all subcategories:', error);
+                    loadingIndicator.classList.remove('active');
+                    subcategorySelect.disabled = false;
+                });
+        }
+        
+        // Load initial subcategories if category is pre-selected
+        if (categorySelect.value) {
+            loadSubcategories(categorySelect.value);
+        }
+        
+        // Event listener for category change
+        categorySelect.addEventListener('change', function() {
+            loadSubcategories(this.value);
         });
     });
 </script>

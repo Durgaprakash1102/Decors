@@ -118,4 +118,6 @@ path('admin/offer/create/', views.offer_create_view, name='offer_create'),
 path('admin/offer/edit/<int:offer_id>/', views.offer_edit_view, name='offer_edit'),
 path('admin/offer/delete/<int:offer_id>/', views.offer_delete_view, name='offer_delete'),
 path('admin/offer/toggle/<int:offer_id>/', views.offer_toggle_status_view, name='offer_toggle'),
+path('get-subcategories-ajax/', views.get_subcategories_ajax, name='get_subcategories_ajax'),
+path('get-all-subcategories-ajax/', views.get_all_subcategories_ajax, name='get_all_subcategories_ajax'),
 ]
