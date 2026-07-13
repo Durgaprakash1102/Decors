@@ -1170,10 +1170,27 @@ def product_smart_edit_view(request, product_id):
     
 # ==================== REVIEW VIEWS ====================
 
+
 @login_required
 def review_list_view(request):
+    # Get all reviews with related data
     reviews = ProductReview.objects.select_related('product', 'user').all()
-    return render(request, 'Ecom/admin/review_list.html', {'reviews': reviews})
+    
+    # Calculate counts properly
+    total_count = reviews.count()
+    pending_count = reviews.filter(is_approved=False).count()
+    approved_count = reviews.filter(is_approved=True).count()
+    rejected_count = 0  # You can add a rejected status if needed
+    
+    context = {
+        'reviews': reviews,
+        'total_count': total_count,
+        'pending_count': pending_count,
+        'approved_count': approved_count,
+        'rejected_count': rejected_count,
+    }
+    
+    return render(request, 'Ecom/admin/review_list.html', context)
 
 @login_required
 def review_approve_view(request, review_id):
@@ -1189,6 +1206,7 @@ def review_delete_view(request, review_id):
     review.delete()
     messages.success(request, 'Review deleted successfully!')
     return redirect('Ecom:review_list')
+
 
 # ==================== INVENTORY LOG VIEW ====================
 
