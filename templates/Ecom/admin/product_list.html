@@ -1,4 +1,3 @@
-
 {% load static %}
 
 {% block title %}Products - MyStore{% endblock %}
@@ -182,14 +181,86 @@
         display: inline-block;
         margin-left: 4px;
     }
+    
+    /* Filter bar styles */
+    .filter-bar {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #e9ecef;
+    }
+    .filter-bar .filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+    .filter-bar .filter-row .form-control,
+    .filter-bar .filter-row .form-select {
+        font-size: 13px;
+        min-width: 140px;
+    }
+    .filter-bar .filter-row .form-control {
+        min-width: 200px;
+    }
+    .filter-bar .filter-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .filter-bar .results-count {
+        font-size: 13px;
+        color: #6c757d;
+        margin-left: auto;
+        padding: 5px 10px;
+        background: white;
+        border-radius: 4px;
+        border: 1px solid #e9ecef;
+    }
+    .filter-bar .results-count strong {
+        color: #1a1a2e;
+    }
+    
+    @media (max-width: 768px) {
+        .filter-bar .filter-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .filter-bar .filter-row .form-control,
+        .filter-bar .filter-row .form-select {
+            min-width: 100%;
+            width: 100%;
+        }
+        .filter-bar .filter-actions {
+            justify-content: center;
+        }
+        .filter-bar .results-count {
+            margin-left: 0;
+            text-align: center;
+        }
+    }
+    @media (max-width: 480px) {
+        .filter-bar {
+            padding: 10px;
+        }
+        .filter-bar .filter-row .form-control,
+        .filter-bar .filter-row .form-select {
+            font-size: 12px;
+        }
+        .filter-bar .filter-actions .btn {
+            font-size: 12px;
+            padding: 5px 12px;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <h2><i class="fas fa-boxes text-primary"></i> Products</h2>
-        <div>
+        <div class="d-flex gap-2 flex-wrap">
             <a href="{% url 'Ecom:product_smart_create' %}" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Add New Product
             </a>
@@ -202,6 +273,105 @@
         </div>
     </div>
 
+    <!-- ============================================ -->
+    <!-- FILTER BAR                                   -->
+    <!-- ============================================ -->
+    <div class="filter-bar">
+        <form method="GET" id="productFilterForm">
+            <div class="filter-row">
+                <!-- Search Input -->
+                <input type="text" name="search" class="form-control form-control-sm" 
+                       placeholder="Search products..." 
+                       value="{{ search_query }}">
+                
+                <!-- Category Filter -->
+                <select name="category" class="form-select form-select-sm">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if category_filter == category.id|stringformat:"s" %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <!-- Subcategory Filter -->
+                <select name="subcategory" class="form-select form-select-sm">
+                    <option value="">All Subcategories</option>
+                    {% for subcategory in subcategories %}
+                        <option value="{{ subcategory.id }}" {% if subcategory_filter == subcategory.id|stringformat:"s" %}selected{% endif %}>
+                            {{ subcategory.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <!-- Brand Filter -->
+                <select name="brand" class="form-select form-select-sm">
+                    <option value="">All Brands</option>
+                    {% for brand in brands %}
+                        <option value="{{ brand }}" {% if brand_filter == brand %}selected{% endif %}>
+                            {{ brand }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <!-- Status Filter -->
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">All Status</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+                
+                <!-- Stock Filter -->
+                <select name="stock" class="form-select form-select-sm">
+                    <option value="">All Stock</option>
+                    <option value="in_stock" {% if stock_filter == 'in_stock' %}selected{% endif %}>In Stock</option>
+                    <option value="low_stock" {% if stock_filter == 'low_stock' %}selected{% endif %}>Low Stock</option>
+                    <option value="out_of_stock" {% if stock_filter == 'out_of_stock' %}selected{% endif %}>Out of Stock</option>
+                </select>
+                
+                <!-- Offer Filter -->
+                <select name="offer" class="form-select form-select-sm">
+                    <option value="">All Products</option>
+                    <option value="has_offer" {% if offer_filter == 'has_offer' %}selected{% endif %}>Has Offer/Discount</option>
+                    <option value="no_offer" {% if offer_filter == 'no_offer' %}selected{% endif %}>No Offer/Discount</option>
+                </select>
+                
+                <!-- Sort By -->
+                <select name="sort" class="form-select form-select-sm">
+                    <option value="created_desc" {% if sort_by == 'created_desc' %}selected{% endif %}>Sort: Newest</option>
+                    <option value="created" {% if sort_by == 'created' %}selected{% endif %}>Sort: Oldest</option>
+                    <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Sort: Name A-Z</option>
+                    <option value="name_desc" {% if sort_by == 'name_desc' %}selected{% endif %}>Sort: Name Z-A</option>
+                    <option value="price" {% if sort_by == 'price' %}selected{% endif %}>Sort: Price Low-High</option>
+                    <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Sort: Price High-Low</option>
+                    <option value="stock" {% if sort_by == 'stock' %}selected{% endif %}>Sort: Stock Low-High</option>
+                    <option value="stock_desc" {% if sort_by == 'stock_desc' %}selected{% endif %}>Sort: Stock High-Low</option>
+                    <option value="updated_desc" {% if sort_by == 'updated_desc' %}selected{% endif %}>Sort: Recently Updated</option>
+                </select>
+                
+                <!-- Action Buttons -->
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="fas fa-search"></i> Filter
+                    </button>
+                    {% if search_query or category_filter or subcategory_filter or brand_filter or status_filter or stock_filter or offer_filter %}
+                        <a href="?{% if sort_by %}sort={{ sort_by }}{% endif %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-times"></i> Clear
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <!-- Results Count -->
+                <div class="results-count">
+                    <strong>{{ total_products }}</strong> products found
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PRODUCT TABLE                                -->
+    <!-- ============================================ -->
     <div class="card shadow-sm">
         <div class="card-body">
             <div class="table-responsive">
@@ -476,27 +646,37 @@
                                 </div>
                             </td>
                             <td>
-                               <div class="d-flex flex-column gap-1" style="min-width:90px;">
-    <a href="{% url 'Ecom:product_detail' product.id %}" class="btn btn-sm btn-info" target="_blank" title="View on Store">
-        <i class="fas fa-eye"></i> View
-    </a>
-    <a href="{% url 'Ecom:product_admin_detail' product.id %}" class="btn btn-sm btn-secondary" title="Admin Details">
-        <i class="fas fa-info-circle"></i> Details
-    </a>
-    <a href="{% url 'Ecom:product_smart_edit' product.id %}" class="btn btn-sm btn-primary" title="Edit Product">
-        <i class="fas fa-edit"></i> Edit
-    </a>
-    <a href="{% url 'Ecom:product_delete' product.id %}" class="btn btn-sm btn-danger" title="Delete Product" onclick="return confirm('Are you sure you want to delete this product?')">
-        <i class="fas fa-trash"></i> Delete
-    </a>
-</div>
+                                <div class="d-flex flex-column gap-1" style="min-width:90px;">
+                                    <a href="{% url 'Ecom:product_detail' product.id %}" class="btn btn-sm btn-info" target="_blank" title="View on Store">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <a href="{% url 'Ecom:product_admin_detail' product.id %}" class="btn btn-sm btn-secondary" title="Admin Details">
+                                        <i class="fas fa-info-circle"></i> Details
+                                    </a>
+                                    <a href="{% url 'Ecom:product_smart_edit' product.id %}" class="btn btn-sm btn-primary" title="Edit Product">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a href="{% url 'Ecom:product_delete' product.id %}" class="btn btn-sm btn-danger" title="Delete Product" onclick="return confirm('Are you sure you want to delete this product?')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
                             <td colspan="10" class="text-center py-4">
                                 <i class="fas fa-boxes fa-3x text-muted"></i>
-                                <p class="mt-2">No products found. <a href="{% url 'Ecom:product_smart_create' %}">Add your first product</a></p>
+                                <p class="mt-2">No products found.</p>
+                                {% if search_query or category_filter or subcategory_filter or brand_filter or status_filter or stock_filter or offer_filter %}
+                                    <p class="text-muted">Try adjusting your filters.</p>
+                                    <a href="?{% if sort_by %}sort={{ sort_by }}{% endif %}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-times"></i> Clear Filters
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'Ecom:product_smart_create' %}" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i> Add your first product
+                                    </a>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -509,15 +689,25 @@
             <nav>
                 <ul class="pagination justify-content-center">
                     {% if products.has_previous %}
-                        <li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}">Previous</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                Previous
+                            </a>
+                        </li>
                     {% endif %}
                     {% for i in products.paginator.page_range %}
                         <li class="page-item {% if products.number == i %}active{% endif %}">
-                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                            <a class="page-link" href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                {{ i }}
+                            </a>
                         </li>
                     {% endfor %}
                     {% if products.has_next %}
-                        <li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}">Next</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                Next
+                            </a>
+                        </li>
                     {% endif %}
                 </ul>
             </nav>
@@ -563,6 +753,17 @@
                 }
             });
         }
+    });
+    
+    // Auto-submit form on select change (optional)
+    document.addEventListener('DOMContentLoaded', function() {
+        const selects = document.querySelectorAll('#productFilterForm select');
+        selects.forEach(function(select) {
+            select.addEventListener('change', function() {
+                // Uncomment below to auto-submit on change
+                // document.getElementById('productFilterForm').submit();
+            });
+        });
     });
 </script>
 {% endblock %}

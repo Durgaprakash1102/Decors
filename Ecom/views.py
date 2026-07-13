@@ -680,11 +680,149 @@ def subcategory_delete_view(request, subcategory_id):
 
 @login_required
 def product_list_view(request):
-    products = Product.objects.select_related('category', 'subcategory').all()
+    """Product list with search and filter capabilities"""
+    
+    # Base queryset
+    products = Product.objects.select_related('category', 'subcategory')
+    
+    # ============================================
+    # GET FILTER PARAMETERS
+    # ============================================
+    search_query = request.GET.get('search', '')
+    category_filter = request.GET.get('category', '')
+    subcategory_filter = request.GET.get('subcategory', '')
+    brand_filter = request.GET.get('brand', '')
+    status_filter = request.GET.get('status', '')
+    stock_filter = request.GET.get('stock', '')
+    offer_filter = request.GET.get('offer', '')
+    sort_by = request.GET.get('sort', 'created_desc')
+    
+    # ============================================
+    # APPLY SEARCH
+    # ============================================
+    if search_query:
+        products = products.filter(
+            models.Q(name__icontains=search_query) |
+            models.Q(sku__icontains=search_query) |
+            models.Q(brand__icontains=search_query) |
+            models.Q(description__icontains=search_query) |
+            models.Q(short_description__icontains=search_query) |
+            models.Q(category__name__icontains=search_query) |
+            models.Q(subcategory__name__icontains=search_query)
+        )
+    
+    # ============================================
+    # APPLY FILTERS
+    # ============================================
+    # Category filter
+    if category_filter:
+        products = products.filter(category_id=category_filter)
+    
+    # Subcategory filter
+    if subcategory_filter:
+        products = products.filter(subcategory_id=subcategory_filter)
+    
+    # Brand filter
+    if brand_filter:
+        products = products.filter(brand__icontains=brand_filter)
+    
+    # Status filter (active/inactive)
+    if status_filter == 'active':
+        products = products.filter(is_active=True)
+    elif status_filter == 'inactive':
+        products = products.filter(is_active=False)
+    
+    # Stock filter
+    if stock_filter == 'in_stock':
+        products = products.filter(stock_quantity__gt=0)
+    elif stock_filter == 'out_of_stock':
+        products = products.filter(stock_quantity=0)
+    elif stock_filter == 'low_stock':
+        products = products.filter(
+            stock_quantity__gt=0,
+            stock_quantity__lte=models.F('low_stock_threshold')
+        )
+    
+    # Offer filter
+    if offer_filter == 'has_offer':
+        # Products with offer (using offer_name property)
+        products = products.filter(
+            models.Q(discount_percentage__gt=0) | 
+            models.Q(id__in=Offer.objects.filter(
+                is_active=True,
+                valid_from__lte=timezone.now(),
+                valid_to__gte=timezone.now()
+            ).values_list('product_id', flat=True))
+        )
+    elif offer_filter == 'no_offer':
+        # Products without offer
+        products = products.exclude(
+            models.Q(discount_percentage__gt=0) | 
+            models.Q(id__in=Offer.objects.filter(
+                is_active=True,
+                valid_from__lte=timezone.now(),
+                valid_to__gte=timezone.now()
+            ).values_list('product_id', flat=True))
+        )
+    
+    # ============================================
+    # APPLY SORTING
+    # ============================================
+    if sort_by == 'name':
+        products = products.order_by('name')
+    elif sort_by == 'name_desc':
+        products = products.order_by('-name')
+    elif sort_by == 'price':
+        products = products.order_by('price')
+    elif sort_by == 'price_desc':
+        products = products.order_by('-price')
+    elif sort_by == 'stock':
+        products = products.order_by('stock_quantity')
+    elif sort_by == 'stock_desc':
+        products = products.order_by('-stock_quantity')
+    elif sort_by == 'created':
+        products = products.order_by('created_at')
+    elif sort_by == 'created_desc':
+        products = products.order_by('-created_at')
+    elif sort_by == 'updated':
+        products = products.order_by('updated_at')
+    elif sort_by == 'updated_desc':
+        products = products.order_by('-updated_at')
+    else:
+        products = products.order_by('-created_at')
+    
+    # ============================================
+    # GET FILTER OPTIONS
+    # ============================================
+    categories = Category.objects.filter(is_active=True).order_by('name')
+    subcategories = SubCategory.objects.filter(is_active=True).order_by('name')
+    brands = Product.objects.exclude(brand__isnull=True).exclude(brand='').values_list('brand', flat=True).distinct().order_by('brand')
+    
+    # ============================================
+    # PAGINATION
+    # ============================================
     paginator = Paginator(products, 20)
     page = request.GET.get('page')
     products_page = paginator.get_page(page)
-    return render(request, 'Ecom/admin/product_list.html', {'products': products_page})
+    
+    context = {
+        'products': products_page,
+        'categories': categories,
+        'subcategories': subcategories,
+        'brands': brands,
+        # Current filter values
+        'search_query': search_query,
+        'category_filter': category_filter,
+        'subcategory_filter': subcategory_filter,
+        'brand_filter': brand_filter,
+        'status_filter': status_filter,
+        'stock_filter': stock_filter,
+        'offer_filter': offer_filter,
+        'sort_by': sort_by,
+        # Counts
+        'total_products': products.count(),
+    }
+    return render(request, 'Ecom/admin/product_list.html', context)
 
 def product_detail_view(request, product_id):
     product = get_object_or_404(Product, id=product_id, is_active=True)
