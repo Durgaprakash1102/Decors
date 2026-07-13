@@ -686,8 +686,6 @@ def product_list_view(request):
     products_page = paginator.get_page(page)
     return render(request, 'Ecom/admin/product_list.html', {'products': products_page})
 
-# ==================== PRODUCT DETAIL VIEW (Public) ====================
-
 def product_detail_view(request, product_id):
     product = get_object_or_404(Product, id=product_id, is_active=True)
     
@@ -704,11 +702,40 @@ def product_detail_view(request, product_id):
     # Get product variants
     variants = product.variants.filter(is_active=True)
     
+    # ============================================
+    # CHECK IF PRODUCT IS IN CART OR WISHLIST
+    # ============================================
+    in_cart = False
+    in_wishlist = False
+    cart_item_id = None
+    wishlist_item_id = None
+    
+    if request.user.is_authenticated:
+        # Check if product is in cart
+        cart = get_or_create_cart(request)
+        cart_item = CartItem.objects.filter(cart=cart, product=product).first()
+        if cart_item:
+            in_cart = True
+            cart_item_id = cart_item.id
+        
+        # Check if product is in wishlist
+        wishlist_item = WishlistItem.objects.filter(
+            wishlist__user=request.user, 
+            product=product
+        ).first()
+        if wishlist_item:
+            in_wishlist = True
+            wishlist_item_id = wishlist_item.id
+    
     context = {
         'product': product,
         'reviews': reviews,
         'similar_products': similar_products,
         'variants': variants,
+        'in_cart': in_cart,
+        'cart_item_id': cart_item_id,
+        'in_wishlist': in_wishlist,
+        'wishlist_item_id': wishlist_item_id,
     }
     return render(request, 'Ecom/product_detail.html', context)
 

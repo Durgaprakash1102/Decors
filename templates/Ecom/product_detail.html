@@ -488,6 +488,7 @@
     .action-buttons .btn-cart {
         background: #0d6efd;
         color: white;
+        border: none;
     }
     .action-buttons .btn-cart:hover:not(:disabled) {
         background: #0b5ed7;
@@ -500,6 +501,12 @@
         transform: none;
         box-shadow: none;
     }
+    .action-buttons .btn-cart.in-cart {
+        background: #28a745;
+    }
+    .action-buttons .btn-cart.in-cart:hover:not(:disabled) {
+        background: #1e7e34;
+    }
     .action-buttons .btn-wishlist {
         background: white;
         color: #1a1a2e;
@@ -510,7 +517,7 @@
         border-color: #dc3545;
         color: #dc3545;
     }
-    .action-buttons .btn-wishlist.liked {
+    .action-buttons .btn-wishlist.in-wishlist {
         background: #fff5f5;
         border-color: #dc3545;
         color: #dc3545;
@@ -1436,11 +1443,26 @@
                         </div>
 
                         <div class="action-buttons">
-                            <button class="btn btn-cart btn-lg" id="addToCartBtn" onclick="addToCart()">
-                                <i class="fas fa-shopping-cart"></i> <span id="cartBtnText">Add to Cart</span>
+                            <!-- ============================================ -->
+                            <!-- ADD TO CART BUTTON WITH STATUS              -->
+                            <!-- ============================================ -->
+                            <button class="btn btn-cart btn-lg {% if in_cart %}in-cart{% endif %}" 
+                                    id="addToCartBtn" 
+                                    onclick="addToCart()"
+                                    {% if product.is_out_of_stock %}disabled{% endif %}>
+                                <i class="fas {% if in_cart %}fa-check-circle{% else %}fa-shopping-cart{% endif %}"></i>
+                                <span id="cartBtnText">{% if in_cart %}In Cart{% else %}Add to Cart{% endif %}</span>
                             </button>
-                            <button class="btn btn-wishlist" id="wishlistBtn" onclick="toggleWishlist()">
-                                <i class="fas fa-heart"></i> <span class="wishlist-text">Add to Wishlist</span>
+                            
+                            <!-- ============================================ -->
+                            <!-- WISHLIST BUTTON WITH STATUS                -->
+                            <!-- ============================================ -->
+                            <button class="btn btn-wishlist {% if in_wishlist %}in-wishlist{% endif %}" 
+                                    id="wishlistBtn" 
+                                    onclick="toggleWishlist()">
+                                <i class="fas {% if in_wishlist %}fa-heart{% else %}fa-heart{% endif %}" 
+                                   style="{% if in_wishlist %}color:#dc3545;{% endif %}"></i>
+                                <span class="wishlist-text">{% if in_wishlist %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}</span>
                             </button>
                         </div>
                         
@@ -1732,6 +1754,7 @@
     // ============================================
     function showToast(message, type = 'success') {
         const container = document.getElementById('toastContainer');
+        if (!container) return;
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         const icons = {
@@ -2057,6 +2080,11 @@
                 }, 1500);
             } else if (data.success) {
                 showToast(data.message, 'success');
+                // Update button to show "In Cart"
+                button.classList.add('in-cart');
+                document.getElementById('cartBtnText').textContent = 'In Cart';
+                button.querySelector('i').className = 'fas fa-check-circle';
+                // Update cart count in header
                 const cartBadge = document.querySelector('.cart-count');
                 if (cartBadge) {
                     cartBadge.textContent = data.cart_count;
@@ -2070,7 +2098,9 @@
             console.error('Error:', error);
         })
         .finally(() => {
-            document.getElementById('cartBtnText').textContent = originalText;
+            if (document.getElementById('cartBtnText').textContent !== 'In Cart') {
+                document.getElementById('cartBtnText').textContent = originalText;
+            }
             button.disabled = false;
         });
     }
@@ -2104,10 +2134,10 @@
                 showToast(data.message, 'success');
                 if (data.in_wishlist) {
                     button.innerHTML = '<i class="fas fa-heart" style="color:#dc3545;"></i> <span class="wishlist-text">Remove from Wishlist</span>';
-                    button.classList.add('liked');
+                    button.classList.add('in-wishlist');
                 } else {
                     button.innerHTML = '<i class="fas fa-heart"></i> <span class="wishlist-text">Add to Wishlist</span>';
-                    button.classList.remove('liked');
+                    button.classList.remove('in-wishlist');
                 }
             } else {
                 showToast(data.error || 'Failed to update wishlist', 'error');

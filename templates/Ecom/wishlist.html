@@ -1,48 +1,377 @@
-{% extends 'base.html' %}
+
 {% load static %}
 
 {% block title %}My Wishlist - MyStore{% endblock %}
 
+{% block extra_css %}
+<style>
+    .wishlist-card {
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .wishlist-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    .wishlist-card .card-img-top {
+        border-radius: 0;
+        transition: transform 0.3s ease;
+    }
+    .wishlist-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+    .wishlist-card .card-body {
+        padding: 15px;
+    }
+    .wishlist-card .card-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        line-height: 1.4;
+        min-height: 40px;
+    }
+    .wishlist-card .card-title a {
+        color: #1a1a2e;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .wishlist-card .card-title a:hover {
+        color: #0d6efd;
+    }
+    .wishlist-card .card-text {
+        margin-bottom: 12px;
+    }
+    .wishlist-card .card-text .current-price {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2d7d46;
+    }
+    .wishlist-card .card-text .original-price {
+        font-size: 14px;
+        color: #999;
+        text-decoration: line-through;
+    }
+    .wishlist-card .card-text .discount-badge {
+        background: #dc3545;
+        color: white;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .wishlist-card .card-text .offer-badge {
+        background: #ff6b6b;
+        color: white;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        animation: pulse-offer 2s infinite;
+    }
+    @keyframes pulse-offer {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    .wishlist-card .card-text .offer-name {
+        font-size: 11px;
+        color: #ff6b6b;
+        font-weight: 600;
+        display: block;
+        margin-top: 2px;
+    }
+    .wishlist-card .card-text .savings-text {
+        font-size: 12px;
+        color: #28a745;
+        font-weight: 600;
+        display: block;
+    }
+    .wishlist-card .btn-remove {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid #e9ecef;
+        color: #dc3545;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 2;
+        font-size: 14px;
+        padding: 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .wishlist-card .btn-remove:hover {
+        background: #dc3545;
+        color: white;
+        transform: scale(1.1);
+    }
+    .wishlist-card .btn-move-cart {
+        width: 100%;
+        padding: 8px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+        transition: all 0.3s ease;
+        background: #0d6efd;
+        color: white;
+        border: none;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+    .wishlist-card .btn-move-cart:hover {
+        background: #0b5ed7;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(13,110,253,0.3);
+        color: white;
+    }
+    .wishlist-card .btn-move-cart.out-of-stock {
+        background: #6c757d;
+        cursor: not-allowed;
+    }
+    .wishlist-card .btn-move-cart.out-of-stock:hover {
+        background: #6c757d;
+        transform: none;
+        box-shadow: none;
+    }
+    .wishlist-card .stock-badge {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        padding: 3px 10px;
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: 600;
+        z-index: 2;
+    }
+    .wishlist-card .stock-badge.in-stock {
+        background: #d4edda;
+        color: #155724;
+    }
+    .wishlist-card .stock-badge.low-stock {
+        background: #fff3cd;
+        color: #856404;
+    }
+    .wishlist-card .stock-badge.out-of-stock {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    .wishlist-card .product-image-wrapper {
+        position: relative;
+        overflow: hidden;
+        height: 200px;
+        background: #f8f9fa;
+    }
+    .wishlist-card .product-image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .wishlist-card:hover .product-image-wrapper img {
+        transform: scale(1.05);
+    }
+    .wishlist-card .product-image-wrapper .no-image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #adb5bd;
+        font-size: 48px;
+    }
+    
+    /* Toast Notification */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+    .toast {
+        padding: 12px 20px;
+        border-radius: 10px;
+        color: white;
+        font-weight: 500;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        animation: slideInRight 0.5s ease;
+        min-width: 250px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .toast.success { background: #28a745; }
+    .toast.error { background: #dc3545; }
+    .toast.info { background: #17a2b8; }
+    .toast.warning { background: #ffc107; color: #1a1a2e; }
+    .toast .toast-close {
+        margin-left: auto;
+        cursor: pointer;
+        opacity: 0.8;
+        font-size: 18px;
+    }
+    .toast .toast-close:hover { opacity: 1; }
+    @keyframes slideInRight {
+        from { transform: translateX(100px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+        .wishlist-card .product-image-wrapper {
+            height: 150px;
+        }
+        .wishlist-card .card-title {
+            font-size: 13px;
+            min-height: 35px;
+        }
+        .wishlist-card .card-text .current-price {
+            font-size: 16px;
+        }
+    }
+    @media (max-width: 480px) {
+        .wishlist-card .product-image-wrapper {
+            height: 120px;
+        }
+        .wishlist-card .card-body {
+            padding: 10px;
+        }
+        .wishlist-card .card-title {
+            font-size: 12px;
+            min-height: 30px;
+        }
+        .wishlist-card .card-text .current-price {
+            font-size: 14px;
+        }
+        .wishlist-card .btn-move-cart {
+            font-size: 11px;
+            padding: 6px;
+        }
+        .wishlist-card .btn-remove {
+            width: 28px;
+            height: 28px;
+            font-size: 12px;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
-    <h2 class="mb-4"><i class="fas fa-heart text-danger"></i> My Wishlist</h2>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <h2 class="mb-4">
+        <i class="fas fa-heart text-danger"></i> My Wishlist
+        <span class="badge bg-secondary ms-2">{{ total_items }}</span>
+    </h2>
     
     {% if items %}
         <div class="row">
             {% for item in items %}
                 <div class="col-md-3 col-6 mb-4">
-                    <div class="card wishlist-card h-100">
-                        <div class="position-relative">
+                    <div class="wishlist-card card h-100">
+                        <div class="product-image-wrapper">
                             <a href="{% url 'Ecom:product_detail' item.product.id %}">
                                 {% if item.main_image %}
-                                    <img src="{{ item.main_image }}" class="card-img-top" alt="{{ item.product.name }}" style="height:200px;object-fit:cover;">
+                                    <img src="{{ item.main_image }}" alt="{{ item.product.name }}" loading="lazy">
                                 {% else %}
-                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height:200px;">
-                                        <i class="fas fa-image fa-3x text-muted"></i>
+                                    <div class="no-image">
+                                        <i class="fas fa-image"></i>
                                     </div>
                                 {% endif %}
                             </a>
-                            <button class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2" onclick="removeWishlistItem({{ item.id }})" title="Remove from wishlist">
+                            
+                            <!-- Stock Badge -->
+                            {% if item.product.is_out_of_stock %}
+                                <span class="stock-badge out-of-stock">
+                                    <i class="fas fa-times-circle"></i> Out of Stock
+                                </span>
+                            {% elif item.product.is_low_stock %}
+                                <span class="stock-badge low-stock">
+                                    <i class="fas fa-exclamation-triangle"></i> {{ item.product.stock_quantity }} left
+                                </span>
+                            {% else %}
+                                <span class="stock-badge in-stock">
+                                    <i class="fas fa-check-circle"></i> In Stock
+                                </span>
+                            {% endif %}
+                            
+                            <!-- Remove Button -->
+                            <button class="btn-remove" onclick="removeWishlistItem({{ item.id }})" title="Remove from wishlist">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
+                        
                         <div class="card-body">
                             <h6 class="card-title">
-                                <a href="{% url 'Ecom:product_detail' item.product.id %}" class="text-dark text-decoration-none">
+                                <a href="{% url 'Ecom:product_detail' item.product.id %}">
                                     {{ item.product.name|truncatechars:30 }}
                                 </a>
                             </h6>
-                            <p class="card-text">
-                                <span class="fw-bold">₹{{ item.price|floatformat:2 }}</span>
-                                {% if item.product.discount_percentage > 0 %}
-                                    <span class="text-muted text-decoration-line-through ms-1">₹{{ item.product.price }}</span>
-                                    <span class="badge bg-danger ms-1">{{ item.product.discount_percentage|floatformat:0 }}%</span>
+                            
+                            <!-- ============================================ -->
+                            <!-- PRICE WITH OFFER SUPPORT                    -->
+                            <!-- ============================================ -->
+                            <div class="card-text">
+                                {% if item.product.offer_name and item.product.offer_name != "Product Discount" %}
+                                    <!-- Offer Applied -->
+                                    <span class="current-price">₹{{ item.product.offer_price|floatformat:2 }}</span>
+                                    <span class="original-price ms-1">₹{{ item.product.price|floatformat:2 }}</span>
+                                    <span class="offer-badge ms-1">
+                                        <i class="fas fa-gift"></i> Offer
+                                    </span>
+                                    <span class="offer-name">
+                                        <i class="fas fa-tag"></i> {{ item.product.offer_name }}
+                                    </span>
+                                    <span class="savings-text">
+                                        Save ₹{{ item.product.total_savings|floatformat:2 }}
+                                    </span>
+                                {% elif item.product.discount_percentage > 0 %}
+                                    <!-- Product Discount Only -->
+                                    <span class="current-price">₹{{ item.product.final_price|floatformat:2 }}</span>
+                                    <span class="original-price ms-1">₹{{ item.product.price|floatformat:2 }}</span>
+                                    <span class="discount-badge ms-1">
+                                        {{ item.product.discount_percentage|floatformat:0 }}% OFF
+                                    </span>
+                                {% else %}
+                                    <!-- No Discount -->
+                                    <span class="current-price">₹{{ item.product.price|floatformat:2 }}</span>
                                 {% endif %}
-                            </p>
+                            </div>
+                            
+                            <!-- ============================================ -->
+                            <!-- VARIANT INFO (if variant exists)            -->
+                            <!-- ============================================ -->
+                            {% if item.variant %}
+                                <div style="font-size:12px;color:#6c757d;margin-bottom:8px;">
+                                    <i class="fas fa-cubes"></i>
+                                    {% if item.variant.name %}
+                                        {{ item.variant.name }}
+                                    {% else %}
+                                        {% if item.variant.color %}{{ item.variant.color }}{% endif %}
+                                        {% if item.variant.size %}{% if item.variant.color %} / {% endif %}{{ item.variant.size }}{% endif %}
+                                    {% endif %}
+                                    <span class="text-muted">({{ item.variant.sku }})</span>
+                                </div>
+                            {% endif %}
+                            
                             <div class="d-grid gap-2">
-                                <a href="{% url 'Ecom:move_to_cart' item.id %}" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-shopping-cart"></i> Move to Cart
-                                </a>
+                                {% if item.product.is_out_of_stock %}
+                                    <a href="#" class="btn-move-cart out-of-stock" onclick="event.preventDefault(); showToast('This product is out of stock', 'warning');">
+                                        <i class="fas fa-times-circle"></i> Out of Stock
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'Ecom:move_to_cart' item.id %}" class="btn-move-cart">
+                                        <i class="fas fa-shopping-cart"></i> Move to Cart
+                                    </a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -61,26 +390,13 @@
     {% endif %}
 </div>
 
+<!-- ============================================ -->
+<!-- JAVASCRIPT                                  -->
+<!-- ============================================ -->
 <script>
-    function removeWishlistItem(itemId) {
-        if (!confirm('Remove this item from wishlist?')) return;
-        
-        fetch('{% url "Ecom:remove_from_wishlist" 0 %}'.replace('0', itemId), {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert(data.error || 'Error removing item');
-            }
-        });
-    }
-    
+    // ============================================
+    // CSRF TOKEN HELPER
+    // ============================================
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -95,5 +411,96 @@
         }
         return cookieValue;
     }
+
+    // ============================================
+    // TOAST NOTIFICATION
+    // ============================================
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            info: 'fa-info-circle',
+            warning: 'fa-exclamation-triangle'
+        };
+        toast.innerHTML = `
+            <i class="fas ${icons[type] || icons.info}"></i>
+            <span>${message}</span>
+            <span class="toast-close" onclick="this.parentElement.remove()">&times;</span>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 5000);
+    }
+
+    // ============================================
+    // REMOVE WISHLIST ITEM
+    // ============================================
+    function removeWishlistItem(itemId) {
+        if (!confirm('Remove this item from wishlist?')) return;
+        
+        const button = document.querySelector(`button[onclick="removeWishlistItem(${itemId})"]`);
+        if (button) {
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+        }
+        
+        fetch('{% url "Ecom:remove_from_wishlist" 0 %}'.replace('0', itemId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Item removed from wishlist', 'success');
+                setTimeout(() => {
+                    location.reload();
+                }, 800);
+            } else {
+                showToast(data.error || 'Error removing item', 'error');
+                if (button) {
+                    button.innerHTML = '<i class="fas fa-times"></i>';
+                    button.disabled = false;
+                }
+            }
+        })
+        .catch(error => {
+            showToast('Network error. Please try again.', 'error');
+            if (button) {
+                button.innerHTML = '<i class="fas fa-times"></i>';
+                button.disabled = false;
+            }
+        });
+    }
+
+    // ============================================
+    // AUTO-DISMISS TOASTS
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-dismiss toasts after 5 seconds
+        document.querySelectorAll('.toast').forEach(function(toast) {
+            setTimeout(function() {
+                if (toast.parentElement) {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.3s';
+                    setTimeout(function() {
+                        if (toast.parentElement) {
+                            toast.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        });
+    });
 </script>
 {% endblock %}
