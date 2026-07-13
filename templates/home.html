@@ -157,6 +157,73 @@
     }
     
     /* ============================================ */
+    /* PRICE BREAKDOWN STYLES                      */
+    /* ============================================ */
+    .price-breakdown {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .price-breakdown .original {
+        color: #6c757d;
+        text-decoration: line-through;
+        font-size: 13px;
+    }
+    .price-breakdown .current {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2d7d46;
+    }
+    .price-breakdown .offer-tag {
+        background: #ff6b6b;
+        color: white;
+        padding: 1px 8px;
+        border-radius: 10px;
+        font-size: 9px;
+        font-weight: 600;
+    }
+    .price-breakdown .offer-tag i {
+        margin-right: 2px;
+    }
+    .price-breakdown .product-discount-tag {
+        background: #dc3545;
+        color: white;
+        padding: 1px 8px;
+        border-radius: 10px;
+        font-size: 9px;
+        font-weight: 600;
+    }
+    .price-breakdown .product-discount-tag i {
+        margin-right: 2px;
+    }
+    .price-breakdown .savings-text {
+        font-size: 11px;
+        font-weight: 600;
+        color: #28a745;
+    }
+    
+    /* Offer badge on product */
+    .offer-badge-mini {
+        background: #ff6b6b;
+        color: white;
+        padding: 1px 8px;
+        border-radius: 10px;
+        font-size: 9px;
+        font-weight: 600;
+        display: inline-block;
+        margin-top: 2px;
+        animation: pulse-offer 2s infinite;
+    }
+    .offer-badge-mini i {
+        margin-right: 2px;
+    }
+    @keyframes pulse-offer {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    /* ============================================ */
     /* DEALS OF THE DAY                            */
     /* ============================================ */
     .deals-grid {
@@ -269,6 +336,7 @@
         display: flex;
         align-items: center;
         gap: 10px;
+        flex-wrap: wrap;
         margin-bottom: 12px;
     }
     .deal-card .deal-price .current {
@@ -280,6 +348,21 @@
         font-size: 16px;
         color: #999;
         text-decoration: line-through;
+    }
+    .deal-card .deal-price .offer-tag-mini {
+        background: #ff6b6b;
+        color: white;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+    }
+    .deal-card .deal-offer-name {
+        font-size: 11px;
+        color: #ff6b6b;
+        font-weight: 600;
+        margin-top: -8px;
+        margin-bottom: 8px;
     }
     .deal-card .deal-progress {
         display: flex;
@@ -360,6 +443,7 @@
         .deal-card .deal-btn { font-size: 12px; padding: 8px; }
         .deal-card .deal-progress .deal-stock-text { font-size: 10px; }
         .deal-card .deal-rating { font-size: 11px; }
+        .deal-card .deal-offer-name { font-size: 9px; }
     }
     
     /* ============================================ */
@@ -424,6 +508,13 @@
         background: linear-gradient(135deg, #dc3545, #c82333);
         color: white;
     }
+    .product-card .product-image .badge-tag.offer-badge {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        color: white;
+        top: 45px;
+        left: 10px;
+        font-size: 10px;
+    }
     .product-card .product-image .badge-stock {
         position: absolute;
         bottom: 10px;
@@ -472,11 +563,17 @@
         color: #6c757d;
         font-size: 12px;
     }
+    .product-card .product-body .product-offer-name {
+        font-size: 10px;
+        color: #ff6b6b;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
     .product-card .product-body .product-price {
         margin-top: auto;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         flex-wrap: wrap;
     }
     .product-card .product-body .product-price .current {
@@ -488,6 +585,22 @@
         font-size: 14px;
         color: #999;
         text-decoration: line-through;
+    }
+    .product-card .product-body .product-price .offer-tag-mini {
+        background: #ff6b6b;
+        color: white;
+        padding: 1px 8px;
+        border-radius: 10px;
+        font-size: 9px;
+        font-weight: 600;
+    }
+    .product-card .product-body .product-price .discount-tag-mini {
+        background: #dc3545;
+        color: white;
+        padding: 1px 8px;
+        border-radius: 10px;
+        font-size: 9px;
+        font-weight: 600;
     }
     .product-card .product-actions {
         padding: 10px 16px 16px 16px;
@@ -728,6 +841,7 @@
 {% endblock %}
 
 {% block content %}
+
 <div class="home-container">
     <div class="container py-4">
         
@@ -775,12 +889,30 @@
                                         </div>
                                     {% endif %}
                                 </a>
-                                {% if product.discount_percentage > 0 %}
+                                
+                                <!-- ============================================ -->
+                                <!-- DEAL BADGE                                 -->
+                                <!-- ============================================ -->
+                                {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                    <!-- Offer Applied -->
+                                    <div class="deal-badge" style="background:linear-gradient(135deg, #ff6b6b, #ee5a24);">
+                                        <span class="deal-discount">
+                                            {% if product.offer_discount_amount %}
+                                                ₹{{ product.offer_discount_amount|floatformat:0 }}
+                                            {% else %}
+                                                {{ product.discount_percentage|floatformat:0 }}%
+                                            {% endif %}
+                                        </span>
+                                        <span class="deal-label">OFFER</span>
+                                    </div>
+                                {% elif product.discount_percentage > 0 %}
+                                    <!-- Product Discount Only -->
                                     <div class="deal-badge">
                                         <span class="deal-discount">{{ product.discount_percentage|floatformat:0 }}%</span>
                                         <span class="deal-label">OFF</span>
                                     </div>
                                 {% endif %}
+                                
                                 <span class="deal-stock-badge 
                                     {% if product.is_out_of_stock %}out-of-stock
                                     {% elif product.is_low_stock %}low-stock
@@ -804,12 +936,35 @@
                                     {% endwith %}
                                     <span class="count">({{ product.total_reviews }})</span>
                                 </div>
+                                
+                                <!-- ============================================ -->
+                                <!-- DEAL PRICE WITH OFFER SUPPORT               -->
+                                <!-- ============================================ -->
                                 <div class="deal-price">
-                                    <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
-                                    {% if product.discount_percentage > 0 %}
-                                        <span class="original">₹{{ product.price }}</span>
+                                    {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                        <!-- Offer Applied -->
+                                        <span class="current">₹{{ product.offer_price|floatformat:2 }}</span>
+                                        <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                                        <span class="offer-tag-mini">
+                                            <i class="fas fa-gift"></i> Offer
+                                        </span>
+                                    {% elif product.discount_percentage > 0 %}
+                                        <!-- Product Discount Only -->
+                                        <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
+                                        <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                                    {% else %}
+                                        <!-- No Discount -->
+                                        <span class="current">₹{{ product.price|floatformat:2 }}</span>
                                     {% endif %}
                                 </div>
+                                
+                                <!-- Offer Name -->
+                                {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                    <div class="deal-offer-name">
+                                        <i class="fas fa-tag"></i> {{ product.offer_name }}
+                                    </div>
+                                {% endif %}
+                                
                                 <div class="deal-progress">
                                     <div class="progress">
                                         <div class="progress-bar" style="width: {% widthratio product.stock_quantity 100 100 %}%;"></div>
@@ -927,9 +1082,16 @@
                                     {% endif %}
                                 </a>
                                 <span class="badge-tag best-seller"><i class="fas fa-trophy"></i> Best Seller</span>
-                                {% if product.discount_percentage > 0 %}
+                                
+                                <!-- Offer Badge -->
+                                {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                    <span class="badge-tag offer-badge">
+                                        <i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:10 }}
+                                    </span>
+                                {% elif product.discount_percentage > 0 %}
                                     <span class="badge-tag" style="background:linear-gradient(135deg,#dc3545,#c82333);color:white;top:45px;left:10px;">-{{ product.discount_percentage|floatformat:0 }}%</span>
                                 {% endif %}
+                                
                                 <span class="badge-stock 
                                     {% if product.is_out_of_stock %}out-of-stock
                                     {% elif product.is_low_stock %}low-stock
@@ -953,12 +1115,34 @@
                                     {% endwith %}
                                     <span class="count">({{ product.total_reviews }})</span>
                                 </div>
+                                
+                                <!-- ============================================ -->
+                                <!-- PRODUCT PRICE WITH OFFER SUPPORT            -->
+                                <!-- ============================================ -->
                                 <div class="product-price">
-                                    <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
-                                    {% if product.discount_percentage > 0 %}
-                                        <span class="original">₹{{ product.price }}</span>
+                                    {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                        <!-- Offer Applied -->
+                                        <span class="current">₹{{ product.offer_price|floatformat:2 }}</span>
+                                        <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                                        <span class="offer-tag-mini">
+                                            <i class="fas fa-gift"></i> Offer
+                                        </span>
+                                    {% elif product.discount_percentage > 0 %}
+                                        <!-- Product Discount Only -->
+                                        <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
+                                        <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                                    {% else %}
+                                        <!-- No Discount -->
+                                        <span class="current">₹{{ product.price|floatformat:2 }}</span>
                                     {% endif %}
                                 </div>
+                                
+                                <!-- Offer Name -->
+                                {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                    <div class="product-offer-name">
+                                        <i class="fas fa-tag"></i> {{ product.offer_name }}
+                                    </div>
+                                {% endif %}
                             </div>
                             <div class="product-actions">
                                 <a href="{% url 'Ecom:product_detail' product.id %}" class="btn-view">
@@ -1003,9 +1187,16 @@
                                     {% endif %}
                                 </a>
                                 <span class="badge-tag featured"><i class="fas fa-star"></i> Featured</span>
-                                {% if product.discount_percentage > 0 %}
+                                
+                                <!-- Offer Badge -->
+                                {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                    <span class="badge-tag offer-badge">
+                                        <i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:10 }}
+                                    </span>
+                                {% elif product.discount_percentage > 0 %}
                                     <span class="badge-tag" style="background:linear-gradient(135deg,#dc3545,#c82333);color:white;top:45px;left:10px;">-{{ product.discount_percentage|floatformat:0 }}%</span>
                                 {% endif %}
+                                
                                 <span class="badge-stock 
                                     {% if product.is_out_of_stock %}out-of-stock
                                     {% elif product.is_low_stock %}low-stock
@@ -1029,12 +1220,28 @@
                                     {% endwith %}
                                     <span class="count">({{ product.total_reviews }})</span>
                                 </div>
+                                
+                                <!-- Price with Offer Support -->
                                 <div class="product-price">
-                                    <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
-                                    {% if product.discount_percentage > 0 %}
-                                        <span class="original">₹{{ product.price }}</span>
+                                    {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                        <span class="current">₹{{ product.offer_price|floatformat:2 }}</span>
+                                        <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                                        <span class="offer-tag-mini">
+                                            <i class="fas fa-gift"></i> Offer
+                                        </span>
+                                    {% elif product.discount_percentage > 0 %}
+                                        <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
+                                        <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                                    {% else %}
+                                        <span class="current">₹{{ product.price|floatformat:2 }}</span>
                                     {% endif %}
                                 </div>
+                                
+                                {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                    <div class="product-offer-name">
+                                        <i class="fas fa-tag"></i> {{ product.offer_name }}
+                                    </div>
+                                {% endif %}
                             </div>
                             <div class="product-actions">
                                 <a href="{% url 'Ecom:product_detail' product.id %}" class="btn-view">
@@ -1079,9 +1286,16 @@
                                     {% endif %}
                                 </a>
                                 <span class="badge-tag new"><i class="fas fa-clock"></i> New</span>
-                                {% if product.discount_percentage > 0 %}
+                                
+                                <!-- Offer Badge -->
+                                {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                    <span class="badge-tag offer-badge">
+                                        <i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:10 }}
+                                    </span>
+                                {% elif product.discount_percentage > 0 %}
                                     <span class="badge-tag" style="background:linear-gradient(135deg,#dc3545,#c82333);color:white;top:45px;left:10px;">-{{ product.discount_percentage|floatformat:0 }}%</span>
                                 {% endif %}
+                                
                                 <span class="badge-stock 
                                     {% if product.is_out_of_stock %}out-of-stock
                                     {% elif product.is_low_stock %}low-stock
@@ -1105,12 +1319,28 @@
                                     {% endwith %}
                                     <span class="count">({{ product.total_reviews }})</span>
                                 </div>
+                                
+                                <!-- Price with Offer Support -->
                                 <div class="product-price">
-                                    <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
-                                    {% if product.discount_percentage > 0 %}
-                                        <span class="original">₹{{ product.price }}</span>
+                                    {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                        <span class="current">₹{{ product.offer_price|floatformat:2 }}</span>
+                                        <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                                        <span class="offer-tag-mini">
+                                            <i class="fas fa-gift"></i> Offer
+                                        </span>
+                                    {% elif product.discount_percentage > 0 %}
+                                        <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
+                                        <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                                    {% else %}
+                                        <span class="current">₹{{ product.price|floatformat:2 }}</span>
                                     {% endif %}
                                 </div>
+                                
+                                {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                    <div class="product-offer-name">
+                                        <i class="fas fa-tag"></i> {{ product.offer_name }}
+                                    </div>
+                                {% endif %}
                             </div>
                             <div class="product-actions">
                                 <a href="{% url 'Ecom:product_detail' product.id %}" class="btn-view">
@@ -1155,9 +1385,16 @@
                                     {% endif %}
                                 </a>
                                 <span class="badge-tag top-rated"><i class="fas fa-star"></i> Top Rated</span>
-                                {% if product.discount_percentage > 0 %}
+                                
+                                <!-- Offer Badge -->
+                                {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                    <span class="badge-tag offer-badge">
+                                        <i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:10 }}
+                                    </span>
+                                {% elif product.discount_percentage > 0 %}
                                     <span class="badge-tag" style="background:linear-gradient(135deg,#dc3545,#c82333);color:white;top:45px;left:10px;">-{{ product.discount_percentage|floatformat:0 }}%</span>
                                 {% endif %}
+                                
                                 <span class="badge-stock 
                                     {% if product.is_out_of_stock %}out-of-stock
                                     {% elif product.is_low_stock %}low-stock
@@ -1181,12 +1418,28 @@
                                     {% endwith %}
                                     <span class="count">({{ product.total_reviews }})</span>
                                 </div>
+                                
+                                <!-- Price with Offer Support -->
                                 <div class="product-price">
-                                    <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
-                                    {% if product.discount_percentage > 0 %}
-                                        <span class="original">₹{{ product.price }}</span>
+                                    {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                        <span class="current">₹{{ product.offer_price|floatformat:2 }}</span>
+                                        <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                                        <span class="offer-tag-mini">
+                                            <i class="fas fa-gift"></i> Offer
+                                        </span>
+                                    {% elif product.discount_percentage > 0 %}
+                                        <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
+                                        <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                                    {% else %}
+                                        <span class="current">₹{{ product.price|floatformat:2 }}</span>
                                     {% endif %}
                                 </div>
+                                
+                                {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                    <div class="product-offer-name">
+                                        <i class="fas fa-tag"></i> {{ product.offer_name }}
+                                    </div>
+                                {% endif %}
                             </div>
                             <div class="product-actions">
                                 <a href="{% url 'Ecom:product_detail' product.id %}" class="btn-view">
@@ -1230,9 +1483,16 @@
                                     </div>
                                 {% endif %}
                             </a>
-                            {% if product.discount_percentage > 0 %}
+                            
+                            <!-- Offer Badge -->
+                            {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                <span class="badge-tag offer-badge">
+                                    <i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:10 }}
+                                </span>
+                            {% elif product.discount_percentage > 0 %}
                                 <span class="badge-tag" style="background:linear-gradient(135deg,#dc3545,#c82333);color:white;top:10px;left:10px;">-{{ product.discount_percentage|floatformat:0 }}%</span>
                             {% endif %}
+                            
                             <span class="badge-stock 
                                 {% if product.is_out_of_stock %}out-of-stock
                                 {% elif product.is_low_stock %}low-stock
@@ -1256,12 +1516,28 @@
                                 {% endwith %}
                                 <span class="count">({{ product.total_reviews }})</span>
                             </div>
+                            
+                            <!-- Price with Offer Support -->
                             <div class="product-price">
-                                <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
-                                {% if product.discount_percentage > 0 %}
-                                    <span class="original">₹{{ product.price }}</span>
+                                {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                    <span class="current">₹{{ product.offer_price|floatformat:2 }}</span>
+                                    <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                                    <span class="offer-tag-mini">
+                                        <i class="fas fa-gift"></i> Offer
+                                    </span>
+                                {% elif product.discount_percentage > 0 %}
+                                    <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
+                                    <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                                {% else %}
+                                    <span class="current">₹{{ product.price|floatformat:2 }}</span>
                                 {% endif %}
                             </div>
+                            
+                            {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                <div class="product-offer-name">
+                                    <i class="fas fa-tag"></i> {{ product.offer_name }}
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="product-actions">
                             <a href="{% url 'Ecom:product_detail' product.id %}" class="btn-view">

@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+
 {% load static %}
 
-{% block title %}{{ product.name }} - MyStore{% endblock %}
+{% block title %}{{ product.name }} - MyStore Admin{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -66,6 +66,11 @@
         font-size: 14px;
         font-weight: 600;
     }
+    .variant-detail-card .variant-offer {
+        font-size: 13px;
+        color: #ff6b6b;
+        font-weight: 600;
+    }
     .variant-detail-card .variant-warranty {
         font-size: 13px;
         color: #6c757d;
@@ -106,6 +111,76 @@
     .stats-card.info { border-color: #17a2b8; }
     .stats-card .label { font-size: 12px; color: #6c757d; }
     .stats-card .value { font-size: 18px; font-weight: 600; }
+
+    .offer-badge {
+        background: #ff6b6b;
+        color: white;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-block;
+        animation: pulse-offer 2s infinite;
+    }
+    @keyframes pulse-offer {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .price-breakdown {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .price-breakdown .original {
+        color: #6c757d;
+        text-decoration: line-through;
+        font-size: 14px;
+    }
+    .price-breakdown .discounted {
+        color: #28a745;
+        font-weight: 700;
+        font-size: 16px;
+    }
+    .price-breakdown .offer-tag {
+        background: #ff6b6b;
+        color: white;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .price-breakdown .offer-tag i {
+        margin-right: 3px;
+    }
+    .price-breakdown .product-discount-tag {
+        background: #dc3545;
+        color: white;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .price-breakdown .product-discount-tag i {
+        margin-right: 3px;
+    }
+    .price-breakdown .best-deal-tag {
+        background: #28a745;
+        color: white;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .price-breakdown .best-deal-tag i {
+        margin-right: 3px;
+    }
+    .price-breakdown .savings-text {
+        font-size: 13px;
+        font-weight: 600;
+        color: #28a745;
+    }
 </style>
 {% endblock %}
 
@@ -172,12 +247,48 @@
                             <p><strong>Weight:</strong> {{ product.weight|default:"-" }} kg</p>
                             <p><strong>Dimensions:</strong> {{ product.dimensions|default:"-" }}</p>
                             <p><strong>Warranty:</strong> {{ product.warranty_months }} months</p>
-                            <p><strong>Price:</strong> ₹{{ product.price }}</p>
-                            <p><strong>Discount:</strong> {{ product.discount_percentage }}%</p>
-                            <p><strong>Final Price:</strong> <span class="text-success fw-bold">₹{{ product.final_price|floatformat:2 }}</span></p>
                             <p><strong>Stock:</strong> {{ product.stock_quantity }}</p>
                         </div>
                     </div>
+                    
+                    <!-- ============================================ -->
+                    <!-- PRODUCT PRICE WITH OFFER DISPLAY            -->
+                    <!-- ============================================ -->
+                    <hr>
+                    <h6>Pricing</h6>
+                    <div class="price-breakdown">
+                        <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                        
+                        {% if product.offer_name and product.offer_name != "Product Discount" %}
+                            <!-- Offer Applied -->
+                            <span class="discounted">₹{{ product.offer_price|floatformat:2 }}</span>
+                            <span class="offer-tag">
+                                <i class="fas fa-gift"></i> {{ product.offer_name }}
+                            </span>
+                            <span class="savings-text">
+                                Save ₹{{ product.total_savings|floatformat:2 }}
+                            </span>
+                        {% elif product.discount_percentage > 0 %}
+                            <!-- Product Discount Only -->
+                            <span class="discounted">₹{{ product.final_price|floatformat:2 }}</span>
+                            <span class="product-discount-tag">
+                                <i class="fas fa-tags"></i> {{ product.discount_percentage|floatformat:0 }}% OFF
+                            </span>
+                        {% else %}
+                            <!-- No Discount -->
+                            <span class="discounted">₹{{ product.price|floatformat:2 }}</span>
+                            <span class="text-muted">No discount</span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Offer Banner (if offer applied) -->
+                    {% if product.offer_name and product.offer_name != "Product Discount" %}
+                        <div class="mt-2 p-2 bg-light rounded" style="border-left: 4px solid #ff6b6b;">
+                            <i class="fas fa-gift text-danger"></i>
+                            <strong>{{ product.offer_name }}</strong> applied on this product!
+                            <span class="text-success">Save ₹{{ product.total_savings|floatformat:2 }}</span>
+                        </div>
+                    {% endif %}
                     
                     <hr>
                     <h6>Short Description</h6>
@@ -207,7 +318,7 @@
                 </div>
             </div>
 
-            <!-- Variants with Details -->
+            <!-- Variants with Details and Offer Support -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-cubes text-warning"></i> Variants ({{ product.variants.count }})</h5>
@@ -236,6 +347,14 @@
                                         <span class="variant-sku">({{ variant.sku }})</span>
                                     </div>
                                     <div>
+                                        <!-- ============================================ -->
+                                        <!-- VARIANT OFFER TAG                          -->
+                                        <!-- ============================================ -->
+                                        {% if variant.offer_name and variant.offer_name != "Product Discount" %}
+                                            <span class="offer-badge me-1">
+                                                <i class="fas fa-gift"></i> {{ variant.offer_name|truncatechars:10 }}
+                                            </span>
+                                        {% endif %}
                                         {% if variant.is_active %}
                                             <span class="badge bg-success">Active</span>
                                         {% else %}
@@ -246,13 +365,43 @@
                                 
                                 <div class="row">
                                     <div class="col-md-4">
+                                        <!-- ============================================ -->
+                                        <!-- VARIANT PRICE WITH OFFER DISPLAY            -->
+                                        <!-- ============================================ -->
                                         <div class="variant-price">
-                                            Price: ₹{{ variant.price }}
-                                            {% if variant.discount_percentage > 0 %}
-                                                <span class="text-success">(₹{{ variant.final_price|floatformat:2 }})</span>
-                                                <span class="badge bg-danger ms-1">-{{ variant.discount_percentage }}%</span>
-                                            {% endif %}
+                                            <div class="price-breakdown">
+                                                <span class="original">₹{{ variant.price|floatformat:2 }}</span>
+                                                
+                                                {% if variant.offer_name and variant.offer_name != "Product Discount" %}
+                                                    <!-- Variant has Offer Applied -->
+                                                    <span class="discounted">₹{{ variant.offer_price|floatformat:2 }}</span>
+                                                    <span class="offer-tag">
+                                                        <i class="fas fa-gift"></i> Offer
+                                                    </span>
+                                                    <span class="savings-text">
+                                                        Save ₹{{ variant.total_savings|floatformat:2 }}
+                                                    </span>
+                                                {% elif variant.discount_percentage > 0 %}
+                                                    <!-- Variant has Product Discount Only -->
+                                                    <span class="discounted">₹{{ variant.final_price|floatformat:2 }}</span>
+                                                    <span class="product-discount-tag">
+                                                        <i class="fas fa-tags"></i> {{ variant.discount_percentage|floatformat:0 }}%
+                                                    </span>
+                                                {% else %}
+                                                    <!-- No Discount -->
+                                                    <span class="discounted">₹{{ variant.price|floatformat:2 }}</span>
+                                                    <span class="text-muted">No discount</span>
+                                                {% endif %}
+                                            </div>
                                         </div>
+                                        
+                                        <!-- Variant Offer Name (if applied) -->
+                                        {% if variant.offer_name and variant.offer_name != "Product Discount" %}
+                                            <div class="variant-offer mt-1">
+                                                <i class="fas fa-tag"></i> {{ variant.offer_name }}
+                                            </div>
+                                        {% endif %}
+                                        
                                         <div class="variant-stock mt-1">
                                             Stock: 
                                             {% if variant.is_out_of_stock %}
@@ -438,6 +587,24 @@
                         <div class="label">Total Images</div>
                         <div class="value">{{ product.images.count }}</div>
                     </div>
+                    <!-- Offer Stats -->
+                    <div class="stats-card" style="border-color: #ff6b6b;">
+                        <div class="label">Offer Status</div>
+                        <div class="value">
+                            {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                <span class="text-success">
+                                    <i class="fas fa-gift"></i> {{ product.offer_name }}
+                                    <small class="text-muted">(Save ₹{{ product.total_savings|floatformat:2 }})</small>
+                                </span>
+                            {% elif product.discount_percentage > 0 %}
+                                <span class="text-warning">
+                                    <i class="fas fa-tags"></i> {{ product.discount_percentage|floatformat:0 }}% OFF
+                                </span>
+                            {% else %}
+                                <span class="text-muted">No discount</span>
+                            {% endif %}
+                        </div>
+                    </div>
                     <div class="stats-card {% if product.is_out_of_stock %}danger{% elif product.is_low_stock %}warning{% else %}success{% endif %}">
                         <div class="label">Stock Status</div>
                         <div class="value">
@@ -496,6 +663,14 @@
                         {% if product.is_new %}<span class="badge bg-info">New</span>{% endif %}
                         {% if product.is_best_seller %}<span class="badge bg-danger">Best Seller</span>{% endif %}
                     </p>
+                    <!-- Offer Info -->
+                    {% if product.offer_name and product.offer_name != "Product Discount" %}
+                        <p>
+                            <span class="badge" style="background:#ff6b6b;color:white;">
+                                <i class="fas fa-gift"></i> {{ product.offer_name }}
+                            </span>
+                        </p>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -2036,10 +2036,12 @@ def get_or_create_cart(request):
     """Get or create cart for user or session"""
     if request.user.is_authenticated:
         cart, created = Cart.objects.get_or_create(user=request.user)
+        # Merge session cart if exists
         if request.session.get('cart_session_id'):
             session_cart = Cart.objects.filter(session_id=request.session['cart_session_id']).first()
             if session_cart and session_cart != cart:
                 for item in session_cart.items.all():
+                    # Make sure to preserve product and variant
                     cart_item, _ = CartItem.objects.get_or_create(
                         cart=cart,
                         product=item.product,
@@ -2086,15 +2088,32 @@ def cart_view(request):
         if not product:
             continue
         
+        # Get the item's price
         original_price = Decimal(str(item.original_price))
         product_discounted_price = Decimal(str(item.price))
         quantity = Decimal(str(item.quantity))
         
-        # Calculate final price with best discount
-        final_price, offer_name, offer_discount = calculate_offer_discount(product, product_discounted_price)
+        # ============================================
+        # PASS THE VARIANT TO calculate_offer_discount
+        # ============================================
+        final_price, offer_name, offer_discount = calculate_offer_discount(
+            product, 
+            product_discounted_price,
+            variant=item.variant  # Pass the variant if it exists
+        )
         
         # Calculate product discount amount
         product_discount_amount = original_price - product_discounted_price
+        
+        # Debug print
+        print(f"Item: {item.item_name}")
+        print(f"Original Price: {original_price}")
+        print(f"Product Discounted Price: {product_discounted_price}")
+        print(f"Final Price: {final_price}")
+        print(f"Offer Name: {offer_name}")
+        print(f"Offer Discount: {offer_discount}")
+        print(f"Product Discount Amount: {product_discount_amount}")
+        print("---")
         
         # Determine which discount is applied
         has_product_discount = product_discount_amount > 0
@@ -2146,7 +2165,7 @@ def cart_view(request):
     return render(request, 'Ecom/cart.html', context)
 
 def add_to_cart(request):
-    """Add product to cart"""
+    """Add product or variant to cart"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -2157,9 +2176,10 @@ def add_to_cart(request):
             product = None
             variant = None
             
+            # IMPORTANT: Check variant FIRST
             if variant_id:
                 variant = get_object_or_404(ProductVariant, id=variant_id, is_active=True)
-                product = variant.product
+                product = variant.product  # Get the product from variant
             elif product_id:
                 product = get_object_or_404(Product, id=product_id, is_active=True)
             else:
@@ -2172,15 +2192,18 @@ def add_to_cart(request):
                     'message': 'Please login to add items to cart'
                 })
             
+            # Check stock - use variant stock if variant exists, else product stock
             stock = variant.stock_quantity if variant else product.stock_quantity
             if stock < quantity:
                 return JsonResponse({'success': False, 'error': f'Only {stock} items available'})
             
             cart = get_or_create_cart(request)
+            
+            # Create cart item with BOTH product and variant
             cart_item, created = CartItem.objects.get_or_create(
                 cart=cart,
-                product=product,
-                variant=variant,
+                product=product,  # Always set product
+                variant=variant,  # Set variant if exists, else None
                 defaults={'quantity': quantity}
             )
             
@@ -2193,18 +2216,21 @@ def add_to_cart(request):
             if cart.coupon:
                 cart.remove_coupon()
             
+            # Get the item name for response
+            item_name = variant.name if variant and variant.name else product.name
+            
             return JsonResponse({
                 'success': True,
-                'message': 'Item added to cart successfully!',
+                'message': f'"{item_name}" added to cart successfully!',
                 'cart_count': cart.total_items,
-                'item_name': product.name
+                'item_name': item_name,
+                'is_variant': bool(variant)
             })
             
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     
     return JsonResponse({'success': False, 'error': 'Invalid request'})
-
 
 @login_required
 def update_cart_item(request):
@@ -2440,8 +2466,14 @@ def checkout_view(request):
             product_discounted_price = Decimal(str(item.price))
             product_discount_amount = original_price - product_discounted_price
             
-            # Calculate final price with best discount
-            final_price, offer_name, offer_discount = calculate_offer_discount(item.product, product_discounted_price)
+            # ============================================
+            # PASS THE VARIANT TO calculate_offer_discount
+            # ============================================
+            final_price, offer_name, offer_discount = calculate_offer_discount(
+                item.product, 
+                product_discounted_price,
+                variant=item.variant  # Pass the variant if it exists
+            )
             
             # Track the best offer applied
             if offer_discount > 0 and offer_name and offer_name != "Product Discount":
@@ -2464,6 +2496,23 @@ def checkout_view(request):
             has_product_discount = product_discount_amount > 0
             has_offer = offer_name is not None and offer_name != "Product Discount"
             
+            # ============================================
+            # FIX: Ensure offer discount is correctly applied
+            # ============================================
+            if has_offer and has_product_discount:
+                # Both exist - verify which one is actually applied
+                product_final_price = original_price - product_discount_amount
+                offer_final_price = original_price - offer_discount
+                
+                if offer_final_price < product_final_price:
+                    # Offer is better - it should be applied
+                    final_price = offer_final_price
+                    has_product_discount = False
+                else:
+                    # Product discount is better - it should be applied
+                    final_price = product_final_price
+                    has_offer = False
+            
             # Calculate actual savings
             actual_savings = original_price - final_price
             
@@ -2472,9 +2521,9 @@ def checkout_view(request):
                 'original_price': original_price,
                 'product_discounted_price': product_discounted_price,
                 'final_price': final_price,
-                'offer_name': offer_name,
-                'offer_discount': offer_discount,
-                'product_discount_amount': product_discount_amount,
+                'offer_name': offer_name if has_offer else None,
+                'offer_discount': offer_discount if has_offer else Decimal('0'),
+                'product_discount_amount': product_discount_amount if has_product_discount else Decimal('0'),
                 'has_product_discount': has_product_discount,
                 'has_offer': has_offer,
                 'actual_savings': actual_savings,
@@ -3130,10 +3179,12 @@ def offer_toggle_status_view(request, offer_id):
     return redirect('Ecom:offer_list')
 
 from decimal import Decimal
+from django.utils import timezone
+from .models import Offer
 
-def calculate_offer_discount(product, price):
+def calculate_offer_discount(product, price, variant=None):
     """
-    Calculate if any offer applies to this product
+    Calculate if any offer applies to this product or variant
     Rules:
     1. Compare product discount vs offer discount on the ORIGINAL price
     2. Apply the BEST discount (higher discount amount)
@@ -3151,27 +3202,32 @@ def calculate_offer_discount(product, price):
     best_offer_discount = Decimal('0')
     best_offer_name = None
     
-    # Get original price
+    # Get original price - THIS SHOULD BE THE VARIANT'S PRICE IF VARIANT EXISTS
     original_price = Decimal(str(product.price))
+    
+    # If variant exists, use variant's original price
+    if variant:
+        original_price = Decimal(str(variant.price))
     
     # Convert price to Decimal (this is already product-discounted price from CartItem)
     if not isinstance(price, Decimal):
         price = Decimal(str(price))
     
-    # Calculate product discount amount
+    # Calculate product discount amount on the correct price
     product_discount_amount = original_price - price
     
     # ============================================
     # 1. FIND THE BEST OFFER DISCOUNT
-    #    Calculate offer on ORIGINAL price
+    #    Calculate offer on the ITEM's price
     # ============================================
     for offer in offers:
         discount_value = Decimal(str(offer.discount_value))
         
         if offer.offer_type == 'product':
+            # Check if offer is on the product
             if offer.product and offer.product.id == product.id:
                 if offer.discount_type == 'percentage':
-                    # Calculate on ORIGINAL price
+                    # Calculate on the item's price
                     discount = (original_price * discount_value) / Decimal('100')
                     if offer.max_discount:
                         max_disc = Decimal(str(offer.max_discount))
@@ -3185,8 +3241,10 @@ def calculate_offer_discount(product, price):
                     best_offer_name = offer.name
                     
         elif offer.offer_type == 'category':
+            # Check if offer is on the category
             if product.category and offer.category and offer.category.id == product.category.id:
                 if offer.discount_type == 'percentage':
+                    # Calculate on the item's price
                     discount = (original_price * discount_value) / Decimal('100')
                     if offer.max_discount:
                         max_disc = Decimal(str(offer.max_discount))
@@ -3203,6 +3261,15 @@ def calculate_offer_discount(product, price):
     # 2. APPLY THE BEST DISCOUNT ON ORIGINAL PRICE
     # ============================================
     
+    # Debug prints
+    print(f"Product: {product.name}")
+    if variant:
+        print(f"Variant: {variant.name or variant.sku}")
+    print(f"Original Price (item): {original_price}")
+    print(f"Product Discount Amount: {product_discount_amount}")
+    print(f"Best Offer Discount: {best_offer_discount}")
+    print(f"Best Offer Name: {best_offer_name}")
+    
     # Case 1: No product discount, no offer
     if product_discount_amount == 0 and best_offer_discount == 0:
         return price, None, Decimal('0')
@@ -3214,6 +3281,7 @@ def calculate_offer_discount(product, price):
     # Case 3: Only offer exists (no product discount)
     if product_discount_amount == 0 and best_offer_discount > 0:
         final_price = original_price - best_offer_discount
+        print(f"Only Offer: Final Price = {final_price}")
         return final_price, best_offer_name, best_offer_discount
     
     # Case 4: Both exist - apply the better one on ORIGINAL price
@@ -3221,11 +3289,15 @@ def calculate_offer_discount(product, price):
         product_final_price = original_price - product_discount_amount
         offer_final_price = original_price - best_offer_discount
         
+        print(f"Both Exist - Product Final: {product_final_price}, Offer Final: {offer_final_price}")
+        
         if offer_final_price < product_final_price:
             # Offer gives better discount
+            print(f"Offer is better: {best_offer_name}")
             return offer_final_price, best_offer_name, best_offer_discount
         else:
             # Product discount gives better discount
+            print("Product discount is better")
             return product_final_price, "Product Discount", Decimal('0')
     
     # Fallback

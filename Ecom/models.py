@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils import timezone
@@ -245,7 +247,7 @@ class SubCategory(models.Model):
                 os.remove(self.image.path)
         super().delete(*args, **kwargs)
 
-# ========== PRODUCT MODEL ==========
+# ========== PRODUCT MODEL ========== 
 class Product(models.Model):
     # Basic Information
     name = models.CharField(max_length=200)
@@ -320,7 +322,7 @@ class Product(models.Model):
     
     @property
     def final_price(self):
-        """Calculate final price after discount"""
+        """Calculate final price after product discount"""
         if self.discount_percentage > 0:
             discount_amount = (self.price * self.discount_percentage) / 100
             return self.price - discount_amount
@@ -328,7 +330,7 @@ class Product(models.Model):
     
     @property
     def discount_amount(self):
-        """Calculate discount amount"""
+        """Calculate product discount amount"""
         if self.discount_percentage > 0:
             return (self.price * self.discount_percentage) / 100
         return 0
@@ -371,6 +373,140 @@ class Product(models.Model):
             distribution[review.rating] += 1
         return distribution
     
+    # ============================================
+    # OFFER RELATED PROPERTIES
+    # ============================================
+    
+    @property
+    def _get_offer_data(self):
+        """
+        Internal method to get offer data for this product.
+        Returns: (offer_price, offer_name, offer_discount)
+        """
+        from decimal import Decimal
+        from django.utils import timezone
+        from .models import Offer
+        
+        # Get all active offers
+        offers = Offer.objects.filter(
+            is_active=True,
+            valid_from__lte=timezone.now(),
+            valid_to__gte=timezone.now()
+        ).order_by('-priority')
+        
+        original_price = Decimal(str(self.price))
+        product_discounted_price = self.final_price
+        product_discount_amount = original_price - product_discounted_price
+        
+        best_offer_discount = Decimal('0')
+        best_offer_name = None
+        
+        # Find best offer
+        for offer in offers:
+            discount_value = Decimal(str(offer.discount_value))
+            
+            if offer.offer_type == 'product':
+                if offer.product and offer.product.id == self.id:
+                    if offer.discount_type == 'percentage':
+                        discount = (original_price * discount_value) / Decimal('100')
+                        if offer.max_discount:
+                            max_disc = Decimal(str(offer.max_discount))
+                            if discount > max_disc:
+                                discount = max_disc
+                    else:
+                        discount = discount_value
+                    
+                    if discount > best_offer_discount:
+                        best_offer_discount = discount
+                        best_offer_name = offer.name
+                        
+            elif offer.offer_type == 'category':
+                if self.category and offer.category and offer.category.id == self.category.id:
+                    if offer.discount_type == 'percentage':
+                        discount = (original_price * discount_value) / Decimal('100')
+                        if offer.max_discount:
+                            max_disc = Decimal(str(offer.max_discount))
+                            if discount > max_disc:
+                                discount = max_disc
+                    else:
+                        discount = discount_value
+                    
+                    if discount > best_offer_discount:
+                        best_offer_discount = discount
+                        best_offer_name = offer.name
+        
+        # Determine final price with best discount
+        has_product_discount = product_discount_amount > 0
+        has_offer = best_offer_discount > 0
+        
+        if has_product_discount and has_offer:
+            # Both exist - apply the better one
+            product_final_price = original_price - product_discount_amount
+            offer_final_price = original_price - best_offer_discount
+            
+            if offer_final_price < product_final_price:
+                # Offer gives better discount
+                return offer_final_price, best_offer_name, best_offer_discount
+            else:
+                # Product discount gives better discount
+                return product_final_price, "Product Discount", Decimal('0')
+        elif has_offer:
+            # Only offer exists
+            return original_price - best_offer_discount, best_offer_name, best_offer_discount
+        elif has_product_discount:
+            # Only product discount exists
+            return product_discounted_price, "Product Discount", Decimal('0')
+        else:
+            # No discount
+            return original_price, None, Decimal('0')
+    
+    @property
+    def offer_price(self):
+        """Get final price after best discount (product discount OR offer)"""
+        price, name, discount = self._get_offer_data
+        return price
+    
+    @property
+    def offer_name(self):
+        """Get the name of the applied offer (or 'Product Discount')"""
+        price, name, discount = self._get_offer_data
+        return name
+    
+    @property
+    def offer_discount_amount(self):
+        """Get the discount amount from the applied offer"""
+        price, name, discount = self._get_offer_data
+        return discount
+    
+    @property
+    def has_offer_applied(self):
+        """Check if an offer is applied to this product"""
+        price, name, discount = self._get_offer_data
+        return name is not None and name != "Product Discount"
+    
+    @property
+    def has_product_discount(self):
+        """Check if product discount is applied"""
+        return self.discount_percentage > 0
+    
+    @property
+    def best_discount_type(self):
+        """Get the type of best discount applied: 'offer', 'product', or None"""
+        price, name, discount = self._get_offer_data
+        if name and name != "Product Discount":
+            return 'offer'
+        elif name == "Product Discount":
+            return 'product'
+        return None
+    
+    @property
+    def total_savings(self):
+        """Get total savings from the best discount"""
+        price, name, discount = self._get_offer_data
+        if name:
+            return Decimal(str(self.price)) - price
+        return Decimal('0')
+    
     def get_similar_products(self, limit=5):
         """Get similar products based on category and subcategory"""
         similar = Product.objects.filter(
@@ -385,7 +521,7 @@ class Product(models.Model):
                 return same_subcat[:limit]
         
         return similar[:limit]
-
+    
 # ========== PRODUCT IMAGE MODEL ==========
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
@@ -415,7 +551,6 @@ class ProductImage(models.Model):
                 os.remove(self.image.path)
         super().delete(*args, **kwargs)
 
-# ========== PRODUCT VARIANT MODEL ==========
 class ProductVariant(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
     
@@ -484,13 +619,13 @@ class ProductVariant(models.Model):
             low_stock = int(self.low_stock_threshold)
         except (ValueError, TypeError):
             low_stock = 5
-        # Store the threshold value
         self.low_stock_threshold = low_stock
         
         super().save(*args, **kwargs)
     
     @property
     def final_price(self):
+        """Calculate final price after product discount"""
         if self.discount_percentage > 0:
             discount_amount = (self.price * self.discount_percentage) / 100
             return self.price - discount_amount
@@ -498,6 +633,7 @@ class ProductVariant(models.Model):
     
     @property
     def discount_amount(self):
+        """Calculate product discount amount"""
         if self.discount_percentage > 0:
             return (self.price * self.discount_percentage) / 100
         return 0
@@ -518,6 +654,144 @@ class ProductVariant(models.Model):
         if first_image:
             return first_image.image.url
         return None
+    
+    # ============================================
+    # OFFER RELATED PROPERTIES (CALCULATED ON VARIANT'S OWN PRICE)
+    # ============================================
+    
+    @property
+    def _get_offer_data(self):
+        """
+        Internal method to get offer data for this variant.
+        Calculates offer discount on the variant's OWN price.
+        Returns: (offer_price, offer_name, offer_discount)
+        """
+        from decimal import Decimal
+        from django.utils import timezone
+        from .models import Offer
+        
+        # Get all active offers
+        offers = Offer.objects.filter(
+            is_active=True,
+            valid_from__lte=timezone.now(),
+            valid_to__gte=timezone.now()
+        ).order_by('-priority')
+        
+        # Use variant's own price
+        original_price = Decimal(str(self.price))
+        variant_discounted_price = self.final_price
+        variant_discount_amount = original_price - variant_discounted_price
+        
+        best_offer_discount = Decimal('0')
+        best_offer_name = None
+        
+        # Find best offer for this variant's product
+        for offer in offers:
+            discount_value = Decimal(str(offer.discount_value))
+            
+            if offer.offer_type == 'product':
+                if offer.product and offer.product.id == self.product.id:
+                    # Calculate discount on variant's price
+                    if offer.discount_type == 'percentage':
+                        discount = (original_price * discount_value) / Decimal('100')
+                        if offer.max_discount:
+                            max_disc = Decimal(str(offer.max_discount))
+                            if discount > max_disc:
+                                discount = max_disc
+                    else:
+                        discount = discount_value
+                    
+                    if discount > best_offer_discount:
+                        best_offer_discount = discount
+                        best_offer_name = offer.name
+                        
+            elif offer.offer_type == 'category':
+                if self.product.category and offer.category and offer.category.id == self.product.category.id:
+                    # Calculate discount on variant's price
+                    if offer.discount_type == 'percentage':
+                        discount = (original_price * discount_value) / Decimal('100')
+                        if offer.max_discount:
+                            max_disc = Decimal(str(offer.max_discount))
+                            if discount > max_disc:
+                                discount = max_disc
+                    else:
+                        discount = discount_value
+                    
+                    if discount > best_offer_discount:
+                        best_offer_discount = discount
+                        best_offer_name = offer.name
+        
+        # Determine final price with best discount
+        has_product_discount = variant_discount_amount > 0
+        has_offer = best_offer_discount > 0
+        
+        if has_product_discount and has_offer:
+            # Both exist - apply the better one
+            product_final_price = original_price - variant_discount_amount
+            offer_final_price = original_price - best_offer_discount
+            
+            if offer_final_price < product_final_price:
+                # Offer gives better discount
+                return offer_final_price, best_offer_name, best_offer_discount
+            else:
+                # Product discount gives better discount
+                return product_final_price, "Product Discount", Decimal('0')
+        elif has_offer:
+            # Only offer exists
+            return original_price - best_offer_discount, best_offer_name, best_offer_discount
+        elif has_product_discount:
+            # Only product discount exists
+            return variant_discounted_price, "Product Discount", Decimal('0')
+        else:
+            # No discount
+            return original_price, None, Decimal('0')
+    
+    @property
+    def offer_price(self):
+        """Get final price after best discount (calculated on variant's own price)"""
+        price, name, discount = self._get_offer_data
+        return price
+    
+    @property
+    def offer_name(self):
+        """Get the name of the applied offer (or 'Product Discount')"""
+        price, name, discount = self._get_offer_data
+        return name
+    
+    @property
+    def offer_discount_amount(self):
+        """Get the discount amount from the applied offer"""
+        price, name, discount = self._get_offer_data
+        return discount
+    
+    @property
+    def has_offer_applied(self):
+        """Check if an offer is applied to this variant"""
+        price, name, discount = self._get_offer_data
+        return name is not None and name != "Product Discount"
+    
+    @property
+    def has_product_discount(self):
+        """Check if product discount is applied to this variant"""
+        return self.discount_percentage > 0
+    
+    @property
+    def best_discount_type(self):
+        """Get the type of best discount applied: 'offer', 'product', or None"""
+        price, name, discount = self._get_offer_data
+        if name and name != "Product Discount":
+            return 'offer'
+        elif name == "Product Discount":
+            return 'product'
+        return None
+    
+    @property
+    def total_savings(self):
+        """Get total savings from the best discount"""
+        price, name, discount = self._get_offer_data
+        if name:
+            return Decimal(str(self.price)) - price
+        return Decimal('0')
     
 # ========== VARIANT IMAGE MODEL ==========
 class VariantImage(models.Model):
@@ -726,89 +1000,423 @@ class CartItem(models.Model):
     
     class Meta:
         db_table = 'cart_items'
+        verbose_name = 'Cart Item'
+        verbose_name_plural = 'Cart Items'
         unique_together = ['cart', 'product', 'variant']
     
     def __str__(self):
+        if self.variant:
+            return f"{self.quantity} x {self.variant.product.name} - {self.variant.name or self.variant.sku}"
         if self.product:
             return f"{self.quantity} x {self.product.name}"
-        return f"{self.quantity} x {self.variant.sku}"
+        return f"{self.quantity} x Unknown Item"
+    
+    # ============================================
+    # BASIC PROPERTIES
+    # ============================================
     
     @property
     def item_name(self):
+        """Get the display name of the item"""
+        if self.variant:
+            # Show variant name with product name
+            if self.variant.name:
+                return f"{self.variant.product.name} - {self.variant.name}"
+            else:
+                # Build name from variant attributes
+                variant_info = []
+                if self.variant.color:
+                    variant_info.append(self.variant.color)
+                if self.variant.size:
+                    variant_info.append(self.variant.size)
+                if variant_info:
+                    return f"{self.variant.product.name} ({' / '.join(variant_info)})"
+                return self.variant.product.name
         if self.product:
             return self.product.name
-        return self.variant.product.name
+        return "Unknown Item"
     
     @property
     def item_sku(self):
+        """Get the SKU of the item"""
+        if self.variant:
+            return self.variant.sku
         if self.product:
             return self.product.sku
-        return self.variant.sku
+        return ""
     
     @property
-    def price(self):
+    def item_id(self):
+        """Get the ID of the item (product or variant)"""
+        if self.variant:
+            return self.variant.id
         if self.product:
-            return self.product.final_price
-        return self.variant.final_price
-    
-    @property
-    def original_price(self):
-        if self.product:
-            return self.product.price
-        return self.variant.price
-    
-    @property
-    def total_price(self):
-        return self.price * self.quantity
-    
-    @property
-    def stock_available(self):
-        if self.product:
-            return self.product.stock_quantity
-        return self.variant.stock_quantity
-    
-    @property
-    def main_image(self):
-        if self.product:
-            return self.product.main_image
-        return self.variant.main_image or self.variant.product.main_image
-    
-    @property
-    def has_product_discount(self):
-        return self.original_price > self.price
-    
-    @property
-    def offer_price(self):
-        """Get price after offer discount"""
-        from .views import calculate_offer_discount
-        if self.product:
-            price, offer_name, discount = calculate_offer_discount(self.product, self.price)
-            return price
-        return self.price
-    
-    @property
-    def offer_name(self):
-        """Get offer name if applied"""
-        from .views import calculate_offer_discount
-        if self.product:
-            price, offer_name, discount = calculate_offer_discount(self.product, self.price)
-            return offer_name
+            return self.product.id
         return None
     
     @property
-    def offer_discount(self):
-        """Get offer discount amount"""
-        from .views import calculate_offer_discount
+    def item_type(self):
+        """Get the type of item: 'variant' or 'product'"""
+        if self.variant:
+            return 'variant'
+        return 'product'
+    
+    # ============================================
+    # PRICING PROPERTIES
+    # ============================================
+    
+    @property
+    def original_price(self):
+        """Get the original price (before any discounts)"""
+        if self.variant:
+            return self.variant.price
         if self.product:
-            price, offer_name, discount = calculate_offer_discount(self.product, self.price)
-            return discount
-        return 0
+            return self.product.price
+        return Decimal('0')
+    
+    @property
+    def product_discounted_price(self):
+        """Get the price after product-level discount (before offers)"""
+        if self.variant:
+            return self.variant.final_price
+        if self.product:
+            return self.product.final_price
+        return Decimal('0')
+    
+    @property
+    def price(self):
+        """
+        Get the current price after product discount (for cart display)
+        This is the price before offer discount
+        """
+        return self.product_discounted_price
+    
+    @property
+    def has_product_discount(self):
+        """Check if the item has a product-level discount"""
+        return self.original_price > self.product_discounted_price
+    
+    @property
+    def product_discount_amount(self):
+        """Get the product discount amount"""
+        return self.original_price - self.product_discounted_price
+    
+    # ============================================
+    # OFFER PROPERTIES (Calculated on Item's Price)
+    # ============================================
+    
+    @property
+    def _get_item_for_offer(self):
+        """
+        Get the appropriate item (product or variant) for offer calculation
+        Returns: (item, original_price)
+        """
+        if self.variant:
+            return self.variant, self.variant.price
+        return self.product, self.product.price
+    
+    @property
+    def offer_data(self):
+        """
+        Calculate offer data for this cart item.
+        Returns: (offer_price, offer_name, offer_discount)
+        """
+        from decimal import Decimal
+        from django.utils import timezone
+        from .models import Offer
+        
+        if not self.product:
+            return None, None, Decimal('0')
+        
+        # Get the item and its original price
+        item, original_price = self._get_item_for_offer
+        
+        # Get all active offers
+        offers = Offer.objects.filter(
+            is_active=True,
+            valid_from__lte=timezone.now(),
+            valid_to__gte=timezone.now()
+        ).order_by('-priority')
+        
+        # Get product discounted price
+        product_discounted_price = self.product_discounted_price
+        product_discount_amount = original_price - product_discounted_price
+        
+        best_offer_discount = Decimal('0')
+        best_offer_name = None
+        
+        # Find best offer for this item
+        for offer in offers:
+            discount_value = Decimal(str(offer.discount_value))
+            
+            if offer.offer_type == 'product':
+                # Check if offer is on the product
+                if offer.product and offer.product.id == self.product.id:
+                    if offer.discount_type == 'percentage':
+                        discount = (original_price * discount_value) / Decimal('100')
+                        if offer.max_discount:
+                            max_disc = Decimal(str(offer.max_discount))
+                            if discount > max_disc:
+                                discount = max_disc
+                    else:
+                        discount = discount_value
+                    
+                    if discount > best_offer_discount:
+                        best_offer_discount = discount
+                        best_offer_name = offer.name
+                        
+            elif offer.offer_type == 'category':
+                # Check if offer is on the category
+                if self.product.category and offer.category and offer.category.id == self.product.category.id:
+                    if offer.discount_type == 'percentage':
+                        discount = (original_price * discount_value) / Decimal('100')
+                        if offer.max_discount:
+                            max_disc = Decimal(str(offer.max_discount))
+                            if discount > max_disc:
+                                discount = max_disc
+                    else:
+                        discount = discount_value
+                    
+                    if discount > best_offer_discount:
+                        best_offer_discount = discount
+                        best_offer_name = offer.name
+        
+        # Determine final price with best discount
+        has_product_discount = product_discount_amount > 0
+        has_offer = best_offer_discount > 0
+        
+        if has_product_discount and has_offer:
+            # Both exist - apply the better one
+            product_final_price = original_price - product_discount_amount
+            offer_final_price = original_price - best_offer_discount
+            
+            if offer_final_price < product_final_price:
+                # Offer gives better discount
+                return offer_final_price, best_offer_name, best_offer_discount
+            else:
+                # Product discount gives better discount
+                return product_final_price, "Product Discount", Decimal('0')
+        elif has_offer:
+            # Only offer exists
+            return original_price - best_offer_discount, best_offer_name, best_offer_discount
+        elif has_product_discount:
+            # Only product discount exists
+            return product_discounted_price, "Product Discount", Decimal('0')
+        else:
+            # No discount
+            return original_price, None, Decimal('0')
+    
+    @property
+    def offer_price(self):
+        """Get final price after best discount (product discount OR offer)"""
+        price, name, discount = self.offer_data
+        return price
+    
+    @property
+    def offer_name(self):
+        """Get the name of the applied offer (or 'Product Discount')"""
+        price, name, discount = self.offer_data
+        return name
+    
+    @property
+    def offer_discount(self):
+        """Get the discount amount from the applied offer"""
+        price, name, discount = self.offer_data
+        return discount
+    
+    @property
+    def has_offer_applied(self):
+        """Check if an offer is applied to this item"""
+        price, name, discount = self.offer_data
+        return name is not None and name != "Product Discount"
+    
+    @property
+    def best_discount_type(self):
+        """Get the type of best discount applied: 'offer', 'product', or None"""
+        price, name, discount = self.offer_data
+        if name and name != "Product Discount":
+            return 'offer'
+        elif name == "Product Discount":
+            return 'product'
+        return None
+    
+    @property
+    def total_savings(self):
+        """Get total savings from the best discount"""
+        price, name, discount = self.offer_data
+        if name:
+            return self.original_price - price
+        return Decimal('0')
+    
+    # ============================================
+    # TOTAL CALCULATIONS
+    # ============================================
+    
+    @property
+    def total_price(self):
+        """Total price after product discount (without offer)"""
+        return self.product_discounted_price * self.quantity
     
     @property
     def total_offer_price(self):
         """Total price after offer discount"""
         return self.offer_price * self.quantity
-
+    
+    @property
+    def total_original_price(self):
+        """Total original price"""
+        return self.original_price * self.quantity
+    
+    @property
+    def total_product_discount(self):
+        """Total product discount amount"""
+        return self.product_discount_amount * self.quantity
+    
+    @property
+    def total_offer_discount(self):
+        """Total offer discount amount"""
+        return self.offer_discount * self.quantity
+    
+    @property
+    def total_savings_amount(self):
+        """Total savings from best discount"""
+        return self.total_savings * self.quantity
+    
+    @property
+    def discount_percentage(self):
+        """Calculate discount percentage"""
+        if self.original_price > 0:
+            return ((self.original_price - self.offer_price) / self.original_price) * 100
+        return 0
+    
+    # ============================================
+    # STOCK PROPERTIES
+    # ============================================
+    
+    @property
+    def stock_available(self):
+        """Get available stock for this item"""
+        if self.variant:
+            return self.variant.stock_quantity
+        if self.product:
+            return self.product.stock_quantity
+        return 0
+    
+    @property
+    def is_in_stock(self):
+        """Check if item is in stock"""
+        return self.stock_available > 0
+    
+    @property
+    def is_low_stock(self):
+        """Check if item is low on stock"""
+        if self.variant:
+            return self.variant.is_low_stock
+        if self.product:
+            return self.product.is_low_stock
+        return False
+    
+    @property
+    def is_out_of_stock(self):
+        """Check if item is out of stock"""
+        return self.stock_available <= 0
+    
+    # ============================================
+    # IMAGE PROPERTIES
+    # ============================================
+    
+    @property
+    def main_image(self):
+        """Get the main image for this item"""
+        if self.variant:
+            return self.variant.main_image or self.variant.product.main_image
+        if self.product:
+            return self.product.main_image
+        return None
+    
+    # ============================================
+    # VARIANT INFO
+    # ============================================
+    
+    @property
+    def variant_color(self):
+        """Get variant color if exists"""
+        if self.variant:
+            return self.variant.color
+        return None
+    
+    @property
+    def variant_size(self):
+        """Get variant size if exists"""
+        if self.variant:
+            return self.variant.size
+        return None
+    
+    @property
+    def variant_name_display(self):
+        """Get variant display name"""
+        if self.variant:
+            if self.variant.name:
+                return self.variant.name
+            variant_info = []
+            if self.variant.color:
+                variant_info.append(self.variant.color)
+            if self.variant.size:
+                variant_info.append(self.variant.size)
+            if variant_info:
+                return ' / '.join(variant_info)
+            return self.variant.sku
+        return None
+    
+    @property
+    def has_variant(self):
+        """Check if this cart item has a variant"""
+        return self.variant is not None
+    
+    @property
+    def is_product_only(self):
+        """Check if this cart item is product only (no variant)"""
+        return self.product is not None and self.variant is None
+    
+    # ============================================
+    # FORMATTED DISPLAY
+    # ============================================
+    
+    def get_price_display(self):
+        """Get formatted price display with discount info"""
+        if self.has_offer_applied:
+            return {
+                'current': f"₹{self.offer_price:.2f}",
+                'original': f"₹{self.original_price:.2f}",
+                'savings': f"₹{self.total_savings:.2f}",
+                'tag': self.offer_name,
+                'type': 'offer'
+            }
+        elif self.has_product_discount:
+            return {
+                'current': f"₹{self.product_discounted_price:.2f}",
+                'original': f"₹{self.original_price:.2f}",
+                'savings': f"₹{self.product_discount_amount:.2f}",
+                'tag': f"{self.discount_percentage:.0f}% OFF",
+                'type': 'product'
+            }
+        else:
+            return {
+                'current': f"₹{self.original_price:.2f}",
+                'original': None,
+                'savings': None,
+                'tag': None,
+                'type': 'none'
+            }
+    
+    def get_stock_status(self):
+        """Get stock status with badge class"""
+        if self.is_out_of_stock:
+            return {'status': 'out-of-stock', 'text': 'Out of Stock', 'icon': 'times-circle'}
+        elif self.is_low_stock:
+            return {'status': 'low-stock', 'text': f'Only {self.stock_available} left', 'icon': 'exclamation-triangle'}
+        else:
+            return {'status': 'in-stock', 'text': 'In Stock', 'icon': 'check-circle'}
 
 # ============================================
 # WISHLIST MODELS

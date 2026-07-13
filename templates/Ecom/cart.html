@@ -1,3 +1,4 @@
+
 {% load static %}
 
 {% block title %}Shopping Cart - MyStore{% endblock %}
@@ -28,12 +29,15 @@
         font-size: 16px;
     }
     .price-breakdown .offer-tag {
-        background: #ffc107;
-        color: #1a1a2e;
+        background: #ff6b6b;
+        color: white;
         padding: 2px 10px;
         border-radius: 12px;
         font-size: 11px;
         font-weight: 600;
+    }
+    .price-breakdown .offer-tag i {
+        margin-right: 3px;
     }
     .price-breakdown .product-discount-tag {
         background: #dc3545;
@@ -42,6 +46,9 @@
         border-radius: 12px;
         font-size: 11px;
         font-weight: 600;
+    }
+    .price-breakdown .product-discount-tag i {
+        margin-right: 3px;
     }
     .price-breakdown .best-discount-tag {
         background: #28a745;
@@ -58,6 +65,10 @@
         font-size: 13px;
         font-weight: 600;
         color: #28a745;
+    }
+    .price-breakdown .no-discount {
+        font-size: 13px;
+        color: #6c757d;
     }
     .offer-banner {
         background: linear-gradient(135deg, #fff3cd, #ffe69b);
@@ -99,6 +110,7 @@
     .toast.success { background: #28a745; }
     .toast.error { background: #dc3545; }
     .toast.info { background: #17a2b8; }
+    .toast.warning { background: #ffc107; color: #1a1a2e; }
     .toast .toast-close {
         margin-left: auto;
         cursor: pointer;
@@ -121,6 +133,29 @@
             min-width: 200px;
             font-size: 14px;
             padding: 10px 16px;
+        }
+    }
+    @media (max-width: 480px) {
+        .cart-item .d-flex.align-items-center {
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .cart-item .ms-3.text-end {
+            text-align: left !important;
+            margin-left: 0 !important;
+            width: 100%;
+        }
+        .price-breakdown .original {
+            font-size: 12px;
+        }
+        .price-breakdown .discounted {
+            font-size: 14px;
+        }
+        .price-breakdown .offer-tag,
+        .price-breakdown .product-discount-tag,
+        .price-breakdown .best-discount-tag {
+            font-size: 9px;
+            padding: 1px 6px;
         }
     }
 </style>
@@ -160,7 +195,7 @@
                                 <small class="text-muted">SKU: {{ data.item.item_sku }}</small>
                                 
                                 <!-- ============================================ -->
-                                <!-- PRICE BREAKDOWN - CORRECT SAVINGS           -->
+                                <!-- PRICE BREAKDOWN - CORRECT DISPLAY           -->
                                 <!-- ============================================ -->
                                 <div class="price-breakdown">
                                     <!-- Original Price -->
@@ -169,9 +204,11 @@
                                     <!-- Final Price -->
                                     <span class="discounted">₹{{ data.final_price|floatformat:2 }}</span>
                                     
-                                    <!-- DISPLAY ONLY THE APPLIED DISCOUNT -->
+                                    <!-- ======================================== -->
+                                    <!-- DISPLAY THE APPLIED DISCOUNT (BEST ONE) -->
+                                    <!-- ======================================== -->
                                     {% if data.has_offer %}
-                                        <!-- Offer Applied -->
+                                        <!-- Offer Applied (Priority) -->
                                         <span class="offer-tag">
                                             <i class="fas fa-gift"></i> {{ data.offer_name }}
                                         </span>
@@ -179,7 +216,7 @@
                                             Save ₹{{ data.offer_discount|floatformat:2 }}
                                         </span>
                                     {% elif data.has_product_discount %}
-                                        <!-- Product Discount Applied -->
+                                        <!-- Product Discount Applied (Only if no offer) -->
                                         <span class="product-discount-tag">
                                             <i class="fas fa-tags"></i> Product Discount
                                         </span>
@@ -188,10 +225,10 @@
                                         </span>
                                     {% else %}
                                         <!-- No Discount -->
-                                        <span class="text-muted">No discount</span>
+                                        <span class="no-discount">No discount applied</span>
                                     {% endif %}
                                     
-                                    <!-- Show Best Deal tag if both existed -->
+                                    <!-- Show Best Deal tag if both existed (but offer was better) -->
                                     {% if data.has_product_discount and data.has_offer %}
                                         <span class="best-discount-tag">
                                             <i class="fas fa-crown"></i> Best Deal
@@ -373,7 +410,8 @@
         const icons = {
             success: 'fa-check-circle',
             error: 'fa-exclamation-circle',
-            info: 'fa-info-circle'
+            info: 'fa-info-circle',
+            warning: 'fa-exclamation-triangle'
         };
         toast.innerHTML = `
             <i class="fas ${icons[type] || icons.info}"></i>

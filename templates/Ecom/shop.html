@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+
 {% load static %}
 
 {% block title %}
@@ -224,6 +224,23 @@
         background: #f8d7da;
         color: #721c24;
     }
+    .product-card .product-image .badge-offer {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #ff6b6b;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        z-index: 2;
+        animation: pulse-offer 2s infinite;
+    }
+    @keyframes pulse-offer {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
     .product-card .product-image .badge-discount {
         position: absolute;
         top: 10px;
@@ -234,6 +251,7 @@
         border-radius: 12px;
         font-size: 11px;
         font-weight: 600;
+        z-index: 2;
     }
     .product-card .product-image .badge-new {
         position: absolute;
@@ -245,6 +263,7 @@
         border-radius: 12px;
         font-size: 11px;
         font-weight: 600;
+        z-index: 2;
     }
     .product-card .product-image .badge-featured {
         position: absolute;
@@ -256,6 +275,7 @@
         border-radius: 12px;
         font-size: 11px;
         font-weight: 600;
+        z-index: 2;
     }
     .product-card .product-image .badge-best-seller {
         position: absolute;
@@ -267,6 +287,7 @@
         border-radius: 12px;
         font-size: 11px;
         font-weight: 600;
+        z-index: 2;
     }
     .product-card .product-body {
         padding: 15px;
@@ -322,6 +343,22 @@
         font-size: 14px;
         color: #999;
         text-decoration: line-through;
+    }
+    .product-card .product-body .product-price .offer-tag {
+        font-size: 10px;
+        background: #ff6b6b;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+    .product-card .product-body .product-price .product-discount-tag {
+        font-size: 10px;
+        background: #dc3545;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-weight: 600;
     }
     .product-card .product-body .product-variants {
         display: flex;
@@ -550,6 +587,41 @@
     }
     
     /* ============================================ */
+    /* OFFER BANNER FOR CATEGORY                    */
+    /* ============================================ */
+    .category-offer-banner {
+        background: linear-gradient(135deg, #fff5f5, #ffebee);
+        border: 2px solid #ff6b6b;
+        border-radius: 12px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    .category-offer-banner i {
+        font-size: 28px;
+        color: #ff6b6b;
+    }
+    .category-offer-banner .offer-text {
+        flex: 1;
+        font-weight: 600;
+        color: #c62828;
+    }
+    .category-offer-banner .offer-text strong {
+        font-size: 18px;
+    }
+    .category-offer-banner .offer-badge {
+        background: #ff6b6b;
+        color: white;
+        padding: 5px 16px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 14px;
+    }
+    
+    /* ============================================ */
     /* RESPONSIVE                                  */
     /* ============================================ */
     @media (max-width: 992px) {
@@ -598,6 +670,14 @@
             flex-direction: column;
             align-items: stretch;
         }
+        .category-offer-banner {
+            padding: 12px 16px;
+            flex-direction: column;
+            text-align: center;
+        }
+        .category-offer-banner i {
+            font-size: 24px;
+        }
     }
     
     @media (max-width: 576px) {
@@ -628,6 +708,12 @@
         }
         .filter-sidebar {
             width: 280px;
+        }
+        .category-offer-banner .offer-text {
+            font-size: 14px;
+        }
+        .category-offer-banner .offer-text strong {
+            font-size: 16px;
         }
     }
 </style>
@@ -673,6 +759,28 @@
                 {% if subcategory.image %}
                     <img src="{{ subcategory.image.url }}" alt="{{ subcategory.name }}" style="max-height:200px;width:100%;object-fit:cover;border-radius:12px;" class="mt-2">
                 {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- ============================================ -->
+        <!-- CATEGORY OFFER BANNER                       -->
+        <!-- ============================================ -->
+        {% if category_offer and category_offer.is_valid %}
+            <div class="category-offer-banner">
+                <i class="fas fa-gift"></i>
+                <div class="offer-text">
+                    <strong>🔥 {{ category_offer.name }}</strong>
+                    {% if category_offer.discount_type == 'percentage' %}
+                        Get <strong>{{ category_offer.discount_value|floatformat:0 }}% OFF</strong>
+                    {% else %}
+                        Get <strong>₹{{ category_offer.discount_value|floatformat:2 }} OFF</strong>
+                    {% endif %}
+                    on all products in this category!
+                    {% if category_offer.max_discount %}
+                        <span class="text-muted">(Max ₹{{ category_offer.max_discount|floatformat:2 }})</span>
+                    {% endif %}
+                </div>
+                <span class="offer-badge">Limited Time</span>
             </div>
         {% endif %}
 
@@ -1151,9 +1259,22 @@
                                             </div>
                                         {% endif %}
                                     </a>
+                                    
+                                    <!-- ============================================ -->
+                                    <!-- OFFER BADGE - Shows offer if applicable      -->
+                                    <!-- ============================================ -->
+                                    {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                        <span class="badge-offer">
+                                            <i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:15 }}
+                                        </span>
+                                    {% endif %}
+                                    
+                                    <!-- Product Discount Badge -->
                                     {% if product.discount_percentage > 0 %}
                                         <span class="badge-discount">-{{ product.discount_percentage|floatformat:0 }}%</span>
                                     {% endif %}
+                                    
+                                    <!-- Status Badges -->
                                     {% if product.is_new %}
                                         <span class="badge-new">New</span>
                                     {% endif %}
@@ -1163,6 +1284,8 @@
                                     {% if product.is_best_seller %}
                                         <span class="badge-best-seller">Best Seller</span>
                                     {% endif %}
+                                    
+                                    <!-- Stock Badge -->
                                     <span class="badge-stock 
                                         {% if product.is_out_of_stock %}out-of-stock
                                         {% elif product.is_low_stock %}low-stock
@@ -1194,12 +1317,41 @@
                                         {% endwith %}
                                         <span class="count">({{ product.total_reviews }})</span>
                                     </div>
+                                    
+                                    <!-- ============================================ -->
+                                    <!-- PRICE DISPLAY WITH OFFERS                     -->
+                                    <!-- ============================================ -->
                                     <div class="product-price">
-                                        <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
-                                        {% if product.discount_percentage > 0 %}
+                                        {% if product.offer_price and product.offer_price < product.final_price %}
+                                            <!-- Offer applied -->
+                                            <span class="current">₹{{ product.offer_price|floatformat:2 }}</span>
                                             <span class="original">₹{{ product.price }}</span>
+                                            <span class="offer-tag">
+                                                <i class="fas fa-gift"></i> Offer
+                                            </span>
+                                        {% elif product.discount_percentage > 0 %}
+                                            <!-- Product discount applied -->
+                                            <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
+                                            <span class="original">₹{{ product.price }}</span>
+                                            <span class="product-discount-tag">
+                                                <i class="fas fa-tags"></i> Discount
+                                            </span>
+                                        {% else %}
+                                            <!-- No discount -->
+                                            <span class="current">₹{{ product.price|floatformat:2 }}</span>
                                         {% endif %}
                                     </div>
+                                    
+                                    <!-- ============================================ -->
+                                    <!-- OFFER NAME DISPLAY (if offer applied)         -->
+                                    <!-- ============================================ -->
+                                    {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                        <div style="font-size:11px;color:#ff6b6b;font-weight:600;margin-top:2px;">
+                                            <i class="fas fa-tag"></i> {{ product.offer_name }}
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <!-- Variants -->
                                     {% if product.variants.exists %}
                                         <div class="product-variants">
                                             {% for variant in product.variants.all|slice:":4" %}

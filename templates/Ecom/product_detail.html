@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+
 {% load static %}
 
 {% block title %}{{ product.name }} - MyStore{% endblock %}
@@ -176,6 +176,7 @@
         padding: 15px 20px;
         border-radius: 12px;
         margin: 15px 0;
+        transition: all 0.3s ease;
     }
     .price-section .current-price {
         font-size: 32px;
@@ -198,6 +199,27 @@
         margin-left: 10px;
         display: inline-block;
     }
+    .price-section .offer-badge {
+        background: #ff6b6b;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-left: 10px;
+        display: inline-block;
+        animation: pulse-offer 2s infinite;
+    }
+    @keyframes pulse-offer {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    .price-section .savings-text {
+        color: #28a745;
+        font-weight: 600;
+        font-size: 14px;
+        margin-left: 10px;
+    }
 
     .stock-badge {
         padding: 6px 16px;
@@ -205,6 +227,7 @@
         font-weight: 600;
         font-size: 14px;
         display: inline-block;
+        transition: all 0.3s ease;
     }
     .stock-badge.in-stock { background: #d4edda; color: #155724; }
     .stock-badge.low-stock { background: #fff3cd; color: #856404; }
@@ -263,19 +286,20 @@
     /* ============================================ */
     .variant-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
         gap: 10px;
         margin: 10px 0 15px 0;
     }
     .variant-option {
-        padding: 12px 16px;
+        padding: 14px 16px;
         border-radius: 10px;
         border: 2px solid #e9ecef;
         cursor: pointer;
         transition: all 0.2s ease;
         background: white;
+        position: relative;
     }
-    .variant-option:hover {
+    .variant-option:hover:not(.out-of-stock) {
         border-color: #0d6efd;
         background: #f0f7ff;
         transform: translateY(-2px);
@@ -296,8 +320,48 @@
         color: #1a1a2e;
     }
     .variant-option .variant-price {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+    .variant-option .variant-price .offer-price {
         font-weight: 700;
         color: #2d7d46;
+        font-size: 15px;
+    }
+    .variant-option .variant-price .discount-price {
+        font-weight: 700;
+        color: #2d7d46;
+        font-size: 15px;
+    }
+    .variant-option .variant-price .regular-price {
+        font-weight: 700;
+        color: #1a1a2e;
+        font-size: 15px;
+    }
+    .variant-option .variant-price .original-price {
+        font-size: 12px;
+        color: #999;
+        text-decoration: line-through;
+        font-weight: 400;
+    }
+    .variant-option .variant-price .offer-tag-small {
+        font-size: 9px;
+        background: #ff6b6b;
+        color: white;
+        padding: 1px 8px;
+        border-radius: 10px;
+        font-weight: 700;
+    }
+    .variant-option .variant-price .discount-tag-small {
+        font-size: 9px;
+        background: #dc3545;
+        color: white;
+        padding: 1px 8px;
+        border-radius: 10px;
+        font-weight: 700;
     }
     .variant-option .variant-sku {
         font-size: 12px;
@@ -318,6 +382,34 @@
         border-radius: 4px;
         border: 1px solid #e9ecef;
         object-fit: cover;
+    }
+    .variant-option .variant-offer-tag {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #ff6b6b;
+        color: white;
+        padding: 2px 10px;
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: 700;
+    }
+    .variant-option .variant-offer-name {
+        font-size: 11px;
+        color: #ff6b6b;
+        font-weight: 600;
+        margin-top: 4px;
+    }
+    .variant-option .variant-selected-check {
+        display: none;
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        color: #0d6efd;
+        font-size: 18px;
+    }
+    .variant-option.selected .variant-selected-check {
+        display: block;
     }
 
     /* ============================================ */
@@ -366,7 +458,6 @@
     .quantity-wrapper .qty-group .qty-input:focus {
         outline: none;
     }
-    /* Remove number input arrows */
     .quantity-wrapper .qty-group .qty-input::-webkit-inner-spin-button,
     .quantity-wrapper .qty-group .qty-input::-webkit-outer-spin-button {
         -webkit-appearance: none;
@@ -392,12 +483,13 @@
         font-size: 16px;
         text-align: center;
         display: inline-block;
+        text-decoration: none;
     }
     .action-buttons .btn-cart {
         background: #0d6efd;
         color: white;
     }
-    .action-buttons .btn-cart:hover {
+    .action-buttons .btn-cart:hover:not(:disabled) {
         background: #0b5ed7;
         transform: translateY(-2px);
         box-shadow: 0 4px 15px rgba(13,110,253,0.3);
@@ -424,7 +516,9 @@
         color: #dc3545;
     }
 
-    /* Toast Notification */
+    /* ============================================ */
+    /* TOAST NOTIFICATION                          */
+    /* ============================================ */
     .toast-container {
         position: fixed;
         top: 20px;
@@ -467,12 +561,10 @@
         margin-top: 30px;
     }
     
-    /* Hide radio inputs */
     .tabs-input {
         display: none;
     }
     
-    /* Tab labels as clickable tabs */
     .tabs-label {
         display: inline-block;
         padding: 12px 24px;
@@ -495,14 +587,12 @@
         margin-right: 8px;
     }
     
-    /* Active tab label */
     .tabs-input:checked + .tabs-label {
         color: #0d6efd;
         background: white;
         border-bottom: 3px solid #0d6efd;
     }
     
-    /* Tab content - hidden by default */
     .tab-content {
         display: none;
         background: white;
@@ -513,7 +603,6 @@
         margin-top: 0;
     }
     
-    /* Show content when radio is checked */
     #tab1:checked ~ .tab-content-1,
     #tab2:checked ~ .tab-content-2,
     #tab3:checked ~ .tab-content-3,
@@ -521,7 +610,6 @@
         display: block;
     }
     
-    /* Tab wrapper */
     .tabs-wrapper {
         display: flex;
         flex-wrap: wrap;
@@ -531,48 +619,34 @@
     }
 
     /* ============================================ */
-    /* CONTENT SECTIONS - LINE BY LINE             */
+    /* CONTENT SECTIONS                            */
     /* ============================================ */
     .content-section {
         max-width: 100%;
         overflow-wrap: break-word;
     }
-    
     .content-section p {
         margin-bottom: 12px;
         line-height: 1.8;
         color: #4a4a5a;
     }
-    
     .content-section ul,
     .content-section ol {
         padding-left: 25px;
         margin-bottom: 15px;
     }
-    
     .content-section ul li,
     .content-section ol li {
         margin-bottom: 8px;
         line-height: 1.7;
         color: #4a4a5a;
     }
-    
-    .content-section h1,
-    .content-section h2,
-    .content-section h3,
-    .content-section h4,
-    .content-section h5,
-    .content-section h6 {
+    .content-section h1, .content-section h2, .content-section h3,
+    .content-section h4, .content-section h5, .content-section h6 {
         margin-top: 20px;
         margin-bottom: 10px;
         color: #1a1a2e;
     }
-    
-    .content-section strong,
-    .content-section b {
-        color: #1a1a2e;
-    }
-    
     .content-section blockquote {
         border-left: 4px solid #0d6efd;
         padding: 10px 20px;
@@ -580,20 +654,17 @@
         background: #f8f9fa;
         border-radius: 0 8px 8px 0;
     }
-    
     .content-section table {
         width: 100%;
         border-collapse: collapse;
         margin: 15px 0;
     }
-    
     .content-section table th,
     .content-section table td {
         padding: 10px 12px;
         border: 1px solid #e9ecef;
         text-align: left;
     }
-    
     .content-section table th {
         background: #f8f9fa;
         font-weight: 600;
@@ -759,7 +830,6 @@
         flex-wrap: wrap;
     }
 
-    /* Rating Summary */
     .rating-summary {
         display: flex;
         flex-wrap: wrap;
@@ -848,6 +918,41 @@
     }
 
     /* ============================================ */
+    /* OFFER BANNER                                */
+    /* ============================================ */
+    .offer-banner {
+        background: linear-gradient(135deg, #fff5f5, #ffebee);
+        border: 2px solid #ff6b6b;
+        border-radius: 10px;
+        padding: 12px 18px;
+        margin: 15px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .offer-banner i {
+        font-size: 24px;
+        color: #ff6b6b;
+    }
+    .offer-banner .offer-text {
+        flex: 1;
+        font-weight: 600;
+        color: #c62828;
+    }
+    .offer-banner .offer-text strong {
+        font-size: 16px;
+    }
+    .offer-banner .offer-badge {
+        background: #ff6b6b;
+        color: white;
+        padding: 4px 16px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    /* ============================================ */
     /* SIMILAR PRODUCTS                            */
     /* ============================================ */
     .similar-products {
@@ -871,6 +976,8 @@
         border: 1px solid #e9ecef;
         background: white;
         height: 100%;
+        display: flex;
+        flex-direction: column;
     }
     .similar-product-card:hover {
         transform: translateY(-5px);
@@ -880,6 +987,7 @@
         height: 180px;
         overflow: hidden;
         background: #f8f9fa;
+        position: relative;
     }
     .similar-product-card .card-img img {
         width: 100%;
@@ -894,16 +1002,56 @@
         color: #adb5bd;
         font-size: 32px;
     }
+    .similar-product-card .card-img .similar-offer-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #ff6b6b;
+        color: white;
+        padding: 2px 10px;
+        border-radius: 10px;
+        font-size: 9px;
+        font-weight: 700;
+    }
+    .similar-product-card .card-img .similar-discount-badge {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background: #dc3545;
+        color: white;
+        padding: 2px 10px;
+        border-radius: 10px;
+        font-size: 9px;
+        font-weight: 700;
+    }
     .similar-product-card .card-body {
         padding: 15px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
     }
     .similar-product-card .card-body .card-title {
         font-size: 14px;
         font-weight: 600;
         margin-bottom: 8px;
         color: #1a1a2e;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-decoration: none;
+    }
+    .similar-product-card .card-body .card-title:hover {
+        color: #0d6efd;
     }
     .similar-product-card .card-body .card-price {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .similar-product-card .card-body .card-price .current {
         font-size: 16px;
         font-weight: 700;
         color: #2d7d46;
@@ -913,7 +1061,28 @@
         color: #999;
         text-decoration: line-through;
         font-weight: normal;
-        margin-left: 6px;
+    }
+    .similar-product-card .card-body .card-price .offer-tag {
+        font-size: 9px;
+        background: #ff6b6b;
+        color: white;
+        padding: 1px 6px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    .similar-product-card .card-body .card-price .discount-tag {
+        font-size: 9px;
+        background: #dc3545;
+        color: white;
+        padding: 1px 6px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    .similar-product-card .card-body .card-offer-name {
+        font-size: 10px;
+        color: #ff6b6b;
+        font-weight: 600;
+        margin-top: 3px;
     }
     .similar-product-card .card-body .btn-view {
         display: block;
@@ -933,44 +1102,6 @@
     .similar-product-card .card-body .btn-view:hover {
         background: #0d6efd;
         color: white;
-    }
-
-    /* ============================================ */
-    /* TOAST NOTIFICATIONS                         */
-    /* ============================================ */
-    .toast-container {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-    }
-    .toast {
-        padding: 15px 25px;
-        border-radius: 10px;
-        color: white;
-        font-weight: 500;
-        margin-bottom: 10px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-        animation: slideInRight 0.5s ease;
-        min-width: 280px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-    .toast.success { background: #28a745; }
-    .toast.error { background: #dc3545; }
-    .toast.info { background: #17a2b8; }
-    .toast.warning { background: #ffc107; color: #1a1a2e; }
-    .toast .toast-close {
-        margin-left: auto;
-        cursor: pointer;
-        opacity: 0.8;
-        font-size: 18px;
-    }
-    .toast .toast-close:hover { opacity: 1; }
-    @keyframes slideInRight {
-        from { transform: translateX(100px); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
     }
 
     /* ============================================ */
@@ -1001,6 +1132,7 @@
         .rating-summary .rating-bars { width: 100%; }
         .toast-container { top: 10px; right: 10px; }
         .toast { min-width: 200px; padding: 12px 18px; font-size: 14px; }
+        .offer-banner { flex-direction: column; text-align: center; }
     }
     
     @media (max-width: 480px) {
@@ -1104,26 +1236,52 @@
                         <span class="review-count">({{ product.total_reviews }} reviews)</span>
                     </div>
 
-                    <!-- Price -->
-                    <div class="price-section">
-                        {% if product.discount_percentage > 0 %}
-                            <span class="current-price">₹{{ product.final_price|floatformat:2 }}</span>
-                            <span class="original-price">₹{{ product.price }}</span>
-                            <span class="discount-badge">{{ product.discount_percentage }}% OFF</span>
+                    <!-- ============================================ -->
+                    <!-- PRICE SECTION - SHOWS PRODUCT PRICE BY DEFAULT -->
+                    <!-- ============================================ -->
+                    <div class="price-section" id="priceSection">
+                        {% if product.offer_name and product.offer_name != "Product Discount" %}
+                            <!-- Product has Offer Applied -->
+                            <span class="current-price" id="displayPrice">₹{{ product.offer_price|floatformat:2 }}</span>
+                            <span class="original-price" id="displayOriginal">₹{{ product.price|floatformat:2 }}</span>
+                            <span class="offer-badge"><i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:15 }}</span>
+                            <span class="savings-text">Save ₹{{ product.total_savings|floatformat:2 }}</span>
+                        {% elif product.discount_percentage > 0 %}
+                            <!-- Product has Discount Only -->
+                            <span class="current-price" id="displayPrice">₹{{ product.final_price|floatformat:2 }}</span>
+                            <span class="original-price" id="displayOriginal">₹{{ product.price|floatformat:2 }}</span>
+                            <span class="discount-badge">{{ product.discount_percentage|floatformat:0 }}% OFF</span>
                         {% else %}
-                            <span class="current-price">₹{{ product.price }}</span>
+                            <!-- No Discount on Product -->
+                            <span class="current-price" id="displayPrice">₹{{ product.price|floatformat:2 }}</span>
                         {% endif %}
                     </div>
 
+                    <!-- ============================================ -->
+                    <!-- OFFER BANNER (if product has offer)          -->
+                    <!-- ============================================ -->
+                    {% if product.offer_name and product.offer_name != "Product Discount" %}
+                        <div class="offer-banner">
+                            <i class="fas fa-gift"></i>
+                            <div class="offer-text">
+                                <strong>{{ product.offer_name }}</strong> applied on this product!
+                                You save <strong>₹{{ product.total_savings|floatformat:2 }}</strong>
+                            </div>
+                            <span class="offer-badge">🔥 Best Deal</span>
+                        </div>
+                    {% endif %}
+
                     <!-- Stock Status -->
                     <div class="mb-3">
-                        {% if product.is_out_of_stock %}
-                            <span class="stock-badge out-of-stock"><i class="fas fa-times-circle"></i> Out of Stock</span>
-                        {% elif product.is_low_stock %}
-                            <span class="stock-badge low-stock"><i class="fas fa-exclamation-triangle"></i> Only {{ product.stock_quantity }} left</span>
-                        {% else %}
-                            <span class="stock-badge in-stock"><i class="fas fa-check-circle"></i> In Stock</span>
-                        {% endif %}
+                        <span class="stock-badge" id="stockBadge">
+                            {% if product.is_out_of_stock %}
+                                <i class="fas fa-times-circle"></i> Out of Stock
+                            {% elif product.is_low_stock %}
+                                <i class="fas fa-exclamation-triangle"></i> Only <span id="stockQuantity">{{ product.stock_quantity }}</span> left
+                            {% else %}
+                                <i class="fas fa-check-circle"></i> In Stock
+                            {% endif %}
+                        </span>
                     </div>
 
                     <!-- Attributes -->
@@ -1173,14 +1331,29 @@
                         </div>
                     {% endif %}
 
-                    <!-- Variants -->
+                    <!-- ============================================ -->
+                    <!-- VARIANTS - SHOWN BUT NOT AUTO-SELECTED      -->
+                    <!-- ============================================ -->
                     {% if variants %}
                         <div class="mb-3">
-                            <label class="fw-bold mb-2" style="display:block;">Select Variant</label>
-                            <div class="variant-grid">
+                            <label class="fw-bold mb-2" style="display:block;">Select Variant (Optional)</label>
+                            <p class="text-muted small">You can add the product as-is or select a variant below</p>
+                            <div class="variant-grid" id="variantGrid">
                                 {% for variant in variants %}
                                     <div class="variant-option {% if variant.is_out_of_stock %}out-of-stock{% endif %}" 
-                                         onclick="selectVariant(this, {{ variant.id }})">
+                                         onclick="selectVariant(this, {{ variant.id }})"
+                                         data-variant-id="{{ variant.id }}"
+                                         data-price="{{ variant.price }}"
+                                         data-final-price="{{ variant.final_price }}"
+                                         data-offer-price="{{ variant.offer_price }}"
+                                         data-offer-name="{% if variant.offer_name %}{{ variant.offer_name }}{% endif %}"
+                                         data-stock="{{ variant.stock_quantity }}"
+                                         data-is-out-of-stock="{{ variant.is_out_of_stock|lower }}">
+                                        
+                                        {% if variant.offer_name and variant.offer_name != "Product Discount" %}
+                                            <span class="variant-offer-tag">🔥 Offer</span>
+                                        {% endif %}
+                                        
                                         <div class="d-flex justify-content-between align-items-start">
                                             <span class="variant-name">
                                                 {% if variant.name %}
@@ -1191,8 +1364,24 @@
                                                     {% if not variant.color and not variant.size %}Variant{% endif %}
                                                 {% endif %}
                                             </span>
-                                            <span class="variant-price">₹{{ variant.final_price|floatformat:2 }}</span>
+                                            <span class="variant-price">
+                                                {% if variant.offer_name and variant.offer_name != "Product Discount" %}
+                                                    <!-- Variant has its own Offer Applied -->
+                                                    <span class="offer-price">₹{{ variant.offer_price|floatformat:2 }}</span>
+                                                    <span class="original-price">₹{{ variant.price|floatformat:2 }}</span>
+                                                    <span class="offer-tag-small">OFFER</span>
+                                                {% elif variant.discount_percentage > 0 %}
+                                                    <!-- Variant has its own Product Discount -->
+                                                    <span class="discount-price">₹{{ variant.final_price|floatformat:2 }}</span>
+                                                    <span class="original-price">₹{{ variant.price|floatformat:2 }}</span>
+                                                    <span class="discount-tag-small">{{ variant.discount_percentage|floatformat:0 }}%</span>
+                                                {% else %}
+                                                    <!-- No Discount on Variant -->
+                                                    <span class="regular-price">₹{{ variant.price|floatformat:2 }}</span>
+                                                {% endif %}
+                                            </span>
                                         </div>
+                                        
                                         <div class="d-flex justify-content-between">
                                             <span class="variant-sku">SKU: {{ variant.sku }}</span>
                                             <span class="variant-stock">
@@ -1203,6 +1392,14 @@
                                                 {% endif %}
                                             </span>
                                         </div>
+                                        
+                                        <!-- Variant Offer Name (if offer applied to this variant) -->
+                                        {% if variant.offer_name and variant.offer_name != "Product Discount" %}
+                                            <div class="variant-offer-name">
+                                                <i class="fas fa-tag"></i> {{ variant.offer_name|truncatechars:20 }}
+                                            </div>
+                                        {% endif %}
+                                        
                                         {% if variant.images.exists %}
                                             <div class="variant-images">
                                                 {% for img in variant.images.all|slice:":3" %}
@@ -1210,13 +1407,24 @@
                                                 {% endfor %}
                                             </div>
                                         {% endif %}
+                                        
+                                        <span class="variant-selected-check">
+                                            <i class="fas fa-check-circle"></i>
+                                        </span>
                                     </div>
                                 {% endfor %}
                             </div>
+                            
+                            <!-- Clear Variant Selection Button -->
+                            <button class="btn btn-sm btn-outline-secondary mt-2" onclick="clearVariantSelection()">
+                                <i class="fas fa-times"></i> Use Product (No Variant)
+                            </button>
                         </div>
                     {% endif %}
 
-                    <!-- Quantity & Actions -->
+                    <!-- ============================================ -->
+                    <!-- QUANTITY & ACTIONS                         -->
+                    <!-- ============================================ -->
                     <div class="mt-3">
                         <div class="quantity-wrapper">
                             <span class="quantity-label">Quantity</span>
@@ -1228,12 +1436,20 @@
                         </div>
 
                         <div class="action-buttons">
-                            <button class="btn btn-cart btn-lg" id="addToCartBtn" {% if product.is_out_of_stock %}disabled{% endif %} onclick="addToCart()">
-                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            <button class="btn btn-cart btn-lg" id="addToCartBtn" onclick="addToCart()">
+                                <i class="fas fa-shopping-cart"></i> <span id="cartBtnText">Add to Cart</span>
                             </button>
                             <button class="btn btn-wishlist" id="wishlistBtn" onclick="toggleWishlist()">
                                 <i class="fas fa-heart"></i> <span class="wishlist-text">Add to Wishlist</span>
                             </button>
+                        </div>
+                        
+                        <!-- Show selected variant info -->
+                        <div id="selectedVariantInfo" style="display:none; margin-top:10px; padding:10px; background:#e7f1ff; border-radius:8px; font-size:14px;">
+                            <i class="fas fa-check-circle text-primary"></i>
+                            <span id="selectedVariantName"></span>
+                            <span class="text-muted">selected</span>
+                            <button class="btn btn-sm btn-link text-danger" onclick="clearVariantSelection()">Remove</button>
                         </div>
                     </div>
 
@@ -1447,17 +1663,37 @@
                             {% else %}
                                 <div class="no-img"><i class="fas fa-image"></i></div>
                             {% endif %}
+                            {% if similar.offer_name and similar.offer_name != "Product Discount" %}
+                                <span class="similar-offer-badge"><i class="fas fa-gift"></i> Offer</span>
+                            {% endif %}
+                            {% if similar.discount_percentage > 0 and not similar.offer_name %}
+                                <span class="similar-discount-badge">{{ similar.discount_percentage|floatformat:0 }}%</span>
+                            {% endif %}
                         </div>
                         <div class="card-body">
-                            <div class="card-title">{{ similar.name|truncatechars:25 }}</div>
+                            <a href="{% url 'Ecom:product_detail' similar.id %}" class="card-title">
+                                {{ similar.name|truncatechars:30 }}
+                            </a>
                             <div class="card-price">
-                                ₹{{ similar.final_price|floatformat:2 }}
-                                {% if similar.discount_percentage > 0 %}
-                                    <span class="original">₹{{ similar.price }}</span>
+                                {% if similar.offer_name and similar.offer_name != "Product Discount" %}
+                                    <span class="current">₹{{ similar.offer_price|floatformat:2 }}</span>
+                                    <span class="original">₹{{ similar.price|floatformat:2 }}</span>
+                                    <span class="offer-tag">{{ similar.offer_name|truncatechars:8 }}</span>
+                                {% elif similar.discount_percentage > 0 %}
+                                    <span class="current">₹{{ similar.final_price|floatformat:2 }}</span>
+                                    <span class="original">₹{{ similar.price|floatformat:2 }}</span>
+                                    <span class="discount-tag">{{ similar.discount_percentage|floatformat:0 }}%</span>
+                                {% else %}
+                                    <span class="current">₹{{ similar.price|floatformat:2 }}</span>
                                 {% endif %}
                             </div>
+                            {% if similar.offer_name and similar.offer_name != "Product Discount" %}
+                                <div class="card-offer-name">
+                                    <i class="fas fa-tag"></i> {{ similar.offer_name|truncatechars:15 }}
+                                </div>
+                            {% endif %}
                             <a href="{% url 'Ecom:product_detail' similar.id %}" class="btn-view">
-                                <i class="fas fa-eye"></i> View
+                                <i class="fas fa-eye"></i> View Details
                             </a>
                         </div>
                     </div>
@@ -1543,7 +1779,8 @@
     function updateQuantity(change) {
         const input = document.getElementById('quantityInput');
         let value = parseInt(input.value) || 1;
-        value = Math.max(1, Math.min(99, value + change));
+        const max = parseInt(input.max) || 99;
+        value = Math.max(1, Math.min(max, value + change));
         input.value = value;
     }
 
@@ -1561,36 +1798,242 @@
     // ============================================
     // SELECT VARIANT
     // ============================================
+    let selectedVariantId = null;
+    let selectedVariantData = null;
+
     function selectVariant(element, variantId) {
+        // Remove selection from all variants
         document.querySelectorAll('.variant-option').forEach(function(el) {
             el.classList.remove('selected');
         });
         element.classList.add('selected');
+        
+        selectedVariantId = variantId;
+        selectedVariantData = {
+            id: variantId,
+            name: element.querySelector('.variant-name')?.textContent?.trim() || 'Variant',
+            price: parseFloat(element.dataset.price),
+            finalPrice: parseFloat(element.dataset.finalPrice),
+            offerPrice: parseFloat(element.dataset.offerPrice) || null,
+            offerName: element.dataset.offerName || null,
+            stock: parseInt(element.dataset.stock),
+            isOutOfStock: element.dataset.isOutOfStock === 'true'
+        };
+        
+        // Update price display with variant's data
+        updatePriceDisplay(selectedVariantData);
+        
+        // Update stock display
+        updateStockDisplay(selectedVariantData);
+        
+        // Update quantity max
+        document.getElementById('quantityInput').max = selectedVariantData.stock;
+        
+        // Update Add to Cart button
+        const cartBtn = document.getElementById('addToCartBtn');
+        if (selectedVariantData.isOutOfStock) {
+            cartBtn.disabled = true;
+            document.getElementById('cartBtnText').textContent = 'Out of Stock';
+        } else {
+            cartBtn.disabled = false;
+            document.getElementById('cartBtnText').textContent = 'Add to Cart';
+        }
+        
+        // Show selected variant info
+        const infoDiv = document.getElementById('selectedVariantInfo');
+        infoDiv.style.display = 'block';
+        document.getElementById('selectedVariantName').textContent = selectedVariantData.name;
     }
 
     // ============================================
-    // ADD TO CART WITH AJAX
+    // CLEAR VARIANT SELECTION
+    // ============================================
+    function clearVariantSelection() {
+        document.querySelectorAll('.variant-option').forEach(function(el) {
+            el.classList.remove('selected');
+        });
+        selectedVariantId = null;
+        selectedVariantData = null;
+        
+        // Reset to product price
+        resetToProductPrice();
+        
+        // Reset stock display
+        resetStockDisplay();
+        
+        // Reset quantity max
+        document.getElementById('quantityInput').max = {{ product.stock_quantity|default:99 }};
+        
+        // Reset Add to Cart button
+        const cartBtn = document.getElementById('addToCartBtn');
+        cartBtn.disabled = false;
+        document.getElementById('cartBtnText').textContent = 'Add to Cart';
+        
+        // Hide selected variant info
+        document.getElementById('selectedVariantInfo').style.display = 'none';
+    }
+
+    // ============================================
+    // RESET TO PRODUCT PRICE
+    // ============================================
+    function resetToProductPrice() {
+        const priceSection = document.getElementById('priceSection');
+        const displayPrice = document.getElementById('displayPrice');
+        const displayOriginal = document.getElementById('displayOriginal');
+        
+        // Remove existing badges
+        priceSection.querySelectorAll('.offer-badge, .discount-badge, .savings-text').forEach(el => el.remove());
+        
+        {% if product.offer_name and product.offer_name != "Product Discount" %}
+            displayPrice.textContent = `₹{{ product.offer_price|floatformat:2 }}`;
+            displayOriginal.textContent = `₹{{ product.price|floatformat:2 }}`;
+            displayOriginal.style.display = 'inline';
+            
+            const offerBadge = document.createElement('span');
+            offerBadge.className = 'offer-badge';
+            offerBadge.innerHTML = `<i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:15 }}`;
+            priceSection.appendChild(offerBadge);
+            
+            const savingsText = document.createElement('span');
+            savingsText.className = 'savings-text';
+            savingsText.textContent = `Save ₹{{ product.total_savings|floatformat:2 }}`;
+            priceSection.appendChild(savingsText);
+        {% elif product.discount_percentage > 0 %}
+            displayPrice.textContent = `₹{{ product.final_price|floatformat:2 }}`;
+            displayOriginal.textContent = `₹{{ product.price|floatformat:2 }}`;
+            displayOriginal.style.display = 'inline';
+            
+            const discountBadge = document.createElement('span');
+            discountBadge.className = 'discount-badge';
+            discountBadge.textContent = `{{ product.discount_percentage|floatformat:0 }}% OFF`;
+            priceSection.appendChild(discountBadge);
+        {% else %}
+            displayPrice.textContent = `₹{{ product.price|floatformat:2 }}`;
+            displayOriginal.style.display = 'none';
+        {% endif %}
+    }
+
+    // ============================================
+    // RESET STOCK DISPLAY
+    // ============================================
+    function resetStockDisplay() {
+        const stockBadge = document.getElementById('stockBadge');
+        {% if product.is_out_of_stock %}
+            stockBadge.className = 'stock-badge out-of-stock';
+            stockBadge.innerHTML = '<i class="fas fa-times-circle"></i> Out of Stock';
+        {% elif product.is_low_stock %}
+            stockBadge.className = 'stock-badge low-stock';
+            stockBadge.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Only {{ product.stock_quantity }} left`;
+        {% else %}
+            stockBadge.className = 'stock-badge in-stock';
+            stockBadge.innerHTML = '<i class="fas fa-check-circle"></i> In Stock';
+        {% endif %}
+    }
+
+    // ============================================
+    // UPDATE PRICE DISPLAY (Uses Variant Data)
+    // ============================================
+    function updatePriceDisplay(variantData) {
+        const priceSection = document.getElementById('priceSection');
+        const displayPrice = document.getElementById('displayPrice');
+        const displayOriginal = document.getElementById('displayOriginal');
+        
+        // Remove existing badges
+        priceSection.querySelectorAll('.offer-badge, .discount-badge, .savings-text').forEach(el => el.remove());
+        
+        if (variantData.offerName && variantData.offerName !== "Product Discount") {
+            // Variant has its own offer applied
+            displayPrice.textContent = `₹${variantData.offerPrice.toFixed(2)}`;
+            displayOriginal.textContent = `₹${variantData.price.toFixed(2)}`;
+            displayOriginal.style.display = 'inline';
+            
+            const offerBadge = document.createElement('span');
+            offerBadge.className = 'offer-badge';
+            offerBadge.innerHTML = `<i class="fas fa-gift"></i> ${variantData.offerName.substring(0, 15)}`;
+            priceSection.appendChild(offerBadge);
+            
+            const savings = variantData.price - variantData.offerPrice;
+            const savingsText = document.createElement('span');
+            savingsText.className = 'savings-text';
+            savingsText.textContent = `Save ₹${savings.toFixed(2)}`;
+            priceSection.appendChild(savingsText);
+            
+        } else if (variantData.finalPrice < variantData.price) {
+            // Variant has its own product discount
+            displayPrice.textContent = `₹${variantData.finalPrice.toFixed(2)}`;
+            displayOriginal.textContent = `₹${variantData.price.toFixed(2)}`;
+            displayOriginal.style.display = 'inline';
+            
+            const discount = ((variantData.price - variantData.finalPrice) / variantData.price) * 100;
+            const discountBadge = document.createElement('span');
+            discountBadge.className = 'discount-badge';
+            discountBadge.textContent = `${Math.round(discount)}% OFF`;
+            priceSection.appendChild(discountBadge);
+            
+        } else {
+            // No discount on variant
+            displayPrice.textContent = `₹${variantData.price.toFixed(2)}`;
+            displayOriginal.style.display = 'none';
+        }
+    }
+
+    // ============================================
+    // UPDATE STOCK DISPLAY
+    // ============================================
+    function updateStockDisplay(variantData) {
+        const stockBadge = document.getElementById('stockBadge');
+        
+        if (variantData.isOutOfStock) {
+            stockBadge.className = 'stock-badge out-of-stock';
+            stockBadge.innerHTML = '<i class="fas fa-times-circle"></i> Out of Stock';
+        } else if (variantData.stock <= 5) {
+            stockBadge.className = 'stock-badge low-stock';
+            stockBadge.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Only ${variantData.stock} left`;
+        } else {
+            stockBadge.className = 'stock-badge in-stock';
+            stockBadge.innerHTML = '<i class="fas fa-check-circle"></i> In Stock';
+        }
+    }
+
+    // ============================================
+    // ADD TO CART (Supports both Product and Variant)
     // ============================================
     function addToCart() {
         const quantity = document.getElementById('quantityInput').value;
         const productId = {{ product.id }};
-        const variantElements = document.querySelectorAll('.variant-option.selected');
-        let variantId = null;
-        if (variantElements.length > 0) {
-            const onclickAttr = variantElements[0].getAttribute('onclick');
-            if (onclickAttr) {
-                const match = onclickAttr.match(/selectVariant\(this, (\d+)\)/);
-                if (match) variantId = match[1];
-            }
-        }
+        let variantId = selectedVariantId;
 
         if (parseInt(quantity) <= 0) {
             showToast('Please select a valid quantity', 'warning');
             return;
         }
 
+        // Check stock if variant selected
+        if (selectedVariantData) {
+            if (selectedVariantData.isOutOfStock) {
+                showToast('Selected variant is out of stock', 'error');
+                return;
+            }
+            if (parseInt(quantity) > selectedVariantData.stock) {
+                showToast(`Only ${selectedVariantData.stock} items available`, 'error');
+                return;
+            }
+        } else {
+            // Check product stock
+            const productStock = {{ product.stock_quantity }};
+            if (productStock <= 0) {
+                showToast('Product is out of stock', 'error');
+                return;
+            }
+            if (parseInt(quantity) > productStock) {
+                showToast(`Only ${productStock} items available`, 'error');
+                return;
+            }
+        }
+
         const button = document.getElementById('addToCartBtn');
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+        const originalText = document.getElementById('cartBtnText').textContent;
+        document.getElementById('cartBtnText').textContent = 'Adding...';
         button.disabled = true;
 
         fetch('{% url "Ecom:add_to_cart" %}', {
@@ -1601,7 +2044,7 @@
             },
             body: JSON.stringify({
                 product_id: productId,
-                variant_id: variantId,
+                variant_id: variantId,  // null if no variant selected
                 quantity: quantity
             })
         })
@@ -1614,7 +2057,6 @@
                 }, 1500);
             } else if (data.success) {
                 showToast(data.message, 'success');
-                // Update cart count in header
                 const cartBadge = document.querySelector('.cart-count');
                 if (cartBadge) {
                     cartBadge.textContent = data.cart_count;
@@ -1628,25 +2070,17 @@
             console.error('Error:', error);
         })
         .finally(() => {
-            button.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+            document.getElementById('cartBtnText').textContent = originalText;
             button.disabled = false;
         });
     }
 
     // ============================================
-    // TOGGLE WISHLIST WITH AJAX
+    // TOGGLE WISHLIST (Supports both Product and Variant)
     // ============================================
     function toggleWishlist() {
         const productId = {{ product.id }};
-        const variantElements = document.querySelectorAll('.variant-option.selected');
-        let variantId = null;
-        if (variantElements.length > 0) {
-            const onclickAttr = variantElements[0].getAttribute('onclick');
-            if (onclickAttr) {
-                const match = onclickAttr.match(/selectVariant\(this, (\d+)\)/);
-                if (match) variantId = match[1];
-            }
-        }
+        let variantId = selectedVariantId;
 
         const button = document.getElementById('wishlistBtn');
         const originalHtml = button.innerHTML;
@@ -1706,6 +2140,9 @@
                 });
             });
         });
+        
+        // DO NOT auto-select any variant - show product by default
+        // The product price is shown by default
     });
 </script>
 {% endblock %}
