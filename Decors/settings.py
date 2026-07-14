@@ -56,6 +56,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 'Ecom.context_processors.header_categories',
                 'Ecom.admin_context.low_stock_context',
+                "Ecom.context_processor.base_template",
             ],
         },
     },
