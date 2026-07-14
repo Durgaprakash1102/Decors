@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . views import *
 
 app_name = 'Ecom'
 
@@ -120,4 +121,10 @@ path('admin/offer/delete/<int:offer_id>/', views.offer_delete_view, name='offer_
 path('admin/offer/toggle/<int:offer_id>/', views.offer_toggle_status_view, name='offer_toggle'),
 path('get-subcategories-ajax/', views.get_subcategories_ajax, name='get_subcategories_ajax'),
 path('get-all-subcategories-ajax/', views.get_all_subcategories_ajax, name='get_all_subcategories_ajax'),
+
+path('admin/orders/', admin_order_list_view, name='admin_order_list'),
+    path('admin/orders/<int:order_id>/', admin_order_detail_view, name='admin_order_detail'),
+    path('admin/orders/<int:order_id>/update/', admin_order_update_view, name='admin_order_update'),
+    path('admin/orders/bulk-update/', admin_order_bulk_update_view, name='admin_order_bulk_update'),
+    path('admin/orders/status-update-ajax/', admin_order_status_update_ajax, name='admin_order_status_update_ajax'),
 ]

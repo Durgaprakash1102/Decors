@@ -1,0 +1,560 @@
+
+{% load static %}
+
+{% block title %}Orders Management - MyStore Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        border-left: 4px solid;
+        padding: 12px 15px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        transition: all 0.3s;
+    }
+    .stats-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .stats-card .label { font-size: 12px; color: #6c757d; }
+    .stats-card .value { font-size: 20px; font-weight: 700; }
+    .stats-card.primary { border-color: #0d6efd; }
+    .stats-card.success { border-color: #28a745; }
+    .stats-card.warning { border-color: #ffc107; }
+    .stats-card.danger { border-color: #dc3545; }
+    .stats-card.info { border-color: #17a2b8; }
+    .stats-card.secondary { border-color: #6c757d; }
+    
+    .filter-bar {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #e9ecef;
+    }
+    .filter-bar .filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+    .filter-bar .filter-row .form-control,
+    .filter-bar .filter-row .form-select {
+        font-size: 13px;
+        min-width: 140px;
+    }
+    .filter-bar .filter-row .form-control {
+        min-width: 180px;
+    }
+    .filter-bar .filter-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .filter-bar .results-count {
+        font-size: 13px;
+        color: #6c757d;
+        margin-left: auto;
+        padding: 5px 10px;
+        background: white;
+        border-radius: 4px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .order-row:hover {
+        background-color: #f8f9fa;
+    }
+    .order-row .order-number {
+        font-weight: 600;
+    }
+    .order-row .order-actions {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+    
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    .status-badge.pending { background: #fff3cd; color: #856404; }
+    .status-badge.processing { background: #cce5ff; color: #004085; }
+    .status-badge.shipped { background: #d1ecf1; color: #0c5460; }
+    .status-badge.delivered { background: #d4edda; color: #155724; }
+    .status-badge.cancelled { background: #e2e3e5; color: #383d41; }
+    .status-badge.failed { background: #f8d7da; color: #721c24; }
+    .status-badge.paid { background: #d4edda; color: #155724; }
+    .status-badge.refunded { background: #f8d7da; color: #721c24; }
+    
+    @media (max-width: 768px) {
+        .filter-bar .filter-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .filter-bar .filter-row .form-control,
+        .filter-bar .filter-row .form-select {
+            min-width: 100%;
+            width: 100%;
+        }
+        .filter-bar .results-count {
+            margin-left: 0;
+            text-align: center;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+    }
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h2><i class="fas fa-boxes text-primary"></i> Order Management</h2>
+        <a href="{% url 'Ecom:admin_dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-6">
+            <div class="stats-card primary">
+                <div class="label">Total Orders</div>
+                <div class="value">{{ stats.total }}</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stats-card warning">
+                <div class="label">Pending</div>
+                <div class="value">{{ stats.pending }}</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stats-card info">
+                <div class="label">Processing</div>
+                <div class="value">{{ stats.processing }}</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stats-card success">
+                <div class="label">Delivered</div>
+                <div class="value">{{ stats.delivered }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <form method="GET" id="orderFilterForm">
+            <div class="filter-row">
+                <!-- Search -->
+                <input type="text" name="search" class="form-control form-control-sm" 
+                       placeholder="Search orders..." value="{{ search_query }}">
+                
+                <!-- Status Filter -->
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">All Status</option>
+                    {% for status_code, status_label in status_choices %}
+                        <option value="{{ status_code }}" {% if status_filter == status_code %}selected{% endif %}>
+                            {{ status_label }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <!-- Payment Status Filter -->
+                <select name="payment_status" class="form-select form-select-sm">
+                    <option value="">All Payment</option>
+                    {% for status_code, status_label in payment_status_choices %}
+                        <option value="{{ status_code }}" {% if payment_filter == status_code %}selected{% endif %}>
+                            {{ status_label }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <!-- Date Range -->
+                <input type="date" name="date_from" class="form-control form-control-sm" 
+                       value="{{ date_from }}" placeholder="From">
+                <input type="date" name="date_to" class="form-control form-control-sm" 
+                       value="{{ date_to }}" placeholder="To">
+                
+                <!-- Sort -->
+                <select name="sort" class="form-select form-select-sm">
+                    <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
+                    <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Oldest First</option>
+                    <option value="-total_amount" {% if sort_by == '-total_amount' %}selected{% endif %}>Highest Amount</option>
+                    <option value="total_amount" {% if sort_by == 'total_amount' %}selected{% endif %}>Lowest Amount</option>
+                    <option value="order_number" {% if sort_by == 'order_number' %}selected{% endif %}>Order # A-Z</option>
+                    <option value="-order_number" {% if sort_by == '-order_number' %}selected{% endif %}>Order # Z-A</option>
+                </select>
+                
+                <!-- Actions -->
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="fas fa-search"></i> Filter
+                    </button>
+                    {% if search_query or status_filter or payment_filter or date_from or date_to %}
+                        <a href="?{% if sort_by %}sort={{ sort_by }}{% endif %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-times"></i> Clear
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <div class="results-count">
+                    <strong>{{ total_count }}</strong> orders found
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="selectAll" onclick="toggleAllOrders()">
+                            </th>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr class="order-row">
+                            <td>
+                                <input type="checkbox" class="order-checkbox" value="{{ order.id }}">
+                            </td>
+                            <td>
+                                <span class="order-number">#{{ order.order_number }}</span>
+                            </td>
+                            <td>
+                                <div>{{ order.user.full_name }}</div>
+                                <small class="text-muted">{{ order.user.email }}</small>
+                            </td>
+                            <td>
+                                <strong>₹{{ order.total_amount|floatformat:2 }}</strong>
+                                {% if order.total_discount > 0 %}
+                                    <br><small class="text-success">Saved ₹{{ order.total_discount|floatformat:2 }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="status-badge {{ order.status }}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status-badge {{ order.payment_status }}">
+                                    {{ order.get_payment_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <small>{{ order.created_at|date:"M d, Y H:i" }}</small>
+                            </td>
+                            <td>
+                                <div class="order-actions">
+                                    <a href="{% url 'Ecom:admin_order_detail' order.id %}" 
+                                       class="btn btn-sm btn-info" title="View Details">
+                                        <i class="fas fa-eye">Detail</i>
+                                    </a>
+                                    <button onclick="updateOrderStatus({{ order.id }})" 
+                                            class="btn btn-sm btn-primary" title="Update Status">
+                                        <i class="fas fa-edit">Update Status</i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">
+                                <i class="fas fa-box fa-3x text-muted"></i>
+                                <p class="mt-2">No orders found.</p>
+                                {% if search_query or status_filter or payment_filter %}
+                                    <p class="text-muted">Try adjusting your filters.</p>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Bulk Actions -->
+            {% if orders %}
+            <div class="row mt-3 align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <select id="bulkAction" class="form-select form-select-sm" style="width:180px;">
+                            <option value="">Bulk Actions</option>
+                            <option value="mark_processing">Mark as Processing</option>
+                            <option value="mark_shipped">Mark as Shipped</option>
+                            <option value="mark_delivered">Mark as Delivered</option>
+                            <option value="mark_cancelled">Mark as Cancelled</option>
+                        </select>
+                        <button onclick="bulkUpdate()" class="btn btn-sm btn-primary">
+                            <i class="fas fa-check"></i> Apply
+                        </button>
+                        <span id="selectedCount" class="text-muted small align-self-center">0 selected</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <!-- Pagination -->
+                    {% if orders.has_other_pages %}
+                    <nav>
+                        <ul class="pagination justify-content-end mb-0 flex-wrap">
+                            {% if orders.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ orders.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        Previous
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% for i in orders.paginator.page_range %}
+                                <li class="page-item {% if orders.number == i %}active{% endif %}">
+                                    <a class="page-link" href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        {{ i }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                            {% if orders.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ orders.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        Next
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- UPDATE STATUS MODAL                          -->
+<!-- ============================================ -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Order Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateStatusForm" method="POST" action="#">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Order</label>
+                        <input type="text" class="form-control" id="modalOrderNumber" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select" id="modalStatus">
+                            {% for status_code, status_label in status_choices %}
+                                <option value="{{ status_code }}">{{ status_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tracking Number</label>
+                        <input type="text" name="tracking_number" class="form-control" 
+                               placeholder="Enter tracking number">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tracking URL</label>
+                        <input type="url" name="tracking_url" class="form-control" 
+                               placeholder="https://track.example.com/12345">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Delivery Date</label>
+                        <input type="datetime-local" name="delivery_date" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea name="notes" class="form-control" rows="2" 
+                                  placeholder="Add notes about this order"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitStatusUpdate()">
+                    <i class="fas fa-save"></i> Update Order
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- JAVASCRIPT                                  -->
+<!-- ============================================ -->
+<script>
+    let currentOrderId = null;
+    
+    // ============================================
+    // TOGGLE ALL ORDERS
+    // ============================================
+    function toggleAllOrders() {
+        const selectAll = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll('.order-checkbox');
+        checkboxes.forEach(cb => cb.checked = selectAll.checked);
+        updateSelectedCount();
+    }
+    
+    // ============================================
+    // UPDATE SELECTED COUNT
+    // ============================================
+    function updateSelectedCount() {
+        const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+        document.getElementById('selectedCount').textContent = checkboxes.length + ' selected';
+    }
+    
+    document.querySelectorAll('.order-checkbox').forEach(cb => {
+        cb.addEventListener('change', updateSelectedCount);
+    });
+    
+    // ============================================
+    // BULK UPDATE
+    // ============================================
+    function bulkUpdate() {
+        const action = document.getElementById('bulkAction').value;
+        const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+        
+        if (!action) {
+            alert('Please select an action.');
+            return;
+        }
+        
+        if (checkboxes.length === 0) {
+            alert('Please select at least one order.');
+            return;
+        }
+        
+        if (!confirm(`Are you sure you want to ${action.replace('_', ' ')} ${checkboxes.length} orders?`)) {
+            return;
+        }
+        
+        const orderIds = Array.from(checkboxes).map(cb => cb.value);
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{% url "Ecom:admin_order_bulk_update" %}';
+        
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = getCookie('csrftoken');
+        form.appendChild(csrfInput);
+        
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = action;
+        form.appendChild(actionInput);
+        
+        orderIds.forEach(id => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'order_ids';
+            input.value = id;
+            form.appendChild(input);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+    
+    // ============================================
+    // UPDATE ORDER STATUS (Modal)
+    // ============================================
+    function updateOrderStatus(orderId) {
+        currentOrderId = orderId;
+        
+        fetch(`/admin/orders/${orderId}/`)
+            .then(response => response.text())
+            .then(html => {
+                // Parse order number from the page
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const orderNumber = doc.querySelector('.order-number')?.textContent || `#${orderId}`;
+                document.getElementById('modalOrderNumber').value = orderNumber;
+                
+                const modal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
+                modal.show();
+            })
+            .catch(() => {
+                document.getElementById('modalOrderNumber').value = `#${orderId}`;
+                const modal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
+                modal.show();
+            });
+    }
+    
+    // ============================================
+    // SUBMIT STATUS UPDATE
+    // ============================================
+    function submitStatusUpdate() {
+        const form = document.getElementById('updateStatusForm');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
+        
+        fetch(`/admin/orders/${currentOrderId}/update/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams(data)
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                location.reload();
+            }
+        })
+        .catch(error => {
+            alert('Error updating order. Please try again.');
+        });
+    }
+    
+    // ============================================
+    // CSRF TOKEN HELPER
+    // ============================================
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

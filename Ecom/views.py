@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
+from django.urls import reverse
 from .models import User, Profile, Address, OTP
 from .forms import *
 from .utils import create_and_send_otp, verify_otp, delete_file_if_exists, get_user_by_identifier
@@ -2295,15 +2296,7 @@ def cart_view(request):
         # Calculate product discount amount
         product_discount_amount = original_price - product_discounted_price
         
-        # Debug print
-        print(f"Item: {item.item_name}")
-        print(f"Original Price: {original_price}")
-        print(f"Product Discounted Price: {product_discounted_price}")
-        print(f"Final Price: {final_price}")
-        print(f"Offer Name: {offer_name}")
-        print(f"Offer Discount: {offer_discount}")
-        print(f"Product Discount Amount: {product_discount_amount}")
-        print("---")
+        
         
         # Determine which discount is applied
         has_product_discount = product_discount_amount > 0
@@ -2872,6 +2865,11 @@ def checkout_view(request):
     }
     return render(request, 'Ecom/checkout.html', context)
 
+from django.core.mail import send_mail, EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.conf import settings
+
 @login_required
 @csrf_exempt
 def payment_success(request):
@@ -2968,6 +2966,11 @@ def payment_success(request):
                     order.coupon.used_count += 1
                     order.coupon.save()
                 
+                # ============================================
+                # SEND EMAIL NOTIFICATIONS
+                # ============================================
+                send_order_confirmation_emails(order, request)
+                
                 messages.success(request, f'Payment successful! Order #{order.order_number} confirmed.')
                 return redirect('Ecom:order_success', order_id=order.id)
                 
@@ -3056,6 +3059,140 @@ def payment_success(request):
     
     # If GET request, redirect to orders
     return redirect('Ecom:orders')
+
+
+def send_order_confirmation_emails(order, request):
+    """
+    Send order confirmation emails to customer and superuser
+    """
+    try:
+        # ============================================
+        # PREPARE ORDER DATA FOR EMAIL
+        # ============================================
+        order_items = []
+        subtotal = Decimal('0')
+        
+        for item in order.items.all():
+            item_total = item.final_price * item.quantity
+            order_items.append({
+                'name': item.product_name,
+                'sku': item.sku,
+                'quantity': item.quantity,
+                'price': item.final_price,
+                'total': item_total,
+                'original_price': item.original_price,
+                'discount': item.product_discount + item.offer_discount,
+                'offer_name': item.offer_name if item.offer_name else None,
+            })
+            subtotal += item_total
+        
+        # Prepare context for email templates
+        context = {
+            'order': order,
+            'order_items': order_items,
+            'subtotal': subtotal,
+            'total': order.total_amount,
+            'user': order.user,
+            'site_name': 'MyStore',
+            'site_url': request.build_absolute_uri('/'),
+            'order_url': request.build_absolute_uri(
+                reverse('Ecom:order_detail', args=[order.id])
+            ),
+            'order_success_url': request.build_absolute_uri(
+                reverse('Ecom:order_success', args=[order.id])
+            ),
+            'support_email': settings.DEFAULT_FROM_EMAIL or 'support@mystore.com',
+            'payment_id': order.razorpay_payment_id,
+            'shipping_address': order.shipping_address,
+            'billing_address': order.billing_address,
+            'order_date': order.created_at.strftime('%B %d, %Y at %I:%M %p'),
+            'coupon_code': order.coupon.code if order.coupon else None,
+            'coupon_discount': order.coupon_discount,
+            'product_discount_total': order.product_discount_total,
+            'offer_discount': order.offer_discount,
+        }
+        
+        # ============================================
+        # 1. SEND EMAIL TO CUSTOMER
+        # ============================================
+        customer_subject = f'Order Confirmation - Order #{order.order_number}'
+        
+        customer_html = render_to_string('emails/order_confirmation_customer.html', context)
+        customer_plain = strip_tags(customer_html)
+        
+        customer_email = EmailMultiAlternatives(
+            subject=customer_subject,
+            body=customer_plain,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[order.user.email],
+            reply_to=[settings.DEFAULT_FROM_EMAIL],
+        )
+        customer_email.attach_alternative(customer_html, "text/html")
+        customer_email.send(fail_silently=False)
+        
+        # ============================================
+        # 2. SEND EMAIL TO SUPERUSERS (Admin Notification)
+        # ============================================
+        superusers = User.objects.filter(
+            is_superuser=True, 
+            is_active=True
+        ).exclude(email__isnull=True).exclude(email='')
+        
+        superuser_emails = list(superusers.values_list('email', flat=True))
+        
+        if superuser_emails:
+            admin_subject = f'🔔 New Order Received - Order #{order.order_number}'
+            
+            admin_html = render_to_string('emails/admin_order_notification.html', context)
+            admin_plain = strip_tags(admin_html)
+            
+            try:
+                admin_email = EmailMultiAlternatives(
+                    subject=admin_subject,
+                    body=admin_plain,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=superuser_emails,
+                    reply_to=[order.user.email],
+                )
+                admin_email.attach_alternative(admin_html, "text/html")
+                admin_email.send(fail_silently=False)
+            except Exception:
+                # Try sending individually if batch fails
+                for email in superuser_emails:
+                    try:
+                        single_admin_email = EmailMultiAlternatives(
+                            subject=admin_subject,
+                            body=admin_plain,
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            to=[email],
+                            reply_to=[order.user.email],
+                        )
+                        single_admin_email.attach_alternative(admin_html, "text/html")
+                        single_admin_email.send(fail_silently=False)
+                    except Exception:
+                        pass
+        else:
+            # Fallback: Check for admin email in settings
+            if hasattr(settings, 'ADMIN_EMAILS') and settings.ADMIN_EMAILS:
+                admin_subject = f'🔔 New Order Received - Order #{order.order_number}'
+                admin_html = render_to_string('emails/admin_order_notification.html', context)
+                admin_plain = strip_tags(admin_html)
+                
+                admin_email = EmailMultiAlternatives(
+                    subject=admin_subject,
+                    body=admin_plain,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=settings.ADMIN_EMAILS,
+                    reply_to=[order.user.email],
+                )
+                admin_email.attach_alternative(admin_html, "text/html")
+                admin_email.send(fail_silently=False)
+        
+    except Exception as e:
+        # Log email error but don't fail the order
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error sending order confirmation emails for Order #{order.order_number}: {str(e)}")
 
 
 @login_required
@@ -3392,14 +3529,12 @@ def calculate_offer_discount(product, price, variant=None):
     best_offer_discount = Decimal('0')
     best_offer_name = None
     
-    # Get original price - THIS SHOULD BE THE VARIANT'S PRICE IF VARIANT EXISTS
+    # Get original price - Use variant's price if variant exists
     original_price = Decimal(str(product.price))
-    
-    # If variant exists, use variant's original price
     if variant:
         original_price = Decimal(str(variant.price))
     
-    # Convert price to Decimal (this is already product-discounted price from CartItem)
+    # Convert price to Decimal
     if not isinstance(price, Decimal):
         price = Decimal(str(price))
     
@@ -3408,16 +3543,13 @@ def calculate_offer_discount(product, price, variant=None):
     
     # ============================================
     # 1. FIND THE BEST OFFER DISCOUNT
-    #    Calculate offer on the ITEM's price
     # ============================================
     for offer in offers:
         discount_value = Decimal(str(offer.discount_value))
         
         if offer.offer_type == 'product':
-            # Check if offer is on the product
             if offer.product and offer.product.id == product.id:
                 if offer.discount_type == 'percentage':
-                    # Calculate on the item's price
                     discount = (original_price * discount_value) / Decimal('100')
                     if offer.max_discount:
                         max_disc = Decimal(str(offer.max_discount))
@@ -3431,10 +3563,8 @@ def calculate_offer_discount(product, price, variant=None):
                     best_offer_name = offer.name
                     
         elif offer.offer_type == 'category':
-            # Check if offer is on the category
             if product.category and offer.category and offer.category.id == product.category.id:
                 if offer.discount_type == 'percentage':
-                    # Calculate on the item's price
                     discount = (original_price * discount_value) / Decimal('100')
                     if offer.max_discount:
                         max_disc = Decimal(str(offer.max_discount))
@@ -3448,46 +3578,30 @@ def calculate_offer_discount(product, price, variant=None):
                     best_offer_name = offer.name
     
     # ============================================
-    # 2. APPLY THE BEST DISCOUNT ON ORIGINAL PRICE
+    # 2. APPLY THE BEST DISCOUNT
     # ============================================
-    
-    # Debug prints
-    print(f"Product: {product.name}")
-    if variant:
-        print(f"Variant: {variant.name or variant.sku}")
-    print(f"Original Price (item): {original_price}")
-    print(f"Product Discount Amount: {product_discount_amount}")
-    print(f"Best Offer Discount: {best_offer_discount}")
-    print(f"Best Offer Name: {best_offer_name}")
     
     # Case 1: No product discount, no offer
     if product_discount_amount == 0 and best_offer_discount == 0:
         return price, None, Decimal('0')
     
-    # Case 2: Only product discount exists (no offer)
+    # Case 2: Only product discount exists
     if product_discount_amount > 0 and best_offer_discount == 0:
         return price, "Product Discount", Decimal('0')
     
-    # Case 3: Only offer exists (no product discount)
+    # Case 3: Only offer exists
     if product_discount_amount == 0 and best_offer_discount > 0:
         final_price = original_price - best_offer_discount
-        print(f"Only Offer: Final Price = {final_price}")
         return final_price, best_offer_name, best_offer_discount
     
-    # Case 4: Both exist - apply the better one on ORIGINAL price
+    # Case 4: Both exist - apply the better one
     if product_discount_amount > 0 and best_offer_discount > 0:
         product_final_price = original_price - product_discount_amount
         offer_final_price = original_price - best_offer_discount
         
-        print(f"Both Exist - Product Final: {product_final_price}, Offer Final: {offer_final_price}")
-        
         if offer_final_price < product_final_price:
-            # Offer gives better discount
-            print(f"Offer is better: {best_offer_name}")
             return offer_final_price, best_offer_name, best_offer_discount
         else:
-            # Product discount gives better discount
-            print("Product discount is better")
             return product_final_price, "Product Discount", Decimal('0')
     
     # Fallback
@@ -3513,3 +3627,245 @@ def get_all_subcategories_ajax(request):
         is_active=True
     ).values('id', 'name').order_by('name')
     return JsonResponse(list(subcategories), safe=False)
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib import messages
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.utils import timezone
+from .models import Order, OrderItem, Transaction
+
+# ============================================
+# ORDER MANAGEMENT VIEWS (Admin/Superuser)
+# ============================================
+
+@staff_member_required
+def admin_order_list_view(request):
+    """
+    Admin view to list all orders with filters
+    """
+    orders = Order.objects.all().select_related('user', 'coupon', 'offer')
+    
+    # ============================================
+    # FILTERS
+    # ============================================
+    status_filter = request.GET.get('status', '')
+    payment_filter = request.GET.get('payment_status', '')
+    search_query = request.GET.get('search', '')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    
+    # Apply status filter
+    if status_filter:
+        orders = orders.filter(status=status_filter)
+    
+    # Apply payment status filter
+    if payment_filter:
+        orders = orders.filter(payment_status=payment_filter)
+    
+    # Apply search
+    if search_query:
+        orders = orders.filter(
+            Q(order_number__icontains=search_query) |
+            Q(user__email__icontains=search_query) |
+            Q(user__full_name__icontains=search_query) |
+            Q(shipping_address__icontains=search_query)
+        )
+    
+    # Apply date filters
+    if date_from:
+        try:
+            from datetime import datetime
+            date_from_obj = datetime.strptime(date_from, '%Y-%m-%d')
+            orders = orders.filter(created_at__date__gte=date_from_obj.date())
+        except ValueError:
+            pass
+    
+    if date_to:
+        try:
+            from datetime import datetime
+            date_to_obj = datetime.strptime(date_to, '%Y-%m-%d')
+            orders = orders.filter(created_at__date__lte=date_to_obj.date())
+        except ValueError:
+            pass
+    
+    # ============================================
+    # ORDER STATISTICS
+    # ============================================
+    stats = {
+        'total': Order.objects.count(),
+        'pending': Order.objects.filter(status='pending').count(),
+        'processing': Order.objects.filter(status='processing').count(),
+        'shipped': Order.objects.filter(status='shipped').count(),
+        'delivered': Order.objects.filter(status='delivered').count(),
+        'cancelled': Order.objects.filter(status='cancelled').count(),
+        'failed': Order.objects.filter(status='failed').count(),
+        'paid': Order.objects.filter(payment_status='paid').count(),
+        'pending_payment': Order.objects.filter(payment_status='pending').count(),
+        'refunded': Order.objects.filter(payment_status='refunded').count(),
+    }
+    
+    # ============================================
+    # SORTING
+    # ============================================
+    sort_by = request.GET.get('sort', '-created_at')
+    valid_sorts = ['created_at', '-created_at', 'order_number', '-order_number', 
+                   'total_amount', '-total_amount', 'status', '-status']
+    if sort_by in valid_sorts:
+        orders = orders.order_by(sort_by)
+    else:
+        orders = orders.order_by('-created_at')
+    
+    # ============================================
+    # PAGINATION
+    # ============================================
+    paginator = Paginator(orders, 20)
+    page = request.GET.get('page')
+    orders_page = paginator.get_page(page)
+    
+    context = {
+        'orders': orders_page,
+        'stats': stats,
+        'status_filter': status_filter,
+        'payment_filter': payment_filter,
+        'search_query': search_query,
+        'date_from': date_from,
+        'date_to': date_to,
+        'sort_by': sort_by,
+        'total_count': orders.count(),
+        'status_choices': Order.STATUS_CHOICES,
+        'payment_status_choices': Order.PAYMENT_STATUS_CHOICES,
+    }
+    return render(request, 'Ecom/admin/order_list.html', context)
+
+
+@staff_member_required
+def admin_order_detail_view(request, order_id):
+    """
+    Admin view to see order details
+    """
+    order = get_object_or_404(Order, id=order_id)
+    transactions = order.transactions.all()
+    items = order.items.all()
+    
+    context = {
+        'order': order,
+        'items': items,
+        'transactions': transactions,
+    }
+    return render(request, 'Ecom/admin/order_detail.html', context)
+
+
+@staff_member_required
+def admin_order_update_view(request, order_id):
+    """
+    Admin view to update order status, tracking info, and delivery date
+    """
+    order = get_object_or_404(Order, id=order_id)
+    
+    if request.method == 'POST':
+        # Get form data
+        status = request.POST.get('status')
+        tracking_number = request.POST.get('tracking_number', '').strip()
+        tracking_url = request.POST.get('tracking_url', '').strip()
+        delivery_date = request.POST.get('delivery_date')
+        notes = request.POST.get('notes', '').strip()
+        
+        # Update order
+        if status and status in dict(Order.STATUS_CHOICES):
+            order.status = status
+        
+        if tracking_number:
+            order.tracking_number = tracking_number
+        
+        if tracking_url:
+            order.tracking_url = tracking_url
+        
+        if delivery_date:
+            try:
+                from datetime import datetime
+                order.delivery_date = datetime.strptime(delivery_date, '%Y-%m-%dT%H:%M')
+            except ValueError:
+                try:
+                    order.delivery_date = datetime.strptime(delivery_date, '%Y-%m-%d')
+                except ValueError:
+                    pass
+        
+        if notes:
+            order.notes = notes
+        
+        order.save()
+        messages.success(request, f'Order #{order.order_number} updated successfully!')
+        return redirect('Ecom:admin_order_detail', order_id=order.id)
+    
+    # GET request - redirect to detail
+    return redirect('Ecom:admin_order_detail', order_id=order.id)
+
+
+@staff_member_required
+def admin_order_bulk_update_view(request):
+    """
+    Bulk update orders (status, tracking, etc.)
+    """
+    if request.method == 'POST':
+        order_ids = request.POST.getlist('order_ids')
+        action = request.POST.get('action')
+        
+        if not order_ids:
+            messages.error(request, 'No orders selected.')
+            return redirect('Ecom:admin_order_list')
+        
+        if action == 'mark_processing':
+            Order.objects.filter(id__in=order_ids).update(status='processing')
+            messages.success(request, f'{len(order_ids)} orders marked as processing.')
+        
+        elif action == 'mark_shipped':
+            Order.objects.filter(id__in=order_ids).update(status='shipped')
+            messages.success(request, f'{len(order_ids)} orders marked as shipped.')
+        
+        elif action == 'mark_delivered':
+            Order.objects.filter(id__in=order_ids).update(
+                status='delivered',
+                delivery_date=timezone.now()
+            )
+            messages.success(request, f'{len(order_ids)} orders marked as delivered.')
+        
+        elif action == 'mark_cancelled':
+            Order.objects.filter(id__in=order_ids).update(status='cancelled')
+            messages.success(request, f'{len(order_ids)} orders cancelled.')
+        
+        else:
+            messages.error(request, 'Invalid action selected.')
+        
+        return redirect('Ecom:admin_order_list')
+    
+    return redirect('Ecom:admin_order_list')
+
+
+@staff_member_required
+def admin_order_status_update_ajax(request):
+    """
+    AJAX endpoint to update order status
+    """
+    if request.method == 'POST':
+        import json
+        data = json.loads(request.body)
+        order_id = data.get('order_id')
+        status = data.get('status')
+        
+        try:
+            order = Order.objects.get(id=order_id)
+            if status in dict(Order.STATUS_CHOICES):
+                order.status = status
+                order.save()
+                return JsonResponse({
+                    'success': True,
+                    'message': f'Order #{order.order_number} status updated to {dict(Order.STATUS_CHOICES)[status]}'
+                })
+            else:
+                return JsonResponse({'success': False, 'error': 'Invalid status'})
+        except Order.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Order not found'})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'})

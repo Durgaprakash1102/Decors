@@ -1627,6 +1627,7 @@ class Order(models.Model):
     # Additional
     notes = models.TextField(blank=True)
     tracking_number = models.CharField(max_length=100, blank=True, null=True)
+    tracking_url = models.URLField(max_length=500, blank=True, null=True, help_text="URL to track the shipment")
     delivery_date = models.DateTimeField(null=True, blank=True)
     
     # Timestamps

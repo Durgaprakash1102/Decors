@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #28a745;
+        }
+        .header h1 {
+            color: #28a745;
+            margin: 0;
+            font-size: 28px;
+        }
+        .header .order-number {
+            color: #6c757d;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        .success-icon {
+            text-align: center;
+            font-size: 48px;
+            color: #28a745;
+            margin: 20px 0;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        .section-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 8px;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        .order-item .item-details {
+            flex: 1;
+        }
+        .order-item .item-name {
+            font-weight: 500;
+        }
+        .order-item .item-meta {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .order-item .item-price {
+            font-weight: 600;
+            text-align: right;
+        }
+        .order-item .item-price .original {
+            font-size: 12px;
+            color: #999;
+            text-decoration: line-through;
+            font-weight: 400;
+        }
+        .offer-tag {
+            background: #ff6b6b;
+            color: white;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+        .totals {
+            margin-top: 15px;
+        }
+        .totals .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+        .totals .row.total {
+            font-weight: 700;
+            font-size: 18px;
+            border-top: 2px solid #e9ecef;
+            padding-top: 10px;
+            margin-top: 5px;
+        }
+        .totals .row.discount {
+            color: #28a745;
+        }
+        .address-block {
+            white-space: pre-line;
+            margin: 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #0d6efd;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .btn:hover {
+            background-color: #0b5ed7;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px 0 0 0;
+            border-top: 1px solid #e9ecef;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .savings-banner {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border: 1px solid #28a745;
+            border-radius: 6px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+            color: #155724;
+        }
+        .payment-details {
+            font-size: 13px;
+            color: #6c757d;
+        }
+        @media (max-width: 480px) {
+            .container { padding: 15px; }
+            .order-item { flex-wrap: wrap; }
+            .order-item .item-price { width: 100%; text-align: left; margin-top: 4px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>✅ Order Confirmed!</h1>
+            <div class="order-number">Order #{{ order.order_number }}</div>
+        </div>
+
+        <div class="success-icon">🎉</div>
+
+        <!-- Thank You Message -->
+        <p style="text-align:center;font-size:16px;">
+            Thank you, <strong>{{ user.full_name }}</strong>! Your order has been placed successfully.
+        </p>
+
+        <!-- Savings Banner -->
+        {% if product_discount_total > 0 or offer_discount > 0 or coupon_discount > 0 %}
+        <div class="savings-banner">
+            🎉 You saved 
+            <strong>₹{{ product_discount_total|add:offer_discount|add:coupon_discount|floatformat:2 }}</strong> 
+            on this order!
+        </div>
+        {% endif %}
+
+        <!-- Order Items -->
+        <div class="section">
+            <div class="section-title">🛍️ Order Items</div>
+            {% for item in order_items %}
+            <div class="order-item">
+                <div class="item-details">
+                    <div class="item-name">
+                        {{ item.name }}
+                        {% if item.offer_name %}
+                            <span class="offer-tag">{{ item.offer_name }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="item-meta">
+                        SKU: {{ item.sku }} × {{ item.quantity }}
+                    </div>
+                </div>
+                <div class="item-price">
+                    ₹{{ item.total|floatformat:2 }}
+                    {% if item.original_price > item.price %}
+                        <br><span class="original">₹{{ item.original_price|floatformat:2 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Totals -->
+            <div class="totals">
+                <div class="row">
+                    <span>Subtotal</span>
+                    <span>₹{{ subtotal|floatformat:2 }}</span>
+                </div>
+                {% if product_discount_total > 0 %}
+                <div class="row discount">
+                    <span>Product Discount</span>
+                    <span>-₹{{ product_discount_total|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+                {% if offer_discount > 0 %}
+                <div class="row discount">
+                    <span>Offer Savings</span>
+                    <span>-₹{{ offer_discount|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+                {% if coupon_discount > 0 %}
+                <div class="row discount">
+                    <span>Coupon Discount</span>
+                    <span>-₹{{ coupon_discount|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+                <div class="row total">
+                    <span>Total Paid</span>
+                    <span>₹{{ total|floatformat:2 }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shipping Address -->
+        <div class="section">
+            <div class="section-title">📍 Shipping Address</div>
+            <p class="address-block">{{ shipping_address|linebreaksbr }}</p>
+        </div>
+
+        <!-- Billing Address -->
+        <div class="section">
+            <div class="section-title">📄 Billing Address</div>
+            <p class="address-block">{{ billing_address|linebreaksbr }}</p>
+        </div>
+
+        <!-- Payment Details -->
+        <div class="section">
+            <div class="section-title">💳 Payment Details</div>
+            <div class="payment-details">
+                <p><strong>Transaction ID:</strong> {{ payment_id }}</p>
+                <p><strong>Order Date:</strong> {{ order_date }}</p>
+                {% if coupon_code %}
+                    <p><strong>Coupon Applied:</strong> {{ coupon_code }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="text-align:center;margin:20px 0;">
+            <a href="{{ order_url }}" class="btn">View Order Details</a>
+        </div>
+        <div style="text-align:center;">
+            <a href="{{ site_url }}" style="color:#0d6efd;text-decoration:none;">Continue Shopping</a>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                Thank you for shopping with <strong>{{ site_name }}</strong>!<br>
+                If you have any questions, please contact us at <a href="mailto:{{ support_email }}">{{ support_email }}</a>
+            </p>
+            <p>&copy; {{ site_name }}. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

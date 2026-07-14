@@ -1,0 +1,395 @@
+
+{% load static %}
+
+{% block title %}Order #{{ order.order_number }} - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .order-detail-card {
+        border-left: 4px solid;
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+    .order-detail-card.primary { border-color: #0d6efd; }
+    .order-detail-card.success { border-color: #28a745; }
+    .order-detail-card.warning { border-color: #ffc107; }
+    .order-detail-card.info { border-color: #17a2b8; }
+    .order-detail-card .label { font-size: 12px; color: #6c757d; }
+    .order-detail-card .value { font-size: 16px; font-weight: 600; }
+    
+    .status-badge {
+        padding: 4px 14px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    .status-badge.pending { background: #fff3cd; color: #856404; }
+    .status-badge.processing { background: #cce5ff; color: #004085; }
+    .status-badge.shipped { background: #d1ecf1; color: #0c5460; }
+    .status-badge.delivered { background: #d4edda; color: #155724; }
+    .status-badge.cancelled { background: #e2e3e5; color: #383d41; }
+    .status-badge.failed { background: #f8d7da; color: #721c24; }
+    .status-badge.paid { background: #d4edda; color: #155724; }
+    .status-badge.refunded { background: #f8d7da; color: #721c24; }
+    .status-badge.pending_payment { background: #fff3cd; color: #856404; }
+    
+    .order-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 10px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    .order-item .item-details {
+        flex: 1;
+    }
+    .order-item .item-name {
+        font-weight: 600;
+    }
+    .order-item .item-meta {
+        font-size: 12px;
+        color: #6c757d;
+    }
+    .order-item .item-total {
+        font-weight: 700;
+        text-align: right;
+    }
+    .order-item .item-price-breakdown {
+        font-size: 12px;
+        color: #6c757d;
+        text-align: right;
+    }
+    
+    .tracking-info {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2><i class="fas fa-box text-primary"></i> Order #{{ order.order_number }}</h2>
+            <div class="mt-1">
+                <span class="status-badge {{ order.status }}">{{ order.get_status_display }}</span>
+                <span class="status-badge {{ order.payment_status }}">{{ order.get_payment_status_display }}</span>
+            </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'Ecom:admin_order_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Orders
+            </a>
+            <button onclick="updateOrderStatus({{ order.id }})" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Update Status
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column - Order Details -->
+        <div class="col-md-8">
+            <!-- Order Items -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-list text-primary"></i> Order Items</h5>
+                </div>
+                <div class="card-body">
+                    {% for item in items %}
+                    <div class="order-item">
+                        <div class="item-details">
+                            <div class="item-name">
+                                {{ item.product_name }}
+                                {% if item.offer_name %}
+                                    <span class="badge" style="background:#ff6b6b;color:white;font-size:9px;">
+                                        {{ item.offer_name }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <div class="item-meta">
+                                SKU: {{ item.sku }} | Qty: {{ item.quantity }}
+                                {% if item.variant %}
+                                    | Variant: {{ item.variant.name|default:item.variant.sku }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="item-total">
+                            ₹{{ item.total|floatformat:2 }}
+                            {% if item.original_price > item.final_price %}
+                                <div class="item-price-breakdown">
+                                    <span class="text-decoration-line-through">₹{{ item.original_price|floatformat:2 }}</span>
+                                    <span class="text-success ms-1">Save ₹{{ item.product_discount|add:item.offer_discount|floatformat:2 }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <!-- Order Totals -->
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6 offset-md-6">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Subtotal:</span>
+                                <span>₹{{ order.subtotal|floatformat:2 }}</span>
+                            </div>
+                            {% if order.product_discount_total > 0 %}
+                            <div class="d-flex justify-content-between mb-1 text-success">
+                                <span>Product Discount:</span>
+                                <span>-₹{{ order.product_discount_total|floatformat:2 }}</span>
+                            </div>
+                            {% endif %}
+                            {% if order.offer_discount > 0 %}
+                            <div class="d-flex justify-content-between mb-1 text-success">
+                                <span>Offer Savings:</span>
+                                <span>-₹{{ order.offer_discount|floatformat:2 }}</span>
+                            </div>
+                            {% endif %}
+                            {% if order.coupon_discount > 0 %}
+                            <div class="d-flex justify-content-between mb-1 text-success">
+                                <span>Coupon Discount:</span>
+                                <span>-₹{{ order.coupon_discount|floatformat:2 }}</span>
+                            </div>
+                            {% endif %}
+                            <hr>
+                            <div class="d-flex justify-content-between mb-1 fw-bold">
+                                <span>Total:</span>
+                                <span>₹{{ order.total_amount|floatformat:2 }}</span>
+                            </div>
+                            {% if order.total_savings > 0 %}
+                            <div class="text-success text-end">
+                                <small>Total Savings: ₹{{ order.total_savings|floatformat:2 }}</small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-user text-primary"></i> Customer Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Name:</strong> {{ order.user.full_name }}</p>
+                            <p><strong>Email:</strong> <a href="mailto:{{ order.user.email }}">{{ order.user.email }}</a></p>
+                            <p><strong>Phone:</strong> {{ order.user.phone|default:"Not provided" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Order Date:</strong> {{ order.created_at|date:"F d, Y H:i" }}</p>
+                            {% if order.coupon %}
+                                <p><strong>Coupon:</strong> {{ order.coupon.code }}</p>
+                            {% endif %}
+                            {% if order.offer %}
+                                <p><strong>Offer:</strong> {{ order.offer.name }}</p>
+                            {% endif %}
+                            <p><strong>Notes:</strong> {{ order.notes|default:"No notes" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Shipping & Tracking -->
+        <div class="col-md-4">
+            <!-- Shipping Address -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-map-marker-alt text-primary"></i> Shipping Address</h5>
+                </div>
+                <div class="card-body">
+                    <p style="white-space:pre-line;">{{ order.shipping_address|linebreaksbr }}</p>
+                </div>
+            </div>
+
+            <!-- Billing Address -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-credit-card text-primary"></i> Billing Address</h5>
+                </div>
+                <div class="card-body">
+                    <p style="white-space:pre-line;">{{ order.billing_address|linebreaksbr }}</p>
+                </div>
+            </div>
+
+            <!-- Tracking Information -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-truck text-primary"></i> Tracking Information</h5>
+                </div>
+                <div class="card-body">
+                    {% if order.tracking_number or order.tracking_url %}
+                        <div class="tracking-info">
+                            {% if order.tracking_number %}
+                                <p><strong>Tracking Number:</strong><br>
+                                <code>{{ order.tracking_number }}</code></p>
+                            {% endif %}
+                            {% if order.tracking_url %}
+                                <p><strong>Tracking URL:</strong><br>
+                                <a href="{{ order.tracking_url }}" target="_blank">{{ order.tracking_url|truncatechars:50 }}</a></p>
+                            {% endif %}
+                            {% if order.delivery_date %}
+                                <p><strong>Delivery Date:</strong><br>
+                                {{ order.delivery_date|date:"F d, Y H:i" }}</p>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-3">No tracking information available.</p>
+                    {% endif %}
+                    <button onclick="updateOrderStatus({{ order.id }})" class="btn btn-sm btn-primary w-100 mt-2">
+                        <i class="fas fa-edit"></i> Update Tracking
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions -->
+    {% if transactions %}
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fas fa-history text-primary"></i> Transactions</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Transaction ID</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                        <tr>
+                            <td>
+                                <span class="badge {% if transaction.transaction_type == 'payment' %}bg-primary{% else %}bg-warning{% endif %}">
+                                    {{ transaction.get_transaction_type_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <code style="font-size:11px;">
+                                    {% if transaction.razorpay_transaction_id %}
+                                        {{ transaction.razorpay_transaction_id|truncatechars:20 }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </code>
+                            </td>
+                            <td>₹{{ transaction.amount|floatformat:2 }}</td>
+                            <td>
+                                <span class="badge {% if transaction.status == 'success' %}bg-success{% elif transaction.status == 'failed' %}bg-danger{% elif transaction.status == 'refunded' %}bg-info{% else %}bg-warning{% endif %}">
+                                    {{ transaction.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ============================================ -->
+<!-- UPDATE STATUS MODAL                          -->
+<!-- ============================================ -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Order #{{ order.order_number }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateStatusForm" method="POST" action="{% url 'Ecom:admin_order_update' order.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select">
+                            {% for status_code, status_label in order.STATUS_CHOICES %}
+                                <option value="{{ status_code }}" {% if order.status == status_code %}selected{% endif %}>
+                                    {{ status_label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tracking Number</label>
+                        <input type="text" name="tracking_number" class="form-control" 
+                               value="{{ order.tracking_number }}" placeholder="Enter tracking number">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tracking URL</label>
+                        <input type="url" name="tracking_url" class="form-control" 
+                               value="{{ order.tracking_url }}" placeholder="https://track.example.com/12345">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Delivery Date</label>
+                        <input type="datetime-local" name="delivery_date" class="form-control" 
+                               value="{{ order.delivery_date|date:'Y-m-d\TH:i' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea name="notes" class="form-control" rows="2" 
+                                  placeholder="Add notes about this order">{{ order.notes }}</textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitStatusUpdate()">
+                    <i class="fas fa-save"></i> Update Order
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- JAVASCRIPT                                  -->
+<!-- ============================================ -->
+<script>
+    function updateOrderStatus(orderId) {
+        const modal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
+        modal.show();
+    }
+    
+    function submitStatusUpdate() {
+        const form = document.getElementById('updateStatusForm');
+        form.submit();
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}
