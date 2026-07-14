@@ -86,13 +86,13 @@
                             <td>
                                 <div class="btn-group" style="min-width:100px;">
                                     <a href="{% url 'Ecom:banner_edit' banner.id %}" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-edit"></i>
+                                        <i class="fas fa-edit">edit</i>
                                     </a>
                                     <a href="{% url 'Ecom:banner_toggle' banner.id %}" class="btn btn-sm {% if banner.is_active %}btn-warning{% else %}btn-success{% endif %}">
-                                        <i class="fas {% if banner.is_active %}fa-pause{% else %}fa-play{% endif %}"></i>
+                                        <i class="fas {% if banner.is_active %}fa-pause{% else %}fa-play{% endif %}"> toggle</i>
                                     </a>
                                     <a href="{% url 'Ecom:banner_delete' banner.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this banner?')">
-                                        <i class="fas fa-trash"></i>
+                                        <i class="fas fa-trash">delete</i>
                                     </a>
                                 </div>
                             </td>
