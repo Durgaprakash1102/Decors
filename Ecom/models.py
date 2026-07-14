@@ -1793,8 +1793,6 @@ class Transaction(models.Model):
     def is_refund(self):
         return self.transaction_type == 'refund'
 
-# models.py - Add this to your existing models file
-
 class Banner(models.Model):
     title = models.CharField(max_length=200)
     short_description = models.TextField(max_length=500, blank=True, help_text="Brief description shown on banner")
@@ -1813,7 +1811,6 @@ class Banner(models.Model):
         return self.title
     
     def delete(self, *args, **kwargs):
-        # Delete image from storage when banner is deleted
         if self.image:
             import os
             from django.conf import settings

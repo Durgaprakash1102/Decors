@@ -4085,11 +4085,10 @@ def admin_order_status_update_ajax(request):
     
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
-# views.py - Add these to your existing views
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
+from django.http import JsonResponse
 from .models import Banner
 from .forms import BannerForm
 
@@ -4114,10 +4113,15 @@ def banner_list_view(request):
     """List all banners"""
     banners = Banner.objects.all().order_by('-created_at')
     
+    total_banners = banners.count()
+    active_banners = banners.filter(is_active=True).count()
+    inactive_banners = banners.filter(is_active=False).count()
+    
     context = {
         'banners': banners,
-        'total_banners': banners.count(),
-        'active_banners': banners.filter(is_active=True).count(),
+        'total_banners': total_banners,
+        'active_banners': active_banners,
+        'inactive_banners': inactive_banners,
     }
     return render(request, 'Ecom/admin/banner_list.html', context)
 
@@ -4131,6 +4135,10 @@ def banner_create_view(request):
             banner = form.save()
             messages.success(request, f'Banner "{banner.title}" created successfully!')
             return redirect('Ecom:banner_list')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = BannerForm()
     
@@ -4151,6 +4159,10 @@ def banner_edit_view(request, banner_id):
             form.save()
             messages.success(request, f'Banner "{banner.title}" updated successfully!')
             return redirect('Ecom:banner_list')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = BannerForm(instance=banner)
     
@@ -4172,6 +4184,8 @@ def banner_delete_view(request, banner_id):
         messages.success(request, f'Banner "{title}" deleted successfully!')
         return redirect('Ecom:banner_list')
     
+    # GET request - redirect back
+    messages.error(request, 'Invalid request method.')
     return redirect('Ecom:banner_list')
 
 
@@ -4179,6 +4193,7 @@ def banner_delete_view(request, banner_id):
 def banner_toggle_status_view(request, banner_id):
     """Toggle banner active status"""
     banner = get_object_or_404(Banner, id=banner_id)
+    
     banner.is_active = not banner.is_active
     banner.save()
     

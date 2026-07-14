@@ -664,8 +664,6 @@ class OfferForm(forms.ModelForm):
         
         return cleaned_data
     
-# forms.py - Add this to your existing forms file
-
 from django import forms
 from .models import Banner
 
@@ -674,5 +672,14 @@ class BannerForm(forms.ModelForm):
         model = Banner
         fields = ['title', 'short_description', 'image', 'is_active']
         widgets = {
-            'short_description': forms.Textarea(attrs={'rows': 3}),
+            'short_description': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'image': forms.FileInput(attrs={'class': 'form-control'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+        labels = {
+            'title': 'Banner Title',
+            'short_description': 'Short Description',
+            'image': 'Banner Image',
+            'is_active': 'Active',
         }
