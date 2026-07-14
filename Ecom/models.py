@@ -1792,3 +1792,31 @@ class Transaction(models.Model):
     @property
     def is_refund(self):
         return self.transaction_type == 'refund'
+
+# models.py - Add this to your existing models file
+
+class Banner(models.Model):
+    title = models.CharField(max_length=200)
+    short_description = models.TextField(max_length=500, blank=True, help_text="Brief description shown on banner")
+    image = models.ImageField(upload_to='banners/', help_text="Recommended size: 1920x600")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'banners'
+        verbose_name = 'Banner'
+        verbose_name_plural = 'Banners'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return self.title
+    
+    def delete(self, *args, **kwargs):
+        # Delete image from storage when banner is deleted
+        if self.image:
+            import os
+            from django.conf import settings
+            if os.path.isfile(self.image.path):
+                os.remove(self.image.path)
+        super().delete(*args, **kwargs)

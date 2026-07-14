@@ -663,3 +663,16 @@ class OfferForm(forms.ModelForm):
             raise forms.ValidationError('Valid To date must be after Valid From date.')
         
         return cleaned_data
+    
+# forms.py - Add this to your existing forms file
+
+from django import forms
+from .models import Banner
+
+class BannerForm(forms.ModelForm):
+    class Meta:
+        model = Banner
+        fields = ['title', 'short_description', 'image', 'is_active']
+        widgets = {
+            'short_description': forms.Textarea(attrs={'rows': 3}),
+        }

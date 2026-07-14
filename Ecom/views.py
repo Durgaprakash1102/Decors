@@ -14,6 +14,46 @@ from decimal import Decimal
 from django.db.models import Q, Count, Avg, F, DecimalField
 from django.db.models.functions import Coalesce
 
+# utils.py or add to views.py
+
+from .models import Coupon, Offer
+from django.utils import timezone
+
+def get_active_coupons(limit=4):
+    """Get active coupons for homepage display"""
+    now = timezone.now()
+    return Coupon.objects.filter(
+        is_active=True,
+        valid_from__lte=now,
+        valid_to__gte=now
+    ).exclude(
+        usage_limit__isnull=False,
+        used_count__gte=models.F('usage_limit')
+    ).order_by('-created_at')[:limit]
+
+
+def get_active_offers(limit=4):
+    """Get active offers for homepage display"""
+    now = timezone.now()
+    return Offer.objects.filter(
+        is_active=True,
+        valid_from__lte=now,
+        valid_to__gte=now
+    ).order_by('-priority', '-created_at')[:limit]
+
+
+def get_featured_offers(limit=2):
+    """Get featured offers (highest discount) for homepage"""
+    now = timezone.now()
+    return Offer.objects.filter(
+        is_active=True,
+        valid_from__lte=now,
+        valid_to__gte=now
+    ).exclude(
+        banner_image__isnull=True
+    ).exclude(
+        banner_image=''
+    ).order_by('-discount_value', '-priority')[:limit]
 
 def home(request):
     """Home page with best sellers, featured, new arrivals, categories, subcategories, and deals of the day"""
@@ -32,6 +72,11 @@ def home(request):
     featured_products = products.filter(is_featured=True).order_by('-created_at')[:8]
     
     # ============================================
+    # BANNERS
+    # ============================================
+    banners = Banner.objects.filter(is_active=True).order_by('-created_at')[:5]
+    
+    # ============================================
     # NEW ARRIVALS - products marked as new
     # ============================================
     new_arrivals = products.filter(is_new=True).order_by('-created_at')[:8]
@@ -45,19 +90,24 @@ def home(request):
     # DEALS OF THE DAY - Products with highest discounts
     # ============================================
     # Get products with discount > 0, sorted by discount percentage (highest first)
-    deals_of_the_day = products.filter(
+    deals_of_the_day_query = products.filter(
         discount_percentage__gt=0
     ).order_by('-discount_percentage')[:6]
     
     # If less than 6 products with discount, get some without discount to fill
-    if deals_of_the_day.count() < 6:
+    if deals_of_the_day_query.count() < 6:
+        # Get the IDs of products already in deals
+        existing_ids = list(deals_of_the_day_query.values_list('id', flat=True))
+        
+        # Get additional products excluding the ones already in deals
         additional_products = products.exclude(
-            id__in=deals_of_the_day.values_list('id', flat=True)
-        ).order_by('-created_at')[:6 - deals_of_the_day.count()]
+            id__in=existing_ids
+        ).order_by('-created_at')[:6 - deals_of_the_day_query.count()]
+        
         # Combine querysets
-        deals_of_the_day = list(deals_of_the_day) + list(additional_products)
+        deals_of_the_day = list(deals_of_the_day_query) + list(additional_products)
     else:
-        deals_of_the_day = list(deals_of_the_day)
+        deals_of_the_day = list(deals_of_the_day_query)
     
     # ============================================
     # CATEGORIES with product count
@@ -89,6 +139,49 @@ def home(request):
     ).order_by('-avg_rating')[:8]
     
     # ============================================
+    # COUPONS
+    # ============================================
+    now = timezone.now()
+    coupons = Coupon.objects.filter(
+        is_active=True,
+        valid_from__lte=now,
+        valid_to__gte=now
+    ).exclude(
+        usage_limit__isnull=False,
+        used_count__gte=models.F('usage_limit')
+    ).order_by('-created_at')[:6]
+    
+    # ============================================
+    # OFFERS (With Banner Images)
+    # ============================================
+    offers = Offer.objects.filter(
+        is_active=True,
+        valid_from__lte=now,
+        valid_to__gte=now
+    ).exclude(
+        banner_image__isnull=True
+    ).exclude(
+        banner_image=''
+    ).order_by('-priority', '-created_at')[:6]
+    
+    # ============================================
+    # FEATURED OFFERS (with images and high discount)
+    # ============================================
+    # Get offers with discount > 0
+    featured_offers_query = Offer.objects.filter(
+        is_active=True,
+        valid_from__lte=now,
+        valid_to__gte=now,
+        discount_value__gt=0
+    ).exclude(
+        banner_image__isnull=True
+    ).exclude(
+        banner_image=''
+    ).order_by('-discount_value', '-priority')[:5]
+    
+    featured_offers = list(featured_offers_query)
+    
+    # ============================================
     # RECENTLY VIEWED - if user is authenticated
     # ============================================
     recently_viewed = []
@@ -109,6 +202,10 @@ def home(request):
         'categories': categories,
         'subcategories': subcategories,
         'recently_viewed': recently_viewed,
+        'banners': banners,
+        'coupons': coupons,
+        'offers': offers,
+        'featured_offers': featured_offers,
     }
     return render(request, 'home.html', context)
 
@@ -3635,6 +3732,9 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.utils import timezone
 from .models import Order, OrderItem, Transaction
+import logging
+
+logger = logging.getLogger(__name__)
 
 # ============================================
 # ORDER MANAGEMENT VIEWS (Admin/Superuser)
@@ -3644,8 +3744,18 @@ from .models import Order, OrderItem, Transaction
 def admin_order_list_view(request):
     """
     Admin view to list all orders with filters
+    Excludes pending payment orders and their counts
     """
-    orders = Order.objects.all().select_related('user', 'coupon', 'offer')
+    # ============================================
+    # EXCLUDE PENDING PAYMENT ORDERS
+    # ============================================
+    # Only show orders with payment_status != 'pending'
+    # Also exclude failed orders
+    orders = Order.objects.select_related('user', 'coupon', 'offer').exclude(
+        payment_status='pending'
+    ).exclude(
+        status='failed'
+    )
     
     # ============================================
     # FILTERS
@@ -3691,19 +3801,23 @@ def admin_order_list_view(request):
             pass
     
     # ============================================
-    # ORDER STATISTICS
+    # ORDER STATISTICS (Only show active orders)
     # ============================================
+    # Get all orders for count (excluding pending)
+    active_orders = Order.objects.exclude(
+        payment_status='pending'
+    ).exclude(
+        status='failed'
+    )
+    
     stats = {
-        'total': Order.objects.count(),
-        'pending': Order.objects.filter(status='pending').count(),
-        'processing': Order.objects.filter(status='processing').count(),
-        'shipped': Order.objects.filter(status='shipped').count(),
-        'delivered': Order.objects.filter(status='delivered').count(),
-        'cancelled': Order.objects.filter(status='cancelled').count(),
-        'failed': Order.objects.filter(status='failed').count(),
-        'paid': Order.objects.filter(payment_status='paid').count(),
-        'pending_payment': Order.objects.filter(payment_status='pending').count(),
-        'refunded': Order.objects.filter(payment_status='refunded').count(),
+        'total': active_orders.count(),
+        'processing': active_orders.filter(status='processing').count(),
+        'shipped': active_orders.filter(status='shipped').count(),
+        'delivered': active_orders.filter(status='delivered').count(),
+        'cancelled': active_orders.filter(status='cancelled').count(),
+        'paid': active_orders.filter(payment_status='paid').count(),
+        'refunded': active_orders.filter(payment_status='refunded').count(),
     }
     
     # ============================================
@@ -3738,8 +3852,6 @@ def admin_order_list_view(request):
         'payment_status_choices': Order.PAYMENT_STATUS_CHOICES,
     }
     return render(request, 'Ecom/admin/order_list.html', context)
-
-
 @staff_member_required
 def admin_order_detail_view(request, order_id):
     """
@@ -3756,6 +3868,60 @@ def admin_order_detail_view(request, order_id):
     }
     return render(request, 'Ecom/admin/order_detail.html', context)
 
+def send_order_status_update_email(order, old_status, request):
+    """
+    Send email notification to customer when order status is updated
+    """
+    try:
+        # Get status display names
+        old_status_display = dict(Order.STATUS_CHOICES).get(old_status, old_status)
+        new_status_display = order.get_status_display()
+        
+        # Prepare context for email
+        context = {
+            'order': order,
+            'user': order.user,
+            'old_status': old_status_display,
+            'new_status': new_status_display,
+            'site_name': 'MyStore',
+            'site_url': request.build_absolute_uri('/'),
+            'order_url': request.build_absolute_uri(
+                reverse('Ecom:order_detail', args=[order.id])
+            ),
+            'support_email': settings.DEFAULT_FROM_EMAIL or 'support@mystore.com',
+            'order_date': order.created_at.strftime('%B %d, %Y at %I:%M %p'),
+            'total_amount': order.total_amount,
+        }
+        
+        # Add tracking info if available
+        if order.tracking_number:
+            context['tracking_number'] = order.tracking_number
+        if order.tracking_url:
+            context['tracking_url'] = order.tracking_url
+        if order.delivery_date:
+            context['delivery_date'] = order.delivery_date.strftime('%B %d, %Y')
+        
+        # Render HTML email
+        subject = f'Order #{order.order_number} Status Update - {new_status_display}'
+        html_content = render_to_string('emails/order_status_update.html', context)
+        text_content = strip_tags(html_content)
+        
+        # Send email
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=text_content,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[order.user.email],
+            reply_to=[settings.DEFAULT_FROM_EMAIL],
+        )
+        email.attach_alternative(html_content, "text/html")
+        email.send(fail_silently=False)
+        
+        logger.info(f"Status update email sent to {order.user.email} for Order #{order.order_number}")
+        
+    except Exception as e:
+        logger.error(f"Failed to send status update email for Order #{order.order_number}: {str(e)}")
+
 
 @staff_member_required
 def admin_order_update_view(request, order_id):
@@ -3771,6 +3937,9 @@ def admin_order_update_view(request, order_id):
         tracking_url = request.POST.get('tracking_url', '').strip()
         delivery_date = request.POST.get('delivery_date')
         notes = request.POST.get('notes', '').strip()
+        send_email = request.POST.get('send_email', 'on')  # Checkbox to send email
+        
+        old_status = order.status
         
         # Update order
         if status and status in dict(Order.STATUS_CHOICES):
@@ -3796,7 +3965,14 @@ def admin_order_update_view(request, order_id):
             order.notes = notes
         
         order.save()
-        messages.success(request, f'Order #{order.order_number} updated successfully!')
+        
+        # Send email notification if status changed and send_email is checked
+        if old_status != order.status and send_email == 'on':
+            send_order_status_update_email(order, old_status, request)
+            messages.success(request, f'Order #{order.order_number} updated and email sent to customer!')
+        else:
+            messages.success(request, f'Order #{order.order_number} updated successfully!')
+        
         return redirect('Ecom:admin_order_detail', order_id=order.id)
     
     # GET request - redirect to detail
@@ -3806,37 +3982,61 @@ def admin_order_update_view(request, order_id):
 @staff_member_required
 def admin_order_bulk_update_view(request):
     """
-    Bulk update orders (status, tracking, etc.)
+    Bulk update orders (status, tracking, etc.) with email notifications
     """
     if request.method == 'POST':
         order_ids = request.POST.getlist('order_ids')
         action = request.POST.get('action')
+        send_email = request.POST.get('send_email', 'on')
         
         if not order_ids:
             messages.error(request, 'No orders selected.')
             return redirect('Ecom:admin_order_list')
         
-        if action == 'mark_processing':
-            Order.objects.filter(id__in=order_ids).update(status='processing')
-            messages.success(request, f'{len(order_ids)} orders marked as processing.')
+        # Get orders to update (exclude pending payment orders)
+        orders_to_update = Order.objects.filter(id__in=order_ids).exclude(payment_status='pending')
+        skipped_count = len(order_ids) - orders_to_update.count()
         
-        elif action == 'mark_shipped':
-            Order.objects.filter(id__in=order_ids).update(status='shipped')
-            messages.success(request, f'{len(order_ids)} orders marked as shipped.')
+        if skipped_count > 0:
+            messages.warning(request, f'Skipped {skipped_count} pending orders.')
         
-        elif action == 'mark_delivered':
-            Order.objects.filter(id__in=order_ids).update(
-                status='delivered',
-                delivery_date=timezone.now()
-            )
-            messages.success(request, f'{len(order_ids)} orders marked as delivered.')
+        updated_count = 0
+        email_count = 0
         
-        elif action == 'mark_cancelled':
-            Order.objects.filter(id__in=order_ids).update(status='cancelled')
-            messages.success(request, f'{len(order_ids)} orders cancelled.')
+        for order in orders_to_update:
+            old_status = order.status
+            
+            if action == 'mark_processing':
+                order.status = 'processing'
+            elif action == 'mark_shipped':
+                order.status = 'shipped'
+            elif action == 'mark_delivered':
+                order.status = 'delivered'
+                order.delivery_date = timezone.now()
+            elif action == 'mark_cancelled':
+                order.status = 'cancelled'
+            else:
+                messages.error(request, 'Invalid action selected.')
+                return redirect('Ecom:admin_order_list')
+            
+            order.save()
+            updated_count += 1
+            
+            # Send email notification if status changed and send_email is checked
+            if old_status != order.status and send_email == 'on':
+                # Use a dummy request for email
+                from django.test import RequestFactory
+                factory = RequestFactory()
+                dummy_request = factory.get('/')
+                dummy_request.build_absolute_uri = request.build_absolute_uri
+                
+                send_order_status_update_email(order, old_status, dummy_request)
+                email_count += 1
         
+        if email_count > 0:
+            messages.success(request, f'{updated_count} orders updated. {email_count} email notifications sent.')
         else:
-            messages.error(request, 'Invalid action selected.')
+            messages.success(request, f'{updated_count} orders updated successfully.')
         
         return redirect('Ecom:admin_order_list')
     
@@ -3846,26 +4046,142 @@ def admin_order_bulk_update_view(request):
 @staff_member_required
 def admin_order_status_update_ajax(request):
     """
-    AJAX endpoint to update order status
+    AJAX endpoint to update order status and send email notification
     """
     if request.method == 'POST':
-        import json
         data = json.loads(request.body)
         order_id = data.get('order_id')
         status = data.get('status')
+        send_email = data.get('send_email', True)
         
         try:
             order = Order.objects.get(id=order_id)
             if status in dict(Order.STATUS_CHOICES):
+                old_status = order.status
                 order.status = status
                 order.save()
+                
+                # Send email notification if status changed
+                if old_status != order.status and send_email:
+                    # Create a dummy request for email
+                    from django.test import RequestFactory
+                    factory = RequestFactory()
+                    dummy_request = factory.get('/')
+                    dummy_request.build_absolute_uri = request.build_absolute_uri
+                    
+                    send_order_status_update_email(order, old_status, dummy_request)
+                
                 return JsonResponse({
                     'success': True,
-                    'message': f'Order #{order.order_number} status updated to {dict(Order.STATUS_CHOICES)[status]}'
+                    'message': f'Order #{order.order_number} status updated to {dict(Order.STATUS_CHOICES)[status]}',
+                    'email_sent': old_status != order.status and send_email
                 })
             else:
                 return JsonResponse({'success': False, 'error': 'Invalid status'})
         except Order.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Order not found'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
     
     return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+# views.py - Add these to your existing views
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib import messages
+from .models import Banner
+from .forms import BannerForm
+
+# ============================================
+# PUBLIC VIEWS
+# ============================================
+
+def get_active_banners(limit=None):
+    """Get active banners for homepage"""
+    queryset = Banner.objects.filter(is_active=True).order_by('-created_at')
+    if limit:
+        queryset = queryset[:limit]
+    return queryset
+
+
+# ============================================
+# ADMIN VIEWS (CRUD)
+# ============================================
+
+@staff_member_required
+def banner_list_view(request):
+    """List all banners"""
+    banners = Banner.objects.all().order_by('-created_at')
+    
+    context = {
+        'banners': banners,
+        'total_banners': banners.count(),
+        'active_banners': banners.filter(is_active=True).count(),
+    }
+    return render(request, 'Ecom/admin/banner_list.html', context)
+
+
+@staff_member_required
+def banner_create_view(request):
+    """Create a new banner"""
+    if request.method == 'POST':
+        form = BannerForm(request.POST, request.FILES)
+        if form.is_valid():
+            banner = form.save()
+            messages.success(request, f'Banner "{banner.title}" created successfully!')
+            return redirect('Ecom:banner_list')
+    else:
+        form = BannerForm()
+    
+    return render(request, 'Ecom/admin/banner_form.html', {
+        'form': form,
+        'action': 'Create',
+    })
+
+
+@staff_member_required
+def banner_edit_view(request, banner_id):
+    """Edit an existing banner"""
+    banner = get_object_or_404(Banner, id=banner_id)
+    
+    if request.method == 'POST':
+        form = BannerForm(request.POST, request.FILES, instance=banner)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Banner "{banner.title}" updated successfully!')
+            return redirect('Ecom:banner_list')
+    else:
+        form = BannerForm(instance=banner)
+    
+    return render(request, 'Ecom/admin/banner_form.html', {
+        'form': form,
+        'action': 'Edit',
+        'banner': banner
+    })
+
+
+@staff_member_required
+def banner_delete_view(request, banner_id):
+    """Delete a banner"""
+    banner = get_object_or_404(Banner, id=banner_id)
+    
+    if request.method == 'POST':
+        title = banner.title
+        banner.delete()
+        messages.success(request, f'Banner "{title}" deleted successfully!')
+        return redirect('Ecom:banner_list')
+    
+    return redirect('Ecom:banner_list')
+
+
+@staff_member_required
+def banner_toggle_status_view(request, banner_id):
+    """Toggle banner active status"""
+    banner = get_object_or_404(Banner, id=banner_id)
+    banner.is_active = not banner.is_active
+    banner.save()
+    
+    status = 'activated' if banner.is_active else 'deactivated'
+    messages.success(request, f'Banner "{banner.title}" {status} successfully!')
+    return redirect('Ecom:banner_list')

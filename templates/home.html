@@ -157,6 +157,84 @@
     }
     
     /* ============================================ */
+    /* BANNER STYLES                               */
+    /* ============================================ */
+    .banner-card {
+        border-radius: 16px;
+        overflow: hidden;
+        position: relative;
+        background: #1a1a2e;
+    }
+    .banner-card img {
+        width: 100%;
+        max-height: 350px;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    .banner-card:hover img {
+        transform: scale(1.03);
+    }
+    .banner-card .banner-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 100%);
+        display: flex;
+        align-items: center;
+        padding: 40px;
+    }
+    .banner-card .banner-content {
+        max-width: 60%;
+        color: white;
+        position: relative;
+        z-index: 2;
+    }
+    .banner-card .banner-content h2 {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    .banner-card .banner-content p {
+        font-size: 16px;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    @media (max-width: 768px) {
+        .banner-card img {
+            max-height: 250px;
+        }
+        .banner-card .banner-content {
+            max-width: 80%;
+        }
+        .banner-card .banner-content h2 {
+            font-size: 24px;
+        }
+        .banner-card .banner-content p {
+            font-size: 14px;
+        }
+    }
+    @media (max-width: 480px) {
+        .banner-card img {
+            max-height: 180px;
+        }
+        .banner-card .banner-content {
+            max-width: 100%;
+            padding: 15px;
+        }
+        .banner-card .banner-content h2 {
+            font-size: 18px;
+        }
+        .banner-card .banner-content p {
+            font-size: 12px;
+        }
+        .banner-card .banner-overlay {
+            padding: 20px;
+        }
+    }
+    
+    /* ============================================ */
     /* PRICE BREAKDOWN STYLES                      */
     /* ============================================ */
     .price-breakdown {
@@ -223,6 +301,321 @@
         50% { transform: scale(1.05); }
     }
     
+    /* ============================================ */
+    /* COUPON CARD WITH IMAGE                      */
+    /* ============================================ */
+    .coupon-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+        height: 100%;
+    }
+    .coupon-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    }
+
+    .coupon-card .coupon-image-wrapper {
+        position: relative;
+        height: 160px;
+        overflow: hidden;
+        background: #f8f9fa;
+    }
+    .coupon-card .coupon-image-wrapper .coupon-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .coupon-card .coupon-image-wrapper .coupon-image-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .coupon-card .coupon-discount-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: rgba(0,0,0,0.7);
+        backdrop-filter: blur(4px);
+        color: white;
+        padding: 8px 14px;
+        border-radius: 10px;
+        text-align: center;
+        min-width: 70px;
+    }
+    .coupon-card .coupon-discount-badge .discount-value {
+        font-size: 20px;
+        font-weight: 800;
+        display: block;
+        line-height: 1.2;
+    }
+    .coupon-card .coupon-discount-badge .discount-label {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        opacity: 0.8;
+        display: block;
+    }
+
+    .coupon-card .coupon-expiry-badge {
+        position: absolute;
+        bottom: 12px;
+        right: 12px;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(4px);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+    }
+    .coupon-card .coupon-expiry-badge i {
+        margin-right: 4px;
+    }
+
+    .coupon-card .coupon-body {
+        padding: 12px 15px;
+    }
+    .coupon-card .coupon-code-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+    .coupon-card .coupon-code {
+        font-weight: 700;
+        color: #1a1a2e;
+        font-size: 15px;
+        letter-spacing: 1px;
+        background: #f8f9fa;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-family: monospace;
+    }
+    .coupon-card .btn-copy-coupon {
+        padding: 4px 10px;
+        border-radius: 6px;
+        border: 1px solid #0d6efd;
+        background: transparent;
+        color: #0d6efd;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .coupon-card .btn-copy-coupon:hover {
+        background: #0d6efd;
+        color: white;
+    }
+    .coupon-card .btn-copy-coupon.copied {
+        background: #28a745;
+        border-color: #28a745;
+        color: white;
+    }
+
+    .coupon-card .coupon-desc {
+        font-size: 13px;
+        color: #6c757d;
+        margin-bottom: 8px;
+    }
+    .coupon-card .coupon-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        color: #6c757d;
+    }
+    .coupon-card .coupon-footer i {
+        margin-right: 3px;
+    }
+    .coupon-card .coupon-footer .coupon-used {
+        color: #28a745;
+        font-weight: 600;
+    }
+
+    /* ============================================ */
+    /* OFFER CARD WITH IMAGE                       */
+    /* ============================================ */
+    .offer-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+        height: 100%;
+    }
+    .offer-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    }
+
+    .offer-card .offer-image-wrapper {
+        position: relative;
+        height: 180px;
+        overflow: hidden;
+        background: #f8f9fa;
+    }
+    .offer-card .offer-image-wrapper .offer-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .offer-card .offer-image-wrapper .offer-image-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .offer-card .offer-discount-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        color: white;
+        padding: 6px 14px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 700;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    }
+    .offer-card .offer-type-badge {
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(4px);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+    }
+    .offer-card .offer-type-badge i {
+        margin-right: 4px;
+    }
+
+    .offer-card .offer-body {
+        padding: 12px 15px;
+    }
+    .offer-card .offer-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-bottom: 4px;
+    }
+    .offer-card .offer-desc {
+        font-size: 13px;
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+    .offer-card .offer-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .offer-card .offer-footer .offer-valid {
+        font-size: 12px;
+        color: #6c757d;
+    }
+    .offer-card .offer-footer .offer-valid i {
+        margin-right: 4px;
+    }
+    .offer-card .btn-offer-shop {
+        padding: 6px 16px;
+        border-radius: 6px;
+        background: #0d6efd;
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+    .offer-card .btn-offer-shop:hover {
+        background: #0b5ed7;
+        color: white;
+    }
+
+    /* ============================================ */
+    /* FEATURED OFFER WITH BACKGROUND IMAGE        */
+    /* ============================================ */
+    .featured-offer-card {
+        border-radius: 12px;
+        overflow: hidden;
+        padding: 30px 35px;
+        min-height: 220px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        color: white;
+        background-size: cover;
+        background-position: center;
+    }
+    .featured-offer-card .featured-offer-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 1;
+    }
+    .featured-offer-card .featured-offer-content {
+        position: relative;
+        z-index: 2;
+        max-width: 70%;
+    }
+    .featured-offer-card .featured-offer-badge {
+        display: inline-block;
+        background: rgba(255,255,255,0.2);
+        padding: 4px 16px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    .featured-offer-card .featured-offer-title {
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+    .featured-offer-card .featured-offer-desc {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 12px;
+    }
+    .featured-offer-card .featured-offer-meta {
+        display: flex;
+        gap: 15px;
+        font-size: 13px;
+        opacity: 0.8;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+    .featured-offer-card .featured-offer-meta i {
+        margin-right: 4px;
+    }
+    .featured-offer-card .btn-featured-shop {
+        display: inline-block;
+        padding: 10px 28px;
+        border-radius: 8px;
+        background: white;
+        color: #1a1a2e;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+    .featured-offer-card .btn-featured-shop:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
     /* ============================================ */
     /* DEALS OF THE DAY                            */
     /* ============================================ */
@@ -422,28 +815,6 @@
         font-size: 10px;
         font-weight: 600;
         z-index: 2;
-    }
-    @media (max-width: 768px) {
-        .deals-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
-        .deal-card .deal-image { height: 150px; }
-        .deal-card .deal-price .current { font-size: 20px; }
-        .deal-card .deal-badge .deal-discount { font-size: 20px; }
-        .deal-card .deal-badge { padding: 8px 12px; min-width: 55px; }
-    }
-    @media (max-width: 480px) {
-        .deals-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .deal-card .deal-image { height: 120px; }
-        .deal-card .deal-body { padding: 12px; }
-        .deal-card .deal-name { font-size: 12px; }
-        .deal-card .deal-price .current { font-size: 16px; }
-        .deal-card .deal-price .original { font-size: 12px; }
-        .deal-card .deal-badge { top: 8px; left: 8px; padding: 4px 8px; min-width: 45px; }
-        .deal-card .deal-badge .deal-discount { font-size: 16px; }
-        .deal-card .deal-badge .deal-label { font-size: 8px; }
-        .deal-card .deal-btn { font-size: 12px; padding: 8px; }
-        .deal-card .deal-progress .deal-stock-text { font-size: 10px; }
-        .deal-card .deal-rating { font-size: 11px; }
-        .deal-card .deal-offer-name { font-size: 9px; }
     }
     
     /* ============================================ */
@@ -661,18 +1032,6 @@
         background: #0d6efd;
         border-radius: 3px;
     }
-    @media (max-width: 768px) {
-        .product-grid.scrollable .product-card { min-width: 170px; gap: 15px; }
-    }
-    @media (max-width: 480px) {
-        .product-grid.scrollable .product-card { min-width: 150px; gap: 10px; }
-        .product-card .product-image { height: 140px; }
-        .product-card .product-body { padding: 10px 12px; }
-        .product-card .product-body .product-name { font-size: 12px; }
-        .product-card .product-body .product-price .current { font-size: 15px; }
-        .product-card .product-actions { padding: 8px 12px 12px 12px; }
-        .product-card .product-actions .btn-view { font-size: 11px; padding: 6px; }
-    }
     
     /* ============================================ */
     /* CATEGORY GRID                               */
@@ -726,17 +1085,6 @@
     }
     .category-card:hover .category-image {
         border-color: #0d6efd;
-    }
-    @media (max-width: 768px) {
-        .category-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .category-card { padding: 18px 10px; }
-        .category-card .category-image { width: 60px; height: 60px; }
-    }
-    @media (max-width: 480px) {
-        .category-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .category-card { padding: 15px 10px; }
-        .category-card .category-image { width: 50px; height: 50px; }
-        .category-card .category-name { font-size: 13px; }
     }
     
     /* ============================================ */
@@ -792,15 +1140,6 @@
     .subcategory-card:hover .subcategory-image {
         border-color: #0d6efd;
     }
-    @media (max-width: 768px) {
-        .subcategory-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    }
-    @media (max-width: 480px) {
-        .subcategory-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-        .subcategory-card { padding: 12px 8px; }
-        .subcategory-card .subcategory-name { font-size: 12px; }
-        .subcategory-card .subcategory-image { width: 45px; height: 45px; }
-    }
     
     /* ============================================ */
     /* EMPTY STATE                                 */
@@ -828,20 +1167,77 @@
     }
     
     /* ============================================ */
-    /* RESPONSIVE HELPERS                         */
+    /* RESPONSIVE STYLES                           */
     /* ============================================ */
     @media (max-width: 768px) {
         .container { padding-left: 12px; padding-right: 12px; }
         .mb-5 { margin-bottom: 30px !important; }
+        .deals-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
+        .deal-card .deal-image { height: 150px; }
+        .deal-card .deal-price .current { font-size: 20px; }
+        .deal-card .deal-badge .deal-discount { font-size: 20px; }
+        .deal-card .deal-badge { padding: 8px 12px; min-width: 55px; }
+        .coupon-card .coupon-image-wrapper { height: 120px; }
+        .offer-card .offer-image-wrapper { height: 140px; }
+        .coupon-card .coupon-discount-badge .discount-value { font-size: 16px; }
+        .coupon-card .coupon-discount-badge { padding: 5px 10px; min-width: 55px; }
+        .featured-offer-card { padding: 20px; min-height: 180px; }
+        .featured-offer-card .featured-offer-title { font-size: 20px; }
+        .featured-offer-card .featured-offer-content { max-width: 100%; }
+        .category-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .category-card { padding: 18px 10px; }
+        .category-card .category-image { width: 60px; height: 60px; }
+        .product-grid.scrollable .product-card { min-width: 170px; }
+        .subcategory-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
     }
+    
     @media (max-width: 480px) {
         .mb-5 { margin-bottom: 25px !important; }
+        .deals-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .deal-card .deal-image { height: 120px; }
+        .deal-card .deal-body { padding: 12px; }
+        .deal-card .deal-name { font-size: 12px; }
+        .deal-card .deal-price .current { font-size: 16px; }
+        .deal-card .deal-price .original { font-size: 12px; }
+        .deal-card .deal-badge { top: 8px; left: 8px; padding: 4px 8px; min-width: 45px; }
+        .deal-card .deal-badge .deal-discount { font-size: 16px; }
+        .deal-card .deal-badge .deal-label { font-size: 8px; }
+        .deal-card .deal-btn { font-size: 12px; padding: 8px; }
+        .deal-card .deal-progress .deal-stock-text { font-size: 10px; }
+        .deal-card .deal-rating { font-size: 11px; }
+        .deal-card .deal-offer-name { font-size: 9px; }
+        .coupon-card .coupon-image-wrapper { height: 100px; }
+        .offer-card .offer-image-wrapper { height: 110px; }
+        .coupon-card .coupon-discount-badge .discount-value { font-size: 14px; }
+        .coupon-card .coupon-expiry-badge { font-size: 9px; padding: 2px 8px; }
+        .coupon-card .coupon-code { font-size: 12px; padding: 2px 8px; }
+        .offer-card .offer-discount-badge { font-size: 11px; padding: 4px 10px; }
+        .offer-card .offer-name { font-size: 13px; }
+        .featured-offer-card { padding: 15px; min-height: 150px; }
+        .featured-offer-card .featured-offer-title { font-size: 16px; }
+        .featured-offer-card .featured-offer-desc { font-size: 12px; }
+        .featured-offer-card .btn-featured-shop { padding: 8px 20px; font-size: 13px; }
+        .featured-offer-card .featured-offer-meta { font-size: 11px; gap: 10px; }
+        .product-grid.scrollable .product-card { min-width: 150px; }
+        .product-card .product-image { height: 140px; }
+        .product-card .product-body { padding: 10px 12px; }
+        .product-card .product-body .product-name { font-size: 12px; }
+        .product-card .product-body .product-price .current { font-size: 15px; }
+        .product-card .product-actions { padding: 8px 12px 12px 12px; }
+        .product-card .product-actions .btn-view { font-size: 11px; padding: 6px; }
+        .category-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .category-card { padding: 15px 10px; }
+        .category-card .category-image { width: 50px; height: 50px; }
+        .category-card .category-name { font-size: 13px; }
+        .subcategory-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .subcategory-card { padding: 12px 8px; }
+        .subcategory-card .subcategory-name { font-size: 12px; }
+        .subcategory-card .subcategory-image { width: 45px; height: 45px; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-
 <div class="home-container">
     <div class="container py-4">
         
@@ -864,7 +1260,32 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- DEALS OF THE DAY - Highest Discounts        -->
+        <!-- BANNER SECTION                              -->
+        <!-- ============================================ -->
+        {% if banners %}
+        <div class="banner-section mb-5">
+            <div class="row">
+                {% for banner in banners %}
+                <div class="col-12 mb-3">
+                    <div class="banner-card">
+                        <img src="{{ banner.image.url }}" alt="{{ banner.title }}" loading="lazy">
+                        <div class="banner-overlay">
+                            <div class="banner-content">
+                                <h2>{{ banner.title }}</h2>
+                                {% if banner.short_description %}
+                                    <p>{{ banner.short_description }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ============================================ -->
+        <!-- DEALS OF THE DAY                            -->
         <!-- ============================================ -->
         <div class="mb-5">
             <div class="section-header">
@@ -890,11 +1311,7 @@
                                     {% endif %}
                                 </a>
                                 
-                                <!-- ============================================ -->
-                                <!-- DEAL BADGE                                 -->
-                                <!-- ============================================ -->
                                 {% if product.offer_name and product.offer_name != "Product Discount" %}
-                                    <!-- Offer Applied -->
                                     <div class="deal-badge" style="background:linear-gradient(135deg, #ff6b6b, #ee5a24);">
                                         <span class="deal-discount">
                                             {% if product.offer_discount_amount %}
@@ -906,7 +1323,6 @@
                                         <span class="deal-label">OFFER</span>
                                     </div>
                                 {% elif product.discount_percentage > 0 %}
-                                    <!-- Product Discount Only -->
                                     <div class="deal-badge">
                                         <span class="deal-discount">{{ product.discount_percentage|floatformat:0 }}%</span>
                                         <span class="deal-label">OFF</span>
@@ -937,28 +1353,21 @@
                                     <span class="count">({{ product.total_reviews }})</span>
                                 </div>
                                 
-                                <!-- ============================================ -->
-                                <!-- DEAL PRICE WITH OFFER SUPPORT               -->
-                                <!-- ============================================ -->
                                 <div class="deal-price">
                                     {% if product.offer_name and product.offer_name != "Product Discount" %}
-                                        <!-- Offer Applied -->
                                         <span class="current">₹{{ product.offer_price|floatformat:2 }}</span>
                                         <span class="original">₹{{ product.price|floatformat:2 }}</span>
                                         <span class="offer-tag-mini">
                                             <i class="fas fa-gift"></i> Offer
                                         </span>
                                     {% elif product.discount_percentage > 0 %}
-                                        <!-- Product Discount Only -->
                                         <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
                                         <span class="original">₹{{ product.price|floatformat:2 }}</span>
                                     {% else %}
-                                        <!-- No Discount -->
                                         <span class="current">₹{{ product.price|floatformat:2 }}</span>
                                     {% endif %}
                                 </div>
                                 
-                                <!-- Offer Name -->
                                 {% if product.offer_name and product.offer_name != "Product Discount" %}
                                     <div class="deal-offer-name">
                                         <i class="fas fa-tag"></i> {{ product.offer_name }}
@@ -986,6 +1395,166 @@
                 </div>
             {% endif %}
         </div>
+
+        <!-- ============================================ -->
+        <!-- COUPONS SECTION                             -->
+        <!-- ============================================ -->
+        {% if coupons %}
+        <div class="coupons-section mb-5">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span class="icon-wrapper" style="background:linear-gradient(135deg,#fff3cd,#ffe69b);color:#ffc107;">
+                        <i class="fas fa-ticket-alt"></i>
+                    </span>
+                    Exclusive Coupons
+                </h3>
+                <a href="{% url 'Ecom:shop' %}" class="view-all">View All →</a>
+            </div>
+            
+            <div class="row">
+                {% for coupon in coupons %}
+                <div class="col-md-4 col-lg-3 col-6 mb-3">
+                    <div class="coupon-card">
+                        <div class="coupon-image-wrapper">
+                            {% if coupon.image %}
+                                <img src="{{ coupon.image.url }}" alt="{{ coupon.code }}" class="coupon-image">
+                            {% else %}
+                                <div class="coupon-image-placeholder" style="background: linear-gradient(135deg, #ffc107, #ffb300);">
+                                    <i class="fas fa-ticket-alt fa-3x" style="color: rgba(255,255,255,0.5);"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="coupon-discount-badge">
+                                {% if coupon.discount_type == 'percentage' %}
+                                    <span class="discount-value">{{ coupon.discount_value|floatformat:0 }}%</span>
+                                    <span class="discount-label">OFF</span>
+                                {% else %}
+                                    <span class="discount-value">₹{{ coupon.discount_value|floatformat:0 }}</span>
+                                    <span class="discount-label">OFF</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="coupon-expiry-badge">
+                                <i class="far fa-clock"></i> {{ coupon.valid_to|date:"d M Y" }}
+                            </div>
+                        </div>
+                        
+                        <div class="coupon-body">
+                            <div class="coupon-code-wrapper">
+                                <span class="coupon-code">{{ coupon.code }}</span>
+                                <button class="btn-copy-coupon" onclick="copyCoupon('{{ coupon.code }}')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <p class="coupon-desc">{{ coupon.description|default:"Get discount on your purchase"|truncatechars:35 }}</p>
+                            <div class="coupon-footer">
+                                <span class="coupon-min-order">
+                                    <i class="fas fa-shopping-bag"></i> Min. ₹{{ coupon.min_order_amount }}
+                                </span>
+                                <span class="coupon-used">{{ coupon.used_count }} used</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ============================================ -->
+        <!-- OFFERS SECTION                              -->
+        <!-- ============================================ -->
+        {% if offers %}
+        <div class="offers-section mb-5">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span class="icon-wrapper" style="background:linear-gradient(135deg,#fff5f5,#ffebee);color:#ff6b6b;">
+                        <i class="fas fa-gift"></i>
+                    </span>
+                    Special Offers
+                </h3>
+                <a href="{% url 'Ecom:shop' %}" class="view-all">View All →</a>
+            </div>
+            
+            <div class="row">
+                {% for offer in offers %}
+                <div class="col-md-4 col-6 mb-3">
+                    <div class="offer-card">
+                        <div class="offer-image-wrapper">
+                            {% if offer.banner_image %}
+                                <img src="{{ offer.banner_image.url }}" alt="{{ offer.name }}" class="offer-image">
+                            {% else %}
+                                <div class="offer-image-placeholder" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);">
+                                    <i class="fas fa-gift fa-3x" style="color: rgba(255,255,255,0.5);"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="offer-discount-badge">
+                                {% if offer.discount_type == 'percentage' %}
+                                    {{ offer.discount_value|floatformat:0 }}% OFF
+                                {% else %}
+                                    ₹{{ offer.discount_value|floatformat:0 }} OFF
+                                {% endif %}
+                            </div>
+                            
+                            <div class="offer-type-badge">
+                                {{ offer.get_offer_type_display }}
+                            </div>
+                        </div>
+                        
+                        <div class="offer-body">
+                            <h5 class="offer-name">{{ offer.name }}</h5>
+                            <p class="offer-desc">{{ offer.description|default:"Limited time offer!"|truncatechars:40 }}</p>
+                            <div class="offer-footer">
+                                <span class="offer-valid">
+                                    <i class="far fa-clock"></i> {{ offer.valid_to|date:"d M Y" }}
+                                </span>
+                                <a href="{% url 'Ecom:shop' %}" class="btn-offer-shop">
+                                    Shop <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ============================================ -->
+        <!-- FEATURED OFFERS (Big Banner)                 -->
+        <!-- ============================================ -->
+        {% if featured_offers %}
+        <div class="featured-offers mb-5">
+            <div class="row">
+                {% for offer in featured_offers %}
+                <div class="col-md-6 mb-3">
+                    <div class="featured-offer-card" {% if offer.banner_image %}style="background-image: url('{{ offer.banner_image.url }}'); background-size: cover; background-position: center;"{% else %}style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);"{% endif %}>
+                        <div class="featured-offer-overlay"></div>
+                        <div class="featured-offer-content">
+                            <div class="featured-offer-badge">
+                                {% if offer.discount_type == 'percentage' %}
+                                    {{ offer.discount_value|floatformat:0 }}% OFF
+                                {% else %}
+                                    ₹{{ offer.discount_value|floatformat:0 }} OFF
+                                {% endif %}
+                            </div>
+                            <h3 class="featured-offer-title">{{ offer.name }}</h3>
+                            <p class="featured-offer-desc">{{ offer.description|default:"Limited time offer! Grab it now."|truncatechars:60 }}</p>
+                            <div class="featured-offer-meta">
+                                <span><i class="far fa-clock"></i> Valid till {{ offer.valid_to|date:"d M Y" }}</span>
+                                <span><i class="fas fa-tag"></i> {{ offer.get_offer_type_display }}</span>
+                            </div>
+                            <a href="{% url 'Ecom:shop' %}" class="btn-featured-shop">
+                                <i class="fas fa-shopping-bag"></i> Shop Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
 
         <!-- ============================================ -->
         <!-- CATEGORIES                                  -->
@@ -1083,7 +1652,6 @@
                                 </a>
                                 <span class="badge-tag best-seller"><i class="fas fa-trophy"></i> Best Seller</span>
                                 
-                                <!-- Offer Badge -->
                                 {% if product.offer_name and product.offer_name != "Product Discount" %}
                                     <span class="badge-tag offer-badge">
                                         <i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:10 }}
@@ -1116,28 +1684,21 @@
                                     <span class="count">({{ product.total_reviews }})</span>
                                 </div>
                                 
-                                <!-- ============================================ -->
-                                <!-- PRODUCT PRICE WITH OFFER SUPPORT            -->
-                                <!-- ============================================ -->
                                 <div class="product-price">
                                     {% if product.offer_name and product.offer_name != "Product Discount" %}
-                                        <!-- Offer Applied -->
                                         <span class="current">₹{{ product.offer_price|floatformat:2 }}</span>
                                         <span class="original">₹{{ product.price|floatformat:2 }}</span>
                                         <span class="offer-tag-mini">
                                             <i class="fas fa-gift"></i> Offer
                                         </span>
                                     {% elif product.discount_percentage > 0 %}
-                                        <!-- Product Discount Only -->
                                         <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
                                         <span class="original">₹{{ product.price|floatformat:2 }}</span>
                                     {% else %}
-                                        <!-- No Discount -->
                                         <span class="current">₹{{ product.price|floatformat:2 }}</span>
                                     {% endif %}
                                 </div>
                                 
-                                <!-- Offer Name -->
                                 {% if product.offer_name and product.offer_name != "Product Discount" %}
                                     <div class="product-offer-name">
                                         <i class="fas fa-tag"></i> {{ product.offer_name }}
@@ -1188,7 +1749,6 @@
                                 </a>
                                 <span class="badge-tag featured"><i class="fas fa-star"></i> Featured</span>
                                 
-                                <!-- Offer Badge -->
                                 {% if product.offer_name and product.offer_name != "Product Discount" %}
                                     <span class="badge-tag offer-badge">
                                         <i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:10 }}
@@ -1221,7 +1781,6 @@
                                     <span class="count">({{ product.total_reviews }})</span>
                                 </div>
                                 
-                                <!-- Price with Offer Support -->
                                 <div class="product-price">
                                     {% if product.offer_name and product.offer_name != "Product Discount" %}
                                         <span class="current">₹{{ product.offer_price|floatformat:2 }}</span>
@@ -1287,7 +1846,6 @@
                                 </a>
                                 <span class="badge-tag new"><i class="fas fa-clock"></i> New</span>
                                 
-                                <!-- Offer Badge -->
                                 {% if product.offer_name and product.offer_name != "Product Discount" %}
                                     <span class="badge-tag offer-badge">
                                         <i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:10 }}
@@ -1320,7 +1878,6 @@
                                     <span class="count">({{ product.total_reviews }})</span>
                                 </div>
                                 
-                                <!-- Price with Offer Support -->
                                 <div class="product-price">
                                     {% if product.offer_name and product.offer_name != "Product Discount" %}
                                         <span class="current">₹{{ product.offer_price|floatformat:2 }}</span>
@@ -1386,7 +1943,6 @@
                                 </a>
                                 <span class="badge-tag top-rated"><i class="fas fa-star"></i> Top Rated</span>
                                 
-                                <!-- Offer Badge -->
                                 {% if product.offer_name and product.offer_name != "Product Discount" %}
                                     <span class="badge-tag offer-badge">
                                         <i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:10 }}
@@ -1419,7 +1975,6 @@
                                     <span class="count">({{ product.total_reviews }})</span>
                                 </div>
                                 
-                                <!-- Price with Offer Support -->
                                 <div class="product-price">
                                     {% if product.offer_name and product.offer_name != "Product Discount" %}
                                         <span class="current">₹{{ product.offer_price|floatformat:2 }}</span>
@@ -1484,7 +2039,6 @@
                                 {% endif %}
                             </a>
                             
-                            <!-- Offer Badge -->
                             {% if product.offer_name and product.offer_name != "Product Discount" %}
                                 <span class="badge-tag offer-badge">
                                     <i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:10 }}
@@ -1517,7 +2071,6 @@
                                 <span class="count">({{ product.total_reviews }})</span>
                             </div>
                             
-                            <!-- Price with Offer Support -->
                             <div class="product-price">
                                 {% if product.offer_name and product.offer_name != "Product Discount" %}
                                     <span class="current">₹{{ product.offer_price|floatformat:2 }}</span>
@@ -1552,10 +2105,65 @@
 
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
+<!-- ============================================ -->
+<!-- JAVASCRIPT                                  -->
+<!-- ============================================ -->
 <script>
+    // Copy coupon code function
+    function copyCoupon(code) {
+        // Create a temporary input element
+        const input = document.createElement('input');
+        input.value = code;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        
+        // Find the button and show feedback
+        const button = event.target.closest('.btn-copy-coupon');
+        if (button) {
+            const originalHtml = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            button.classList.add('copied');
+            
+            setTimeout(() => {
+                button.innerHTML = originalHtml;
+                button.classList.remove('copied');
+            }, 2000);
+        }
+        
+        // Show toast notification
+        showToast(`Coupon "${code}" copied to clipboard!`, 'success');
+    }
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            info: 'fa-info-circle',
+            warning: 'fa-exclamation-triangle'
+        };
+        toast.innerHTML = `
+            <i class="fas ${icons[type] || icons.info}"></i>
+            <span>${message}</span>
+            <span class="toast-close" onclick="this.parentElement.remove()">&times;</span>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 5000);
+    }
+
     // ============================================
     // SMOOTH SCROLL FOR PRODUCT CARDS
     // ============================================
@@ -1608,7 +2216,7 @@
         });
         
         // Add fade-in animation for cards
-        const cards = document.querySelectorAll('.deal-card, .product-card, .category-card, .subcategory-card');
+        const cards = document.querySelectorAll('.deal-card, .product-card, .category-card, .subcategory-card, .coupon-card, .offer-card, .featured-offer-card');
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry, index) => {
                 if (entry.isIntersecting) {

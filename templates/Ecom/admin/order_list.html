@@ -1,4 +1,3 @@
-
 {% load static %}
 
 {% block title %}Orders Management - MyStore Admin{% endblock %}
@@ -135,12 +134,7 @@
                 <div class="value">{{ stats.total }}</div>
             </div>
         </div>
-        <div class="col-md-3 col-6">
-            <div class="stats-card warning">
-                <div class="label">Pending</div>
-                <div class="value">{{ stats.pending }}</div>
-            </div>
-        </div>
+       
         <div class="col-md-3 col-6">
             <div class="stats-card info">
                 <div class="label">Processing</div>
@@ -163,23 +157,27 @@
                 <input type="text" name="search" class="form-control form-control-sm" 
                        placeholder="Search orders..." value="{{ search_query }}">
                 
-                <!-- Status Filter -->
+                <!-- Status Filter - Exclude Pending and Failed -->
                 <select name="status" class="form-select form-select-sm">
                     <option value="">All Status</option>
                     {% for status_code, status_label in status_choices %}
-                        <option value="{{ status_code }}" {% if status_filter == status_code %}selected{% endif %}>
-                            {{ status_label }}
-                        </option>
+                        {% if status_code != 'pending' and status_code != 'failed' %}
+                            <option value="{{ status_code }}" {% if status_filter == status_code %}selected{% endif %}>
+                                {{ status_label }}
+                            </option>
+                        {% endif %}
                     {% endfor %}
                 </select>
                 
-                <!-- Payment Status Filter -->
+                <!-- Payment Status Filter - Exclude Pending -->
                 <select name="payment_status" class="form-select form-select-sm">
                     <option value="">All Payment</option>
                     {% for status_code, status_label in payment_status_choices %}
-                        <option value="{{ status_code }}" {% if payment_filter == status_code %}selected{% endif %}>
-                            {{ status_label }}
-                        </option>
+                        {% if status_code != 'pending' %}
+                            <option value="{{ status_code }}" {% if payment_filter == status_code %}selected{% endif %}>
+                                {{ status_label }}
+                            </option>
+                        {% endif %}
                     {% endfor %}
                 </select>
                 
@@ -273,11 +271,11 @@
                                 <div class="order-actions">
                                     <a href="{% url 'Ecom:admin_order_detail' order.id %}" 
                                        class="btn btn-sm btn-info" title="View Details">
-                                        <i class="fas fa-eye">Detail</i>
+                                        <i class="fas fa-eye"></i> Detail
                                     </a>
                                     <button onclick="updateOrderStatus({{ order.id }})" 
                                             class="btn btn-sm btn-primary" title="Update Status">
-                                        <i class="fas fa-edit">Update Status</i>
+                                        <i class="fas fa-edit"></i> Update
                                     </button>
                                 </div>
                             </td>
@@ -372,7 +370,9 @@
                         <label class="form-label">Status</label>
                         <select name="status" class="form-select" id="modalStatus">
                             {% for status_code, status_label in status_choices %}
-                                <option value="{{ status_code }}">{{ status_label }}</option>
+                                {% if status_code != 'pending' and status_code != 'failed' %}
+                                    <option value="{{ status_code }}">{{ status_label }}</option>
+                                {% endif %}
                             {% endfor %}
                         </select>
                     </div>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Status Update</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #0d6efd;
+        }
+        .header h1 {
+            color: #0d6efd;
+            margin: 0;
+            font-size: 24px;
+        }
+        .header .order-number {
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .status-update {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .status-update .old-status {
+            font-size: 18px;
+            color: #6c757d;
+            text-decoration: line-through;
+        }
+        .status-update .arrow {
+            font-size: 24px;
+            color: #0d6efd;
+            margin: 0 15px;
+        }
+        .status-update .new-status {
+            font-size: 24px;
+            font-weight: 700;
+            color: #28a745;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        .section-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 8px;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        .order-item .item-name {
+            flex: 1;
+        }
+        .order-item .item-qty {
+            margin: 0 15px;
+            color: #6c757d;
+        }
+        .order-item .item-price {
+            font-weight: 600;
+        }
+        .tracking-info {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 12px 15px;
+            margin: 10px 0;
+        }
+        .tracking-info a {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+        .tracking-info a:hover {
+            text-decoration: underline;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 25px;
+            background-color: #0d6efd;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .btn:hover {
+            background-color: #0b5ed7;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px 0 0 0;
+            border-top: 1px solid #e9ecef;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-badge.processing { background: #cce5ff; color: #004085; }
+        .status-badge.shipped { background: #d1ecf1; color: #0c5460; }
+        .status-badge.delivered { background: #d4edda; color: #155724; }
+        .status-badge.cancelled { background: #e2e3e5; color: #383d41; }
+        .status-badge.pending { background: #fff3cd; color: #856404; }
+        
+        /* Responsive Styles */
+        @media (max-width: 480px) {
+            .container { padding: 15px; }
+            .header h1 { font-size: 20px; }
+            .status-update .old-status { font-size: 16px; }
+            .status-update .new-status { font-size: 20px; }
+            .order-item { flex-wrap: wrap; }
+            .order-item .item-price { width: 100%; text-align: left; margin-top: 3px; }
+            .btn { display: block; }
+        }
+        @media (max-width: 768px) {
+            .container { padding: 20px; }
+            .status-update .old-status { font-size: 17px; }
+            .status-update .new-status { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📦 Order Status Update</h1>
+            <div class="order-number">Order #{{ order.order_number }}</div>
+        </div>
+
+        <!-- Status Update -->
+        <div class="status-update">
+            <span class="old-status">{{ old_status }}</span>
+            <span class="arrow">→</span>
+            <span class="new-status">{{ new_status }}</span>
+        </div>
+
+        <!-- Order Items -->
+        <div class="section">
+            <div class="section-title">🛍️ Order Items</div>
+            {% for item in order.items.all %}
+            <div class="order-item">
+                <span class="item-name">{{ item.product_name }}</span>
+                <span class="item-qty">×{{ item.quantity }}</span>
+                <span class="item-price">₹{{ item.total|floatformat:2 }}</span>
+            </div>
+            {% endfor %}
+            <div style="margin-top:10px;border-top:2px solid #e9ecef;padding-top:10px;">
+                <div style="display:flex;justify-content:space-between;font-weight:700;font-size:16px;">
+                    <span>Total</span>
+                    <span>₹{{ total_amount|floatformat:2 }}</span>
+                </div>
+                {% if order.coupon_discount > 0 %}
+                <div style="display:flex;justify-content:space-between;font-size:14px;color:#28a745;margin-top:5px;">
+                    <span>Coupon Discount</span>
+                    <span>-₹{{ order.coupon_discount|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tracking Information -->
+        {% if tracking_number or tracking_url or delivery_date %}
+        <div class="tracking-info">
+            <strong><i class="fas fa-truck"></i> Tracking Information</strong>
+            {% if tracking_number %}
+                <p><strong>Tracking Number:</strong> {{ tracking_number }}</p>
+            {% endif %}
+            {% if tracking_url %}
+                <p><strong>Track Order:</strong> <a href="{{ tracking_url }}" target="_blank">{{ tracking_url }}</a></p>
+            {% endif %}
+            {% if delivery_date %}
+                <p><strong>Expected Delivery:</strong> {{ delivery_date }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Order Details -->
+        <div class="section">
+            <div class="section-title">📋 Order Details</div>
+            <p><strong>Order Date:</strong> {{ order_date }}</p>
+            <p><strong>Payment Status:</strong> {{ order.get_payment_status_display }}</p>
+            <p><strong>Order Status:</strong> 
+                <span class="status-badge {{ order.status }}">{{ order.get_status_display }}</span>
+            </p>
+            {% if order.notes %}
+            <p><strong>Notes:</strong> {{ order.notes }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Address -->
+        <div class="section">
+            <div class="section-title">📍 Shipping Address</div>
+            <p style="white-space:pre-line;margin:0;">{{ order.shipping_address|linebreaksbr }}</p>
+        </div>
+
+        <!-- Action Button -->
+        <div style="text-align:center;margin:20px 0;">
+            <a href="{{ order_url }}" class="btn">View Order Details</a>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                Thank you for shopping with <strong>{{ site_name }}</strong>!<br>
+                If you have any questions, contact us at <a href="mailto:{{ support_email }}">{{ support_email }}</a>
+            </p>
+            <p>&copy; {{ site_name }}. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
