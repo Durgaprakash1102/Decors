@@ -1,92 +1,1161 @@
-
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
-{% block title %}{{ action }} Banner - MyStore Admin{% endblock %}
+{% block title %}{{ action }} Banner - ShubhDecor{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-image text-primary"></i> {{ action }} Banner</h2>
-        <a href="{% url 'Ecom:banner_list' %}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back
-        </a>
+<style>
+    /* ============================================================
+       CLEAN PROFESSIONAL BANNER FORM
+       ============================================================ */
+
+    .banner-page {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        max-width: 100%;
+        background: #f8f6f4;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        min-height: 100vh;
+    }
+
+    /* ============================================================
+       HERO SECTION - PRIMARY COLOR (KEPT AS IS)
+       ============================================================ */
+    .hero-primary {
+        background: linear-gradient(135deg, #5c121f 0%, #7a1a2b 50%, #5c121f 100%);
+        padding: 32px 40px 28px;
+        position: relative;
+        overflow: hidden;
+        border-bottom: 4px solid #F4B400;
+    }
+
+    .hero-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 50%, rgba(244, 180, 0, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 50%, rgba(244, 180, 0, 0.05) 0%, transparent 50%);
+        animation: heroShimmer 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes heroShimmer {
+        0% { opacity: 0.5; transform: scale(1); }
+        100% { opacity: 1; transform: scale(1.05); }
+    }
+
+    .hero-primary .hero-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-primary .hero-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .hero-primary .hero-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(10px);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: #F4B400;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .hero-primary .hero-icon:hover {
+        transform: scale(1.05) rotate(-5deg);
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .hero-primary .hero-text h1 {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        font-size: 28px;
+        color: #ffffff;
+        margin: 0;
+        letter-spacing: -0.3px;
+    }
+
+    .hero-primary .hero-text h1 span {
+        color: #F4B400;
+    }
+
+    .hero-primary .hero-text p {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 13px;
+        margin: 2px 0 0;
+        font-weight: 400;
+    }
+
+    .hero-primary .hero-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .hero-primary .btn {
+        padding: 10px 24px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .btn-back-hero {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-back-hero:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ============================================================
+       GOLD ACCENT STRIP (KEPT AS IS)
+       ============================================================ */
+    .gold-strip {
+        background: #F4B400;
+        padding: 6px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #5c121f;
+        letter-spacing: 0.3px;
+    }
+
+    .gold-strip i {
+        margin-right: 4px;
+    }
+
+    .gold-strip .strip-right {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .gold-strip .strip-right span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* ============================================================
+       FORM CONTAINER - CLEAN & PROFESSIONAL
+       ============================================================ */
+    .form-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 28px 32px 40px;
+    }
+
+    /* ===== FORM CARD ===== */
+    .form-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e8e3de;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .form-card .card-border {
+        height: 3px;
+        background: #5c121f;
+    }
+
+    /* ===== FORM BODY - PERFECT ALIGNMENT ===== */
+    .form-body {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 32px;
+        padding: 32px 36px;
+    }
+
+    /* ===== LEFT COLUMN ===== */
+    .form-left {
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .form-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1a1a2e;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .form-group label .required {
+        color: #ef4444;
+        font-size: 15px;
+    }
+
+    .form-group label .badge {
+        background: #f3f4f6;
+        padding: 1px 10px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-left: 4px;
+    }
+
+    .form-group label .badge-primary {
+        background: rgba(92, 18, 31, 0.08);
+        color: #5c121f;
+    }
+
+    /* ===== FORM INPUTS ===== */
+    .form-control {
+        width: 100%;
+        padding: 11px 16px;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.2s ease;
+        background: #fafafa;
+        color: #1a1a2e;
+        outline: none;
+    }
+
+    .form-control:focus {
+        border-color: #5c121f;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(92, 18, 31, 0.06);
+    }
+
+    .form-control::placeholder {
+        color: #9ca3af;
+    }
+
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    .form-control.is-invalid {
+        border-color: #ef4444;
+    }
+
+    .form-control.is-invalid:focus {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.06);
+    }
+
+    .help-text {
+        font-size: 12px;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .help-text i {
+        color: #9ca3af;
+        font-size: 12px;
+    }
+
+    .error-text {
+        color: #ef4444;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 2px;
+    }
+
+    .error-text i {
+        font-size: 12px;
+    }
+
+    /* ===== IMAGE UPLOAD ===== */
+    .upload-zone {
+        border: 2px dashed #e5e7eb;
+        border-radius: 8px;
+        padding: 30px 20px;
+        text-align: center;
+        transition: all 0.2s ease;
+        background: #fafafa;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .upload-zone:hover {
+        border-color: #5c121f;
+        background: #fcf9f7;
+    }
+
+    .upload-zone .upload-icon {
+        font-size: 32px;
+        color: #9ca3af;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .upload-zone .upload-text {
+        font-size: 14px;
+        color: #374151;
+    }
+
+    .upload-zone .upload-text strong {
+        color: #5c121f;
+    }
+
+    .upload-zone .upload-sub {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 4px;
+    }
+
+    .upload-zone input[type="file"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    /* Image Preview */
+    .image-preview {
+        margin-top: 12px;
+        padding: 12px 16px;
+        background: #f9fafb;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .image-preview img {
+        width: 80px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid #e5e7eb;
+        flex-shrink: 0;
+    }
+
+    .image-preview .preview-info {
+        flex: 1;
+    }
+
+    .image-preview .preview-info .name {
+        font-size: 13px;
+        font-weight: 500;
+        color: #1a1a2e;
+    }
+
+    .image-preview .preview-info .size {
+        font-size: 11px;
+        color: #6b7280;
+    }
+
+    .image-preview .preview-badge {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 12px;
+        border-radius: 12px;
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    /* ============================================================
+       RIGHT COLUMN - PERFECT ALIGNMENT
+       ============================================================ */
+    .form-right {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .sidebar-card {
+        background: #f9fafb;
+        border-radius: 8px;
+        padding: 18px 20px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .sidebar-card .card-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .sidebar-card .card-title i {
+        color: #5c121f;
+        font-size: 13px;
+    }
+
+    /* ===== TOGGLE SWITCH ===== */
+    .toggle-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 4px 0;
+    }
+
+    .toggle-wrap input[type="checkbox"] {
+        display: none;
+    }
+
+    .toggle-wrap .toggle-track {
+        width: 44px;
+        height: 24px;
+        background: #d1d5db;
+        border-radius: 12px;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .toggle-wrap .toggle-track::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 20px;
+        height: 20px;
+        background: #ffffff;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .toggle-wrap input:checked + .toggle-track {
+        background: #5c121f;
+    }
+
+    .toggle-wrap input:checked + .toggle-track::after {
+        transform: translateX(20px);
+    }
+
+    .toggle-wrap .toggle-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1a1a2e;
+        cursor: pointer;
+    }
+
+    .toggle-wrap .toggle-status {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 12px;
+        border-radius: 12px;
+        background: #fef2f2;
+        color: #ef4444;
+        transition: all 0.2s ease;
+        margin-left: auto;
+    }
+
+    .toggle-wrap input:checked ~ .toggle-status {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .toggle-help {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .toggle-help i {
+        color: #f59e0b;
+    }
+
+    /* ===== META INFO ===== */
+    .meta-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .meta-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        font-size: 13px;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .meta-row:last-child {
+        border-bottom: none;
+    }
+
+    .meta-row .label {
+        color: #6b7280;
+    }
+
+    .meta-row .value {
+        color: #1a1a2e;
+        font-weight: 500;
+    }
+
+    .meta-row .value .dot {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        margin-right: 4px;
+    }
+
+    .meta-row .value .dot.active {
+        background: #059669;
+    }
+
+    .meta-row .value .dot.inactive {
+        background: #ef4444;
+    }
+
+    /* ===== TIPS ===== */
+    .tips-box {
+        background: #fffbeb;
+        border-color: #fde68a;
+    }
+
+    .tips-box .card-title i {
+        color: #d97706;
+    }
+
+    .tips-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .tips-list li {
+        padding: 4px 0;
+        font-size: 13px;
+        color: #374151;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .tips-list li i {
+        color: #d97706;
+        font-size: 13px;
+        margin-top: 2px;
+    }
+
+    /* ============================================================
+       FORM ACTIONS
+       ============================================================ */
+    .form-actions {
+        padding: 16px 36px 24px;
+        border-top: 1px solid #e5e7eb;
+        background: #fafafa;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .form-actions .btn {
+        padding: 10px 28px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'Inter', sans-serif;
+        text-decoration: none;
+    }
+
+    .btn-submit {
+        background: #5c121f;
+        color: #ffffff;
+    }
+
+    .btn-submit:hover {
+        background: #4a0e18;
+        box-shadow: 0 4px 12px rgba(92, 18, 31, 0.2);
+    }
+
+    .btn-cancel {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .btn-cancel:hover {
+        background: #e5e7eb;
+    }
+
+    .btn-delete {
+        background: #fef2f2;
+        color: #ef4444;
+    }
+
+    .btn-delete:hover {
+        background: #fecaca;
+    }
+
+    .btn-spacer {
+        flex: 1;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+
+    @media (max-width: 1024px) {
+        .form-body {
+            grid-template-columns: 1.5fr 1fr;
+            gap: 24px;
+            padding: 28px 28px;
+        }
+        .form-actions {
+            padding: 14px 28px 20px;
+        }
+    }
+
+    @media (max-width: 850px) {
+        .form-body {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            padding: 24px 24px;
+        }
+        .form-right {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .form-actions {
+            padding: 14px 24px 20px;
+        }
+        .btn-spacer {
+            display: none;
+        }
+        .gold-strip {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 4px 24px;
+        }
+        .gold-strip .strip-right {
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .hero-primary {
+            padding: 20px 18px 16px;
+        }
+        .hero-primary .hero-content {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+        }
+        .hero-primary .hero-left {
+            gap: 14px;
+        }
+        .hero-primary .hero-icon {
+            width: 48px;
+            height: 48px;
+            font-size: 22px;
+        }
+        .hero-primary .hero-text h1 {
+            font-size: 20px;
+        }
+        .hero-primary .hero-text p {
+            font-size: 12px;
+        }
+        .hero-primary .hero-actions .btn {
+            flex: 1;
+            justify-content: center;
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        .gold-strip {
+            padding: 4px 18px;
+            font-size: 11px;
+        }
+
+        .form-container {
+            padding: 16px 14px 24px;
+        }
+        .form-body {
+            padding: 16px 14px;
+            gap: 16px;
+        }
+        .form-right {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .form-actions {
+            padding: 12px 14px 16px;
+            flex-direction: column;
+        }
+        .form-actions .btn {
+            width: 100%;
+            justify-content: center;
+            padding: 10px 20px;
+            font-size: 13px;
+        }
+
+        .form-control {
+            padding: 9px 14px;
+            font-size: 13px;
+        }
+        textarea.form-control {
+            min-height: 80px;
+        }
+
+        .upload-zone {
+            padding: 24px 16px;
+        }
+        .upload-zone .upload-icon {
+            font-size: 28px;
+        }
+
+        .image-preview {
+            flex-direction: column;
+            text-align: center;
+            padding: 12px;
+        }
+        .image-preview img {
+            width: 100%;
+            max-width: 160px;
+            height: auto;
+        }
+
+        .sidebar-card {
+            padding: 14px 16px;
+        }
+
+        .toggle-wrap .toggle-track {
+            width: 38px;
+            height: 22px;
+        }
+        .toggle-wrap .toggle-track::after {
+            width: 18px;
+            height: 18px;
+        }
+        .toggle-wrap input:checked + .toggle-track::after {
+            transform: translateX(16px);
+        }
+        .toggle-wrap .toggle-label {
+            font-size: 13px;
+        }
+
+        .meta-row {
+            font-size: 12px;
+            padding: 4px 0;
+        }
+
+        .tips-list li {
+            font-size: 12px;
+            padding: 3px 0;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .form-container {
+            padding: 10px 8px 16px;
+        }
+        .form-body {
+            padding: 12px 10px;
+        }
+        .form-actions {
+            padding: 10px 10px 14px;
+        }
+        .form-actions .btn {
+            font-size: 12px;
+            padding: 8px 16px;
+        }
+        .hero-primary {
+            padding: 16px 12px 12px;
+        }
+        .hero-primary .hero-text h1 {
+            font-size: 18px;
+        }
+        .gold-strip {
+            padding: 3px 12px;
+            font-size: 10px;
+        }
+        .sidebar-card {
+            padding: 12px 14px;
+        }
+    }
+
+    /* Touch Devices */
+    @media (hover: none) and (pointer: coarse) {
+        .btn, .form-control, .upload-zone {
+            min-height: 44px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-submit:hover, .btn-cancel:hover, .btn-back-hero:hover {
+            transform: none;
+        }
+    }
+</style>
+
+<!-- ============================================================
+PAGE WRAPPER
+============================================================ -->
+<div class="banner-page">
+
+    <!-- ===== HERO - PRIMARY COLOR (UNCHANGED) ===== -->
+    <div class="hero-primary">
+        <div class="hero-content">
+            <div class="hero-left">
+                <div class="hero-icon">
+                    <i class="fas fa-image"></i>
+                </div>
+                <div class="hero-text">
+                    <h1>{{ action }} <span>Banner</span></h1>
+                    <p>
+                        {% if banner %}
+                            Update your existing banner
+                        {% else %}
+                            Create a stunning banner for your store
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="hero-actions">
+                <a href="{% url 'Ecom:banner_list' %}" class="btn btn-back-hero">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <form method="POST" enctype="multipart/form-data">
+    <!-- ===== GOLD STRIP (UNCHANGED) ===== -->
+    <div class="gold-strip">
+        <span>
+            <i class="fas fa-star"></i> 
+            {% if banner %}Editing: {{ banner.title }}{% else %}Create New Banner{% endif %}
+        </span>
+        <div class="strip-right">
+            <span><i class="fas fa-check-circle"></i> Recommended: 1920 × 600</span>
+            <span><i class="fas fa-clock"></i> {% now "F d, Y" %}</span>
+        </div>
+    </div>
+
+    <!-- ===== FORM ===== -->
+    <div class="form-container">
+        <div class="form-card">
+            <div class="card-border"></div>
+            <form method="POST" enctype="multipart/form-data" id="bannerForm">
                 {% csrf_token %}
-                
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="mb-3">
-                            <label class="form-label">Title <span class="text-danger">*</span></label>
+
+                <!-- ===== FORM BODY ===== -->
+                <div class="form-body">
+
+                    <!-- ===== LEFT COLUMN ===== -->
+                    <div class="form-left">
+
+                        <!-- Title -->
+                        <div class="form-group">
+                            <label for="{{ form.title.id_for_label }}">
+                                Title <span class="required">*</span>
+                                <span class="badge badge-primary">Required</span>
+                            </label>
                             {{ form.title }}
                             {% if form.title.errors %}
-                                <div class="text-danger small">{{ form.title.errors }}</div>
+                                <div class="error-text">
+                                    <i class="fas fa-exclamation-circle"></i> {{ form.title.errors.0 }}
+                                </div>
                             {% endif %}
+                            <span class="help-text">
+                                <i class="fas fa-info-circle"></i> A clear, descriptive title for your banner
+                            </span>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Short Description</label>
+
+                        <!-- Description -->
+                        <div class="form-group">
+                            <label for="{{ form.short_description.id_for_label }}">
+                                Description
+                                <span class="badge">Optional</span>
+                            </label>
                             {{ form.short_description }}
                             {% if form.short_description.errors %}
-                                <div class="text-danger small">{{ form.short_description.errors }}</div>
+                                <div class="error-text">
+                                    <i class="fas fa-exclamation-circle"></i> {{ form.short_description.errors.0 }}
+                                </div>
                             {% endif %}
+                            <span class="help-text">
+                                <i class="fas fa-info-circle"></i> Brief description that appears on the banner
+                            </span>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Banner Image <span class="text-danger">*</span></label>
-                            {{ form.image }}
+
+                        <!-- Image -->
+                        <div class="form-group">
+                            <label for="{{ form.image.id_for_label }}">
+                                Banner Image <span class="required">*</span>
+                                <span class="badge badge-primary">Required</span>
+                            </label>
+
+                            <div class="upload-zone" id="uploadZone">
+                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                <div class="upload-text">
+                                    <strong>Click to upload</strong> or drag and drop
+                                </div>
+                                <div class="upload-sub">PNG, JPG, WEBP · Max 5MB</div>
+                                {{ form.image }}
+                            </div>
+
                             {% if form.image.errors %}
-                                <div class="text-danger small">{{ form.image.errors }}</div>
+                                <div class="error-text">
+                                    <i class="fas fa-exclamation-circle"></i> {{ form.image.errors.0 }}
+                                </div>
                             {% endif %}
+
                             {% if banner and banner.image %}
-                                <div class="mt-2">
-                                    <img src="{{ banner.image.url }}" width="200" height="100" style="object-fit:cover; border-radius:4px;">
-                                    <br><small class="text-muted">Current image</small>
+                            <div class="image-preview" id="imagePreview">
+                                <img src="{{ banner.image.url }}" alt="{{ banner.title }}">
+                                <div class="preview-info">
+                                    <div class="name">{{ banner.image.name|cut:"banners/" }}</div>
+                                    <div class="size">Current image</div>
+                                </div>
+                                <span class="preview-badge">
+                                    <i class="fas fa-check-circle"></i> Uploaded
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            <span class="help-text">
+                                <i class="fas fa-info-circle"></i> Recommended: <strong>1920 × 600</strong> pixels
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <!-- ===== RIGHT COLUMN ===== -->
+                    <div class="form-right">
+
+                        <!-- Status Box -->
+                        <div class="sidebar-card">
+                            <div class="card-title">
+                                <i class="fas fa-toggle-on"></i> Status
+                            </div>
+
+                            <div class="toggle-wrap">
+                                {{ form.is_active }}
+                                <label class="toggle-track" for="{{ form.is_active.id_for_label }}"></label>
+                                <span class="toggle-label">Active</span>
+                                <span class="toggle-status" id="statusLabel">
+                                    {% if form.is_active.value %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </div>
+
+                            {% if form.is_active.errors %}
+                                <div class="error-text" style="margin-top:6px;">
+                                    <i class="fas fa-exclamation-circle"></i> {{ form.is_active.errors.0 }}
                                 </div>
                             {% endif %}
-                            <small class="text-muted d-block">Recommended size: 1920x600 pixels</small>
+
+                            <div class="toggle-help">
+                                <i class="fas fa-lightbulb"></i> Toggle to show/hide on store
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <div class="form-check form-switch">
-                                        {{ form.is_active }}
-                                        <label class="form-check-label" for="id_is_active">
-                                            <strong>Active</strong>
-                                        </label>
-                                    </div>
-                                    <small class="text-muted">Uncheck to hide this banner</small>
-                                    {% if form.is_active.errors %}
-                                        <div class="text-danger small">{{ form.is_active.errors }}</div>
-                                    {% endif %}
+
+                        <!-- Meta Info -->
+                        {% if banner %}
+                        <div class="sidebar-card">
+                            <div class="card-title">
+                                <i class="fas fa-info-circle"></i> Details
+                            </div>
+
+                            <div class="meta-list">
+                                <div class="meta-row">
+                                    <span class="label">Created</span>
+                                    <span class="value">{{ banner.created_at|date:"M d, Y" }}</span>
                                 </div>
-                                
-                                {% if banner %}
-                                    <hr>
-                                    <div class="small">
-                                        <p><strong>Created:</strong> {{ banner.created_at|date:"M d, Y H:i" }}</p>
-                                        <p><strong>Last Updated:</strong> {{ banner.updated_at|date:"M d, Y H:i" }}</p>
-                                    </div>
+                                <div class="meta-row">
+                                    <span class="label">Updated</span>
+                                    <span class="value">{{ banner.updated_at|date:"M d, Y H:i" }}</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span class="label">Status</span>
+                                    <span class="value">
+                                        <span class="dot {% if banner.is_active %}active{% else %}inactive{% endif %}"></span>
+                                        {% if banner.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
+                                </div>
+                                {% if banner.position %}
+                                <div class="meta-row">
+                                    <span class="label">Position</span>
+                                    <span class="value">{{ banner.position }}</span>
+                                </div>
                                 {% endif %}
                             </div>
                         </div>
+                        {% endif %}
+
+                        <!-- Tips -->
+                        <div class="sidebar-card tips-box">
+                            <div class="card-title">
+                                <i class="fas fa-lightbulb"></i> Quick Tips
+                            </div>
+                            <ul class="tips-list">
+                                <li>
+                                    <i class="fas fa-check-circle"></i>
+                                    Use high-quality images for best results
+                                </li>
+                                <li>
+                                    <i class="fas fa-check-circle"></i>
+                                    Keep titles short and action-oriented
+                                </li>
+                                <li>
+                                    <i class="fas fa-check-circle"></i>
+                                    Add a clear call-to-action
+                                </li>
+                            </ul>
+                        </div>
+
                     </div>
                 </div>
 
-                <div class="mt-3">
-                    <button type="submit" class="btn btn-primary">
+                <!-- ===== FORM ACTIONS ===== -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-submit">
                         <i class="fas fa-save"></i> {{ action }} Banner
                     </button>
-                    <a href="{% url 'Ecom:banner_list' %}" class="btn btn-secondary">Cancel</a>
+                    <a href="{% url 'Ecom:banner_list' %}" class="btn btn-cancel">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <span class="btn-spacer"></span>
+                    {% if banner %}
+                    <a href="{% url 'Ecom:banner_delete' banner.id %}" class="btn btn-delete"
+                       onclick="return confirm('Are you sure you want to delete this banner?')">
+                        <i class="fas fa-trash"></i> Delete
+                    </a>
+                    {% endif %}
                 </div>
+
             </form>
         </div>
     </div>
 </div>
+
+<!-- ============================================================
+JAVASCRIPT
+============================================================ -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ===== Toggle Status =====
+    const toggleCheckbox = document.getElementById('{{ form.is_active.id_for_label }}');
+    const statusLabel = document.getElementById('statusLabel');
+
+    if (toggleCheckbox && statusLabel) {
+        toggleCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                statusLabel.textContent = 'Active';
+                statusLabel.style.background = '#ecfdf5';
+                statusLabel.style.color = '#059669';
+            } else {
+                statusLabel.textContent = 'Inactive';
+                statusLabel.style.background = '#fef2f2';
+                statusLabel.style.color = '#ef4444';
+            }
+        });
+    }
+
+    // ===== Image Preview =====
+    const fileInput = document.querySelector('input[type="file"]');
+    const uploadZone = document.getElementById('uploadZone');
+
+    if (fileInput && uploadZone) {
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const oldPreview = document.getElementById('imagePreview');
+                    if (oldPreview) oldPreview.remove();
+
+                    const preview = document.createElement('div');
+                    preview.id = 'imagePreview';
+                    preview.className = 'image-preview';
+                    preview.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview">
+                        <div class="preview-info">
+                            <div class="name">${file.name}</div>
+                            <div class="size">${(file.size / 1024).toFixed(1)} KB</div>
+                        </div>
+                        <span class="preview-badge">
+                            <i class="fas fa-check-circle"></i> Ready
+                        </span>
+                    `;
+                    uploadZone.parentNode.appendChild(preview);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // ===== Remove Error on Input =====
+    document.querySelectorAll('.form-control').forEach(function(input) {
+        input.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+            const error = this.parentElement.querySelector('.error-text');
+            if (error) error.remove();
+        });
+    });
+});
+</script>
+
 {% endblock %}

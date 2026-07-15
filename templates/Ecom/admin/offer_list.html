@@ -1,699 +1,1094 @@
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
 {% block title %}Manage Offers - MyStore{% endblock %}
 
-{% block extra_css %}
+{% block content %}
+
 <style>
-    /* ============================================ */
-    /* RESET & BASE                                */
-    /* ============================================ */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+/* ============================================================
+   PERFECT RESPONSIVE - SINGLE COLUMN DETAILS
+   ============================================================ */
+:root {
+    --primary: #5c121f;
+    --primary-light: #7a1a2b;
+    --primary-dark: #3d0c14;
+    --secondary: #F4B400;
+    --bg: #f6f4f2;
+    --white: #ffffff;
+    --border: #e8e4e0;
+    --text: #1d1d1d;
+    --text-light: #6d6d6d;
+    --text-muted: #999;
+    --success: #2e9d57;
+    --danger: #d64045;
+    --warning: #e6a700;
+    --shadow: 0 2px 12px rgba(0,0,0,0.04);
+    --shadow-hover: 0 8px 30px rgba(0,0,0,0.1);
+    --transition: all 0.3s ease;
+    --radius: 14px;
+    --radius-sm: 10px;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* ============================================================
+   WRAPPER
+   ============================================================ */
+.offers-wrap {
+    max-width: 100%;
+    margin: 0;
+}
+
+/* ============================================================
+   MAIN CARD
+   ============================================================ */
+.main-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    width: 100%;
+}
+
+/* ============================================================
+   CARD HEADER
+   ============================================================ */
+.card-header {
+    padding: 14px 20px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.card-header .left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.card-header .left .icon {
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.card-header .left h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0;
+}
+
+.card-header .left h2 span {
+    font-weight: 400;
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+.btn-create {
+    background: var(--primary);
+    color: var(--white);
+    padding: 8px 20px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition);
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.btn-create:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(92,18,31,0.2);
+    color: var(--white);
+}
+
+/* ============================================================
+   CARD STATS
+   ============================================================ */
+.card-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid var(--border);
+}
+
+.stat-item {
+    padding: 12px 16px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+.stat-item:last-child { border-right: none; }
+.stat-item:hover { background: var(--bg); }
+
+.stat-item .num {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.stat-item .label {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 2px;
+}
+
+.stat-item .label i { margin-right: 4px; }
+
+.stat-total .num { color: var(--primary); }
+.stat-active .num { color: var(--success); }
+.stat-inactive .num { color: var(--danger); }
+.stat-expiring .num { color: var(--warning); }
+
+/* ============================================================
+   CARD FILTERS
+   ============================================================ */
+.card-filters {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    background: var(--bg);
+}
+
+.card-filters .search-wrap {
+    flex: 1;
+    position: relative;
+    min-width: 180px;
+}
+
+.card-filters .search-wrap input {
+    width: 100%;
+    padding: 8px 14px 8px 36px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    background: var(--white);
+    outline: none;
+    transition: var(--transition);
+}
+
+.card-filters .search-wrap input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(92,18,31,0.05);
+}
+
+.card-filters .search-wrap i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.card-filters select {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    background: var(--white);
+    outline: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.card-filters select:focus {
+    border-color: var(--primary);
+}
+
+.card-filters .refresh-btn {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--white);
+    color: var(--text-light);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.card-filters .refresh-btn:hover {
+    background: var(--primary);
+    color: var(--white);
+    border-color: var(--primary);
+}
+
+/* ============================================================
+   CARD OFFERS
+   ============================================================ */
+.card-offers {
+    padding: 16px 20px;
+    max-height: 650px;
+    overflow-y: auto;
+}
+
+.card-offers::-webkit-scrollbar { width: 6px; }
+.card-offers::-webkit-scrollbar-track { background: var(--bg); border-radius: 4px; }
+.card-offers::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+
+.offers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+}
+
+/* ============================================================
+   OFFER CARDS - SINGLE COLUMN DETAILS
+   ============================================================ */
+.offer-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: var(--transition);
+    box-shadow: var(--shadow);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.offer-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--secondary), var(--primary));
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.offer-card:hover::before {
+    opacity: 1;
+}
+
+.offer-card:hover {
+    border-color: var(--secondary);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-4px);
+}
+
+/* ===== HEADER ===== */
+.offer-card .card-header-section {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+}
+
+.offer-card .card-header-section .img {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--white);
+    flex-shrink: 0;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.offer-card:hover .card-header-section .img {
+    border-color: var(--secondary);
+}
+
+.offer-card .card-header-section .img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.offer-card .card-header-section .img .no-img {
+    color: var(--text-muted);
+    font-size: 18px;
+}
+
+.offer-card .card-header-section .info {
+    flex: 1;
+    min-width: 0;
+}
+
+.offer-card .card-header-section .info .name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 2px;
+    word-break: break-word;
+}
+
+.offer-card .card-header-section .info .sub {
+    font-size: 12px;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.offer-card .card-header-section .info .sub .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    display: inline-block;
+}
+
+/* ===== STATS ROW ===== */
+.offer-card .card-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 10px 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    gap: 8px;
+}
+
+.offer-card .card-stats-row .stat {
+    text-align: center;
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    background: var(--white);
+    border: 1px solid var(--border);
+}
+
+.offer-card .card-stats-row .stat .stat-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    font-weight: 600;
+    display: block;
+}
+
+.offer-card .card-stats-row .stat .stat-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 2px;
+    display: block;
+    word-break: break-word;
+}
+
+.offer-card .card-stats-row .stat .stat-value.discount { color: var(--danger); }
+.offer-card .card-stats-row .stat .stat-value.priority { color: var(--primary); }
+.offer-card .card-stats-row .stat .stat-value.status-active { color: var(--success); }
+.offer-card .card-stats-row .stat .stat-value.status-inactive { color: var(--text-muted); }
+
+/* ===== DETAILS - SINGLE COLUMN ===== */
+.offer-card .card-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    flex: 1;
+}
+
+.offer-card .card-details .detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px dashed var(--border);
+    gap: 12px;
+}
+
+.offer-card .card-details .detail:last-child {
+    border-bottom: none;
+}
+
+.offer-card .card-details .detail .label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 90px;
+}
+
+.offer-card .card-details .detail .value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    text-align: right;
+    word-break: break-word;
+    flex: 1;
+}
+
+.offer-card .card-details .detail .value .highlight { color: var(--danger); }
+.offer-card .card-details .detail .value .success { color: var(--success); }
+
+/* ===== TAGS ===== */
+.offer-card .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+}
+
+.offer-card .card-tags .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 10px;
+    border-radius: 50px;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+}
+
+.tag-type { background: #eef3ff; color: #2458ff; }
+.tag-category { background: #e8f5e9; color: #1e7e34; }
+.tag-cart { background: #fff3e0; color: #bf5e00; }
+.tag-priority { background: var(--primary); color: var(--white); padding: 2px 6px; }
+.tag-discount { background: #fee2e2; color: var(--danger); font-weight: 700; }
+.tag-date { background: var(--white); color: var(--text-light); text-transform: none; border: 1px solid var(--border); }
+.tag-target { background: var(--white); color: var(--text-light); text-transform: none; border: 1px solid var(--border); }
+.tag-limit { background: #e3f2fd; color: #0d47a1; text-transform: none; }
+
+/* ===== FOOTER ===== */
+.offer-card .card-footer {
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    min-height: 54px;
+    gap: 10px;
+}
+
+.offer-card .card-footer .discount-big {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--danger);
+    word-break: break-word;
+}
+
+.offer-card .card-footer .discount-big small {
+    font-weight: 400;
+    font-size: 11px;
+    color: var(--text-light);
+}
+
+.offer-card .card-footer .actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.offer-card .card-footer .btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.btn-edit { background: #eef3ff; color: #2458ff; }
+.btn-edit:hover { background: #2458ff; color: #fff; transform: scale(1.1); }
+
+.btn-toggle { background: #e8f5e9; color: var(--success); }
+.btn-toggle:hover { background: var(--success); color: #fff; transform: scale(1.1); }
+.btn-toggle.inactive { background: #fbe9e7; color: var(--danger); }
+.btn-toggle.inactive:hover { background: var(--danger); color: #fff; transform: scale(1.1); }
+
+.btn-delete { background: #fbe9e7; color: var(--danger); }
+.btn-delete:hover { background: var(--danger); color: #fff; transform: scale(1.1); }
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.empty-state i {
+    font-size: 44px;
+    color: var(--border);
+    display: block;
+    margin-bottom: 12px;
+}
+
+.empty-state h4 {
+    font-size: 19px;
+    color: var(--text);
+}
+
+.empty-state p {
+    color: var(--text-light);
+    font-size: 14px;
+    margin-bottom: 14px;
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal-box {
+    background: var(--white);
+    border-radius: var(--radius);
+    max-width: 380px;
+    width: 92%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    animation: modalIn 0.25s ease;
+}
+
+@keyframes modalIn {
+    from { transform: scale(0.95) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.modal-box .head {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-box .head h4 {
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-box .head h4 i { color: var(--danger); }
+
+.modal-box .head .close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.modal-box .body {
+    padding: 16px 20px;
+}
+
+.modal-box .body .highlight {
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.modal-box .body .warn {
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.modal-box .footer {
+    padding: 12px 20px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-modal {
+    padding: 7px 20px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-modal.cancel {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-modal.cancel:hover { background: var(--border); }
+
+.btn-modal.danger {
+    background: var(--danger);
+    color: var(--white);
+}
+
+.btn-modal.danger:hover { background: #c0392b; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+/* 4 Columns - Large Desktop */
+@media (min-width: 1400px) {
+    .offers-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* 3 Columns - Desktop */
+@media (min-width: 992px) and (max-width: 1399px) {
+    .offers-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* 2 Columns - Tablet */
+@media (min-width: 576px) and (max-width: 991px) {
+    .offers-wrap { padding: 12px 16px 20px; }
+    .offers-grid { grid-template-columns: repeat(2, 1fr); }
+    .card-offers { max-height: 500px; padding: 14px 16px; }
     
-    .container-fluid {
-        padding: 20px 30px;
-        max-width: 1400px;
-        margin: 0 auto;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: #f8f9fa;
-        min-height: 100vh;
-    }
+    .card-header .left h2 { font-size: 18px; }
+    .card-header .left h2 span { font-size: 12px; }
     
-    /* ============================================ */
-    /* HEADER                                       */
-    /* ============================================ */
-    .header-section {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        flex-wrap: wrap;
-        gap: 15px;
+    .stat-item .num { font-size: 22px; }
+    .stat-item { padding: 10px 14px; }
+    
+    .offer-card .card-header-section .img { width: 44px; height: 44px; }
+    .offer-card .card-header-section .info .name { font-size: 14px; }
+}
+
+/* 1 Column - Mobile */
+@media (max-width: 575px) {
+    .offers-wrap { padding: 8px 10px 16px; }
+    .card-offers { padding: 10px 12px; max-height: 400px; }
+    .offers-grid { grid-template-columns: 1fr; gap: 12px; }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 10px 14px;
     }
-    .header-section h2 {
-        font-size: 28px;
-        font-weight: 700;
-        color: #1a1a2e;
-        margin: 0;
+    .card-header .left .icon { width: 34px; height: 34px; font-size: 15px; }
+    .card-header .left h2 { font-size: 16px; }
+    .card-header .left h2 span { font-size: 11px; display: block; margin-left: 0; }
+    .btn-create { justify-content: center; padding: 7px 16px; font-size: 12px; }
+    
+    .card-stats { grid-template-columns: repeat(2, 1fr); }
+    .stat-item {
+        padding: 8px 10px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
     }
-    .header-section h2 i {
-        color: #ffc107;
-        margin-right: 12px;
-    }
-    .btn-primary {
-        background: #0d6efd;
-        color: white;
-        border: none;
-        padding: 10px 24px;
-        border-radius: 8px;
-        font-size: 15px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
+    .stat-item:nth-child(2) { border-right: none; }
+    .stat-item .num { font-size: 18px; }
+    .stat-item .label { font-size: 10px; }
+    
+    .card-filters {
+        flex-direction: column;
+        padding: 8px 12px;
         gap: 8px;
     }
-    .btn-primary:hover {
-        background: #0b5ed7;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(13,110,253,0.3);
-    }
-    .btn-primary i {
-        font-size: 14px;
-    }
-
-    /* ============================================ */
-    /* STATS CARDS                                 */
-    /* ============================================ */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-    .stats-card {
-        background: white;
-        border-radius: 12px;
-        padding: 20px 24px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
-        border-left: 4px solid;
-    }
-    .stats-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-    .stats-card.total { border-color: #0d6efd; }
-    .stats-card.active { border-color: #28a745; }
-    .stats-card.inactive { border-color: #dc3545; }
-    .stats-card .number {
-        font-size: 32px;
-        font-weight: 700;
-        color: #1a1a2e;
-        line-height: 1.2;
-    }
-    .stats-card .label {
-        font-size: 14px;
-        color: #6c757d;
-        margin-top: 4px;
-    }
-    .stats-card .label i {
-        margin-right: 6px;
-    }
-    .stats-card .label .text-success { color: #28a745; }
-    .stats-card .label .text-danger { color: #dc3545; }
-
-    /* ============================================ */
-    /* TABLE                                        */
-    /* ============================================ */
-    .card {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        overflow: hidden;
-    }
-    .card-body {
-        padding: 24px;
-    }
-    .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 14px;
-    }
-    thead {
-        background: #f8f9fa;
-        border-bottom: 2px solid #e9ecef;
-    }
-    thead th {
-        padding: 12px 16px;
-        text-align: left;
-        font-weight: 600;
-        color: #1a1a2e;
-        white-space: nowrap;
-    }
-    tbody tr {
-        border-bottom: 1px solid #e9ecef;
-        transition: background 0.2s;
-    }
-    tbody tr:hover {
-        background: #f8f9fa;
-    }
-    tbody td {
-        padding: 12px 16px;
-        vertical-align: middle;
-    }
-    .text-center {
-        text-align: center;
-    }
-    .text-muted {
-        color: #6c757d;
-    }
-    .text-success {
-        color: #28a745;
-    }
-    .fw-bold {
-        font-weight: 600;
-    }
-
-    /* Image */
-    .offer-image {
-        width: 50px;
-        height: 50px;
-        border-radius: 6px;
-        object-fit: cover;
-        border: 1px solid #e9ecef;
-    }
-    .image-placeholder {
-        width: 50px;
-        height: 50px;
-        border-radius: 6px;
-        background: #f8f9fa;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #adb5bd;
-        border: 1px dashed #ced4da;
-    }
-
-    /* Badges */
-    .badge {
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        display: inline-block;
-    }
-    .badge-success {
-        background: #d4edda;
-        color: #155724;
-    }
-    .badge-secondary {
-        background: #e9ecef;
-        color: #6c757d;
-    }
-    .badge-warning {
-        background: #fff3cd;
-        color: #856404;
-    }
-    .badge-info {
-        background: #cce5ff;
-        color: #004085;
-    }
-    .badge-primary {
-        background: #cfe2ff;
-        color: #084298;
-    }
-    .badge-danger {
-        background: #f8d7da;
-        color: #721c24;
-    }
-
-    /* Buttons */
-    .btn-group {
-        display: flex;
-        gap: 4px;
-        flex-wrap: wrap;
-    }
-    .btn-sm {
-        padding: 6px 10px;
-        border: none;
-        border-radius: 6px;
-        font-size: 13px;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        text-decoration: none;
-    }
-    .btn-sm:hover {
-        transform: translateY(-1px);
-    }
-    .btn-primary {
-        background: #0d6efd;
-        color: white;
-    }
-    .btn-primary:hover {
-        background: #0b5ed7;
-    }
-    .btn-warning {
-        background: #ffc107;
-        color: #1a1a2e;
-    }
-    .btn-warning:hover {
-        background: #e0a800;
-    }
-    .btn-success {
-        background: #28a745;
-        color: white;
-    }
-    .btn-success:hover {
-        background: #1e7e34;
-    }
-    .btn-danger {
-        background: #dc3545;
-        color: white;
-    }
-    .btn-danger:hover {
-        background: #bd2130;
-    }
-
-    /* ============================================ */
-    /* EMPTY STATE                                 */
-    /* ============================================ */
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-    }
-    .empty-state i {
-        font-size: 48px;
-        color: #adb5bd;
-        display: block;
-        margin-bottom: 15px;
-    }
-    .empty-state p {
-        color: #6c757d;
-        margin-bottom: 15px;
-    }
-
-    /* ============================================ */
-    /* MODAL (Pure CSS)                            */
-    /* ============================================ */
-    .modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.5);
-        z-index: 999;
-        justify-content: center;
-        align-items: center;
-        animation: fadeIn 0.3s ease;
-    }
-    .modal-overlay.active {
-        display: flex;
-    }
-    .modal {
-        background: white;
-        border-radius: 16px;
-        padding: 0;
-        max-width: 450px;
-        width: 90%;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        animation: slideUp 0.3s ease;
-    }
-    .modal-header {
-        padding: 20px 24px 16px 24px;
-        border-bottom: 1px solid #e9ecef;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .modal-header h5 {
-        font-size: 18px;
-        font-weight: 600;
-        color: #1a1a2e;
-        margin: 0;
-    }
-    .modal-header h5 i {
-        color: #dc3545;
-        margin-right: 8px;
-    }
-    .modal-close {
-        background: none;
-        border: none;
-        font-size: 24px;
-        cursor: pointer;
-        color: #6c757d;
-        transition: color 0.2s;
-    }
-    .modal-close:hover {
-        color: #1a1a2e;
-    }
-    .modal-body {
-        padding: 20px 24px;
-    }
-    .modal-body p {
-        margin-bottom: 8px;
-        color: #1a1a2e;
-    }
-    .modal-body .text-danger {
-        color: #dc3545;
-        font-size: 13px;
-    }
-    .modal-body .highlight {
-        color: #0d6efd;
-        font-weight: 600;
-    }
-    .modal-footer {
-        padding: 16px 24px 20px 24px;
-        border-top: 1px solid #e9ecef;
-        display: flex;
-        justify-content: flex-end;
+    .card-filters .search-wrap { min-width: 100%; }
+    .card-filters select { width: 100%; }
+    .card-filters .refresh-btn { width: 100%; justify-content: center; }
+    
+    .offer-card .card-header-section {
+        padding: 10px 12px 8px;
         gap: 10px;
     }
-    .btn-secondary {
-        background: #6c757d;
-        color: white;
-        border: none;
-        padding: 8px 20px;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background 0.2s;
+    .offer-card .card-header-section .img { width: 38px; height: 38px; }
+    .offer-card .card-header-section .info .name { font-size: 13px; }
+    .offer-card .card-header-section .info .sub { font-size: 10px; }
+    
+    .offer-card .card-stats-row {
+        grid-template-columns: repeat(3, 1fr);
+        padding: 8px 12px;
+        gap: 6px;
     }
-    .btn-secondary:hover {
-        background: #5a6268;
+    .offer-card .card-stats-row .stat { padding: 4px 6px; }
+    .offer-card .card-stats-row .stat .stat-value { font-size: 12px; }
+    .offer-card .card-stats-row .stat .stat-label { font-size: 8px; }
+    
+    .offer-card .card-details {
+        padding: 8px 12px;
+        gap: 3px;
     }
-    .btn-danger {
-        background: #dc3545;
-        color: white;
-        border: none;
-        padding: 8px 20px;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background 0.2s;
+    .offer-card .card-details .detail .label { 
+        font-size: 10px;
+        min-width: 70px;
     }
-    .btn-danger:hover {
-        background: #bd2130;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    @keyframes slideUp {
-        from { transform: translateY(20px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-    }
-
-    /* ============================================ */
-    /* RESPONSIVE                                  */
-    /* ============================================ */
-    @media (max-width: 1200px) {
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
+    .offer-card .card-details .detail .value { 
+        font-size: 12px; 
     }
     
-    @media (max-width: 768px) {
-        .container-fluid {
-            padding: 15px;
-        }
-        .header-section {
-            flex-direction: column;
-            align-items: stretch;
-        }
-        .header-section h2 {
-            font-size: 22px;
-        }
-        .btn-primary {
-            justify-content: center;
-        }
-        .stats-grid {
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        .stats-card {
-            padding: 15px 18px;
-        }
-        .stats-card .number {
-            font-size: 24px;
-        }
-        .card-body {
-            padding: 15px;
-        }
-        table {
-            font-size: 13px;
-        }
-        thead th,
-        tbody td {
-            padding: 8px 10px;
-        }
-        .btn-group {
-            flex-direction: column;
-            gap: 4px;
-        }
-        .btn-sm {
-            padding: 4px 8px;
-            font-size: 12px;
-        }
-        .modal {
-            width: 95%;
-            margin: 10px;
-        }
-        .modal-header,
-        .modal-body,
-        .modal-footer {
-            padding: 15px;
-        }
-    }
+    .offer-card .card-tags { padding: 6px 12px; }
+    .offer-card .card-tags .tag { font-size: 8px; padding: 1px 8px; }
     
-    @media (max-width: 480px) {
-        .stats-grid {
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        .stats-card {
-            padding: 12px 14px;
-        }
-        .stats-card .number {
-            font-size: 20px;
-        }
-        .stats-card .label {
-            font-size: 12px;
-        }
-        .offer-image,
-        .image-placeholder {
-            width: 40px;
-            height: 40px;
-        }
-        .badge {
-            font-size: 10px;
-            padding: 2px 8px;
-        }
+    .offer-card .card-footer {
+        padding: 8px 12px;
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+        text-align: center;
     }
+    .offer-card .card-footer .discount-big { font-size: 14px; text-align: center; }
+    .offer-card .card-footer .actions { justify-content: center; }
+    .offer-card .card-footer .btn { width: 30px; height: 30px; font-size: 12px; }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 380px) {
+    .offers-wrap { padding: 4px 6px 12px; }
+    .card-offers { padding: 6px 8px; max-height: 350px; }
+    
+    .card-header .left .icon { width: 28px; height: 28px; font-size: 12px; }
+    .card-header .left h2 { font-size: 14px; }
+    
+    .stat-item .num { font-size: 15px; }
+    .stat-item .label { font-size: 9px; }
+    
+    .offer-card .card-header-section .img { width: 32px; height: 32px; }
+    .offer-card .card-header-section .info .name { font-size: 12px; }
+    .offer-card .card-header-section .info .sub { font-size: 9px; }
+    
+    .offer-card .card-stats-row .stat .stat-value { font-size: 11px; }
+    .offer-card .card-details .detail .value { font-size: 11px; }
+    .offer-card .card-details .detail .label { 
+        font-size: 9px;
+        min-width: 60px;
+    }
+    .offer-card .card-tags .tag { font-size: 7px; padding: 1px 6px; }
+    .offer-card .card-footer .discount-big { font-size: 13px; }
+    .offer-card .card-footer .btn { width: 26px; height: 26px; font-size: 11px; }
+}
 </style>
-{% endblock %}
 
-{% block content %}
-<div class="container-fluid">
+<!-- ============================================================
+   CONTENT
+   ============================================================ -->
+<div class="offers-wrap">
 
-    <!-- ============================================ -->
-    <!-- HEADER                                       -->
-    <!-- ============================================ -->
-    <div class="header-section">
-        <h2><i class="fas fa-gift"></i> Offers</h2>
-        <a href="{% url 'Ecom:offer_create' %}" class="btn-primary">
-            <i class="fas fa-plus"></i> Add New Offer
-        </a>
-    </div>
+    <div class="main-card">
 
-    <!-- ============================================ -->
-    <!-- STATS                                        -->
-    <!-- ============================================ -->
-    <div class="stats-grid">
-        <div class="stats-card total">
-            <div class="number">{{ total_count|default:0 }}</div>
-            <div class="label"><i class="fas fa-gift"></i> Total Offers</div>
+        <!-- Header -->
+        <div class="card-header">
+            <div class="left">
+                <div class="icon"><i class="fas fa-tags"></i></div>
+                <h2>Offers <span>· Manage Promotions</span></h2>
+            </div>
+            <a href="{% url 'Ecom:offer_create' %}" class="btn-create">
+                <i class="fas fa-plus"></i> New Offer
+            </a>
         </div>
-        <div class="stats-card active">
-            <div class="number">{{ active_count|default:0 }}</div>
-            <div class="label"><i class="fas fa-check-circle text-success"></i> Active</div>
-        </div>
-        <div class="stats-card inactive">
-            <div class="number">{{ inactive_count|default:0 }}</div>
-            <div class="label"><i class="fas fa-times-circle text-danger"></i> Inactive</div>
-        </div>
-    </div>
 
-    <!-- ============================================ -->
-    <!-- TABLE                                        -->
-    <!-- ============================================ -->
-    <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Name</th>
-                            <th>Type</th>
-                            <th>Target</th>
-                            <th>Discount</th>
-                            <th>Priority</th>
-                            <th>Valid</th>
-                            <th>Status</th>
-                            <th style="min-width:150px;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for offer in offers %}
-                        <tr>
-                            <td>
-                                {% if offer.banner_image %}
-                                    <img src="{{ offer.banner_image.url }}" alt="{{ offer.name }}" class="offer-image">
+        <!-- Stats -->
+        <div class="card-stats">
+            <div class="stat-item stat-total">
+                <div class="num">{{ total_count|default:0 }}</div>
+                <div class="label"><i class="fas fa-gift"></i> Total</div>
+            </div>
+            <div class="stat-item stat-active">
+                <div class="num">{{ active_count|default:0 }}</div>
+                <div class="label"><i class="fas fa-check-circle"></i> Active</div>
+            </div>
+            <div class="stat-item stat-inactive">
+                <div class="num">{{ inactive_count|default:0 }}</div>
+                <div class="label"><i class="fas fa-pause-circle"></i> Inactive</div>
+            </div>
+            <div class="stat-item stat-expiring">
+                <div class="num">{{ expiring_count|default:0 }}</div>
+                <div class="label"><i class="fas fa-clock"></i> Expiring</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card-filters">
+            <div class="search-wrap">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search offers..." onkeyup="filterOffers()">
+            </div>
+            <select id="statusFilter" onchange="filterOffers()">
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+            <select id="typeFilter" onchange="filterOffers()">
+                <option value="all">All Types</option>
+                <option value="product">Product</option>
+                <option value="category">Category</option>
+                <option value="cart">Cart</option>
+            </select>
+            <button class="refresh-btn" onclick="location.reload()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+
+        <!-- Offers -->
+        <div class="card-offers" id="offersContainer">
+            <div class="offers-grid" id="offersGrid">
+                {% for offer in offers %}
+                <div class="offer-card" 
+                     data-status="{% if offer.is_active %}active{% else %}inactive{% endif %}"
+                     data-type="{{ offer.offer_type }}"
+                     data-search="{{ offer.name|lower }} {{ offer.description|default:''|lower }}">
+                    
+                    <!-- Header Section -->
+                    <div class="card-header-section">
+                        <div class="img">
+                            {% if offer.banner_image %}
+                                <img src="{{ offer.banner_image.url }}" alt="{{ offer.name }}">
+                            {% else %}
+                                <span class="no-img"><i class="fas fa-image"></i></span>
+                            {% endif %}
+                        </div>
+                        <div class="info">
+                            <div class="name">{{ offer.name }}</div>
+                            <div class="sub">
+                                <span>{{ offer.get_offer_type_display }}</span>
+                                <span class="dot"></span>
+                                <span>#{{ offer.id }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats Row -->
+                    <div class="card-stats-row">
+                        <div class="stat">
+                            <span class="stat-label">Discount</span>
+                            <span class="stat-value discount">
+                                {% if offer.discount_type == 'percentage' %}
+                                    {{ offer.discount_value }}%
                                 {% else %}
-                                    <div class="image-placeholder">
-                                        <i class="fas fa-image"></i>
-                                    </div>
+                                    ₹{{ offer.discount_value }}
                                 {% endif %}
-                            </td>
-                            <td><strong>{{ offer.name }}</strong></td>
-                            <td>
-                                <span class="badge {% if offer.offer_type == 'product' %}badge-primary{% elif offer.offer_type == 'category' %}badge-info{% else %}badge-secondary{% endif %}">
-                                    {{ offer.get_offer_type_display }}
-                                </span>
-                            </td>
-                            <td>
+                            </span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Priority</span>
+                            <span class="stat-value priority">{{ offer.priority|default:3 }}</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Status</span>
+                            <span class="stat-value {% if offer.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                {% if offer.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Details - SINGLE COLUMN, EACH IN ONE LINE -->
+                    <div class="card-details">
+                        <div class="detail">
+                            <span class="label">Type</span>
+                            <span class="value">{{ offer.get_offer_type_display }}</span>
+                        </div>
+                        <div class="detail">
+                            <span class="label">Target</span>
+                            <span class="value">
                                 {% if offer.offer_type == 'product' %}
-                                    <span class="badge badge-primary">{{ offer.product.name|truncatechars:15 }}</span>
+                                    {{ offer.product.name }}
                                 {% elif offer.offer_type == 'category' %}
-                                    <span class="badge badge-info">{{ offer.category.name }}</span>
+                                    {{ offer.category.name }}
                                 {% else %}
-                                    <span class="badge badge-secondary">Cart</span>
+                                    Cart Total
                                 {% endif %}
-                            </td>
-                            <td>
-                                <span class="fw-bold text-success">
-                                    {% if offer.discount_type == 'percentage' %}
-                                        {{ offer.discount_value }}% OFF
-                                    {% else %}
-                                        ₹{{ offer.discount_value }} OFF
-                                    {% endif %}
-                                </span>
-                                {% if offer.max_discount %}
-                                    <br><small class="text-muted">Max: ₹{{ offer.max_discount }}</small>
-                                {% endif %}
-                            </td>
-                            <td>{{ offer.priority }}</td>
-                            <td>
-                                <small>
-                                    {{ offer.valid_from|date:"M d" }} - {{ offer.valid_to|date:"M d" }}
-                                </small>
-                            </td>
-                            <td>
-                                <span class="badge {% if offer.is_active %}badge-success{% else %}badge-secondary{% endif %}">
-                                    {% if offer.is_active %}Active{% else %}Inactive{% endif %}
-                                </span>
-                            </td>
-                            <td>
-                                <div class="btn-group">
-                                    <a href="{% url 'Ecom:offer_edit' offer.id %}" class="btn-sm btn-primary" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <button class="btn-sm {% if offer.is_active %}btn-warning{% else %}btn-success{% endif %}" 
-                                            onclick="toggleStatus('{{ offer.id }}', '{{ offer.name }}')" title="Toggle Status">
-                                        <i class="fas fa-{% if offer.is_active %}pause{% else %}play{% endif %}"></i>
-                                    </button>
-                                    <button class="btn-sm btn-danger" 
-                                            onclick="confirmDelete('{{ offer.id }}', '{{ offer.name }}')" title="Delete">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="9">
-                                <div class="empty-state">
-                                    <i class="fas fa-gift"></i>
-                                    <p>No offers created yet.</p>
-                                    <a href="{% url 'Ecom:offer_create' %}" class="btn-primary" style="display:inline-flex; padding:8px 20px; font-size:14px;">
-                                        <i class="fas fa-plus"></i> Create Offer
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                            </span>
+                        </div>
+                        {% if offer.max_discount %}
+                        <div class="detail">
+                            <span class="label">Max Discount</span>
+                            <span class="value highlight">₹{{ offer.max_discount }}</span>
+                        </div>
+                        {% endif %}
+                        {% if offer.min_cart_value %}
+                        <div class="detail">
+                            <span class="label">Min Cart</span>
+                            <span class="value">₹{{ offer.min_cart_value }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="detail">
+                            <span class="label">Valid From</span>
+                            <span class="value">{{ offer.valid_from|date:"d M Y" }}</span>
+                        </div>
+                        <div class="detail">
+                            <span class="label">Valid To</span>
+                            <span class="value">{{ offer.valid_to|date:"d M Y" }}</span>
+                        </div>
+                        {% if offer.usage_limit %}
+                        <div class="detail">
+                            <span class="label">Usage Limit</span>
+                            <span class="value">{{ offer.usage_limit }}</span>
+                        </div>
+                        {% endif %}
+                        {% if offer.used_count %}
+                        <div class="detail">
+                            <span class="label">Used</span>
+                            <span class="value">{{ offer.used_count }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                   
+                    <!-- Footer -->
+                    <div class="card-footer">
+                        
+                        <div class="actions">
+                            <a href="{% url 'Ecom:offer_edit' offer.id %}" class="btn btn-edit" title="Edit Offer">
+                                <i class="fas fa-pen"></i>
+                            </a>
+                            <button class="btn btn-toggle {% if not offer.is_active %}inactive{% endif %}" 
+                                    onclick="toggleStatus('{{ offer.id }}', '{{ offer.name|escapejs }}')" 
+                                    title="{% if offer.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                <i class="fas fa-{% if offer.is_active %}pause{% else %}play{% endif %}"></i>
+                            </button>
+                            <button class="btn btn-delete" 
+                                    onclick="confirmDelete('{{ offer.id }}', '{{ offer.name|escapejs }}')" 
+                                    title="Delete Offer">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-gift"></i>
+                    <h4>No Offers Yet</h4>
+                    <p>Create your first offer to start promoting products.</p>
+                    <a href="{% url 'Ecom:offer_create' %}" class="btn-create" style="display:inline-flex;">
+                        <i class="fas fa-plus"></i> Create Offer
+                    </a>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
 </div>
 
-<!-- ============================================ -->
-<!-- DELETE CONFIRMATION MODAL (Pure CSS)        -->
-<!-- ============================================ -->
+<!-- ============================================================
+   MODAL
+   ============================================================ -->
 <div class="modal-overlay" id="deleteModal">
-    <div class="modal">
-        <div class="modal-header">
-            <h5><i class="fas fa-exclamation-triangle"></i> Confirm Delete</h5>
-            <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div class="modal-box">
+        <div class="head">
+            <h4><i class="fas fa-exclamation-triangle"></i> Delete Offer</h4>
+            <button class="close" onclick="closeModal()">&times;</button>
         </div>
-        <div class="modal-body">
-            <p>Are you sure you want to delete offer <span class="highlight" id="deleteItemName"></span>?</p>
-            <p class="text-danger"><i class="fas fa-exclamation-circle"></i> This action cannot be undone.</p>
+        <div class="body">
+            <p>Delete "<span class="highlight" id="deleteItemName"></span>"?</p>
+            <p class="warn"><i class="fas fa-exclamation-circle"></i> This cannot be undone.</p>
         </div>
-        <div class="modal-footer">
-            <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+        <div class="footer">
+            <button class="btn-modal cancel" onclick="closeModal()">Cancel</button>
             <form method="POST" id="deleteForm" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" class="btn-danger">Yes, Delete</button>
+                <button type="submit" class="btn-modal danger">Delete</button>
             </form>
         </div>
     </div>
 </div>
 
-<!-- ============================================ -->
-<!-- JAVASCRIPT                                   -->
-<!-- ============================================ -->
+<!-- ============================================================
+   JAVASCRIPT
+   ============================================================ -->
 <script>
-    // ============================================
-    // CONFIRM DELETE
-    // ============================================
-    function confirmDelete(id, name) {
-        document.getElementById('deleteItemName').textContent = name;
-        document.getElementById('deleteForm').action = '/admin/offer/delete/' + id + '/';
-        document.getElementById('deleteModal').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    // ============================================
-    // CLOSE MODAL
-    // ============================================
-    function closeModal() {
-        document.getElementById('deleteModal').classList.remove('active');
-        document.body.style.overflow = '';
-    }
-
-    // Close modal on overlay click
-    document.getElementById('deleteModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeModal();
-        }
+function filterOffers() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    const type = document.getElementById('typeFilter').value;
+    const cards = document.querySelectorAll('.offer-card');
+    
+    cards.forEach(card => {
+        const cardStatus = card.dataset.status;
+        const cardType = card.dataset.type;
+        const cardSearch = card.dataset.search || '';
+        
+        let show = true;
+        if (search && !cardSearch.includes(search)) show = false;
+        if (status !== 'all' && cardStatus !== status) show = false;
+        if (type !== 'all' && cardType !== type) show = false;
+        
+        card.style.display = show ? 'flex' : 'none';
     });
+}
 
-    // Close modal on Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeModal();
-        }
-    });
+function confirmDelete(id, name) {
+    document.getElementById('deleteItemName').textContent = name;
+    document.getElementById('deleteForm').action = "{% url 'Ecom:offer_delete' 0 %}".replace('0', id);
+    document.getElementById('deleteModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
 
-    // ============================================
-    // TOGGLE STATUS
-    // ============================================
-    function toggleStatus(id, name) {
-        if (confirm('Toggle status for offer "' + name + '"?')) {
-            window.location.href = '/admin/offer/toggle/' + id + '/';
-        }
+function closeModal() {
+    document.getElementById('deleteModal').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+});
+
+function toggleStatus(id, name) {
+    if (confirm('Toggle status for "' + name + '"?')) {
+        window.location.href = "{% url 'Ecom:offer_toggle' 0 %}".replace('0', id);
     }
+}
 </script>
 
 {% endblock %}

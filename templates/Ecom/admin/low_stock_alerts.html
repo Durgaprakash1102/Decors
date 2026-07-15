@@ -4,198 +4,1112 @@
 {% block title %}Low Stock Alerts - MyStore{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-exclamation-triangle text-warning"></i> Low Stock Alerts</h2>
-        <a href="{% url 'Ecom:product_list' %}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Products
-        </a>
+<style>
+    /* ===== RESET & BASE ===== */
+    .stock-wrapper {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+        padding: 0;
+    }
+
+    /* ===== HEADER ===== */
+    .stock-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 12px;
+        width: 100%;
+    }
+
+    .stock-header .left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .stock-header .left .icon-box {
+        width: 44px;
+        height: 44px;
+        background: #fef3c7;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #d97706;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .stock-header .left h2 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #5c121f;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .stock-header .left h2 .badge {
+        font-size: 13px;
+        font-weight: 600;
+        background: #5c121f;
+        color: #fff;
+        padding: 2px 14px;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+
+    .btn-back {
+        background: #5c121f;
+        color: #fff;
+        padding: 9px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    .btn-back:hover {
+        background: #7a1a2b;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(92,18,31,0.2);
+    }
+
+    /* ===== TABS - PERFECT ALIGNMENT ===== */
+    .stock-tabs {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 24px;
+        width: 100%;
+    }
+
+    .stock-tab {
+        background: #fff;
+        border: 2px solid #e8e3df;
+        border-radius: 10px;
+        padding: 14px 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        min-width: 0;
+    }
+
+    .stock-tab:hover {
+        border-color: #5c121f;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+
+    .stock-tab.active {
+        border-color: #5c121f;
+        background: #fdf8f6;
+        box-shadow: 0 0 0 3px rgba(92,18,31,0.06);
+    }
+
+    .stock-tab .tab-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        flex-shrink: 0;
+    }
+
+    .stock-tab .tab-icon.danger { background: #fef2f2; color: #dc3545; }
+    .stock-tab .tab-icon.warning { background: #fffbeb; color: #d97706; }
+    .stock-tab .tab-icon.info { background: #eff6ff; color: #2563eb; }
+    .stock-tab .tab-icon.primary { background: #eef2ff; color: #6366f1; }
+
+    .stock-tab .tab-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .stock-tab .tab-text .label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1d1d1d;
+        display: block;
+        line-height: 1.2;
+    }
+
+    .stock-tab .tab-text .sub {
+        font-size: 11px;
+        color: #888;
+    }
+
+    .stock-tab .tab-count {
+        font-size: 14px;
+        font-weight: 700;
+        padding: 2px 14px;
+        border-radius: 20px;
+        background: #f3f4f6;
+        color: #1d1d1d;
+        min-width: 30px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .stock-tab .tab-count.danger { background: #dc3545; color: #fff; }
+    .stock-tab .tab-count.warning { background: #d97706; color: #fff; }
+    .stock-tab .tab-count.info { background: #2563eb; color: #fff; }
+    .stock-tab .tab-count.primary { background: #6366f1; color: #fff; }
+    .stock-tab .tab-count.zero { background: #f3f4f6; color: #888; }
+
+    /* ===== TABLE CARD ===== */
+    .table-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e8e3df;
+        overflow: hidden;
+        display: none;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        width: 100%;
+    }
+
+    .table-card.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .table-card .card-head {
+        padding: 14px 20px;
+        background: #faf8f6;
+        border-bottom: 1px solid #e8e3df;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .table-card .card-head .head-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .table-card .card-head .head-left .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .table-card .card-head .head-left .dot.danger { background: #dc3545; }
+    .table-card .card-head .head-left .dot.warning { background: #d97706; }
+    .table-card .card-head .head-left .dot.info { background: #2563eb; }
+    .table-card .card-head .head-left .dot.primary { background: #6366f1; }
+
+    .table-card .card-head h5 {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1d1d1d;
+        margin: 0;
+    }
+
+    .table-card .card-head .count {
+        font-size: 12px;
+        color: #888;
+        background: #fff;
+        padding: 3px 14px;
+        border-radius: 20px;
+        border: 1px solid #e8e3df;
+        white-space: nowrap;
+    }
+
+    .table-card .card-body {
+        overflow-x: auto;
+        overflow-y: visible;
+        padding: 0;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ===== TABLE - PERFECT ALIGNMENT ===== */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        min-width: 600px;
+    }
+
+    table thead {
+        background: #faf8f6;
+    }
+
+    table thead th {
+        padding: 12px 18px;
+        text-align: left;
+        font-weight: 600;
+        color: #888;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #e8e3df;
+        white-space: nowrap;
+    }
+
+    table tbody td {
+        padding: 12px 18px;
+        border-bottom: 1px solid #e8e3df;
+        vertical-align: middle;
+    }
+
+    table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    table tbody tr {
+        transition: background 0.2s ease;
+    }
+
+    table tbody tr:hover {
+        background: #faf8f6;
+    }
+
+    table tbody tr.danger-row {
+        border-left: 3px solid #dc3545;
+    }
+
+    table tbody tr.warning-row {
+        border-left: 3px solid #d97706;
+    }
+
+    /* ===== PRODUCT CELL - PERFECT ALIGNMENT ===== */
+    .product-cell {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .product-cell .img-wrap {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        position: relative;
+    }
+
+    .product-cell .img-wrap img {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid #e8e3df;
+        background: #f3f4f6;
+        display: block;
+    }
+
+    .product-cell .img-wrap .no-img {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        background: #f3f4f6;
+        border: 1px dashed #d1d5db;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #9ca3af;
+        font-size: 18px;
+    }
+
+    .product-cell .img-wrap .status-dot {
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 7px;
+        background: #dc3545;
+        color: #fff;
+    }
+
+    .product-cell .img-wrap .status-dot.warning {
+        background: #d97706;
+    }
+
+    .product-cell .info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+
+    .product-cell .info .name {
+        font-weight: 600;
+        color: #1d1d1d;
+        font-size: 14px;
+        line-height: 1.3;
+    }
+
+    .product-cell .info .name a {
+        color: #1d1d1d;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .product-cell .info .name a:hover {
+        color: #5c121f;
+    }
+
+    .product-cell .info .tags {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+
+    .product-cell .info .tags .tag {
+        background: #f3f4f6;
+        padding: 1px 10px;
+        border-radius: 10px;
+        font-size: 11px;
+        color: #888;
+        border: 1px solid #e5e7eb;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+
+    .product-cell .info .tags .tag i {
+        font-size: 10px;
+    }
+
+    /* ===== STOCK BADGE ===== */
+    .stock-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .stock-badge.danger {
+        background: #fef2f2;
+        color: #dc3545;
+    }
+
+    .stock-badge.warning {
+        background: #fffbeb;
+        color: #d97706;
+    }
+
+    /* ===== SKU ===== */
+    .sku-code {
+        background: #f3f4f6;
+        padding: 2px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #5c121f;
+        font-family: monospace;
+        border: 1px solid #e5e7eb;
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    /* ===== ACTIONS ===== */
+    .actions {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .actions .btn {
+        padding: 5px 14px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border: none;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .actions .btn-view {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .actions .btn-view:hover {
+        background: #2563eb;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .actions .btn-edit {
+        background: #f0fdf4;
+        color: #16a34a;
+    }
+
+    .actions .btn-edit:hover {
+        background: #16a34a;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .actions .btn i {
+        font-size: 12px;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+    }
+
+    .empty-state .icon {
+        font-size: 48px;
+        color: #86efac;
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .empty-state h5 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1d1d1d;
+        margin-bottom: 4px;
+    }
+
+    .empty-state p {
+        color: #888;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    /* ============================================================
+       RESPONSIVE - NO SCROLL OUTSIDE
+       ============================================================ */
+    
+    /* Tablet */
+    @media (max-width: 1024px) {
+        .stock-tabs {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+        .stock-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+        }
+
+        .stock-header .left {
+            flex-wrap: wrap;
+        }
+
+        .stock-header .left h2 {
+            font-size: 20px;
+        }
+
+        .stock-header .left h2 .badge {
+            font-size: 12px;
+            padding: 2px 12px;
+        }
+
+        .btn-back {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .stock-tabs {
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .stock-tab {
+            padding: 12px 14px;
+            gap: 10px;
+        }
+
+        .stock-tab .tab-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 13px;
+        }
+
+        .stock-tab .tab-text .label {
+            font-size: 13px;
+        }
+
+        .stock-tab .tab-count {
+            font-size: 12px;
+            padding: 2px 10px;
+            min-width: 26px;
+        }
+
+        .table-card .card-head {
+            padding: 12px 16px;
+        }
+
+        .table-card .card-head h5 {
+            font-size: 14px;
+        }
+
+        table thead th,
+        table tbody td {
+            padding: 10px 14px;
+            font-size: 12px;
+        }
+
+        .product-cell {
+            gap: 10px;
+        }
+
+        .product-cell .img-wrap,
+        .product-cell .img-wrap img,
+        .product-cell .img-wrap .no-img {
+            width: 38px;
+            height: 38px;
+        }
+
+        .product-cell .info .name {
+            font-size: 13px;
+        }
+
+        .actions .btn {
+            padding: 4px 10px;
+            font-size: 11px;
+        }
+
+        .stock-badge {
+            font-size: 11px;
+            padding: 3px 10px;
+        }
+
+        .sku-code {
+            font-size: 11px;
+            padding: 2px 8px;
+        }
+    }
+
+    /* Small Mobile */
+    @media (max-width: 480px) {
+        .stock-tabs {
+            grid-template-columns: 1fr;
+            gap: 6px;
+        }
+
+        .stock-header .left .icon-box {
+            width: 38px;
+            height: 38px;
+            font-size: 17px;
+        }
+
+        .stock-header .left h2 {
+            font-size: 18px;
+        }
+
+        .stock-header .left h2 .badge {
+            font-size: 11px;
+            padding: 2px 10px;
+        }
+
+        .table-card .card-head {
+            padding: 10px 14px;
+        }
+
+        .table-card .card-head h5 {
+            font-size: 13px;
+        }
+
+        .table-card .card-head .count {
+            font-size: 11px;
+            padding: 2px 10px;
+        }
+
+        table thead th,
+        table tbody td {
+            padding: 8px 10px;
+            font-size: 11px;
+        }
+
+        .product-cell {
+            gap: 8px;
+        }
+
+        .product-cell .img-wrap,
+        .product-cell .img-wrap img,
+        .product-cell .img-wrap .no-img {
+            width: 34px;
+            height: 34px;
+        }
+
+        .product-cell .img-wrap .status-dot {
+            width: 14px;
+            height: 14px;
+            font-size: 6px;
+            bottom: -1px;
+            right: -1px;
+        }
+
+        .product-cell .info .name {
+            font-size: 12px;
+        }
+
+        .product-cell .info .tags .tag {
+            font-size: 10px;
+            padding: 1px 8px;
+        }
+
+        .actions {
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .actions .btn {
+            justify-content: center;
+            font-size: 10px;
+            padding: 4px 10px;
+        }
+
+        .stock-badge {
+            font-size: 10px;
+            padding: 3px 8px;
+        }
+
+        .sku-code {
+            font-size: 10px;
+            padding: 2px 6px;
+        }
+
+        .empty-state {
+            padding: 30px 16px;
+        }
+
+        .empty-state .icon {
+            font-size: 36px;
+        }
+
+        .empty-state h5 {
+            font-size: 16px;
+        }
+    }
+
+    /* ===== SCROLLBAR STYLING ===== */
+    .table-card .card-body::-webkit-scrollbar {
+        height: 6px;
+        width: 6px;
+    }
+
+    .table-card .card-body::-webkit-scrollbar-track {
+        background: #f3f4f6;
+        border-radius: 10px;
+    }
+
+    .table-card .card-body::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 10px;
+    }
+
+    .table-card .card-body::-webkit-scrollbar-thumb:hover {
+        background: #5c121f;
+    }
+</style>
+
+<!-- ===== HEADER ===== -->
+<div class="stock-header">
+    <div class="left">
+        <div class="icon-box">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h2>
+            Low Stock Alerts
+            <span class="badge" id="totalCount">0 items</span>
+        </h2>
+    </div>
+    <a href="{% url 'Ecom:product_list' %}" class="btn-back">
+        <i class="fas fa-arrow-left"></i> Back to Products
+    </a>
+</div>
+
+<!-- ===== TABS ===== -->
+<div class="stock-tabs">
+    <div class="stock-tab active" data-filter="out-of-stock-products" onclick="filterItems('out-of-stock-products')">
+        <div class="tab-icon danger"><i class="fas fa-times-circle"></i></div>
+        <div class="tab-text">
+            <span class="label">Out of Stock</span>
+            <span class="sub">Products</span>
+        </div>
+        <span class="tab-count {% if out_of_stock_products %}danger{% else %}zero{% endif %}">{{ out_of_stock_products|length }}</span>
     </div>
 
-    <!-- Out of Stock Products -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-danger text-white">
-            <h5 class="mb-0"><i class="fas fa-times-circle"></i> Out of Stock Products</h5>
+    <div class="stock-tab" data-filter="out-of-stock-variants" onclick="filterItems('out-of-stock-variants')">
+        <div class="tab-icon info"><i class="fas fa-cubes"></i></div>
+        <div class="tab-text">
+            <span class="label">Out of Stock</span>
+            <span class="sub">Variants</span>
         </div>
-        <div class="card-body">
-            {% if out_of_stock_products %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>SKU</th>
-                                <th>Category</th>
-                                <th>Stock</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for product in out_of_stock_products %}
-                            <tr class="table-danger">
-                                <td>{{ product.name }}</td>
-                                <td><code>{{ product.sku }}</code></td>
-                                <td>{{ product.category.name }}</td>
-                                <td><span class="badge bg-danger">0</span></td>
-                                <td>
-                                    <a href="{% url 'Ecom:product_admin_detail' product.id %}" class="btn btn-sm btn-info">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{% url 'Ecom:product_smart_edit' product.id %}" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="text-success mb-0"><i class="fas fa-check-circle"></i> No out of stock products.</p>
-            {% endif %}
-        </div>
+        <span class="tab-count {% if out_of_stock_variants %}info{% else %}zero{% endif %}">{{ out_of_stock_variants|length }}</span>
     </div>
 
-    <!-- Out of Stock Variants -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-danger text-white">
-            <h5 class="mb-0"><i class="fas fa-times-circle"></i> Out of Stock Variants</h5>
+    <div class="stock-tab" data-filter="low-stock-products" onclick="filterItems('low-stock-products')">
+        <div class="tab-icon warning"><i class="fas fa-exclamation-circle"></i></div>
+        <div class="tab-text">
+            <span class="label">Low Stock</span>
+            <span class="sub">Products</span>
         </div>
-        <div class="card-body">
-            {% if out_of_stock_variants %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>Variant</th>
-                                <th>SKU</th>
-                                <th>Stock</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for variant in out_of_stock_variants %}
-                            <tr class="table-danger">
-                                <td>{{ variant.product.name }}</td>
-                                <td>
-                                    {% if variant.color %}{{ variant.color }} / {% endif %}
-                                    {% if variant.size %}{{ variant.size }}{% endif %}
-                                </td>
-                                <td><code>{{ variant.sku }}</code></td>
-                                <td><span class="badge bg-danger">0</span></td>
-                                <td>
-                                    <a href="{% url 'Ecom:product_admin_detail' variant.product.id %}" class="btn btn-sm btn-info">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{% url 'Ecom:product_smart_edit' variant.product.id %}" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="text-success mb-0"><i class="fas fa-check-circle"></i> No out of stock variants.</p>
-            {% endif %}
-        </div>
+        <span class="tab-count {% if low_stock_products %}warning{% else %}zero{% endif %}">{{ low_stock_products|length }}</span>
     </div>
 
-    <!-- Low Stock Products -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-warning">
-            <h5 class="mb-0"><i class="fas fa-exclamation-circle"></i> Low Stock Products</h5>
+    <div class="stock-tab" data-filter="low-stock-variants" onclick="filterItems('low-stock-variants')">
+        <div class="tab-icon primary"><i class="fas fa-boxes"></i></div>
+        <div class="tab-text">
+            <span class="label">Low Stock</span>
+            <span class="sub">Variants</span>
         </div>
-        <div class="card-body">
-            {% if low_stock_products %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>SKU</th>
-                                <th>Category</th>
-                                <th>Stock</th>
-                                <th>Threshold</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for product in low_stock_products %}
-                            <tr class="table-warning">
-                                <td>{{ product.name }}</td>
-                                <td><code>{{ product.sku }}</code></td>
-                                <td>{{ product.category.name }}</td>
-                                <td><span class="badge bg-warning">{{ product.stock_quantity }}</span></td>
-                                <td>{{ product.low_stock_threshold }}</td>
-                                <td>
-                                    <a href="{% url 'Ecom:product_admin_detail' product.id %}" class="btn btn-sm btn-info">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{% url 'Ecom:product_smart_edit' product.id %}" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="text-success mb-0"><i class="fas fa-check-circle"></i> No low stock products.</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Low Stock Variants -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-warning">
-            <h5 class="mb-0"><i class="fas fa-exclamation-circle"></i> Low Stock Variants</h5>
-        </div>
-        <div class="card-body">
-            {% if low_stock_variants %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>Variant</th>
-                                <th>SKU</th>
-                                <th>Stock</th>
-                                <th>Threshold</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for variant in low_stock_variants %}
-                            <tr class="table-warning">
-                                <td>{{ variant.product.name }}</td>
-                                <td>
-                                    {% if variant.color %}{{ variant.color }} / {% endif %}
-                                    {% if variant.size %}{{ variant.size }}{% endif %}
-                                </td>
-                                <td><code>{{ variant.sku }}</code></td>
-                                <td><span class="badge bg-warning">{{ variant.stock_quantity }}</span></td>
-                                <td>{{ variant.low_stock_threshold }}</td>
-                                <td>
-                                    <a href="{% url 'Ecom:product_admin_detail' variant.product.id %}" class="btn btn-sm btn-info">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{% url 'Ecom:product_smart_edit' variant.product.id %}" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="text-success mb-0"><i class="fas fa-check-circle"></i> No low stock variants.</p>
-            {% endif %}
-        </div>
+        <span class="tab-count {% if low_stock_variants %}primary{% else %}zero{% endif %}">{{ low_stock_variants|length }}</span>
     </div>
 </div>
+
+<!-- ===== SECTION 1: OUT OF STOCK PRODUCTS ===== -->
+<div class="table-card active" id="section-out-of-stock-products">
+    <div class="card-head">
+        <div class="head-left">
+            <span class="dot danger"></span>
+            <h5>Out of Stock Products</h5>
+        </div>
+        <span class="count">{{ out_of_stock_products|length }} items</span>
+    </div>
+    <div class="card-body">
+        {% if out_of_stock_products %}
+        <table>
+            <thead>
+                <tr>
+                    <th style="min-width:200px;">Product</th>
+                    <th style="min-width:100px;">SKU</th>
+                    <th style="min-width:120px;">Category</th>
+                    <th style="min-width:90px;">Stock</th>
+                    <th style="min-width:140px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in out_of_stock_products %}
+                <tr class="danger-row">
+                    <td>
+                        <div class="product-cell">
+                            <div class="img-wrap">
+                                {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.no-img').style.display='flex'">
+                                <div class="no-img" style="display:none;"><i class="fas fa-box"></i></div>
+                                {% else %}
+                                <div class="no-img"><i class="fas fa-box"></i></div>
+                                {% endif %}
+                                <span class="status-dot"><i class="fas fa-times"></i></span>
+                            </div>
+                            <div class="info">
+                                <span class="name"><a href="{% url 'Ecom:product_admin_detail' product.id %}">{{ product.name }}</a></span>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="sku-code">{{ product.sku }}</span></td>
+                    <td>{{ product.category.name|default:"—" }}</td>
+                    <td><span class="stock-badge danger"><i class="fas fa-times-circle"></i> 0</span></td>
+                    <td>
+                        <div class="actions">
+                            <a href="{% url 'Ecom:product_admin_detail' product.id %}" class="btn btn-view"><i class="fas fa-eye"></i> View</a>
+                            <a href="{% url 'Ecom:product_smart_edit' product.id %}" class="btn btn-edit"><i class="fas fa-edit"></i> Edit</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <span class="icon"><i class="fas fa-check-circle"></i></span>
+            <h5>All Products In Stock</h5>
+            <p>No products are currently out of stock.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ===== SECTION 2: OUT OF STOCK VARIANTS ===== -->
+<div class="table-card" id="section-out-of-stock-variants">
+    <div class="card-head">
+        <div class="head-left">
+            <span class="dot info"></span>
+            <h5>Out of Stock Variants</h5>
+        </div>
+        <span class="count">{{ out_of_stock_variants|length }} items</span>
+    </div>
+    <div class="card-body">
+        {% if out_of_stock_variants %}
+        <table>
+            <thead>
+                <tr>
+                    <th style="min-width:200px;">Product / Variant</th>
+                    <th style="min-width:100px;">SKU</th>
+                    <th style="min-width:120px;">Category</th>
+                    <th style="min-width:90px;">Stock</th>
+                    <th style="min-width:140px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for variant in out_of_stock_variants %}
+                <tr class="danger-row">
+                    <td>
+                        <div class="product-cell">
+                            <div class="img-wrap">
+                                {% if variant.image %}
+                                <img src="{{ variant.image.url }}" alt="{{ variant.product.name }}" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.no-img').style.display='flex'">
+                                <div class="no-img" style="display:none;"><i class="fas fa-cube"></i></div>
+                                {% elif variant.product.image %}
+                                <img src="{{ variant.product.image.url }}" alt="{{ variant.product.name }}" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.no-img').style.display='flex'">
+                                <div class="no-img" style="display:none;"><i class="fas fa-cube"></i></div>
+                                {% else %}
+                                <div class="no-img"><i class="fas fa-cube"></i></div>
+                                {% endif %}
+                                <span class="status-dot"><i class="fas fa-times"></i></span>
+                            </div>
+                            <div class="info">
+                                <span class="name"><a href="{% url 'Ecom:product_admin_detail' variant.product.id %}">{{ variant.product.name }}</a></span>
+                                <div class="tags">
+                                    {% if variant.color %}<span class="tag"><i class="fas fa-palette"></i> {{ variant.color }}</span>{% endif %}
+                                    {% if variant.size %}<span class="tag"><i class="fas fa-ruler"></i> {{ variant.size }}</span>{% endif %}
+                                    {% if not variant.color and not variant.size %}<span class="tag">Default</span>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="sku-code">{{ variant.sku }}</span></td>
+                    <td>{{ variant.product.category.name|default:"—" }}</td>
+                    <td><span class="stock-badge danger"><i class="fas fa-times-circle"></i> 0</span></td>
+                    <td>
+                        <div class="actions">
+                            <a href="{% url 'Ecom:product_admin_detail' variant.product.id %}" class="btn btn-view"><i class="fas fa-eye"></i> View</a>
+                            <a href="{% url 'Ecom:product_smart_edit' variant.product.id %}" class="btn btn-edit"><i class="fas fa-edit"></i> Edit</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <span class="icon"><i class="fas fa-check-circle"></i></span>
+            <h5>All Variants In Stock</h5>
+            <p>No variants are currently out of stock.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ===== SECTION 3: LOW STOCK PRODUCTS ===== -->
+<div class="table-card" id="section-low-stock-products">
+    <div class="card-head">
+        <div class="head-left">
+            <span class="dot warning"></span>
+            <h5>Low Stock Products</h5>
+        </div>
+        <span class="count">{{ low_stock_products|length }} items</span>
+    </div>
+    <div class="card-body">
+        {% if low_stock_products %}
+        <table>
+            <thead>
+                <tr>
+                    <th style="min-width:200px;">Product</th>
+                    <th style="min-width:100px;">SKU</th>
+                    <th style="min-width:120px;">Category</th>
+                    <th style="min-width:90px;">Stock</th>
+                    <th style="min-width:80px;">Threshold</th>
+                    <th style="min-width:140px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in low_stock_products %}
+                <tr class="warning-row">
+                    <td>
+                        <div class="product-cell">
+                            <div class="img-wrap">
+                                {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.no-img').style.display='flex'">
+                                <div class="no-img" style="display:none;"><i class="fas fa-box"></i></div>
+                                {% else %}
+                                <div class="no-img"><i class="fas fa-box"></i></div>
+                                {% endif %}
+                                <span class="status-dot warning"><i class="fas fa-exclamation"></i></span>
+                            </div>
+                            <div class="info">
+                                <span class="name"><a href="{% url 'Ecom:product_admin_detail' product.id %}">{{ product.name }}</a></span>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="sku-code">{{ product.sku }}</span></td>
+                    <td>{{ product.category.name|default:"—" }}</td>
+                    <td><span class="stock-badge warning"><i class="fas fa-exclamation-triangle"></i> {{ product.stock_quantity }}</span></td>
+                    <td>{{ product.low_stock_threshold|default:"5" }}</td>
+                    <td>
+                        <div class="actions">
+                            <a href="{% url 'Ecom:product_admin_detail' product.id %}" class="btn btn-view"><i class="fas fa-eye"></i> View</a>
+                            <a href="{% url 'Ecom:product_smart_edit' product.id %}" class="btn btn-edit"><i class="fas fa-edit"></i> Edit</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <span class="icon"><i class="fas fa-check-circle"></i></span>
+            <h5>All Products Well Stocked</h5>
+            <p>No products are below their stock threshold.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ===== SECTION 4: LOW STOCK VARIANTS ===== -->
+<div class="table-card" id="section-low-stock-variants">
+    <div class="card-head">
+        <div class="head-left">
+            <span class="dot primary"></span>
+            <h5>Low Stock Variants</h5>
+        </div>
+        <span class="count">{{ low_stock_variants|length }} items</span>
+    </div>
+    <div class="card-body">
+        {% if low_stock_variants %}
+        <table>
+            <thead>
+                <tr>
+                    <th style="min-width:200px;">Product / Variant</th>
+                    <th style="min-width:100px;">SKU</th>
+                    <th style="min-width:120px;">Category</th>
+                    <th style="min-width:90px;">Stock</th>
+                    <th style="min-width:80px;">Threshold</th>
+                    <th style="min-width:140px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for variant in low_stock_variants %}
+                <tr class="warning-row">
+                    <td>
+                        <div class="product-cell">
+                            <div class="img-wrap">
+                                {% if variant.image %}
+                                <img src="{{ variant.image.url }}" alt="{{ variant.product.name }}" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.no-img').style.display='flex'">
+                                <div class="no-img" style="display:none;"><i class="fas fa-cube"></i></div>
+                                {% elif variant.product.image %}
+                                <img src="{{ variant.product.image.url }}" alt="{{ variant.product.name }}" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.no-img').style.display='flex'">
+                                <div class="no-img" style="display:none;"><i class="fas fa-cube"></i></div>
+                                {% else %}
+                                <div class="no-img"><i class="fas fa-cube"></i></div>
+                                {% endif %}
+                                <span class="status-dot warning"><i class="fas fa-exclamation"></i></span>
+                            </div>
+                            <div class="info">
+                                <span class="name"><a href="{% url 'Ecom:product_admin_detail' variant.product.id %}">{{ variant.product.name }}</a></span>
+                                <div class="tags">
+                                    {% if variant.color %}<span class="tag"><i class="fas fa-palette"></i> {{ variant.color }}</span>{% endif %}
+                                    {% if variant.size %}<span class="tag"><i class="fas fa-ruler"></i> {{ variant.size }}</span>{% endif %}
+                                    {% if not variant.color and not variant.size %}<span class="tag">Default</span>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="sku-code">{{ variant.sku }}</span></td>
+                    <td>{{ variant.product.category.name|default:"—" }}</td>
+                    <td><span class="stock-badge warning"><i class="fas fa-exclamation-triangle"></i> {{ variant.stock_quantity }}</span></td>
+                    <td>{{ variant.low_stock_threshold|default:"5" }}</td>
+                    <td>
+                        <div class="actions">
+                            <a href="{% url 'Ecom:product_admin_detail' variant.product.id %}" class="btn btn-view"><i class="fas fa-eye"></i> View</a>
+                            <a href="{% url 'Ecom:product_smart_edit' variant.product.id %}" class="btn btn-edit"><i class="fas fa-edit"></i> Edit</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <span class="icon"><i class="fas fa-check-circle"></i></span>
+            <h5>All Variants Well Stocked</h5>
+            <p>No variants are below their stock threshold.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // ===== FILTER FUNCTION =====
+    function filterItems(filter) {
+        document.querySelectorAll('.stock-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.filter === filter);
+        });
+
+        document.querySelectorAll('.table-card').forEach(card => {
+            card.classList.remove('active');
+        });
+
+        const target = document.getElementById('section-' + filter);
+        if (target) target.classList.add('active');
+    }
+
+    // ===== TOTAL COUNT =====
+    document.addEventListener('DOMContentLoaded', function() {
+        const total = 
+            {{ out_of_stock_products|length }} + 
+            {{ out_of_stock_variants|length }} + 
+            {{ low_stock_products|length }} + 
+            {{ low_stock_variants|length }};
+        document.getElementById('totalCount').textContent = total + ' items';
+    });
+
+    // ===== IMAGE ERROR HANDLING =====
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.img-wrap img').forEach(img => {
+            img.addEventListener('error', function() {
+                this.style.display = 'none';
+                const fallback = this.parentElement.querySelector('.no-img');
+                if (fallback) fallback.style.display = 'flex';
+            });
+        });
+    });
+</script>
+
 {% endblock %}

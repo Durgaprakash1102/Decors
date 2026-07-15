@@ -1,76 +1,1362 @@
-{% extends 'base.html' %}
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
 {% block title %}{{ action }} Subcategory - MyStore{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-{% if action == 'Create' %}plus-circle{% else %}edit{% endif %} text-primary"></i> {{ action }} Subcategory</h2>
-                <a href="{% url 'Ecom:subcategory_list' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back
-                </a>
-            </div>
 
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Category <span class="text-danger">*</span></label>
-                            {{ form.category }}
-                            {% if form.category.errors %}
-                                <div class="text-danger small">{{ form.category.errors }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Name <span class="text-danger">*</span></label>
-                            {{ form.name }}
-                            {% if form.name.errors %}
-                                <div class="text-danger small">{{ form.name.errors }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            {{ form.description }}
-                            {% if form.description.errors %}
-                                <div class="text-danger small">{{ form.description.errors }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Image</label>
-                            {% if subcategory.image %}
-                                <div class="mb-2">
-                                    <img src="{{ subcategory.image.url }}" width="100" height="100" style="object-fit:cover; border-radius:4px;">
-                                </div>
-                            {% endif %}
-                            {{ form.image }}
-                            {% if form.image.errors %}
-                                <div class="text-danger small">{{ form.image.errors }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="mb-3 form-check">
-                            {{ form.is_active }}
-                            <label class="form-check-label">Active</label>
-                        </div>
-                        
-                        <div class="d-flex justify-content-end gap-2">
-                            <a href="{% url 'Ecom:subcategory_list' %}" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> {{ action }} Subcategory
-                            </button>
-                        </div>
-                    </form>
-                </div>
+<style>
+/* ============================================================
+   ROOT VARIABLES
+   ============================================================ */
+:root {
+    --sc-primary: #5c121f;
+    --sc-primary-light: #7a1a2b;
+    --sc-primary-dark: #3d0c14;
+    --sc-secondary: #F4B400;
+    --sc-bg: #f5f0eb;
+    --sc-white: #ffffff;
+    --sc-border: #e8e4e0;
+    --sc-text: #1d1d1d;
+    --sc-text-light: #6d6d6d;
+    --sc-text-muted: #888888;
+    --sc-success: #2e9d57;
+    --sc-danger: #d64045;
+    --sc-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    --sc-shadow-hover: 0 20px 50px rgba(92,18,31,0.12);
+    --sc-transition: 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --sc-radius: 16px;
+    --sc-radius-sm: 10px;
+    --sc-radius-xs: 8px;
+    --sc-font: 'Inter', sans-serif;
+}
+
+/* ============================================================
+   MAIN WRAPPER
+   ============================================================ */
+.sc-subcategory-wrap {
+    width: 100%;
+    padding: 10px 20px;
+    background: var(--sc-bg);
+    min-height: calc(100vh - 200px);
+    animation: scFadeUp 0.5s ease;
+}
+
+/* ============================================================
+   HEADER SECTION
+   ============================================================ */
+.sc-header-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--sc-border);
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.sc-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.sc-header-icon-box {
+    width: 50px;
+    height: 50px;
+    background: var(--sc-primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sc-white);
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.sc-header-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--sc-primary);
+    font-family: var(--sc-font);
+    margin: 0;
+    letter-spacing: -0.3px;
+}
+
+.sc-header-sub {
+    color: var(--sc-text-light);
+    font-size: 13px;
+    margin: 0;
+    font-family: var(--sc-font);
+}
+
+.sc-btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    background: var(--sc-white);
+    color: var(--sc-text);
+    border: 1px solid var(--sc-border);
+    border-radius: var(--sc-radius-sm);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: var(--sc-transition);
+    font-family: var(--sc-font);
+    flex-shrink: 0;
+}
+
+.sc-btn-back:hover {
+    background: var(--sc-primary);
+    color: var(--sc-white);
+    border-color: var(--sc-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(92, 18, 31, 0.15);
+}
+
+/* ============================================================
+   GRID LAYOUT
+   ============================================================ */
+.sc-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 30px;
+    align-items: start;
+}
+
+/* ============================================================
+   FORM SECTION
+   ============================================================ */
+.sc-form-card {
+    background: var(--sc-white);
+    border-radius: var(--sc-radius);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    border: 1px solid var(--sc-border);
+    overflow: hidden;
+}
+
+.sc-form-header {
+    padding: 20px 28px;
+    background: linear-gradient(135deg, var(--sc-primary) 0%, var(--sc-primary-dark) 100%);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.sc-form-icon-box {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sc-white);
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.sc-form-title {
+    color: var(--sc-white);
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    font-family: var(--sc-font);
+}
+
+.sc-form-badge {
+    margin-left: auto;
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--sc-white);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: var(--sc-font);
+}
+
+.sc-form-body {
+    padding: 28px 30px 30px;
+}
+
+/* ============================================================
+   FORM ROW
+   ============================================================ */
+.sc-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.sc-form-row-full {
+    grid-column: 1 / -1;
+}
+
+.sc-form-group {
+    margin-bottom: 0;
+}
+
+.sc-form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sc-text);
+    margin-bottom: 4px;
+    font-family: var(--sc-font);
+}
+
+.sc-form-label .sc-req {
+    color: var(--sc-danger);
+    margin-left: 2px;
+}
+
+.sc-form-label .sc-hint {
+    font-weight: 400;
+    color: var(--sc-text-muted);
+    font-size: 11px;
+}
+
+.sc-form-label .sc-label-icon {
+    color: var(--sc-primary);
+    margin-right: 4px;
+}
+
+/* ============================================================
+   FORM INPUTS
+   ============================================================ */
+.sc-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--sc-border);
+    border-radius: var(--sc-radius-xs);
+    font-size: 14px;
+    font-family: var(--sc-font);
+    color: var(--sc-text);
+    background: var(--sc-white);
+    transition: var(--sc-transition);
+    outline: none;
+}
+
+.sc-input:focus {
+    border-color: var(--sc-primary);
+    box-shadow: 0 0 0 4px rgba(92, 18, 31, 0.06);
+}
+
+.sc-input::placeholder {
+    color: var(--sc-text-muted);
+    font-weight: 300;
+}
+
+.sc-input-textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.6;
+}
+
+.sc-input-error {
+    border-color: var(--sc-danger);
+    background: #fff5f5;
+}
+
+.sc-error-msg {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--sc-danger);
+    margin-top: 3px;
+    font-weight: 500;
+    font-family: var(--sc-font);
+}
+
+/* ============================================================
+   CHARACTER COUNTER
+   ============================================================ */
+.sc-char-count {
+    text-align: right;
+    font-size: 11px;
+    color: var(--sc-text-muted);
+    margin-top: 2px;
+    font-family: var(--sc-font);
+}
+
+.sc-char-count .sc-count-num {
+    font-weight: 600;
+    color: var(--sc-text-light);
+}
+
+/* ============================================================
+   SEARCHABLE DROPDOWN
+   ============================================================ */
+.sc-drop-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.sc-drop-selected {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--sc-border);
+    border-radius: var(--sc-radius-xs);
+    background: var(--sc-white);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: var(--sc-transition);
+    font-size: 14px;
+    color: var(--sc-text);
+    font-family: var(--sc-font);
+}
+
+.sc-drop-selected:hover {
+    border-color: var(--sc-primary);
+}
+
+.sc-drop-selected.sc-active {
+    border-color: var(--sc-primary);
+    box-shadow: 0 0 0 4px rgba(92, 18, 31, 0.06);
+}
+
+.sc-drop-selected .sc-drop-arrow {
+    color: var(--sc-text-muted);
+    font-size: 12px;
+    transition: var(--sc-transition);
+}
+
+.sc-drop-selected.sc-active .sc-drop-arrow {
+    transform: rotate(180deg);
+}
+
+.sc-drop-selected .sc-drop-placeholder {
+    color: var(--sc-text-muted);
+    font-weight: 300;
+}
+
+.sc-drop-selected .sc-drop-value {
+    color: var(--sc-text);
+    font-weight: 500;
+}
+
+.sc-drop-items {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--sc-white);
+    border: 2px solid var(--sc-primary);
+    border-radius: var(--sc-radius-xs);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    z-index: 1000;
+    max-height: 260px;
+    overflow: hidden;
+    animation: scDropSlide 0.25s ease;
+}
+
+@keyframes scDropSlide {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.sc-drop-items.sc-show {
+    display: block;
+}
+
+.sc-drop-search {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--sc-border);
+    position: sticky;
+    top: 0;
+    background: var(--sc-white);
+    z-index: 2;
+    position: relative;
+}
+
+.sc-drop-search input {
+    width: 100%;
+    padding: 7px 12px 7px 34px;
+    border: 2px solid var(--sc-border);
+    border-radius: var(--sc-radius-xs);
+    font-size: 13px;
+    font-family: var(--sc-font);
+    color: var(--sc-text);
+    background: var(--sc-bg);
+    outline: none;
+    transition: var(--sc-transition);
+}
+
+.sc-drop-search input:focus {
+    border-color: var(--sc-primary);
+    box-shadow: 0 0 0 4px rgba(92, 18, 31, 0.06);
+    background: var(--sc-white);
+}
+
+.sc-drop-search .sc-search-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--sc-text-muted);
+    font-size: 13px;
+}
+
+.sc-drop-options {
+    max-height: 180px;
+    overflow-y: auto;
+    padding: 4px 0;
+}
+
+.sc-drop-options::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sc-drop-options::-webkit-scrollbar-track {
+    background: var(--sc-bg);
+    border-radius: 2px;
+}
+
+.sc-drop-options::-webkit-scrollbar-thumb {
+    background: var(--sc-primary);
+    border-radius: 2px;
+}
+
+.sc-drop-opt {
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--sc-text);
+    transition: var(--sc-transition);
+    font-family: var(--sc-font);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sc-drop-opt:hover {
+    background: var(--sc-bg);
+}
+
+.sc-drop-opt.sc-selected {
+    background: rgba(92, 18, 31, 0.08);
+    color: var(--sc-primary);
+    font-weight: 600;
+}
+
+.sc-drop-opt .sc-opt-check {
+    color: var(--sc-primary);
+    font-size: 12px;
+    margin-left: auto;
+    opacity: 0;
+    transition: var(--sc-transition);
+}
+
+.sc-drop-opt.sc-selected .sc-opt-check {
+    opacity: 1;
+}
+
+.sc-drop-opt .sc-opt-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--sc-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--sc-text-muted);
+    flex-shrink: 0;
+}
+
+.sc-drop-opt .sc-opt-name {
+    flex: 1;
+}
+
+.sc-drop-opt .sc-opt-count {
+    font-size: 11px;
+    color: var(--sc-text-muted);
+    background: var(--sc-bg);
+    padding: 0 8px;
+    border-radius: 10px;
+}
+
+.sc-drop-empty {
+    padding: 20px;
+    text-align: center;
+    color: var(--sc-text-muted);
+    font-size: 13px;
+    font-family: var(--sc-font);
+}
+
+.sc-drop-empty i {
+    display: block;
+    font-size: 28px;
+    margin-bottom: 8px;
+    color: var(--sc-border);
+}
+
+/* ============================================================
+   IMAGE UPLOAD
+   ============================================================ */
+.sc-img-area {
+    border: 2px dashed var(--sc-border);
+    border-radius: var(--sc-radius-sm);
+    padding: 20px;
+    text-align: center;
+    transition: var(--sc-transition);
+    cursor: pointer;
+    background: var(--sc-bg);
+    position: relative;
+}
+
+.sc-img-area:hover {
+    border-color: var(--sc-primary);
+    background: rgba(92, 18, 31, 0.02);
+}
+
+.sc-img-area .sc-upload-icon {
+    font-size: 32px;
+    color: var(--sc-text-muted);
+    margin-bottom: 6px;
+}
+
+.sc-img-area .sc-upload-text {
+    font-size: 13px;
+    color: var(--sc-text-light);
+    font-family: var(--sc-font);
+}
+
+.sc-img-area .sc-upload-text strong {
+    color: var(--sc-primary);
+}
+
+.sc-img-area .sc-upload-hint {
+    font-size: 11px;
+    color: var(--sc-text-muted);
+    margin-top: 4px;
+    font-family: var(--sc-font);
+}
+
+.sc-img-area input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.sc-img-preview {
+    display: none;
+    margin-top: 12px;
+}
+
+.sc-img-preview.sc-has-img {
+    display: block;
+}
+
+.sc-img-preview img {
+    max-width: 120px;
+    max-height: 120px;
+    border-radius: var(--sc-radius-xs);
+    border: 2px solid var(--sc-border);
+    object-fit: cover;
+}
+
+.sc-img-preview small {
+    color: var(--sc-text-muted);
+    font-size: 11px;
+    font-family: var(--sc-font);
+}
+
+/* ============================================================
+   TOGGLE SWITCH
+   ============================================================ */
+.sc-toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 16px;
+    background: var(--sc-bg);
+    border-radius: var(--sc-radius-xs);
+    border: 1px solid var(--sc-border);
+}
+
+.sc-toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.sc-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.sc-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #ccc;
+    transition: var(--sc-transition);
+    border-radius: 30px;
+}
+
+.sc-toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background: var(--sc-white);
+    transition: var(--sc-transition);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.sc-toggle input:checked + .sc-toggle-slider {
+    background: var(--sc-success);
+}
+
+.sc-toggle input:checked + .sc-toggle-slider::before {
+    transform: translateX(20px);
+}
+
+.sc-toggle-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--sc-text);
+    font-family: var(--sc-font);
+}
+
+.sc-toggle-desc {
+    font-size: 11px;
+    color: var(--sc-text-muted);
+    font-family: var(--sc-font);
+}
+
+/* ============================================================
+   FORM ACTIONS
+   ============================================================ */
+.sc-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 2px solid var(--sc-bg);
+}
+
+.sc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: var(--sc-radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--sc-font);
+    border: none;
+    cursor: pointer;
+    transition: var(--sc-transition);
+    text-decoration: none;
+}
+
+.sc-btn-primary {
+    background: var(--sc-primary);
+    color: var(--sc-white);
+}
+
+.sc-btn-primary:hover {
+    background: var(--sc-primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(92, 18, 31, 0.2);
+}
+
+.sc-btn-secondary {
+    background: var(--sc-bg);
+    color: var(--sc-text);
+    border: 1px solid var(--sc-border);
+}
+
+.sc-btn-secondary:hover {
+    background: var(--sc-border);
+    transform: translateY(-2px);
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.sc-sidebar {
+    background: var(--sc-white);
+    border-radius: var(--sc-radius);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    border: 1px solid var(--sc-border);
+    overflow: hidden;
+    position: sticky;
+    top: 30px;
+    animation: scFadeUp 0.5s ease 0.1s both;
+}
+
+.sc-sidebar-head {
+    padding: 18px 20px;
+    background: linear-gradient(135deg, #f5f0eb 0%, #e8e4e0 100%);
+    border-bottom: 1px solid var(--sc-border);
+}
+
+.sc-sidebar-head h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--sc-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--sc-font);
+}
+
+.sc-sidebar-head h4 i {
+    color: var(--sc-primary);
+}
+
+.sc-sidebar-body {
+    padding: 20px;
+}
+
+.sc-tip-card {
+    background: var(--sc-bg);
+    border-radius: var(--sc-radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    border-left: 3px solid var(--sc-secondary);
+    transition: var(--sc-transition);
+    animation: scFadeIn 0.6s ease both;
+}
+
+.sc-tip-card:nth-child(1) { animation-delay: 0.1s; }
+.sc-tip-card:nth-child(2) { animation-delay: 0.2s; }
+.sc-tip-card:nth-child(3) { animation-delay: 0.3s; }
+
+.sc-tip-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+.sc-tip-card:last-child {
+    margin-bottom: 0;
+}
+
+.sc-tip-card .sc-tip-icon {
+    color: var(--sc-secondary);
+    font-size: 16px;
+    margin-right: 8px;
+}
+
+.sc-tip-card .sc-tip-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--sc-text);
+    margin-bottom: 2px;
+    font-family: var(--sc-font);
+}
+
+.sc-tip-card .sc-tip-desc {
+    font-size: 12px;
+    color: var(--sc-text-light);
+    line-height: 1.5;
+    margin: 0;
+    font-family: var(--sc-font);
+}
+
+.sc-examples {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--sc-border);
+}
+
+.sc-examples h5 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sc-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    font-family: var(--sc-font);
+}
+
+.sc-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.sc-tag {
+    background: var(--sc-bg);
+    border: 1px solid var(--sc-border);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    color: var(--sc-text-light);
+    transition: var(--sc-transition);
+    font-family: var(--sc-font);
+}
+
+.sc-tag:hover {
+    background: var(--sc-primary);
+    color: var(--sc-white);
+    border-color: var(--sc-primary);
+    transform: translateY(-1px);
+}
+
+.sc-tag i {
+    margin-right: 4px;
+    font-size: 10px;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes scFadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+/* Desktop Large */
+@media (min-width: 1400px) {
+    .sc-subcategory-wrap { padding: 40px 60px; }
+    .sc-grid { grid-template-columns: 1fr 420px; gap: 40px; }
+    .sc-form-body { padding: 32px 36px 34px; }
+}
+
+/* Desktop */
+@media (max-width: 1200px) {
+    .sc-grid { grid-template-columns: 1fr 340px; gap: 24px; }
+}
+
+/* Tablet */
+@media (max-width: 992px) {
+    .sc-subcategory-wrap { padding: 24px 24px; }
+    .sc-grid { grid-template-columns: 1fr; }
+    .sc-sidebar { position: static; }
+    .sc-form-row { grid-template-columns: 1fr; gap: 14px; }
+    .sc-form-row-full { grid-column: 1; }
+    .sc-header-wrap { flex-direction: column; align-items: flex-start; }
+    .sc-btn-back { width: 100%; justify-content: center; }
+}
+
+/* Mobile Large */
+@media (max-width: 768px) {
+    .sc-subcategory-wrap { padding: 16px 16px; }
+    .sc-form-body { padding: 18px 16px 20px; }
+    .sc-form-header { padding: 16px 18px; }
+    .sc-form-title { font-size: 14px; }
+    .sc-header-title { font-size: 20px; }
+    .sc-header-icon-box { width: 42px; height: 42px; font-size: 18px; }
+    .sc-actions { flex-direction: column-reverse; }
+    .sc-btn { justify-content: center; width: 100%; }
+    .sc-toggle-wrap { flex-wrap: wrap; }
+    .sc-sidebar-head { padding: 14px 16px; }
+    .sc-sidebar-body { padding: 16px; }
+}
+
+/* Mobile Medium */
+@media (max-width: 576px) {
+    .sc-subcategory-wrap { padding: 12px 12px; }
+    .sc-form-body { padding: 14px 12px 16px; }
+    .sc-input { padding: 8px 12px; font-size: 13px; }
+    .sc-input-textarea { min-height: 60px; }
+    .sc-header-title { font-size: 18px; }
+    .sc-header-sub { font-size: 12px; }
+    .sc-header-icon-box { width: 38px; height: 38px; font-size: 16px; }
+    .sc-btn-back { padding: 8px 16px; font-size: 12px; }
+    .sc-drop-selected { padding: 8px 12px; font-size: 13px; }
+    .sc-drop-opt { padding: 6px 12px; font-size: 12px; }
+    .sc-drop-search input { font-size: 12px; padding: 6px 10px 6px 30px; }
+    .sc-img-area { padding: 14px; }
+    .sc-img-area .sc-upload-icon { font-size: 24px; }
+    .sc-sidebar-head h4 { font-size: 14px; }
+    .sc-tip-card { padding: 10px 12px; }
+    .sc-tip-card .sc-tip-title { font-size: 12px; }
+    .sc-tip-card .sc-tip-desc { font-size: 11px; }
+    .sc-form-label { font-size: 11px; }
+    .sc-form-badge { font-size: 10px; padding: 3px 10px; }
+    .sc-char-count { font-size: 10px; }
+    .sc-btn { font-size: 12px; padding: 8px 16px; }
+    .sc-toggle { width: 38px; height: 20px; }
+    .sc-toggle-slider::before { height: 12px; width: 12px; left: 4px; bottom: 4px; }
+    .sc-toggle input:checked + .sc-toggle-slider::before { transform: translateX(18px); }
+    .sc-toggle-label { font-size: 12px; }
+    .sc-toggle-desc { font-size: 10px; }
+    .sc-tag { font-size: 10px; padding: 3px 10px; }
+}
+
+/* Mobile Small */
+@media (max-width: 400px) {
+    .sc-subcategory-wrap { padding: 8px 8px; }
+    .sc-form-body { padding: 12px 10px 14px; }
+    .sc-form-header { padding: 12px 14px; }
+    .sc-form-title { font-size: 13px; }
+    .sc-header-title { font-size: 16px; }
+    .sc-header-sub { font-size: 11px; }
+    .sc-header-icon-box { width: 34px; height: 34px; font-size: 14px; }
+    .sc-input { padding: 6px 10px; font-size: 12px; }
+    .sc-input-textarea { min-height: 50px; }
+    .sc-drop-selected { padding: 6px 10px; font-size: 12px; }
+    .sc-drop-opt { padding: 5px 10px; font-size: 11px; }
+    .sc-img-area .sc-upload-text { font-size: 12px; }
+    .sc-img-area .sc-upload-hint { font-size: 10px; }
+    .sc-btn { font-size: 11px; padding: 7px 14px; }
+    .sc-sidebar-body { padding: 12px; }
+    .sc-tip-card { padding: 8px 10px; }
+}
+</style>
+
+<!-- ============================================================
+   HTML STRUCTURE
+   ============================================================ -->
+<div class="sc-subcategory-wrap">
+
+    <!-- ===== HEADER ===== -->
+    <div class="sc-header-wrap">
+        <div class="sc-header-left">
+            <div class="sc-header-icon-box">
+                <i class="fas fa-{% if action == 'Create' %}plus{% else %}pencil-alt{% endif %}"></i>
+            </div>
+            <div>
+                <h1 class="sc-header-title">{% if action == 'Create' %}Create Subcategory{% else %}Edit Subcategory{% endif %}</h1>
+                <p class="sc-header-sub">{% if action == 'Create' %}Add a new subcategory under a parent category{% else %}Update existing subcategory details{% endif %}</p>
             </div>
         </div>
+        <a href="{% url 'Ecom:subcategory_list' %}" class="sc-btn-back">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <!-- ===== GRID ===== -->
+    <div class="sc-grid">
+
+        <!-- ===== FORM ===== -->
+        <div class="sc-form-card">
+            <div class="sc-form-header">
+                <div class="sc-form-icon-box">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <h3 class="sc-form-title">Subcategory Information</h3>
+                <span class="sc-form-badge">
+                    <i class="fas fa-{% if action == 'Create' %}plus{% else %}edit{% endif %}"></i>
+                    {{ action }}
+                </span>
+            </div>
+            <div class="sc-form-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <!-- ===== Category Dropdown ===== -->
+                    <div class="sc-form-row">
+                        <div class="sc-form-group sc-form-row-full">
+                            <label class="sc-form-label">
+                                <i class="fas fa-folder sc-label-icon"></i>
+                                Parent Category <span class="sc-req">*</span>
+                            </label>
+                            <div class="sc-drop-wrap" id="categoryDropdown">
+                                <div class="sc-drop-selected" onclick="toggleDropdown()">
+                                    <span class="sc-drop-value" id="selectedCategory">
+                                        {% if form.category.value %}
+                                            {% for cat in categories %}
+                                                {% if cat.id == form.category.value %}
+                                                    {{ cat.name }}
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="sc-drop-placeholder">Select a category...</span>
+                                        {% endif %}
+                                    </span>
+                                    <span class="sc-drop-arrow">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </span>
+                                </div>
+                                <div class="sc-drop-items" id="dropdownItems">
+                                    <div class="sc-drop-search">
+                                        <i class="fas fa-search sc-search-icon"></i>
+                                        <input type="text" 
+                                               id="categorySearch" 
+                                               placeholder="Search categories..." 
+                                               oninput="filterCategories()">
+                                    </div>
+                                    <div class="sc-drop-options" id="categoryOptions">
+                                        {% for category in categories %}
+                                            <div class="sc-drop-opt {% if form.category.value == category.id %}sc-selected{% endif %}" 
+                                                 data-value="{{ category.id }}"
+                                                 onclick="selectCategory('{{ category.id }}', '{{ category.name|escapejs }}')">
+                                                <span class="sc-opt-icon">
+                                                    <i class="fas fa-folder"></i>
+                                                </span>
+                                                <span class="sc-opt-name">{{ category.name }}</span>
+                                                <span class="sc-opt-count">{{ category.subcategories.count }}</span>
+                                                <span class="sc-opt-check">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                            </div>
+                                        {% empty %}
+                                            <div class="sc-drop-empty">
+                                                <i class="fas fa-folder-open"></i>
+                                                No categories available
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="category" id="categoryInput" value="{{ form.category.value }}">
+                            {% if form.category.errors %}
+                                <div class="sc-error-msg">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ form.category.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- ===== Name ===== -->
+                    <div class="sc-form-row">
+                        <div class="sc-form-group sc-form-row-full">
+                            <label class="sc-form-label">
+                                <i class="fas fa-tag sc-label-icon"></i>
+                                Subcategory Name <span class="sc-req">*</span>
+                            </label>
+                            <input type="text" 
+                                   name="name" 
+                                   class="sc-input {% if form.name.errors %}sc-input-error{% endif %}"
+                                   placeholder="e.g., Sofas, Dining Tables, Wall Art"
+                                   value="{{ form.name.value|default:'' }}"
+                                   maxlength="100"
+                                   required>
+                            {% if form.name.errors %}
+                                <div class="sc-error-msg">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ form.name.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- ===== Description ===== -->
+                    <div class="sc-form-row">
+                        <div class="sc-form-group sc-form-row-full">
+                            <label class="sc-form-label">
+                                <i class="fas fa-align-left sc-label-icon"></i>
+                                Description <span class="sc-hint">(Optional)</span>
+                            </label>
+                            <textarea name="description" 
+                                      class="sc-input sc-input-textarea {% if form.description.errors %}sc-input-error{% endif %}"
+                                      placeholder="Describe what products belong in this subcategory..."
+                                      maxlength="500"
+                                      oninput="updateCharCount(this)">{{ form.description.value|default:'' }}</textarea>
+                            <div class="sc-char-count">
+                                <span class="sc-count-num" id="charCount">0</span> / 500 characters
+                            </div>
+                            {% if form.description.errors %}
+                                <div class="sc-error-msg">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ form.description.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- ===== Image ===== -->
+                    <div class="sc-form-row">
+                        <div class="sc-form-group sc-form-row-full">
+                            <label class="sc-form-label">
+                                <i class="fas fa-image sc-label-icon"></i>
+                                Subcategory Image <span class="sc-hint">(Optional)</span>
+                            </label>
+                            <div class="sc-img-area" id="imageUploadArea">
+                                <i class="fas fa-cloud-upload-alt sc-upload-icon"></i>
+                                <div class="sc-upload-text">
+                                    <strong>Click to upload</strong> or drag and drop
+                                </div>
+                                <div class="sc-upload-hint">Recommended: 400x400px or larger (JPG, PNG, WebP)</div>
+                                <input type="file" name="image" id="imageUpload" accept="image/*">
+                                <div class="sc-img-preview {% if subcategory.image %}sc-has-img{% endif %}" id="imagePreviewWrapper">
+                                    {% if subcategory.image %}
+                                        <img src="{{ subcategory.image.url }}" alt="{{ subcategory.name }}">
+                                        <br>
+                                        <small>Current image</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if form.image.errors %}
+                                <div class="sc-error-msg">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ form.image.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- ===== Status ===== -->
+                    <div class="sc-form-row">
+                        <div class="sc-form-group sc-form-row-full">
+                            <label class="sc-form-label">
+                                <i class="fas fa-toggle-on sc-label-icon"></i>
+                                Status
+                            </label>
+                            <div class="sc-toggle-wrap">
+                                <label class="sc-toggle">
+                                    <input type="checkbox" name="is_active" {% if form.is_active.value or action == 'Create' %}checked{% endif %}>
+                                    <span class="sc-toggle-slider"></span>
+                                </label>
+                                <div>
+                                    <div class="sc-toggle-label" id="statusLabel">
+                                        {% if form.is_active.value or action == 'Create' %}Active{% else %}Inactive{% endif %}
+                                    </div>
+                                    <div class="sc-toggle-desc" id="statusDescription">
+                                        {% if form.is_active.value or action == 'Create' %}Visible to customers{% else %}Hidden from customers{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== Actions ===== -->
+                    <div class="sc-actions">
+                        <a href="{% url 'Ecom:subcategory_list' %}" class="sc-btn sc-btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="sc-btn sc-btn-primary">
+                            <i class="fas fa-save"></i> 
+                            {% if action == 'Create' %}Create Subcategory{% else %}Update Subcategory{% endif %}
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== SIDEBAR ===== -->
+        <div class="sc-sidebar">
+            <div class="sc-sidebar-head">
+                <h4>
+                    <i class="fas fa-lightbulb"></i>
+                    Quick Tips
+                </h4>
+            </div>
+            <div class="sc-sidebar-body">
+
+                <div class="sc-tip-card">
+                    <div class="sc-tip-title">
+                        <i class="fas fa-bullseye sc-tip-icon"></i>
+                        Choose the Right Parent
+                    </div>
+                    <p class="sc-tip-desc">
+                        Always select the most relevant category for your subcategory to help customers find products easily.
+                    </p>
+                </div>
+
+                <div class="sc-tip-card">
+                    <div class="sc-tip-title">
+                        <i class="fas fa-key sc-tip-icon"></i>
+                        Use Specific Names
+                    </div>
+                    <p class="sc-tip-desc">
+                        Be precise with subcategory names. "Sofas" is better than "Seating" for better search results.
+                    </p>
+                </div>
+
+                <div class="sc-tip-card">
+                    <div class="sc-tip-title">
+                        <i class="fas fa-image sc-tip-icon"></i>
+                        Add a Subcategory Image
+                    </div>
+                    <p class="sc-tip-desc">
+                        A good image makes your subcategory more appealing and helps customers recognize it quickly.
+                    </p>
+                </div>
+
+                <div class="sc-examples">
+                    <h5>📌 Popular Subcategories</h5>
+                    <div class="sc-tags">
+                        <span class="sc-tag"><i class="fas fa-couch"></i> Sofas</span>
+                        <span class="sc-tag"><i class="fas fa-chair"></i> Armchairs</span>
+                        <span class="sc-tag"><i class="fas fa-table"></i> Dining Tables</span>
+                        <span class="sc-tag"><i class="fas fa-bed"></i> Bed Frames</span>
+                        <span class="sc-tag"><i class="fas fa-lamp"></i> Floor Lamps</span>
+                        <span class="sc-tag"><i class="fas fa-paint-brush"></i> Wall Art</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 </div>
+
+<!-- ============================================================
+   JAVASCRIPT
+   ============================================================ -->
+<script>
+    // ===== Character Counter =====
+    function updateCharCount(textarea) {
+        const count = textarea.value.length;
+        const counter = document.getElementById('charCount');
+        if (counter) {
+            counter.textContent = count;
+            counter.style.color = count > 450 ? (count > 490 ? 'var(--sc-danger)' : 'var(--sc-secondary)') : 'var(--sc-text-light)';
+        }
+    }
+
+    // ===== Searchable Dropdown =====
+    function toggleDropdown() {
+        const items = document.getElementById('dropdownItems');
+        const selected = document.querySelector('.sc-drop-selected');
+        items.classList.toggle('sc-show');
+        selected.classList.toggle('sc-active');
+    }
+
+    function selectCategory(id, name) {
+        document.getElementById('selectedCategory').textContent = name;
+        document.getElementById('categoryInput').value = id;
+        
+        document.querySelectorAll('.sc-drop-opt').forEach(opt => {
+            opt.classList.remove('sc-selected');
+        });
+        document.querySelectorAll('.sc-drop-opt').forEach(opt => {
+            if (opt.dataset.value == id) {
+                opt.classList.add('sc-selected');
+            }
+        });
+        
+        document.getElementById('dropdownItems').classList.remove('sc-show');
+        document.querySelector('.sc-drop-selected').classList.remove('sc-active');
+        document.getElementById('categorySearch').value = '';
+        filterCategories();
+    }
+
+    function filterCategories() {
+        const search = document.getElementById('categorySearch').value.toLowerCase();
+        const options = document.querySelectorAll('.sc-drop-opt');
+        let hasVisible = false;
+        
+        options.forEach(opt => {
+            const name = opt.querySelector('.sc-opt-name').textContent.toLowerCase();
+            if (name.includes(search)) {
+                opt.style.display = 'flex';
+                hasVisible = true;
+            } else {
+                opt.style.display = 'none';
+            }
+        });
+        
+        let noResults = document.querySelector('.sc-drop-empty');
+        if (!hasVisible && options.length > 0) {
+            if (!noResults) {
+                const container = document.getElementById('categoryOptions');
+                const empty = document.createElement('div');
+                empty.className = 'sc-drop-empty';
+                empty.innerHTML = `
+                    <i class="fas fa-search"></i>
+                    No matching categories found
+                `;
+                container.appendChild(empty);
+            }
+        } else if (noResults) {
+            noResults.remove();
+        }
+    }
+
+    // ===== Close dropdown on outside click =====
+    document.addEventListener('click', function(e) {
+        const wrapper = document.getElementById('categoryDropdown');
+        if (!wrapper.contains(e.target)) {
+            document.getElementById('dropdownItems').classList.remove('sc-show');
+            document.querySelector('.sc-drop-selected').classList.remove('sc-active');
+        }
+    });
+
+    // ===== Image Upload Preview =====
+    document.addEventListener('DOMContentLoaded', function() {
+        // Character Counter
+        const textarea = document.querySelector('textarea[name="description"]');
+        if (textarea) {
+            updateCharCount(textarea);
+            textarea.addEventListener('input', function() {
+                updateCharCount(this);
+            });
+        }
+
+        // Image Upload
+        const imageInput = document.getElementById('imageUpload');
+        const previewWrapper = document.getElementById('imagePreviewWrapper');
+
+        if (imageInput) {
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        previewWrapper.innerHTML = `
+                            <img src="${event.target.result}" alt="Preview">
+                            <br>
+                            <small>New image uploaded</small>
+                        `;
+                        previewWrapper.classList.add('sc-has-img');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Toggle Status
+        const toggleCheckbox = document.querySelector('.sc-toggle input');
+        const statusLabel = document.getElementById('statusLabel');
+        const statusDescription = document.getElementById('statusDescription');
+
+        if (toggleCheckbox) {
+            toggleCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    statusLabel.textContent = 'Active';
+                    statusDescription.textContent = 'Visible to customers';
+                    statusLabel.style.color = 'var(--sc-success)';
+                } else {
+                    statusLabel.textContent = 'Inactive';
+                    statusDescription.textContent = 'Hidden from customers';
+                    statusLabel.style.color = 'var(--sc-text-muted)';
+                }
+            });
+
+            if (toggleCheckbox.checked) {
+                statusLabel.style.color = 'var(--sc-success)';
+            } else {
+                statusLabel.style.color = 'var(--sc-text-muted)';
+            }
+        }
+
+        // Auto-focus
+        const firstNameInput = document.querySelector('input[name="name"]');
+        if (firstNameInput && !firstNameInput.value) {
+            setTimeout(() => firstNameInput.focus(), 300);
+        }
+    });
+</script>
+
 {% endblock %}

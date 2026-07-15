@@ -694,10 +694,11 @@
         <span class="nav-text">Dashboard</span>
     </a>
 
-    <a href="#"
-       class="nav-item {% if request.resolver_match.url_name == 'order_list' %}active{% endif %}">
+    
+    <a href="{% url 'Ecom:admin_order_list' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'admin_order_list' %}active{% endif %}">
         <i class="fa-solid fa-box"></i>
-        <span class="nav-text">Orders</span>
+        <span class="nav-text">Incoming Orders</span>
     </a>
 
     <a href="{% url 'Ecom:product_list' %}"
@@ -732,10 +733,24 @@
         <span class="nav-text">Sub Categories</span>
     </a>
 
-    <a href="{% url 'Ecom:review_list' %}"
-       class="submenu-item {% if request.resolver_match.url_name == 'review_list' %}active{% endif %}">
-        <i class="fa-solid fa-star"></i>
-        <span class="nav-text">Reviews</span>
+   <a href="{% url 'Ecom:review_list' %}"
+   class="submenu-item {% if request.resolver_match.url_name == 'review_list' %}active{% endif %}">
+    <i class="fa-solid fa-star"></i>
+    <span class="nav-text">Reviews</span>
+
+    {% if pending_review_count %}
+        <span class="menu-badge">{{ pending_review_count }}</span>
+    {% endif %}
+</a>
+    <a href="{% url 'Ecom:coupon_list' %}"
+       class="submenu-item {% if request.resolver_match.url_name == 'coupon_list' %}active{% endif %}">
+        <i class="fa-solid fa-ticket"></i>
+        <span class="nav-text">Coupons</span>
+    </a>
+     <a href="{% url 'Ecom:offer_list' %}"
+       class="submenu-item {% if request.resolver_match.url_name == 'offer_list' %}active{% endif %}">
+        <i class="fa-solid fa-tags"></i>
+        <span class="nav-text">Offers</span>
     </a>
 
     <a href="{% url 'Ecom:low_stock_alerts' %}"
@@ -749,6 +764,11 @@
         {% if total_low_stock_count %}
             <span class="menu-badge">{{ total_low_stock_count }}</span>
         {% endif %}
+    </a>
+     <a href="{% url 'Ecom:banner_list' %}"
+       class="submenu-item {% if request.resolver_match.url_name == 'banner_list' %}active{% endif %}">
+        <i class="fa-solid fa-image"></i>
+        <span class="nav-text">Banners</span>
     </a>
 
     <!-- Section Divider -->

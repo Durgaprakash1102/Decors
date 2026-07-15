@@ -1,530 +1,2068 @@
-
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
-{% block title %}{% if is_edit %}Edit{% else %}Add{% endif %} Product - MyStore{% endblock %}
-
-{% block extra_css %}
-<style>
-    .variant-card {
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
-        background: #f8f9fa;
-        position: relative;
-    }
-    .variant-card .remove-variant {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-    }
-    .image-preview {
-        max-width: 100px;
-        max-height: 100px;
-        margin: 5px;
-        border-radius: 4px;
-        object-fit: cover;
-        border: 2px solid #dee2e6;
-    }
-    .image-upload-box {
-        border: 2px dashed #dee2e6;
-        padding: 20px;
-        text-align: center;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-    .image-upload-box:hover {
-        border-color: #0d6efd;
-        background: #f0f7ff;
-    }
-    .image-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 10px;
-    }
-    .image-item {
-        position: relative;
-        display: inline-block;
-    }
-    .image-item .remove-image {
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        background: #dc3545;
-        color: white;
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        font-size: 12px;
-        line-height: 20px;
-        text-align: center;
-        cursor: pointer;
-        border: none;
-        padding: 0;
-    }
-    .image-item .remove-image:hover {
-        background: #c82333;
-    }
-    .btn-add-variant {
-        width: 100%;
-        padding: 12px;
-        border: 2px dashed #28a745;
-        background: transparent;
-        color: #28a745;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s;
-        font-weight: 600;
-    }
-    .btn-add-variant:hover {
-        background: #28a745;
-        color: white;
-    }
-    .badge-primary {
-        position: absolute;
-        top: 5px;
-        left: 5px;
-        font-size: 10px;
-    }
-    .variant-deleted {
-        opacity: 0.5;
-        pointer-events: none;
-        background: #e9ecef;
-    }
-    .variant-deleted .remove-variant {
-        display: none;
-    }
-    .help-text {
-        font-size: 12px;
-        color: #6c757d;
-    }
-</style>
-{% endblock %}
+{% block title %}{% if is_edit %}Edit{% else %}Add{% endif %} Product - ShubhDecor{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>
-                    <i class="fas fa-{% if is_edit %}edit{% else %}plus-circle{% endif %} text-primary"></i>
-                    {% if is_edit %}Edit{% else %}Add New{% endif %} Product
-                </h2>
-                <div>
-                    <a href="{% url 'Ecom:product_list' %}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to Products
-                    </a>
+<style>
+/* ============================================ */
+/* RESET & BASE                                */
+/* ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #5c121f;
+    --primary-light: #7a1a2b;
+    --secondary: #f4b400;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --bg: #f5f3f0;
+    --card-bg: #ffffff;
+    --text-dark: #1a1a2e;
+    --text-muted: #6b7280;
+    --border: #e5e0db;
+    --radius: 12px;
+    --radius-lg: 16px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.04);
+    --shadow-hover: 0 4px 24px rgba(0,0,0,0.06);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+}
+
+/* ============================================ */
+/* PAGE WRAPPER                                */
+/* ============================================ */
+.product-page {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ============================================ */
+/* HEADER                                       */
+/* ============================================ */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 18px 28px;
+    background: var(--primary);
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 4px 20px rgba(92,18,31,0.15);
+}
+
+.page-header .left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.page-header .left .icon-box {
+    width: 44px;
+    height: 44px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 20px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.page-header .left h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    letter-spacing: -0.3px;
+}
+
+.page-header .left h1 .highlight {
+    color: var(--secondary);
+}
+
+.page-header .left h1 small {
+    display: block;
+    font-size: 13px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.7);
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 22px;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-back:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+/* ============================================ */
+/* FORM CARD                                    */
+/* ============================================ */
+.form-card {
+    background: var(--card-bg);
+    border-radius: 0 0 12px 12px;
+    padding: 32px 36px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+}
+
+/* ============================================ */
+/* SECTIONS                                     */
+/* ============================================ */
+.form-section {
+    margin-bottom: 24px;
+    padding: 20px 24px 24px;
+    background: #faf8f6;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+.form-section:hover {
+    border-color: rgba(92,18,31,0.08);
+}
+
+.form-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+}
+
+.section-header .step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.section-header .title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.section-header .title i {
+    color: var(--primary);
+    margin-right: 6px;
+}
+
+.section-header .badge {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 14px;
+    border-radius: 50px;
+    background: rgba(92,18,31,0.06);
+    color: var(--primary);
+}
+
+/* ============================================ */
+/* FORM ROWS                                    */
+/* ============================================ */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.form-group label .required {
+    color: var(--danger);
+}
+
+.form-group label .hint {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-left: auto;
+}
+
+.form-group .help-text {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    padding: 3px 10px;
+    background: rgba(92,18,31,0.02);
+    border-radius: 4px;
+}
+
+/* ============================================ */
+/* INPUTS - CLEAN                              */
+/* ============================================ */
+.form-control,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text-dark);
+    background: #fff;
+    transition: var(--transition);
+    outline: none;
+}
+
+.form-control:focus,
+.form-select:focus,
+.form-textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(92,18,31,0.05);
+}
+
+.form-control.error,
+.form-select.error,
+.form-textarea.error {
+    border-color: var(--danger);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 70px;
+}
+
+/* ============================================ */
+/* SEARCHABLE DROPDOWN                         */
+/* ============================================ */
+.search-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.search-dropdown .trigger {
+    width: 100%;
+    padding: 10px 14px;
+    padding-right: 40px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text-dark);
+    background: #fff;
+    cursor: pointer;
+    transition: var(--transition);
+    outline: none;
+    text-align: left;
+}
+
+.search-dropdown .trigger:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(92,18,31,0.05);
+}
+
+.search-dropdown .trigger .arrow {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    transition: var(--transition);
+    pointer-events: none;
+}
+
+.search-dropdown.active .trigger .arrow {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.search-dropdown .panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-height: 280px;
+    overflow: hidden;
+    animation: slideDown 0.25s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.search-dropdown.active .panel {
+    display: block;
+}
+
+.search-dropdown .panel .search-box {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.search-dropdown .panel .search-box input {
+    width: 100%;
+    padding: 8px 12px;
+    padding-left: 36px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    background: #faf8f6 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 10px center;
+    transition: var(--transition);
+}
+
+.search-dropdown .panel .search-box input:focus {
+    border-color: var(--primary);
+    background-color: #fff;
+}
+
+.search-dropdown .panel .list {
+    max-height: 180px;
+    overflow-y: auto;
+    padding: 4px 0;
+}
+
+.search-dropdown .panel .list::-webkit-scrollbar {
+    width: 4px;
+}
+.search-dropdown .panel .list::-webkit-scrollbar-thumb {
+    background: #d4d0cc;
+    border-radius: 4px;
+}
+
+.search-dropdown .panel .item {
+    padding: 9px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+    font-size: 13px;
+    color: var(--text-dark);
+    border-left: 3px solid transparent;
+}
+
+.search-dropdown .panel .item:hover {
+    background: #faf8f6;
+    border-left-color: var(--primary);
+}
+
+.search-dropdown .panel .item.selected {
+    background: rgba(92,18,31,0.05);
+    border-left-color: var(--primary);
+    font-weight: 600;
+}
+
+.search-dropdown .panel .item .icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: rgba(92,18,31,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.search-dropdown .panel .item .info {
+    flex: 1;
+}
+
+.search-dropdown .panel .item .info .name {
+    font-weight: 500;
+}
+
+.search-dropdown .panel .item .info .sub {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.search-dropdown .panel .item .tag {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 2px 10px;
+    border-radius: 20px;
+    background: rgba(92,18,31,0.06);
+    color: var(--primary);
+}
+
+.search-dropdown .panel .empty {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.search-dropdown .panel .empty i {
+    display: block;
+    font-size: 28px;
+    color: #d4d0cc;
+    margin-bottom: 6px;
+}
+
+.search-dropdown .selected {
+    display: none;
+    padding: 6px 14px;
+    background: rgba(92,18,31,0.04);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--primary);
+    margin-top: 6px;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid rgba(92,18,31,0.06);
+}
+
+.search-dropdown .selected.show {
+    display: flex;
+}
+
+.search-dropdown .selected .clear {
+    margin-left: auto;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.2s;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.search-dropdown .selected .clear:hover {
+    background: rgba(239,68,68,0.1);
+    color: var(--danger);
+}
+
+/* ============================================ */
+/* VARIANT CARD                                 */
+/* ============================================ */
+.variant-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px 20px;
+    margin-bottom: 16px;
+    background: #faf8f6;
+    position: relative;
+    transition: var(--transition);
+}
+
+.variant-card:hover {
+    border-color: rgba(92,18,31,0.12);
+}
+
+.variant-card .remove-variant {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+}
+
+.btn-add-variant {
+    width: 100%;
+    padding: 14px;
+    border: 2px dashed var(--success);
+    background: transparent;
+    color: var(--success);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.btn-add-variant:hover {
+    background: var(--success);
+    color: #fff;
+}
+
+.variant-deleted {
+    opacity: 0.5;
+    pointer-events: none;
+    background: #e9ecef;
+}
+
+.variant-deleted .remove-variant {
+    display: none;
+}
+
+/* ============================================ */
+/* IMAGE UPLOAD                                */
+/* ============================================ */
+.image-preview {
+    max-width: 100px;
+    max-height: 100px;
+    margin: 5px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 2px solid var(--border);
+}
+
+.image-upload-box {
+    border: 2px dashed var(--border);
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.image-upload-box:hover {
+    border-color: var(--primary);
+    background: #f5f3f0;
+}
+
+.image-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.image-item {
+    position: relative;
+    display: inline-block;
+}
+
+.image-item .remove-image {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--danger);
+    color: #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    transition: var(--transition);
+}
+
+.image-item .remove-image:hover {
+    background: #dc2626;
+}
+
+.badge-primary {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    font-size: 9px;
+    padding: 2px 10px;
+    background: var(--success);
+    color: #fff;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+/* ============================================ */
+/* RICH TEXT EDITOR - LIKE WORD                */
+/* ============================================ */
+.rich-editor-wrapper {
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: var(--transition);
+    background: #fff;
+}
+
+.rich-editor-wrapper:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(92,18,31,0.05);
+}
+
+.rich-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 10px;
+    background: #faf8f6;
+    border-bottom: 2px solid var(--border);
+}
+
+.rich-toolbar .group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 0 4px;
+}
+
+.rich-toolbar .separator {
+    width: 1px;
+    height: 26px;
+    background: var(--border);
+    margin: 0 4px;
+}
+
+.rich-toolbar button {
+    padding: 4px 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dark);
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.rich-toolbar button:hover {
+    background: rgba(92,18,31,0.06);
+}
+
+.rich-toolbar .heading-btn.h1 { font-size: 18px; font-weight: 800; }
+.rich-toolbar .heading-btn.h2 { font-size: 16px; font-weight: 700; }
+.rich-toolbar .heading-btn.h3 { font-size: 14px; font-weight: 600; }
+
+.rich-toolbar .color-btn input[type="color"] {
+    width: 24px;
+    height: 24px;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+}
+
+.rich-editor-wrapper .form-textarea {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    min-height: 120px;
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.8;
+    font-family: 'Inter', sans-serif;
+}
+
+.rich-editor-wrapper .form-textarea:focus {
+    box-shadow: none;
+    border: none;
+}
+
+/* ============================================ */
+/* TOGGLE                                       */
+/* ============================================ */
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+}
+
+.form-check input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+.form-check .form-check-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+    cursor: pointer;
+}
+
+.help-text {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ============================================ */
+/* BUTTONS                                      */
+/* ============================================ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 28px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.btn-secondary {
+    background: var(--border);
+    color: var(--text-dark);
+}
+
+.btn-secondary:hover {
+    background: #d4d0cc;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(92,18,31,0.2);
+}
+
+.btn-success {
+    background: var(--success);
+    color: #fff;
+}
+
+.btn-success:hover {
+    background: #059669;
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+.btn-lg {
+    padding: 12px 34px;
+    font-size: 15px;
+}
+
+.btn-sm {
+    padding: 6px 16px;
+    font-size: 12px;
+}
+
+/* ============================================ */
+/* RESPONSIVE                                   */
+/* ============================================ */
+@media (max-width: 1024px) {
+    .product-page {
+        padding: 16px 20px 32px;
+    }
+    .form-card {
+        padding: 24px 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-page {
+        padding: 12px 14px 24px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 14px 18px;
+    }
+    .page-header .left h1 {
+        font-size: 18px;
+    }
+    .btn-back {
+        justify-content: center;
+    }
+    
+    .form-card {
+        padding: 16px 14px 20px;
+    }
+    .form-section {
+        padding: 14px 14px 18px;
+    }
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+    
+    .section-header .step {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+    .section-header .title {
+        font-size: 14px;
+    }
+    .section-header .badge {
+        font-size: 9px;
+        padding: 2px 10px;
+    }
+    
+    .form-control,
+    .form-select,
+    .form-textarea {
+        padding: 9px 12px;
+        font-size: 14px;
+    }
+    
+    .variant-card {
+        padding: 14px 14px;
+    }
+    
+    .rich-toolbar {
+        padding: 4px 6px;
+        gap: 2px;
+    }
+    .rich-toolbar button {
+        padding: 3px 6px;
+        font-size: 12px;
+    }
+    .rich-toolbar .heading-btn.h1 { font-size: 15px; }
+    .rich-toolbar .heading-btn.h2 { font-size: 13px; }
+    .rich-toolbar .heading-btn.h3 { font-size: 11px; }
+}
+
+@media (max-width: 480px) {
+    .product-page {
+        padding: 8px 8px 16px;
+    }
+    .form-card {
+        padding: 12px 10px 16px;
+    }
+    .form-section {
+        padding: 10px 10px 14px;
+    }
+    .page-header .left .icon-box {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+    .page-header .left h1 {
+        font-size: 16px;
+    }
+    .page-header .left h1 small {
+        font-size: 11px;
+    }
+    .section-header .step {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+    }
+    .section-header .title {
+        font-size: 13px;
+    }
+    .form-control,
+    .form-select,
+    .form-textarea {
+        font-size: 13px;
+        padding: 7px 10px;
+    }
+    .btn {
+        font-size: 13px;
+        padding: 8px 16px;
+    }
+}
+</style>
+
+<div class="product-page">
+
+    <!-- ===== HEADER ===== -->
+    <div class="page-header">
+        <div class="left">
+            <div class="icon-box">
+                <i class="fas fa-{% if is_edit %}edit{% else %}plus-circle{% endif %}"></i>
+            </div>
+            <div>
+                <h1>
+                    <span class="highlight">{% if is_edit %}Edit{% else %}Add New{% endif %}</span> Product
+                    <small>{% if is_edit %}Update product details{% else %}Create a new product{% endif %}</small>
+                </h1>
+            </div>
+        </div>
+        <a href="{% url 'Ecom:product_list' %}" class="btn-back">
+            <i class="fas fa-arrow-left"></i>
+            Back
+        </a>
+    </div>
+
+    <!-- ===== FORM ===== -->
+    <div class="form-card">
+        <form method="POST" enctype="multipart/form-data" id="productForm">
+            {% csrf_token %}
+
+            <!-- ============================================ -->
+            <!-- SECTION 1: BASIC INFORMATION                -->
+            <!-- ============================================ -->
+            <div class="form-section">
+                <div class="section-header">
+                    <span class="step">1</span>
+                    <span class="title"><i class="fas fa-info-circle"></i>Basic Information</span>
+                    <span class="badge">Required</span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Product Name <span class="required">*</span> <span class="hint">Max 255</span></label>
+                        {{ product_form.name }}
+                        {% if product_form.name.errors %}
+                            <div class="error-text">{{ product_form.name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>SKU <span class="required">*</span> <span class="hint">Unique</span></label>
+                        {{ product_form.sku }}
+                        {% if product_form.sku.errors %}
+                            <div class="error-text">{{ product_form.sku.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Brand</label>
+                        {{ product_form.brand }}
+                    </div>
+                    <div class="form-group">
+                        <label>Price <span class="required">*</span></label>
+                        {{ product_form.price }}
+                        {% if product_form.price.errors %}
+                            <div class="error-text">{{ product_form.price.errors.0 }}</div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
 
-            <form method="POST" enctype="multipart/form-data" id="productForm">
-                {% csrf_token %}
-
-                <!-- ============================================ -->
-                <!-- PRODUCT BASIC INFORMATION                    -->
-                <!-- ============================================ -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="fas fa-info-circle text-primary"></i> Product Information</h5>
-                    </div>
-                    <div class="card-body">
-                        <!-- Name, SKU, Brand -->
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Product Name <span class="text-danger">*</span></label>
-                                {{ product_form.name }}
-                                {% if product_form.name.errors %}
-                                    <div class="text-danger small">{{ product_form.name.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">SKU <span class="text-danger">*</span></label>
-                                {{ product_form.sku }}
-                                {% if product_form.sku.errors %}
-                                    <div class="text-danger small">{{ product_form.sku.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Brand</label>
-                                {{ product_form.brand }}
-                            </div>
-                        </div>
-
-                        <!-- Category & Subcategory -->
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Category <span class="text-danger">*</span></label>
-                                {{ product_form.category }}
-                                {% if product_form.category.errors %}
-                                    <div class="text-danger small">{{ product_form.category.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Subcategory</label>
-                                {{ product_form.subcategory }}
-                                {% if product_form.subcategory.errors %}
-                                    <div class="text-danger small">{{ product_form.subcategory.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <!-- Descriptions -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Short Description</label>
-                            {{ product_form.short_description }}
-                            <div class="help-text">Brief description shown in product listings.</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Full Description <span class="text-muted">(HTML supported)</span></label>
-                            {{ product_form.description }}
-                            <div class="help-text">You can use HTML tags for formatting: &lt;b&gt;, &lt;i&gt;, &lt;ul&gt;, &lt;li&gt;, etc.</div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Specifications <span class="text-muted">(HTML supported)</span></label>
-                                {{ product_form.specifications }}
-                                <div class="help-text">Technical specifications with HTML formatting.</div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Features <span class="text-muted">(HTML supported)</span></label>
-                                {{ product_form.features }}
-                                <div class="help-text">Key features with HTML formatting.</div>
-                            </div>
-                        </div>
-
-                        <!-- Attributes -->
-                        <div class="row">
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label fw-bold">Color</label>
-                                {{ product_form.color }}
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label fw-bold">Size</label>
-                                {{ product_form.size }}
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label fw-bold">Weight (kg)</label>
-                                {{ product_form.weight }}
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label fw-bold">Material</label>
-                                {{ product_form.material }}
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Dimensions (L x W x H cm)</label>
-                                {{ product_form.dimensions }}
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Warranty (Months)</label>
-                                {{ product_form.warranty_months }}
-                                <div class="help-text">Enter warranty period in months (e.g., 12, 24, 36).</div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Price <span class="text-danger">*</span></label>
-                                {{ product_form.price }}
-                            </div>
-                        </div>
-
-                        <!-- Pricing & Stock -->
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Discount %</label>
-                                {{ product_form.discount_percentage }}
-                                <div class="help-text">Enter discount percentage (0-100).</div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Stock Quantity</label>
-                                {{ product_form.stock_quantity }}
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold">Low Stock Threshold</label>
-                                {{ product_form.low_stock_threshold }}
-                                <div class="help-text">Alert when stock drops below this number.</div>
-                            </div>
-                        </div>
-
-                        <!-- Warranty Details -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Warranty Details</label>
-                            {{ product_form.warranty_details }}
-                            <div class="help-text">Detailed warranty information and terms.</div>
-                        </div>
-
-                        <!-- Status Checkboxes -->
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-check">
-                                    {{ product_form.is_active }}
-                                    <label class="form-check-label fw-bold">Active</label>
-                                    <div class="help-text">Product visible on store.</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-check">
-                                    {{ product_form.is_featured }}
-                                    <label class="form-check-label fw-bold">Featured</label>
-                                    <div class="help-text">Show on featured section.</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-check">
-                                    {{ product_form.is_new }}
-                                    <label class="form-check-label fw-bold">New</label>
-                                    <div class="help-text">Mark as new product.</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-check">
-                                    {{ product_form.is_best_seller }}
-                                    <label class="form-check-label fw-bold">Best Seller</label>
-                                    <div class="help-text">Mark as best seller.</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- ============================================ -->
+            <!-- SECTION 2: CATEGORY & DESCRIPTION           -->
+            <!-- ============================================ -->
+            <div class="form-section">
+                <div class="section-header">
+                    <span class="step">2</span>
+                    <span class="title"><i class="fas fa-tags"></i>Category &amp; Description</span>
+                    <span class="badge">Required</span>
                 </div>
 
-                <!-- ============================================ -->
-                <!-- PRODUCT IMAGES                              -->
-                <!-- ============================================ -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="fas fa-images text-success"></i> Product Images</h5>
-                    </div>
-                    <div class="card-body">
-                        {% if is_edit and product.images.exists %}
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Existing Images</label>
-                                <div class="image-list">
-                                    {% for img in product.images.all %}
-                                        <div class="image-item">
-                                            <img src="{{ img.image.url }}" class="image-preview" alt="{{ img.alt_text }}">
-                                            {% if img.is_primary %}
-                                                <span class="badge bg-success badge-primary">Primary</span>
-                                            {% endif %}
-                                            <button type="button" class="remove-image" onclick="deleteProductImage({{ img.id }})" title="Delete this image">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        </div>
-                                    {% endfor %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Category <span class="required">*</span> <span class="hint">Search</span></label>
+                        
+                        <!-- SEARCHABLE CATEGORY -->
+                        <div class="search-dropdown" id="categoryDropdown">
+                            <input type="text" class="trigger" id="categoryTrigger" 
+                                   placeholder="🔍 Search &amp; select category..." readonly>
+                            <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+                            
+                            <div class="panel">
+                                <div class="search-box">
+                                    <input type="text" id="categorySearch" placeholder="Search categories..." />
                                 </div>
+                                <div class="list" id="categoryList"></div>
                             </div>
-                            <hr>
+                            
+                            <input type="hidden" name="category" id="categorySelected" value="{{ product_form.category.value|default:'' }}">
+                            
+                            <div class="selected" id="categorySelectedDisplay">
+                                <i class="fas fa-check-circle" style="color:#10b981;"></i>
+                                <span id="categorySelectedName">No category selected</span>
+                                <span class="clear" onclick="clearCategory()">
+                                    <i class="fas fa-times-circle"></i>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        {% if product_form.category.errors %}
+                            <div class="error-text">{{ product_form.category.errors.0 }}</div>
                         {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Subcategory <span class="required">*</span></label>
                         
-                        <div class="image-upload-box" onclick="document.getElementById('product_images').click()">
-                            <i class="fas fa-cloud-upload-alt fa-3x text-muted"></i>
-                            <p class="mt-2 mb-0"><strong>Click to upload product images</strong></p>
-                            <small class="text-muted">You can select multiple images at once. First image will be primary.</small>
+                        <!-- SEARCHABLE SUBCATEGORY -->
+                        <div class="search-dropdown" id="subcategoryDropdown">
+                            <input type="text" class="trigger" id="subcategoryTrigger" 
+                                   placeholder="🔍 Search &amp; select subcategory..." readonly>
+                            <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+                            
+                            <div class="panel">
+                                <div class="search-box">
+                                    <input type="text" id="subcategorySearch" placeholder="Search subcategories..." />
+                                </div>
+                                <div class="list" id="subcategoryList"></div>
+                            </div>
+                            
+                            <input type="hidden" name="subcategory" id="subcategorySelected" value="{{ product_form.subcategory.value|default:'' }}">
+                            
+                            <div class="selected" id="subcategorySelectedDisplay">
+                                <i class="fas fa-check-circle" style="color:#10b981;"></i>
+                                <span id="subcategorySelectedName">No subcategory selected</span>
+                                <span class="clear" onclick="clearSubcategory()">
+                                    <i class="fas fa-times-circle"></i>
+                                </span>
+                            </div>
                         </div>
-                        <input type="file" name="product_images" id="product_images" multiple accept="image/*" style="display:none">
-                        <div id="productImagePreview" class="image-list mt-3"></div>
+                        
+                        {% if product_form.subcategory.errors %}
+                            <div class="error-text">{{ product_form.subcategory.errors.0 }}</div>
+                        {% endif %}
                     </div>
                 </div>
 
-                <!-- ============================================ -->
-                <!-- VARIANTS SECTION                            -->
-                <!-- ============================================ -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fas fa-cubes text-warning"></i> Variants</h5>
-                        <button type="button" class="btn btn-success btn-sm" onclick="addVariant()">
-                            <i class="fas fa-plus"></i> Add Variant
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div id="variantsContainer">
-                            <!-- Existing Variants (for edit mode) -->
-                            {% if is_edit %}
-                                {% for variant in product.variants.all %}
-                                    <div class="variant-card" id="variant-{{ variant.id }}">
-                                        <button type="button" class="btn btn-danger btn-sm remove-variant" onclick="toggleVariantDelete(this)">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                        <input type="hidden" name="variant_id[]" value="{{ variant.id }}">
-                                        <input type="hidden" name="variant_delete[]" value="">
-                                        
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label fw-bold">Variant Name</label>
-                                                <input type="text" name="variant_name[]" class="form-control" value="{{ variant.name }}" placeholder="e.g., Red - Medium">
-                                                <div class="help-text">A descriptive name for this variant</div>
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label fw-bold">SKU <span class="text-danger">*</span></label>
-                                                <input type="text" name="variant_sku[]" class="form-control" value="{{ variant.sku }}" required>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="row">
-                                            <div class="col-md-3 mb-3">
-                                                <label class="form-label fw-bold">Color</label>
-                                                <input type="text" name="variant_color[]" class="form-control" value="{{ variant.color }}">
-                                            </div>
-                                            <div class="col-md-3 mb-3">
-                                                <label class="form-label fw-bold">Size</label>
-                                                <input type="text" name="variant_size[]" class="form-control" value="{{ variant.size }}">
-                                            </div>
-                                            <div class="col-md-3 mb-3">
-                                                <label class="form-label fw-bold">Material</label>
-                                                <input type="text" name="variant_material[]" class="form-control" value="{{ variant.material }}">
-                                            </div>
-                                            <div class="col-md-3 mb-3">
-                                                <label class="form-label fw-bold">Weight (kg)</label>
-                                                <input type="number" name="variant_weight[]" class="form-control" step="0.01" value="{{ variant.weight }}">
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="row">
-                                            <div class="col-md-3 mb-3">
-                                                <label class="form-label fw-bold">Price <span class="text-danger">*</span></label>
-                                                <input type="number" name="variant_price[]" class="form-control" step="0.01" value="{{ variant.price }}" required>
-                                            </div>
-                                            <div class="col-md-3 mb-3">
-                                                <label class="form-label fw-bold">Discount %</label>
-                                                <input type="number" name="variant_discount[]" class="form-control" step="0.01" value="{{ variant.discount_percentage }}">
-                                            </div>
-                                            <div class="col-md-3 mb-3">
-                                                <label class="form-label fw-bold">Stock</label>
-                                                <input type="number" name="variant_stock[]" class="form-control" value="{{ variant.stock_quantity }}">
-                                            </div>
-                                            <div class="col-md-3 mb-3">
-                                                <label class="form-label fw-bold">Low Stock Threshold</label>
-                                                <input type="number" name="variant_low_stock[]" class="form-control" value="{{ variant.low_stock_threshold }}">
-                                                <div class="help-text">Alert when stock drops below this</div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="row">
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label fw-bold">Description <span class="text-muted">(HTML)</span></label>
-                                                <textarea name="variant_description[]" class="form-control" rows="2">{{ variant.description }}</textarea>
-                                            </div>
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label fw-bold">Specifications <span class="text-muted">(HTML)</span></label>
-                                                <textarea name="variant_specifications[]" class="form-control" rows="2">{{ variant.specifications }}</textarea>
-                                            </div>
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label fw-bold">Features <span class="text-muted">(HTML)</span></label>
-                                                <textarea name="variant_features[]" class="form-control" rows="2">{{ variant.features }}</textarea>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label fw-bold">Warranty (Months)</label>
-                                                <input type="number" name="variant_warranty_months[]" class="form-control" value="{{ variant.warranty_months }}">
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label fw-bold">Warranty Details</label>
-                                                <textarea name="variant_warranty_details[]" class="form-control" rows="2">{{ variant.warranty_details }}</textarea>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="row">
-                                            <div class="col-md-12 mb-3">
-                                                <div class="form-check">
-                                                    <input type="checkbox" name="variant_is_active[]" class="form-check-input" {% if variant.is_active %}checked{% endif %}>
-                                                    <label class="form-check-label fw-bold">Active</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Variant Images -->
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Variant Images</label>
-                                            <div class="image-list mb-2" id="variant-image-list-{{ variant.id }}">
-                                                {% if variant.images.exists %}
-                                                    {% for img in variant.images.all %}
-                                                        <div class="image-item" id="variant-img-{{ img.id }}">
-                                                            <img src="{{ img.image.url }}" class="image-preview">
-                                                            {% if img.is_primary %}
-                                                                <span class="badge bg-success badge-primary">Primary</span>
-                                                            {% endif %}
-                                                            <button type="button" class="remove-image" onclick="deleteVariantImage({{ img.id }})" title="Delete this image">
-                                                                <i class="fas fa-times"></i>
-                                                            </button>
-                                                        </div>
-                                                    {% endfor %}
-                                                {% endif %}
-                                            </div>
-                                            <div class="image-upload-box" onclick="document.getElementById('variant_images_{{ forloop.counter0 }}').click()">
-                                                <i class="fas fa-cloud-upload-alt text-muted"></i>
-                                                <small>Click to upload variant images</small>
-                                            </div>
-                                            <input type="file" name="variant_images_{{ forloop.counter0 }}" id="variant_images_{{ forloop.counter0 }}" multiple accept="image/*" style="display:none" 
-                                                   onchange="previewVariantImages(this, 'variant-image-list-{{ variant.id }}')">
-                                            <div id="variant_image_preview_{{ forloop.counter0 }}" class="image-list mt-2"></div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            {% endif %}
-                        </div>
-                        
-                        <button type="button" class="btn-add-variant" onclick="addVariant()">
-                            <i class="fas fa-plus-circle"></i> Add Another Variant
-                        </button>
+                <div class="form-row">
+                    <div class="form-group full">
+                        <label>Short Description <span class="required">*</span></label>
+                        {{ product_form.short_description }}
+                        {% if product_form.short_description.errors %}
+                            <div class="error-text">{{ product_form.short_description.errors.0 }}</div>
+                        {% endif %}
+                        <span class="help-text">Brief description shown in product listings</span>
                     </div>
                 </div>
 
-                <!-- ============================================ -->
-                <!-- SUBMIT BUTTONS                              -->
-                <!-- ============================================ -->
-                <div class="d-flex justify-content-end gap-2">
-                    <a href="{% url 'Ecom:product_list' %}" class="btn btn-secondary btn-lg">
-                        <i class="fas fa-times"></i> Cancel
-                    </a>
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="fas fa-save"></i> 
-                        {% if is_edit %}Update Product{% else %}Create Product{% endif %}
+                <div class="form-row">
+                    <div class="form-group full">
+                        <label>Full Description <span class="required">*</span></label>
+                        
+                        <!-- RICH TEXT EDITOR -->
+                        <div class="rich-editor-wrapper">
+                            <div class="rich-toolbar">
+                                <div class="group">
+                                    <button type="button" onclick="formatText('description', 'bold')"><b>B</b></button>
+                                    <button type="button" onclick="formatText('description', 'italic')"><i>I</i></button>
+                                    <button type="button" onclick="formatText('description', 'underline')"><u>U</u></button>
+                                    <button type="button" onclick="formatText('description', 'strikethrough')"><s>S</s></button>
+                                </div>
+                                <span class="separator"></span>
+                                <div class="group">
+                                    <button type="button" onclick="formatText('description', 'h1')" class="heading-btn h1">H1</button>
+                                    <button type="button" onclick="formatText('description', 'h2')" class="heading-btn h2">H2</button>
+                                    <button type="button" onclick="formatText('description', 'h3')" class="heading-btn h3">H3</button>
+                                </div>
+                                <span class="separator"></span>
+                                <div class="group">
+                                    <button type="button" onclick="formatText('description', 'ul')"><i class="fas fa-list-ul"></i></button>
+                                    <button type="button" onclick="formatText('description', 'ol')"><i class="fas fa-list-ol"></i></button>
+                                </div>
+                                <span class="separator"></span>
+                                <div class="group">
+                                    <button type="button" onclick="formatText('description', 'left')"><i class="fas fa-align-left"></i></button>
+                                    <button type="button" onclick="formatText('description', 'center')"><i class="fas fa-align-center"></i></button>
+                                    <button type="button" onclick="formatText('description', 'right')"><i class="fas fa-align-right"></i></button>
+                                    <button type="button" onclick="formatText('description', 'justify')"><i class="fas fa-align-justify"></i></button>
+                                </div>
+                                <span class="separator"></span>
+                                <div class="group">
+                                    <button type="button" class="color-btn">
+                                        <input type="color" id="descColor" value="#1a1a2e" onchange="formatText('description', 'color', this.value)">
+                                    </button>
+                                </div>
+                                <span class="separator"></span>
+                                <div class="group">
+                                    <button type="button" onclick="formatText('description', 'link')"><i class="fas fa-link"></i></button>
+                                    <button type="button" onclick="formatText('description', 'clear')"><i class="fas fa-eraser"></i></button>
+                                </div>
+                            </div>
+                            
+                            <textarea name="description" id="descriptionEditor" class="form-textarea" rows="6" placeholder="Write detailed description with formatting...">{{ product_form.description.value|default:'' }}</textarea>
+                        </div>
+                        
+                        {% if product_form.description.errors %}
+                            <div class="error-text">{{ product_form.description.errors.0 }}</div>
+                        {% endif %}
+                        <span class="help-text">Format: <b>Bold</b>, <i>Italic</i>, Headings, Lists, Colors, Alignment</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- SECTION 3: SPECIFICATIONS & FEATURES        -->
+            <!-- ============================================ -->
+            <div class="form-section">
+                <div class="section-header">
+                    <span class="step">3</span>
+                    <span class="title"><i class="fas fa-cog"></i>Specifications &amp; Features</span>
+                    <span class="badge">Optional</span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Color</label>
+                        {{ product_form.color }}
+                    </div>
+                    <div class="form-group">
+                        <label>Size</label>
+                        {{ product_form.size }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Weight (kg)</label>
+                        {{ product_form.weight }}
+                    </div>
+                    <div class="form-group">
+                        <label>Material</label>
+                        {{ product_form.material }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Dimensions (L x W x H cm)</label>
+                        {{ product_form.dimensions }}
+                    </div>
+                    <div class="form-group">
+                        <label>Warranty (Months)</label>
+                        {{ product_form.warranty_months }}
+                        <span class="help-text">e.g., 12, 24, 36</span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Specifications <span class="hint">Like Word</span></label>
+                        <div class="rich-editor-wrapper">
+                            <div class="rich-toolbar">
+                                <div class="group">
+                                    <button type="button" onclick="formatText('specifications', 'bold')"><b>B</b></button>
+                                    <button type="button" onclick="formatText('specifications', 'italic')"><i>I</i></button>
+                                    <button type="button" onclick="formatText('specifications', 'underline')"><u>U</u></button>
+                                    <button type="button" onclick="formatText('specifications', 'strikethrough')"><s>S</s></button>
+                                </div>
+                                <span class="separator"></span>
+                                <div class="group">
+                                    <button type="button" onclick="formatText('specifications', 'h1')" class="heading-btn h1">H1</button>
+                                    <button type="button" onclick="formatText('specifications', 'h2')" class="heading-btn h2">H2</button>
+                                    <button type="button" onclick="formatText('specifications', 'h3')" class="heading-btn h3">H3</button>
+                                </div>
+                                <span class="separator"></span>
+                                <div class="group">
+                                    <button type="button" onclick="formatText('specifications', 'ul')"><i class="fas fa-list-ul"></i></button>
+                                    <button type="button" onclick="formatText('specifications', 'ol')"><i class="fas fa-list-ol"></i></button>
+                                </div>
+                                <span class="separator"></span>
+                                <div class="group">
+                                    <button type="button" onclick="formatText('specifications', 'left')"><i class="fas fa-align-left"></i></button>
+                                    <button type="button" onclick="formatText('specifications', 'center')"><i class="fas fa-align-center"></i></button>
+                                    <button type="button" onclick="formatText('specifications', 'right')"><i class="fas fa-align-right"></i></button>
+                                    <button type="button" onclick="formatText('specifications', 'justify')"><i class="fas fa-align-justify"></i></button>
+                                </div>
+                                <span class="separator"></span>
+                                <div class="group">
+                                    <button type="button" class="color-btn">
+                                        <input type="color" id="specColor" value="#1a1a2e" onchange="formatText('specifications', 'color', this.value)">
+                                    </button>
+                                </div>
+                                <span class="separator"></span>
+                                <div class="group">
+                                    <button type="button" onclick="formatText('specifications', 'link')"><i class="fas fa-link"></i></button>
+                                    <button type="button" onclick="formatText('specifications', 'clear')"><i class="fas fa-eraser"></i></button>
+                                </div>
+                            </div>
+                            
+                            <textarea name="specifications" id="specificationsEditor" class="form-textarea" rows="4" placeholder="Technical specifications...">{{ product_form.specifications.value|default:'' }}</textarea>
+                        </div>
+                        {% if product_form.specifications.errors %}
+                            <div class="error-text">{{ product_form.specifications.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>Features <span class="hint">Like Word</span></label>
+                        <div class="rich-editor-wrapper">
+                            <div class="rich-toolbar">
+                                <div class="group">
+                                    <button type="button" onclick="formatText('features', 'bold')"><b>B</b></button>
+                                    <button type="button" onclick="formatText('features', 'italic')"><i>I</i></button>
+                                    <button type="button" onclick="formatText('features', 'underline')"><u>U</u></button>
+                                    <button type="button" onclick="formatText('features', 'strikethrough')"><s>S</s></button>
+                                </div>
+                                <span class="separator"></span>
+                                <div class="group">
+                                    <button type="button" onclick="formatText('features', 'h1')" class="heading-btn h1">H1</button>
+                                    <button type="button" onclick="formatText('features', 'h2')" class="heading-btn h2">H2</button>
+                                    <button type="button" onclick="formatText('features', 'h3')" class="heading-btn h3">H3</button>
+                                </div>
+                                <span class="separator"></span>
+                                <div class="group">
+                                    <button type="button" onclick="formatText('features', 'ul')"><i class="fas fa-list-ul"></i></button>
+                                    <button type="button" onclick="formatText('features', 'ol')"><i class="fas fa-list-ol"></i></button>
+                                </div>
+                                <span class="separator"></span>
+                                <div class="group">
+                                    <button type="button" onclick="formatText('features', 'left')"><i class="fas fa-align-left"></i></button>
+                                    <button type="button" onclick="formatText('features', 'center')"><i class="fas fa-align-center"></i></button>
+                                    <button type="button" onclick="formatText('features', 'right')"><i class="fas fa-align-right"></i></button>
+                                    <button type="button" onclick="formatText('features', 'justify')"><i class="fas fa-align-justify"></i></button>
+                                </div>
+                                <span class="separator"></span>
+                                <div class="group">
+                                    <button type="button" class="color-btn">
+                                        <input type="color" id="featureColor" value="#1a1a2e" onchange="formatText('features', 'color', this.value)">
+                                    </button>
+                                </div>
+                                <span class="separator"></span>
+                                <div class="group">
+                                    <button type="button" onclick="formatText('features', 'link')"><i class="fas fa-link"></i></button>
+                                    <button type="button" onclick="formatText('features', 'clear')"><i class="fas fa-eraser"></i></button>
+                                </div>
+                            </div>
+                            
+                            <textarea name="features" id="featuresEditor" class="form-textarea" rows="4" placeholder="Key features...">{{ product_form.features.value|default:'' }}</textarea>
+                        </div>
+                        {% if product_form.features.errors %}
+                            <div class="error-text">{{ product_form.features.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- SECTION 4: PRICING & STOCK                 -->
+            <!-- ============================================ -->
+            <div class="form-section">
+                <div class="section-header">
+                    <span class="step">4</span>
+                    <span class="title"><i class="fas fa-coins"></i>Pricing &amp; Stock</span>
+                    <span class="badge">Required</span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Discount % <span class="hint">0-100</span></label>
+                        {{ product_form.discount_percentage }}
+                        {% if product_form.discount_percentage.errors %}
+                            <div class="error-text">{{ product_form.discount_percentage.errors.0 }}</div>
+                        {% endif %}
+                        <span class="help-text">Enter discount percentage (0-100)</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Stock Quantity <span class="required">*</span></label>
+                        {{ product_form.stock_quantity }}
+                        {% if product_form.stock_quantity.errors %}
+                            <div class="error-text">{{ product_form.stock_quantity.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Low Stock Threshold <span class="required">*</span></label>
+                        {{ product_form.low_stock_threshold }}
+                        {% if product_form.low_stock_threshold.errors %}
+                            <div class="error-text">{{ product_form.low_stock_threshold.errors.0 }}</div>
+                        {% endif %}
+                        <span class="help-text">Alert when stock drops below this</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Warranty Details</label>
+                        {{ product_form.warranty_details }}
+                        {% if product_form.warranty_details.errors %}
+                            <div class="error-text">{{ product_form.warranty_details.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- SECTION 5: STATUS                          -->
+            <!-- ============================================ -->
+            <div class="form-section">
+                <div class="section-header">
+                    <span class="step">5</span>
+                    <span class="title"><i class="fas fa-toggle-on"></i>Product Status</span>
+                    <span class="badge">Settings</span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <div class="form-check">
+                            {{ product_form.is_active }}
+                            <label class="form-check-label fw-bold">Active</label>
+                        </div>
+                        <span class="help-text">Product visible on store</span>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                            {{ product_form.is_featured }}
+                            <label class="form-check-label fw-bold">Featured</label>
+                        </div>
+                        <span class="help-text">Show on featured section</span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <div class="form-check">
+                            {{ product_form.is_new }}
+                            <label class="form-check-label fw-bold">New</label>
+                        </div>
+                        <span class="help-text">Mark as new product</span>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                            {{ product_form.is_best_seller }}
+                            <label class="form-check-label fw-bold">Best Seller</label>
+                        </div>
+                        <span class="help-text">Mark as best seller</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- SECTION 6: IMAGES                          -->
+            <!-- ============================================ -->
+            <div class="form-section">
+                <div class="section-header">
+                    <span class="step">6</span>
+                    <span class="title"><i class="fas fa-images"></i>Product Images</span>
+                    <span class="badge">Optional</span>
+                </div>
+
+                {% if is_edit and product.images.exists %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Existing Images</label>
+                        <div class="image-list">
+                            {% for img in product.images.all %}
+                                <div class="image-item">
+                                    <img src="{{ img.image.url }}" class="image-preview" alt="{{ img.alt_text }}">
+                                    {% if img.is_primary %}
+                                        <span class="badge-primary">Primary</span>
+                                    {% endif %}
+                                    <button type="button" class="remove-image" onclick="deleteProductImage({{ img.id }})">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <hr>
+                {% endif %}
+
+                <div class="image-upload-box" onclick="document.getElementById('product_images').click()">
+                    <i class="fas fa-cloud-upload-alt fa-3x text-muted"></i>
+                    <p class="mt-2 mb-0"><strong>Click to upload product images</strong></p>
+                    <small>Multiple images supported. First image will be primary.</small>
+                </div>
+                <input type="file" name="product_images" id="product_images" multiple accept="image/*" style="display:none">
+                <div id="productImagePreview" class="image-list mt-3"></div>
+                <span class="help-text">Recommended: 800×800px, JPG/PNG/WEBP, Max 2MB each</span>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- SECTION 7: VARIANTS                        -->
+            <!-- ============================================ -->
+            <div class="form-section">
+                <div class="section-header" style="justify-content:space-between;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <span class="step">7</span>
+                        <span class="title"><i class="fas fa-cubes"></i>Variants</span>
+                        <span class="badge">Optional</span>
+                    </div>
+                    <button type="button" class="btn btn-success btn-sm" onclick="addVariant()">
+                        <i class="fas fa-plus"></i> Add Variant
                     </button>
                 </div>
-            </form>
-        </div>
+
+                <div id="variantsContainer">
+                    {% if is_edit %}
+                        {% for variant in product.variants.all %}
+                            <div class="variant-card" id="variant-{{ variant.id }}">
+                                <button type="button" class="btn btn-danger btn-sm remove-variant" onclick="toggleVariantDelete(this)">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <input type="hidden" name="variant_id[]" value="{{ variant.id }}">
+                                <input type="hidden" name="variant_delete[]" value="">
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Variant Name <span class="hint">Descriptive</span></label>
+                                        <input type="text" name="variant_name[]" class="form-control" value="{{ variant.name }}" placeholder="e.g., Red - Medium">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>SKU <span class="required">*</span></label>
+                                        <input type="text" name="variant_sku[]" class="form-control" value="{{ variant.sku }}" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Color</label>
+                                        <input type="text" name="variant_color[]" class="form-control" value="{{ variant.color }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Size</label>
+                                        <input type="text" name="variant_size[]" class="form-control" value="{{ variant.size }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Material</label>
+                                        <input type="text" name="variant_material[]" class="form-control" value="{{ variant.material }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Weight (kg)</label>
+                                        <input type="number" name="variant_weight[]" class="form-control" step="0.01" value="{{ variant.weight }}">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Price <span class="required">*</span></label>
+                                        <input type="number" name="variant_price[]" class="form-control" step="0.01" value="{{ variant.price }}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Discount %</label>
+                                        <input type="number" name="variant_discount[]" class="form-control" step="0.01" value="{{ variant.discount_percentage }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Stock</label>
+                                        <input type="number" name="variant_stock[]" class="form-control" value="{{ variant.stock_quantity }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Low Stock Threshold</label>
+                                        <input type="number" name="variant_low_stock[]" class="form-control" value="{{ variant.low_stock_threshold }}">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Description <span class="hint">HTML supported</span></label>
+                                        <textarea name="variant_description[]" class="form-textarea" rows="2">{{ variant.description }}</textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Specifications <span class="hint">HTML supported</span></label>
+                                        <textarea name="variant_specifications[]" class="form-textarea" rows="2">{{ variant.specifications }}</textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Features <span class="hint">HTML supported</span></label>
+                                        <textarea name="variant_features[]" class="form-textarea" rows="2">{{ variant.features }}</textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Warranty (Months)</label>
+                                        <input type="number" name="variant_warranty_months[]" class="form-control" value="{{ variant.warranty_months }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Warranty Details</label>
+                                        <textarea name="variant_warranty_details[]" class="form-textarea" rows="2">{{ variant.warranty_details }}</textarea>
+                                    </div>
+                                    <div class="form-group" style="justify-content:center;">
+                                        <div class="form-check">
+                                            <input type="checkbox" name="variant_is_active[]" {% if variant.is_active %}checked{% endif %}>
+                                            <label class="form-check-label">Active</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Variant Images -->
+                                <div class="form-row">
+                                    <div class="form-group full">
+                                        <label>Variant Images</label>
+                                        <div class="image-list mb-2" id="variant-image-list-{{ variant.id }}">
+                                            {% if variant.images.exists %}
+                                                {% for img in variant.images.all %}
+                                                    <div class="image-item" id="variant-img-{{ img.id }}">
+                                                        <img src="{{ img.image.url }}" class="image-preview">
+                                                        {% if img.is_primary %}
+                                                            <span class="badge-primary">Primary</span>
+                                                        {% endif %}
+                                                        <button type="button" class="remove-image" onclick="deleteVariantImage({{ img.id }})">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                        <div class="image-upload-box" onclick="document.getElementById('variant_images_{{ forloop.counter0 }}').click()">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <small>Click to upload variant images</small>
+                                        </div>
+                                        <input type="file" name="variant_images_{{ forloop.counter0 }}" id="variant_images_{{ forloop.counter0 }}" multiple accept="image/*" style="display:none" 
+                                               onchange="previewVariantImages(this, 'variant-image-list-{{ variant.id }}')">
+                                        <div id="variant_image_preview_{{ forloop.counter0 }}" class="image-list mt-2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <button type="button" class="btn-add-variant" onclick="addVariant()">
+                    <i class="fas fa-plus-circle"></i> Add Another Variant
+                </button>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- ACTIONS                                     -->
+            <!-- ============================================ -->
+            <div class="d-flex justify-content-end gap-2" style="margin-top:24px;padding-top:20px;border-top:2px solid var(--border);">
+                <a href="{% url 'Ecom:product_list' %}" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i>
+                    {% if is_edit %}Update Product{% else %}Create Product{% endif %}
+                </button>
+            </div>
+
+        </form>
     </div>
 </div>
 
 <!-- ============================================ -->
-<!-- JAVASCRIPT                                  -->
+<!-- JAVASCRIPT                                   -->
 <!-- ============================================ -->
 <script>
+document.addEventListener('DOMContentLoaded', function() {
     // ============================================
-    // CSRF TOKEN HELPER
+    // RICH TEXT EDITOR - LIKE WORD
     // ============================================
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
+    window.formatText = function(editorId, command, value) {
+        let textarea;
+        if (editorId === 'description') {
+            textarea = document.getElementById('descriptionEditor');
+        } else if (editorId === 'specifications') {
+            textarea = document.getElementById('specificationsEditor');
+        } else if (editorId === 'features') {
+            textarea = document.getElementById('featuresEditor');
+        } else {
+            return;
         }
-        return cookieValue;
+        
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selectedText = textarea.value.substring(start, end);
+        
+        if (start === end) {
+            alert('Please select some text first');
+            return;
+        }
+
+        let formatted = '';
+        switch(command) {
+            case 'bold': formatted = `<b>${selectedText}</b>`; break;
+            case 'italic': formatted = `<i>${selectedText}</i>`; break;
+            case 'underline': formatted = `<u>${selectedText}</u>`; break;
+            case 'strikethrough': formatted = `<s>${selectedText}</s>`; break;
+            case 'h1': formatted = `<h1 style="font-size:28px;font-weight:700;margin:10px 0;color:#1a1a2e;line-height:1.4;">${selectedText}</h1>`; break;
+            case 'h2': formatted = `<h2 style="font-size:24px;font-weight:600;margin:8px 0;color:#1a1a2e;line-height:1.4;">${selectedText}</h2>`; break;
+            case 'h3': formatted = `<h3 style="font-size:20px;font-weight:600;margin:6px 0;color:#1a1a2e;line-height:1.4;">${selectedText}</h3>`; break;
+            case 'ul':
+                const items = selectedText.split('\n').filter(item => item.trim());
+                formatted = `<ul style="margin:8px 0;padding-left:20px;">${items.map(item => `<li style="margin:4px 0;">${item.trim()}</li>`).join('')}</ul>`;
+                break;
+            case 'ol':
+                const itemsOl = selectedText.split('\n').filter(item => item.trim());
+                formatted = `<ol style="margin:8px 0;padding-left:20px;">${itemsOl.map((item, idx) => `<li style="margin:4px 0;">${item.trim()}</li>`).join('')}</ol>`;
+                break;
+            case 'left': formatted = `<div style="text-align:left;">${selectedText}</div>`; break;
+            case 'center': formatted = `<div style="text-align:center;">${selectedText}</div>`; break;
+            case 'right': formatted = `<div style="text-align:right;">${selectedText}</div>`; break;
+            case 'justify': formatted = `<div style="text-align:justify;">${selectedText}</div>`; break;
+            case 'color': formatted = `<span style="color:${value};">${selectedText}</span>`; break;
+            case 'link':
+                const url = prompt('Enter URL:', 'https://');
+                if (url) {
+                    formatted = `<a href="${url}" target="_blank" style="color:#5c121f;text-decoration:underline;">${selectedText}</a>`;
+                } else { return; }
+                break;
+            case 'clear': formatted = selectedText.replace(/<[^>]*>/g, ''); break;
+            default: return;
+        }
+        
+        textarea.value = textarea.value.substring(0, start) + formatted + textarea.value.substring(end);
+        const newCursorPos = start + formatted.length;
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+        textarea.focus();
+    };
+
+    // ============================================
+    // SEARCHABLE DROPDOWN DATA
+    // ============================================
+    const categories = [
+        {% for category in categories %}
+            { id: {{ category.id }}, name: "{{ category.name|escapejs }}" },
+        {% endfor %}
+    ];
+
+    const allSubcategories = [
+        {% for subcategory in subcategories %}
+            { id: {{ subcategory.id }}, name: "{{ subcategory.name|escapejs }}", category_id: {{ subcategory.category.id }} },
+        {% endfor %}
+    ];
+
+    const preselectedCategory = "{{ product_form.category.value|default:'' }}";
+    const preselectedSubcategory = "{{ product_form.subcategory.value|default:'' }}";
+
+    // ============================================
+    // CATEGORY DROPDOWN
+    // ============================================
+    function initCategoryDropdown() {
+        const dropdown = document.getElementById('categoryDropdown');
+        const list = document.getElementById('categoryList');
+        const search = document.getElementById('categorySearch');
+        const hidden = document.getElementById('categorySelected');
+        const display = document.getElementById('categorySelectedDisplay');
+        const displayName = document.getElementById('categorySelectedName');
+        const trigger = document.getElementById('categoryTrigger');
+
+        let selectedId = preselectedCategory || '';
+        let filteredItems = [...categories];
+
+        function renderItems(itemsToRender) {
+            if (itemsToRender.length === 0) {
+                list.innerHTML = `<div class="empty"><i class="fas fa-search"></i><span>No categories found</span></div>`;
+                return;
+            }
+
+            list.innerHTML = itemsToRender.map(item => `
+                <div class="item ${item.id == selectedId ? 'selected' : ''}" data-id="${item.id}">
+                    <span class="icon"><i class="fas fa-folder"></i></span>
+                    <span class="info"><span class="name">${item.name}</span></span>
+                    <span class="tag">category</span>
+                </div>
+            `).join('');
+
+            list.querySelectorAll('.item').forEach(el => {
+                el.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const name = this.querySelector('.name').textContent;
+                    selectItem(id, name);
+                });
+            });
+        }
+
+        function selectItem(id, name) {
+            selectedId = id;
+            hidden.value = id;
+            displayName.textContent = name;
+            display.classList.add('show');
+            trigger.value = name;
+            dropdown.classList.remove('active');
+            renderItems(filteredItems);
+            updateSubcategories(id);
+        }
+
+        window.clearCategory = function() {
+            selectedId = '';
+            hidden.value = '';
+            display.classList.remove('show');
+            trigger.value = '';
+            renderItems(filteredItems);
+            document.getElementById('subcategorySelected').value = '';
+            document.getElementById('subcategorySelectedDisplay').classList.remove('show');
+            document.getElementById('subcategoryTrigger').value = '';
+            document.getElementById('subcategoryList').innerHTML = `
+                <div class="empty"><i class="fas fa-folder-open"></i><span>Select a category first</span></div>
+            `;
+        }
+
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('active');
+            if (dropdown.classList.contains('active')) {
+                search.value = '';
+                search.focus();
+                renderItems(categories);
+            }
+        });
+
+        search.addEventListener('input', function() {
+            const q = this.value.toLowerCase().trim();
+            filteredItems = categories.filter(item => item.name.toLowerCase().includes(q));
+            renderItems(filteredItems);
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target)) dropdown.classList.remove('active');
+        });
+
+        search.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') dropdown.classList.remove('active');
+            if (e.key === 'Enter') {
+                const firstItem = list.querySelector('.item');
+                if (firstItem) firstItem.click();
+            }
+        });
+
+        if (preselectedCategory) {
+            const item = categories.find(i => i.id == preselectedCategory);
+            if (item) selectItem(item.id, item.name);
+        }
+
+        renderItems(categories);
     }
 
     // ============================================
-    // PREVIEW VARIANT IMAGES
+    // UPDATE SUBCATEGORIES
     // ============================================
-    function previewVariantImages(input, containerId) {
+    window.updateSubcategories = function(categoryId) {
+        const filtered = allSubcategories.filter(sub => sub.category_id == categoryId);
+        const list = document.getElementById('subcategoryList');
+        const hidden = document.getElementById('subcategorySelected');
+        const display = document.getElementById('subcategorySelectedDisplay');
+        const displayName = document.getElementById('subcategorySelectedName');
+        const trigger = document.getElementById('subcategoryTrigger');
+        
+        hidden.value = '';
+        display.classList.remove('show');
+        trigger.value = '';
+        
+        if (filtered.length === 0) {
+            list.innerHTML = `<div class="empty"><i class="fas fa-folder-open"></i><span>No subcategories found</span></div>`;
+            return;
+        }
+
+        list.innerHTML = filtered.map(item => `
+            <div class="item" data-id="${item.id}">
+                <span class="icon"><i class="fas fa-tag"></i></span>
+                <span class="info"><span class="name">${item.name}</span></span>
+                <span class="tag">subcategory</span>
+            </div>
+        `).join('');
+
+        list.querySelectorAll('.item').forEach(el => {
+            el.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const name = this.querySelector('.name').textContent;
+                hidden.value = id;
+                displayName.textContent = name;
+                display.classList.add('show');
+                trigger.value = name;
+                document.getElementById('subcategoryDropdown').classList.remove('active');
+            });
+        });
+    }
+
+    // ============================================
+    // SUBCATEGORY DROPDOWN
+    // ============================================
+    function initSubcategoryDropdown() {
+        const dropdown = document.getElementById('subcategoryDropdown');
+        const list = document.getElementById('subcategoryList');
+        const search = document.getElementById('subcategorySearch');
+        const hidden = document.getElementById('subcategorySelected');
+        const display = document.getElementById('subcategorySelectedDisplay');
+        const displayName = document.getElementById('subcategorySelectedName');
+        const trigger = document.getElementById('subcategoryTrigger');
+
+        let selectedId = preselectedSubcategory || '';
+        let initialSubs = [];
+        if (preselectedCategory) {
+            initialSubs = allSubcategories.filter(sub => sub.category_id == preselectedCategory);
+        }
+        
+        if (initialSubs.length === 0) {
+            list.innerHTML = `<div class="empty"><i class="fas fa-folder-open"></i><span>Select a category first</span></div>`;
+        } else {
+            renderSubItems(initialSubs);
+        }
+
+        function renderSubItems(itemsToRender) {
+            if (itemsToRender.length === 0) {
+                list.innerHTML = `<div class="empty"><i class="fas fa-search"></i><span>No subcategories found</span></div>`;
+                return;
+            }
+
+            list.innerHTML = itemsToRender.map(item => `
+                <div class="item ${item.id == selectedId ? 'selected' : ''}" data-id="${item.id}">
+                    <span class="icon"><i class="fas fa-tag"></i></span>
+                    <span class="info"><span class="name">${item.name}</span></span>
+                    <span class="tag">subcategory</span>
+                </div>
+            `).join('');
+
+            list.querySelectorAll('.item').forEach(el => {
+                el.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const name = this.querySelector('.name').textContent;
+                    selectedId = id;
+                    hidden.value = id;
+                    displayName.textContent = name;
+                    display.classList.add('show');
+                    trigger.value = name;
+                    dropdown.classList.remove('active');
+                    renderSubItems(itemsToRender);
+                });
+            });
+        }
+
+        search.addEventListener('input', function() {
+            const q = this.value.toLowerCase().trim();
+            const categoryId = document.getElementById('categorySelected').value;
+            let filtered = allSubcategories;
+            if (categoryId) {
+                filtered = allSubcategories.filter(sub => sub.category_id == categoryId);
+            }
+            filtered = filtered.filter(item => item.name.toLowerCase().includes(q));
+            renderSubItems(filtered);
+        });
+
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const categoryId = document.getElementById('categorySelected').value;
+            if (!categoryId) {
+                alert('Please select a category first');
+                return;
+            }
+            dropdown.classList.toggle('active');
+            if (dropdown.classList.contains('active')) {
+                search.value = '';
+                search.focus();
+                const filtered = allSubcategories.filter(sub => sub.category_id == categoryId);
+                renderSubItems(filtered);
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target)) dropdown.classList.remove('active');
+        });
+
+        search.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') dropdown.classList.remove('active');
+            if (e.key === 'Enter') {
+                const firstItem = list.querySelector('.item');
+                if (firstItem) firstItem.click();
+            }
+        });
+
+        window.clearSubcategory = function() {
+            selectedId = '';
+            hidden.value = '';
+            display.classList.remove('show');
+            trigger.value = '';
+            const categoryId = document.getElementById('categorySelected').value;
+            if (categoryId) {
+                const filtered = allSubcategories.filter(sub => sub.category_id == categoryId);
+                renderSubItems(filtered);
+            } else {
+                list.innerHTML = `<div class="empty"><i class="fas fa-folder-open"></i><span>Select a category first</span></div>`;
+            }
+        }
+
+        if (preselectedSubcategory) {
+            const item = allSubcategories.find(i => i.id == preselectedSubcategory);
+            if (item) {
+                selectedId = item.id;
+                hidden.value = item.id;
+                displayName.textContent = item.name;
+                display.classList.add('show');
+                trigger.value = item.name;
+            }
+        }
+    }
+
+    // ============================================
+    // INIT DROPDOWNS
+    // ============================================
+    if (categories.length > 0) initCategoryDropdown();
+    if (allSubcategories.length > 0) initSubcategoryDropdown();
+
+    // ============================================
+    // VARIANT FUNCTIONS
+    // ============================================
+    let variantCounter = {{ product.variants.count|default:0 }};
+
+    window.addVariant = function() {
+        const container = document.getElementById('variantsContainer');
+        const newId = variantCounter + 1;
+        
+        const variantHTML = `
+            <div class="variant-card">
+                <button type="button" class="btn btn-danger btn-sm remove-variant" onclick="this.closest('.variant-card').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <input type="hidden" name="variant_id[]" value="">
+                <input type="hidden" name="variant_delete[]" value="">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Variant Name <span class="hint">Descriptive</span></label>
+                        <input type="text" name="variant_name[]" class="form-control" placeholder="e.g., Red - Medium">
+                    </div>
+                    <div class="form-group">
+                        <label>SKU <span class="required">*</span></label>
+                        <input type="text" name="variant_sku[]" class="form-control" placeholder="e.g., TSHIRT-RED-M" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Color</label>
+                        <input type="text" name="variant_color[]" class="form-control" placeholder="e.g., Red">
+                    </div>
+                    <div class="form-group">
+                        <label>Size</label>
+                        <input type="text" name="variant_size[]" class="form-control" placeholder="e.g., M">
+                    </div>
+                    <div class="form-group">
+                        <label>Material</label>
+                        <input type="text" name="variant_material[]" class="form-control" placeholder="e.g., Cotton">
+                    </div>
+                    <div class="form-group">
+                        <label>Weight (kg)</label>
+                        <input type="number" name="variant_weight[]" class="form-control" step="0.01" placeholder="0.50">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price <span class="required">*</span></label>
+                        <input type="number" name="variant_price[]" class="form-control" step="0.01" placeholder="499.99" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Discount %</label>
+                        <input type="number" name="variant_discount[]" class="form-control" step="0.01" placeholder="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Stock</label>
+                        <input type="number" name="variant_stock[]" class="form-control" placeholder="50">
+                    </div>
+                    <div class="form-group">
+                        <label>Low Stock Threshold</label>
+                        <input type="number" name="variant_low_stock[]" class="form-control" value="5" placeholder="5">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Description <span class="hint">HTML supported</span></label>
+                        <textarea name="variant_description[]" class="form-textarea" rows="2" placeholder="Variant description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Specifications <span class="hint">HTML supported</span></label>
+                        <textarea name="variant_specifications[]" class="form-textarea" rows="2" placeholder="Variant specifications"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Features <span class="hint">HTML supported</span></label>
+                        <textarea name="variant_features[]" class="form-textarea" rows="2" placeholder="Variant features"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Warranty (Months)</label>
+                        <input type="number" name="variant_warranty_months[]" class="form-control" placeholder="12">
+                    </div>
+                    <div class="form-group">
+                        <label>Warranty Details</label>
+                        <textarea name="variant_warranty_details[]" class="form-textarea" rows="2" placeholder="Warranty details"></textarea>
+                    </div>
+                    <div class="form-group" style="justify-content:center;">
+                        <div class="form-check">
+                            <input type="checkbox" name="variant_is_active[]" checked>
+                            <label class="form-check-label">Active</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group full">
+                        <label>Variant Images</label>
+                        <div id="variant-image-list-${newId}" class="image-list mb-2"></div>
+                        <div class="image-upload-box" onclick="document.getElementById('variant_images_${newId}').click()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <small>Click to upload variant images</small>
+                        </div>
+                        <input type="file" name="variant_images_${newId}" id="variant_images_${newId}" multiple accept="image/*" style="display:none" 
+                               onchange="previewVariantImages(this, 'variant-image-list-${newId}')">
+                        <div id="variant_image_preview_${newId}" class="image-list mt-2"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.insertAdjacentHTML('beforeend', variantHTML);
+        variantCounter = newId;
+    };
+
+    window.toggleVariantDelete = function(button) {
+        const card = button.closest('.variant-card');
+        const deleteInput = card.querySelector('input[name="variant_delete[]"]');
+        if (deleteInput) {
+            if (deleteInput.value === 'on') {
+                deleteInput.value = '';
+                card.classList.remove('variant-deleted');
+                button.innerHTML = '<i class="fas fa-times"></i>';
+                button.className = 'btn btn-danger btn-sm remove-variant';
+            } else {
+                deleteInput.value = 'on';
+                card.classList.add('variant-deleted');
+                button.innerHTML = '<i class="fas fa-undo"></i>';
+                button.className = 'btn btn-warning btn-sm remove-variant';
+            }
+        }
+    };
+
+    // ============================================
+    // PREVIEW FUNCTIONS
+    // ============================================
+    window.previewVariantImages = function(input, containerId) {
         const container = document.getElementById(containerId);
         if (!container) return;
-        
-        // Remove existing preview images (keep existing images from DB)
         const previews = container.querySelectorAll('.variant-preview-temp');
         previews.forEach(el => el.remove());
         
-        // Add new preview images
         for (let i = 0; i < input.files.length; i++) {
             const file = input.files[i];
             const reader = new FileReader();
@@ -532,175 +2070,15 @@
                 const div = document.createElement('div');
                 div.className = 'image-item variant-preview-temp';
                 div.innerHTML = `
-                    <img src="${event.target.result}" class="image-preview" style="border: 2px solid #28a745;">
-                    <span class="badge bg-success badge-primary">New</span>
+                    <img src="${event.target.result}" class="image-preview" style="border:2px solid #10b981;">
+                    <span class="badge-primary">New</span>
                 `;
                 container.appendChild(div);
             }
             reader.readAsDataURL(file);
         }
-    }
+    };
 
-    // ============================================
-    // VARIABLE TO TRACK VARIANT COUNT
-    // ============================================
-    let variantCounter = {{ product.variants.count|default:0 }};
-
-    // ============================================
-    // ADD NEW VARIANT
-    // ============================================
-    function addVariant() {
-        const container = document.getElementById('variantsContainer');
-        const currentCount = container.querySelectorAll('.variant-card').length;
-        const index = currentCount;
-        const newId = variantCounter;
-        
-        const variantHTML = `
-            <div class="variant-card">
-                <button type="button" class="btn btn-danger btn-sm remove-variant" onclick="removeVariant(this)">
-                    <i class="fas fa-times"></i>
-                </button>
-                <input type="hidden" name="variant_id[]" value="">
-                <input type="hidden" name="variant_delete[]" value="">
-                
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Variant Name</label>
-                        <input type="text" name="variant_name[]" class="form-control" placeholder="e.g., Red - Medium">
-                        <div class="help-text">A descriptive name for this variant</div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">SKU <span class="text-danger">*</span></label>
-                        <input type="text" name="variant_sku[]" class="form-control" placeholder="e.g., TSHIRT-RED-M" required>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold">Color</label>
-                        <input type="text" name="variant_color[]" class="form-control" placeholder="e.g., Red">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold">Size</label>
-                        <input type="text" name="variant_size[]" class="form-control" placeholder="e.g., M">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold">Material</label>
-                        <input type="text" name="variant_material[]" class="form-control" placeholder="e.g., Cotton">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold">Weight (kg)</label>
-                        <input type="number" name="variant_weight[]" class="form-control" step="0.01" placeholder="0.50">
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold">Price <span class="text-danger">*</span></label>
-                        <input type="number" name="variant_price[]" class="form-control" step="0.01" placeholder="499.99" required>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold">Discount %</label>
-                        <input type="number" name="variant_discount[]" class="form-control" step="0.01" placeholder="10">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold">Stock</label>
-                        <input type="number" name="variant_stock[]" class="form-control" placeholder="50">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold">Low Stock Threshold</label>
-                        <input type="number" name="variant_low_stock[]" class="form-control" value="5" placeholder="5">
-                        <div class="help-text">Alert when stock drops below this</div>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold">Description <span class="text-muted">(HTML)</span></label>
-                        <textarea name="variant_description[]" class="form-control" rows="2" placeholder="Variant description"></textarea>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold">Specifications <span class="text-muted">(HTML)</span></label>
-                        <textarea name="variant_specifications[]" class="form-control" rows="2" placeholder="Variant specifications"></textarea>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold">Features <span class="text-muted">(HTML)</span></label>
-                        <textarea name="variant_features[]" class="form-control" rows="2" placeholder="Variant features"></textarea>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Warranty (Months)</label>
-                        <input type="number" name="variant_warranty_months[]" class="form-control" placeholder="12">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Warranty Details</label>
-                        <textarea name="variant_warranty_details[]" class="form-control" rows="2" placeholder="Warranty details"></textarea>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-12 mb-3">
-                        <div class="form-check">
-                            <input type="checkbox" name="variant_is_active[]" class="form-check-input" checked>
-                            <label class="form-check-label fw-bold">Active</label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Variant Images</label>
-                    <div id="variant-image-list-${newId}" class="image-list mb-2"></div>
-                    <div class="image-upload-box" onclick="document.getElementById('variant_images_${newId}').click()">
-                        <i class="fas fa-cloud-upload-alt text-muted"></i>
-                        <small>Click to upload variant images</small>
-                    </div>
-                    <input type="file" name="variant_images_${newId}" id="variant_images_${newId}" multiple accept="image/*" style="display:none" 
-                           onchange="previewVariantImages(this, 'variant-image-list-${newId}')">
-                    <div id="variant_image_preview_${newId}" class="image-list mt-2"></div>
-                </div>
-            </div>
-        `;
-        
-        container.insertAdjacentHTML('beforeend', variantHTML);
-        variantCounter++;
-    }
-
-    // ============================================
-    // REMOVE VARIANT
-    // ============================================
-    function removeVariant(button) {
-        const variantCard = button.closest('.variant-card');
-        variantCard.remove();
-    }
-
-    // ============================================
-    // TOGGLE VARIANT DELETE (for existing variants)
-    // ============================================
-    function toggleVariantDelete(button) {
-        const variantCard = button.closest('.variant-card');
-        const deleteInput = variantCard.querySelector('input[name="variant_delete[]"]');
-        if (deleteInput) {
-            if (deleteInput.value === 'on') {
-                deleteInput.value = '';
-                variantCard.classList.remove('variant-deleted');
-                button.innerHTML = '<i class="fas fa-times"></i>';
-                button.className = 'btn btn-danger btn-sm remove-variant';
-                button.title = 'Delete this variant';
-            } else {
-                deleteInput.value = 'on';
-                variantCard.classList.add('variant-deleted');
-                button.innerHTML = '<i class="fas fa-undo"></i>';
-                button.className = 'btn btn-warning btn-sm remove-variant';
-                button.title = 'Restore this variant';
-            }
-        }
-    }
-
-    // ============================================
-    // PRODUCT IMAGE PREVIEW
-    // ============================================
     document.getElementById('product_images').addEventListener('change', function(e) {
         const preview = document.getElementById('productImagePreview');
         preview.innerHTML = '';
@@ -719,142 +2097,48 @@
     });
 
     // ============================================
-    // CATEGORY / SUBCATEGORY DYNAMIC LOADING
+    // DELETE FUNCTIONS
     // ============================================
-    document.addEventListener('DOMContentLoaded', function() {
-        const categorySelect = document.querySelector('select[name="category"]');
-        const subcategorySelect = document.querySelector('select[name="subcategory"]');
-        
-        if (categorySelect) {
-            categorySelect.addEventListener('change', function() {
-                const categoryId = this.value;
-                if (categoryId) {
-                    fetch(`/ajax/get-subcategories/?category_id=${categoryId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            subcategorySelect.innerHTML = '<option value="">---------</option>';
-                            data.forEach(sub => {
-                                const option = document.createElement('option');
-                                option.value = sub.id;
-                                option.textContent = sub.name;
-                                subcategorySelect.appendChild(option);
-                            });
-                        })
-                        .catch(error => console.error('Error loading subcategories:', error));
-                } else {
-                    subcategorySelect.innerHTML = '<option value="">---------</option>';
-                }
-            });
-        }
-    });
+    function getCsrfToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    }
 
-    // ============================================
-    // DELETE PRODUCT IMAGE VIA AJAX
-    // ============================================
-    function deleteProductImage(imageId) {
-        if (!confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
-            return;
-        }
-        
-        const button = document.querySelector(`button[onclick="deleteProductImage(${imageId})"]`);
-        if (button) {
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            button.disabled = true;
-        }
-        
+    window.deleteProductImage = function(imageId) {
+        if (!confirm('Are you sure you want to delete this image?')) return;
         fetch(`/admin/product/image/delete/${imageId}/`, {
             method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json',
-            },
-            credentials: 'same-origin',
+            headers: { 'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/json' },
         })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(text || 'Network response was not ok');
-                });
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Error: ' + (data.error || 'Unknown error occurred'));
-                if (button) {
-                    button.innerHTML = '<i class="fas fa-times"></i>';
-                    button.disabled = false;
-                }
-            }
+            if (data.success) location.reload();
+            else alert('Error: ' + data.error);
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Error deleting image. Please refresh and try again.\n\n' + error.message);
-            if (button) {
-                button.innerHTML = '<i class="fas fa-times"></i>';
-                button.disabled = false;
-            }
+            alert('Error deleting image');
+            console.error(error);
         });
-    }
+    };
 
-    // ============================================
-    // DELETE VARIANT IMAGE VIA AJAX
-    // ============================================
-    function deleteVariantImage(imageId) {
-        if (!confirm('Are you sure you want to delete this variant image? This action cannot be undone.')) {
-            return;
-        }
-        
-        const button = document.querySelector(`button[onclick="deleteVariantImage(${imageId})"]`);
-        if (button) {
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            button.disabled = true;
-        }
-        
+    window.deleteVariantImage = function(imageId) {
+        if (!confirm('Are you sure you want to delete this variant image?')) return;
         fetch(`/admin/variant/image/delete/${imageId}/`, {
             method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json',
-            },
-            credentials: 'same-origin',
+            headers: { 'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/json' },
         })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(text || 'Network response was not ok');
-                });
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Remove the image from the DOM without reloading
                 const imgElement = document.getElementById(`variant-img-${imageId}`);
-                if (imgElement) {
-                    imgElement.remove();
-                }
-                // Show success message
+                if (imgElement) imgElement.remove();
                 alert('Image deleted successfully!');
-            } else {
-                alert('Error: ' + (data.error || 'Unknown error occurred'));
-                if (button) {
-                    button.innerHTML = '<i class="fas fa-times"></i>';
-                    button.disabled = false;
-                }
-            }
+            } else alert('Error: ' + data.error);
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Error deleting variant image. Please refresh and try again.\n\n' + error.message);
-            if (button) {
-                button.innerHTML = '<i class="fas fa-times"></i>';
-                button.disabled = false;
-            }
+            alert('Error deleting image');
+            console.error(error);
         });
-    }
+    };
 
     // ============================================
     // FORM VALIDATION
@@ -862,32 +2146,56 @@
     document.getElementById('productForm').addEventListener('submit', function(e) {
         const variantSkus = document.querySelectorAll('input[name="variant_sku[]"]');
         let hasValidVariant = false;
-        
         variantSkus.forEach(input => {
-            if (input.value.trim() !== '') {
-                hasValidVariant = true;
-            }
+            if (input.value.trim() !== '') hasValidVariant = true;
         });
         
         if (hasValidVariant) {
             const variantPrices = document.querySelectorAll('input[name="variant_price[]"]');
             let hasInvalidPrice = false;
-            
             variantPrices.forEach((input, index) => {
                 const sku = variantSkus[index];
                 if (sku && sku.value.trim() !== '' && !input.value) {
                     hasInvalidPrice = true;
                 }
             });
-            
             if (hasInvalidPrice) {
                 e.preventDefault();
                 alert('Please enter prices for all variants.');
                 return false;
             }
         }
-        
         return true;
     });
+
+    // ============================================
+    // CATEGORY / SUBCATEGORY DYNAMIC LOADING
+    // ============================================
+    const categorySelect = document.querySelector('select[name="category"]');
+    const subcategorySelect = document.querySelector('select[name="subcategory"]');
+    
+    if (categorySelect) {
+        categorySelect.addEventListener('change', function() {
+            const categoryId = this.value;
+            if (categoryId) {
+                fetch(`/ajax/get-subcategories/?category_id=${categoryId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        subcategorySelect.innerHTML = '<option value="">---------</option>';
+                        data.forEach(sub => {
+                            const option = document.createElement('option');
+                            option.value = sub.id;
+                            option.textContent = sub.name;
+                            subcategorySelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error loading subcategories:', error));
+            } else {
+                subcategorySelect.innerHTML = '<option value="">---------</option>';
+            }
+        });
+    }
+});
 </script>
+
 {% endblock %}

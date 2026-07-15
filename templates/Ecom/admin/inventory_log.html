@@ -4,100 +4,1284 @@
 {% block title %}Inventory Log - MyStore{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-clipboard-list text-primary"></i> Inventory Log</h2>
-        <a href="{% url 'Ecom:product_list' %}" class="btn btn-secondary">
+<style>
+    /* ============================================================
+       ROOT VARIABLES
+       ============================================================ */
+    :root {
+        --primary: #5c121f;
+        --primary-light: #7a1a2b;
+        --primary-dark: #3d0c14;
+        --primary-gradient: linear-gradient(135deg, #5c121f 0%, #8b1a2b 100%);
+        --primary-glow: 0 4px 20px rgba(92,18,31,0.25);
+        
+        --bg-primary: #f8f6f5;
+        --bg-card: #ffffff;
+        --bg-hover: #f5f0ee;
+        --bg-stripe: #fcfaf9;
+        
+        --border-color: #e0dbd7;
+        --border-light: #e8e3df;
+        
+        --text-primary: #1a1a1a;
+        --text-secondary: #6b7280;
+        --text-muted: #9ca3af;
+        --text-white: #ffffff;
+        
+        --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+        --shadow-md: 0 8px 32px rgba(92,18,31,0.12);
+        --shadow-lg: 0 16px 48px rgba(92,18,31,0.18);
+        
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 20px;
+        
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ============================================================
+       WRAPPER
+       ============================================================ */
+    .log-wrap {
+        width: 100%;
+        max-width: 100%;
+        padding: 0.5rem;
+        animation: fadeSlideIn 0.6s ease;
+    }
+
+    @keyframes fadeSlideIn {
+        from { opacity: 0; transform: translateY(24px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       STICKY TOP CONTAINER - Header + Table Header both sticky
+       ============================================================ */
+    .sticky-top-container {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--bg-card);
+        padding-bottom: 0;
+    }
+
+    /* ============================================================
+       HEADER - STICKY TOP
+       ============================================================ */
+    .log-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        background: var(--bg-card);
+        padding: 18px 28px;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        border: 1px solid var(--border-color);
+        border-bottom: none;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .log-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-gradient);
+    }
+
+    .log-header .left {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .log-header .left .icon-wrapper {
+        width: 48px;
+        height: 48px;
+        background: var(--primary-gradient);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 20px;
+        flex-shrink: 0;
+        box-shadow: var(--primary-glow);
+        transition: var(--transition);
+    }
+
+    .log-header .left .icon-wrapper:hover {
+        transform: scale(1.05) rotate(-6deg);
+    }
+
+    .log-header .left .header-content h2 {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--primary);
+        margin: 0;
+        line-height: 1.2;
+        letter-spacing: -0.5px;
+    }
+
+    .log-header .left .header-content .subtitle {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin: 2px 0 0 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .log-header .left .header-content .subtitle .badge {
+        font-size: 12px;
+        font-weight: 700;
+        background: var(--primary-gradient);
+        color: #fff;
+        padding: 3px 16px;
+        border-radius: 20px;
+        display: inline-block;
+        box-shadow: var(--primary-glow);
+        letter-spacing: 0.3px;
+    }
+
+    .btn-back {
+        background: var(--primary-gradient);
+        color: #fff;
+        padding: 10px 24px;
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: var(--transition);
+        flex-shrink: 0;
+        border: none;
+        box-shadow: var(--primary-glow);
+        cursor: pointer;
+        letter-spacing: 0.3px;
+    }
+
+    .btn-back:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(92,18,31,0.35);
+        color: #fff;
+    }
+
+    /* ============================================================
+       CARD
+       ============================================================ */
+    .log-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-top: none;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+    }
+
+    .log-card:hover {
+        box-shadow: var(--shadow-md);
+    }
+
+    /* ============================================================
+       TABLE WRAPPER
+       ============================================================ */
+    .table-wrap {
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 0;
+        max-height: 550px;
+        position: relative;
+    }
+
+    .table-wrap::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    .table-wrap::-webkit-scrollbar-track {
+        background: var(--bg-primary);
+        border-radius: 10px;
+    }
+
+    .table-wrap::-webkit-scrollbar-thumb {
+        background: var(--primary-gradient);
+        border-radius: 10px;
+    }
+
+    .table-wrap::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-light);
+    }
+
+    /* ============================================================
+       TABLE - PROFESSIONAL WITH LINES
+       ============================================================ */
+    .log-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        min-width: 950px;
+        table-layout: fixed;
+        border: none;
+    }
+
+    /* ===== COLUMN WIDTHS ===== */
+    .log-table .col-date { width: 12%; }
+    .log-table .col-product { width: 24%; }
+    .log-table .col-action { width: 13%; }
+    .log-table .col-qty { width: 10%; }
+    .log-table .col-prev { width: 8%; }
+    .log-table .col-new { width: 8%; }
+    .log-table .col-note { width: 13%; }
+    .log-table .col-user { width: 12%; }
+
+    /* ============================================================
+       TABLE HEADER - PRIMARY COLOR - STICKY
+       ============================================================ */
+    .log-table thead {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+    }
+
+    .log-table thead th {
+        padding: 14px 12px;
+        text-align: left;
+        font-weight: 700;
+        color: var(--text-white);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        white-space: nowrap;
+        background: var(--primary-gradient);
+        border: 1px solid var(--primary-dark);
+        border-top: none;
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .log-table thead th:first-child {
+        padding-left: 24px;
+        border-left: none;
+    }
+
+    .log-table thead th:last-child {
+        padding-right: 24px;
+        border-right: none;
+    }
+
+    .log-table thead th i {
+        margin-right: 8px;
+        font-size: 12px;
+        opacity: 0.8;
+    }
+
+    /* Header hover effect */
+    .log-table thead th:hover {
+        background: var(--primary-dark);
+        cursor: pointer;
+        transform: scale(1.01);
+    }
+
+    /* Sort indicator */
+    .log-table thead th .sort-icon {
+        opacity: 0;
+        transition: var(--transition);
+        margin-left: 4px;
+        font-size: 10px;
+    }
+
+    .log-table thead th:hover .sort-icon {
+        opacity: 1;
+    }
+
+    /* ============================================================
+       TABLE BODY - WITH PROFESSIONAL LINES
+       ============================================================ */
+    .log-table tbody td {
+        padding: 13px 12px;
+        border: 1px solid var(--border-light);
+        vertical-align: middle;
+        transition: var(--transition);
+        color: var(--text-primary);
+        background: var(--bg-card);
+        font-size: 13px;
+    }
+
+    .log-table tbody td:first-child {
+        padding-left: 24px;
+        border-left: none;
+    }
+
+    .log-table tbody td:last-child {
+        padding-right: 24px;
+        border-right: none;
+    }
+
+    /* Row hover effect */
+    .log-table tbody tr {
+        transition: var(--transition);
+    }
+
+    .log-table tbody tr:hover td {
+        background: var(--bg-hover);
+        border-color: var(--primary);
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Zebra striping */
+    .log-table tbody tr:nth-child(even) td {
+        background: var(--bg-stripe);
+    }
+
+    .log-table tbody tr:nth-child(even):hover td {
+        background: var(--bg-hover);
+    }
+
+    /* Last row border */
+    .log-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* ============================================================
+       DATE
+       ============================================================ */
+    .date-main {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 13px;
+        display: block;
+        letter-spacing: 0.3px;
+    }
+
+    .date-sub {
+        font-size: 11px;
+        color: var(--text-muted);
+        display: block;
+        font-weight: 500;
+        margin-top: 2px;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* ============================================================
+       PRODUCT
+       ============================================================ */
+    .product-info {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .product-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 14px;
+        display: block;
+        line-height: 1.3;
+    }
+
+    .product-name a {
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: var(--transition);
+        position: relative;
+        display: inline-block;
+    }
+
+    .product-name a::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--primary-gradient);
+        transition: var(--transition);
+        border-radius: 2px;
+    }
+
+    .product-name a:hover {
+        color: var(--primary);
+    }
+
+    .product-name a:hover::after {
+        width: 100%;
+    }
+
+    .product-sku {
+        font-size: 11px;
+        color: var(--text-muted);
+        font-family: 'Courier New', monospace;
+        display: block;
+        letter-spacing: 0.5px;
+        font-weight: 500;
+    }
+
+    .product-variant {
+        font-size: 10px;
+        color: #fff;
+        background: var(--primary-gradient);
+        padding: 2px 14px;
+        border-radius: 12px;
+        display: inline-block;
+        margin-top: 4px;
+        font-weight: 600;
+        box-shadow: 0 2px 10px rgba(92,18,31,0.2);
+        letter-spacing: 0.3px;
+        align-self: flex-start;
+        transition: var(--transition);
+    }
+
+    .product-variant:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 16px rgba(92,18,31,0.3);
+    }
+
+    .product-variant i {
+        font-size: 9px;
+        margin-right: 4px;
+    }
+
+    /* ============================================================
+       ACTION BADGE - PROFESSIONAL
+       ============================================================ */
+    .action-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-badge::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: 0.6s;
+    }
+
+    .action-badge:hover::before {
+        left: 100%;
+    }
+
+    .action-badge.purchase { background: #dcfce7; color: #16a34a; }
+    .action-badge.sale { background: #fee2e2; color: #dc3545; }
+    .action-badge.return { background: #fef3c7; color: #d97706; }
+    .action-badge.restock { background: #dbeafe; color: #2563eb; }
+    .action-badge.adjustment { background: #f3f4f6; color: #6b7280; }
+
+    .action-badge i {
+        font-size: 10px;
+        opacity: 0.8;
+    }
+
+    .action-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+
+    /* ============================================================
+       QUANTITY
+       ============================================================ */
+    .qty-change {
+        font-weight: 800;
+        font-size: 15px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: var(--transition);
+    }
+
+    .qty-change.positive { 
+        color: #16a34a;
+    }
+    .qty-change.negative { 
+        color: #dc3545;
+    }
+
+    .qty-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-primary);
+        padding: 2px 14px;
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        color: var(--text-primary);
+        font-size: 13px;
+        text-align: center;
+        min-width: 36px;
+        border: 1px solid var(--border-light);
+        transition: var(--transition);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .qty-number:hover {
+        border-color: var(--primary);
+        background: var(--bg-card);
+        box-shadow: 0 2px 12px rgba(92,18,31,0.08);
+        transform: scale(1.05);
+    }
+
+    /* ============================================================
+       NOTE
+       ============================================================ */
+    .note-text {
+        color: var(--text-secondary);
+        font-size: 12px;
+        display: block;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        background: var(--bg-primary);
+        padding: 3px 14px;
+        border-radius: var(--radius-sm);
+        font-style: italic;
+        transition: var(--transition);
+        border: 1px solid transparent;
+    }
+
+    .note-text:hover {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+        white-space: normal;
+        max-width: 250px;
+        position: relative;
+        z-index: 10;
+        box-shadow: var(--shadow-md);
+        padding: 5px 14px;
+    }
+
+    /* ============================================================
+       USER
+       ============================================================ */
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-cell .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        flex-shrink: 0;
+        box-shadow: 0 2px 12px rgba(92,18,31,0.25);
+        transition: var(--transition);
+        text-transform: uppercase;
+    }
+
+    .user-cell .avatar:hover {
+        transform: scale(1.12) rotate(-8deg);
+        box-shadow: 0 4px 20px rgba(92,18,31,0.35);
+    }
+
+    .user-cell .name {
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 13px;
+        transition: var(--transition);
+    }
+
+    .user-cell:hover .name {
+        color: var(--primary);
+    }
+
+    /* ============================================================
+       EMPTY STATE
+       ============================================================ */
+    .empty-state {
+        text-align: center;
+        padding: 60px 24px;
+    }
+
+    .empty-state .icon-wrapper {
+        width: 80px;
+        height: 80px;
+        background: var(--bg-primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        border: 2px dashed var(--border-color);
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .empty-state .icon-wrapper::after {
+        content: '';
+        position: absolute;
+        inset: -6px;
+        border-radius: 50%;
+        border: 2px dashed var(--primary);
+        opacity: 0.2;
+        animation: spin 20s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .empty-state .icon-wrapper i {
+        font-size: 36px;
+        color: var(--primary);
+        opacity: 0.4;
+        transition: var(--transition);
+    }
+
+    .empty-state:hover .icon-wrapper {
+        border-color: var(--primary);
+        transform: scale(1.04);
+    }
+
+    .empty-state:hover .icon-wrapper i {
+        opacity: 0.7;
+    }
+
+    .empty-state h4 {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        font-size: 14px;
+        margin: 0;
+        max-width: 400px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* ============================================================
+       PAGINATION
+       ============================================================ */
+    .pagination-wrap {
+        padding: 16px 28px;
+        background: var(--bg-primary);
+        border-top: 2px solid var(--border-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .pagination-wrap .page {
+        padding: 7px 18px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 40px;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .pagination-wrap .page:hover {
+        background: var(--primary-gradient);
+        color: #fff;
+        border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(92,18,31,0.3);
+    }
+
+    .pagination-wrap .page.active {
+        background: var(--primary-gradient);
+        color: #fff;
+        border-color: var(--primary);
+        box-shadow: 0 4px 20px rgba(92,18,31,0.25);
+        cursor: default;
+        transform: translateY(0);
+    }
+
+    .pagination-wrap .page.disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        pointer-events: none;
+        background: var(--bg-primary);
+        border-color: var(--border-color);
+    }
+
+    .pagination-wrap .page i {
+        font-size: 12px;
+        transition: var(--transition);
+    }
+
+    .pagination-wrap .page:not(.disabled):hover i {
+        transform: scale(1.2);
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 1024px) {
+        .log-table {
+            min-width: 850px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .log-header {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 16px 20px;
+        }
+
+        .log-header .left .icon-wrapper {
+            width: 42px;
+            height: 42px;
+            font-size: 18px;
+        }
+
+        .log-header .left .header-content h2 {
+            font-size: 20px;
+        }
+
+        .log-header .left .header-content .subtitle {
+            font-size: 12px;
+        }
+
+        .log-header .left .header-content .subtitle .badge {
+            font-size: 11px;
+            padding: 2px 14px;
+        }
+
+        .btn-back {
+            width: 100%;
+            justify-content: center;
+            padding: 10px 20px;
+            font-size: 13px;
+        }
+
+        .log-table {
+            min-width: 750px;
+            font-size: 12px;
+        }
+
+        .log-table thead th {
+            font-size: 10px;
+            padding: 12px 10px;
+        }
+
+        .log-table tbody td {
+            padding: 10px 10px;
+            font-size: 12px;
+        }
+
+        .log-table thead th:first-child,
+        .log-table tbody td:first-child {
+            padding-left: 16px;
+        }
+
+        .log-table thead th:last-child,
+        .log-table tbody td:last-child {
+            padding-right: 16px;
+        }
+
+        .product-name {
+            font-size: 12px;
+        }
+
+        .product-sku {
+            font-size: 10px;
+        }
+
+        .action-badge {
+            font-size: 10px;
+            padding: 4px 12px;
+            gap: 4px;
+        }
+
+        .action-badge i {
+            font-size: 9px;
+        }
+
+        .qty-change {
+            font-size: 13px;
+        }
+
+        .qty-number {
+            font-size: 12px;
+            padding: 2px 10px;
+            min-width: 28px;
+        }
+
+        .user-cell .avatar {
+            width: 28px;
+            height: 28px;
+            font-size: 10px;
+        }
+
+        .user-cell .name {
+            font-size: 12px;
+        }
+
+        .note-text {
+            font-size: 11px;
+            max-width: 100px;
+            padding: 3px 10px;
+        }
+
+        .pagination-wrap {
+            padding: 12px 16px;
+        }
+
+        .pagination-wrap .page {
+            padding: 6px 14px;
+            font-size: 12px;
+            min-width: 36px;
+        }
+
+        .empty-state {
+            padding: 40px 20px;
+        }
+
+        .empty-state .icon-wrapper {
+            width: 64px;
+            height: 64px;
+        }
+
+        .empty-state .icon-wrapper i {
+            font-size: 28px;
+        }
+
+        .empty-state h4 {
+            font-size: 18px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .log-wrap {
+            padding: 0;
+        }
+
+        .log-header {
+            padding: 12px 14px;
+            gap: 12px;
+        }
+
+        .log-header .left {
+            gap: 12px;
+        }
+
+        .log-header .left .icon-wrapper {
+            width: 36px;
+            height: 36px;
+            font-size: 15px;
+            border-radius: var(--radius-sm);
+        }
+
+        .log-header .left .header-content h2 {
+            font-size: 17px;
+        }
+
+        .log-header .left .header-content .subtitle {
+            font-size: 10px;
+            flex-wrap: wrap;
+        }
+
+        .log-header .left .header-content .subtitle .badge {
+            font-size: 10px;
+            padding: 2px 10px;
+        }
+
+        .btn-back {
+            font-size: 12px;
+            padding: 8px 16px;
+            gap: 8px;
+        }
+
+        .log-table {
+            min-width: 620px;
+            font-size: 11px;
+        }
+
+        .log-table thead th {
+            font-size: 9px;
+            padding: 8px 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .log-table thead th i {
+            font-size: 9px;
+            margin-right: 4px;
+        }
+
+        .log-table tbody td {
+            padding: 8px 6px;
+            font-size: 11px;
+        }
+
+        .log-table thead th:first-child,
+        .log-table tbody td:first-child {
+            padding-left: 10px;
+        }
+
+        .log-table thead th:last-child,
+        .log-table tbody td:last-child {
+            padding-right: 10px;
+        }
+
+        .date-main {
+            font-size: 10px;
+        }
+
+        .date-sub {
+            font-size: 9px;
+        }
+
+        .product-name {
+            font-size: 11px;
+        }
+
+        .product-sku {
+            font-size: 9px;
+        }
+
+        .product-variant {
+            font-size: 8px;
+            padding: 1px 8px;
+        }
+
+        .product-variant i {
+            font-size: 7px;
+        }
+
+        .action-badge {
+            font-size: 8px;
+            padding: 2px 8px;
+            gap: 3px;
+        }
+
+        .action-badge i {
+            font-size: 7px;
+        }
+
+        .qty-change {
+            font-size: 11px;
+        }
+
+        .qty-number {
+            font-size: 10px;
+            padding: 1px 8px;
+            min-width: 22px;
+        }
+
+        .user-cell .avatar {
+            width: 22px;
+            height: 22px;
+            font-size: 8px;
+        }
+
+        .user-cell .name {
+            font-size: 10px;
+        }
+
+        .note-text {
+            font-size: 10px;
+            max-width: 60px;
+            padding: 2px 8px;
+        }
+
+        .pagination-wrap {
+            padding: 10px 12px;
+            gap: 4px;
+        }
+
+        .pagination-wrap .page {
+            padding: 4px 10px;
+            font-size: 10px;
+            min-width: 30px;
+        }
+
+        .empty-state {
+            padding: 28px 14px;
+        }
+
+        .empty-state .icon-wrapper {
+            width: 48px;
+            height: 48px;
+        }
+
+        .empty-state .icon-wrapper i {
+            font-size: 20px;
+        }
+
+        .empty-state .icon-wrapper::after {
+            inset: -4px;
+        }
+
+        .empty-state h4 {
+            font-size: 15px;
+        }
+
+        .empty-state p {
+            font-size: 12px;
+        }
+    }
+
+    /* ============================================================
+       PRINT STYLES
+       ============================================================ */
+    @media print {
+        .sticky-top-container {
+            position: relative !important;
+        }
+
+        .log-header {
+            position: relative !important;
+            background: #fff !important;
+            border-radius: 0 !important;
+        }
+
+        .btn-back,
+        .pagination-wrap {
+            display: none !important;
+        }
+        
+        .log-card {
+            border: 1px solid #ddd !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+        }
+        
+        .log-table tbody tr:hover td {
+            background: transparent !important;
+        }
+
+        .log-table thead th {
+            background: #5c121f !important;
+            color: #fff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        .log-table tbody td {
+            border: 1px solid #ddd !important;
+        }
+
+        .log-table tbody tr:nth-child(even) td {
+            background: #f9f9f9 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        .action-badge {
+            border: 1px solid #ddd !important;
+        }
+
+        .product-variant {
+            border: 1px solid #ddd !important;
+        }
+
+        .table-wrap {
+            max-height: none !important;
+            overflow: visible !important;
+        }
+    }
+
+    /* ============================================================
+       SELECTION
+       ============================================================ */
+    ::selection {
+        background: var(--primary);
+        color: #fff;
+    }
+</style>
+
+<!-- ============================================================
+   STICKY TOP CONTAINER - Header + Table Header both sticky
+   ============================================================ -->
+<div class="sticky-top-container">
+
+    <!-- ===== HEADER ===== -->
+    <div class="log-header">
+        <div class="left">
+            <div class="icon-wrapper">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="header-content">
+                <h2>Inventory Log</h2>
+                <p class="subtitle">
+                    <i class="fas fa-history"></i> Track all inventory changes
+                    <span class="badge">{{ logs.paginator.count|default:0 }} entries</span>
+                </p>
+            </div>
+        </div>
+        <a href="{% url 'Ecom:product_list' %}" class="btn-back">
             <i class="fas fa-arrow-left"></i> Back to Products
         </a>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Date/Time</th>
-                            <th>Product/Variant</th>
-                            <th>Action</th>
-                            <th>Quantity Change</th>
-                            <th>Previous Qty</th>
-                            <th>New Qty</th>
-                            <th>Note</th>
-                            <th>By</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for log in logs %}
-                        <tr>
-                            <td>{{ log.created_at|date:"Y-m-d H:i" }}</td>
-                            <td>
-                                {% if log.product %}
-                                    <strong>{{ log.product.name }}</strong>
-                                    <small class="text-muted d-block">{{ log.product.sku }}</small>
-                                {% elif log.variant %}
-                                    <strong>{{ log.variant.product.name }}</strong>
-                                    <small class="text-muted d-block">{{ log.variant.sku }}</small>
-                                    <small class="text-muted">
-                                        {% if log.variant.color %}{{ log.variant.color }} / {% endif %}
-                                        {% if log.variant.size %}{{ log.variant.size }}{% endif %}
-                                    </small>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="badge 
-                                    {% if log.action == 'purchase' %}bg-success
-                                    {% elif log.action == 'sale' %}bg-danger
-                                    {% elif log.action == 'return' %}bg-warning text-dark
-                                    {% elif log.action == 'restock' %}bg-info
-                                    {% else %}bg-secondary{% endif %}">
-                                    {{ log.get_action_display }}
+    <!-- ===== CARD ===== -->
+    <div class="log-card">
+        <div class="table-wrap">
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th class="col-date"><i class="fas fa-calendar-alt"></i> DATE <span class="sort-icon"><i class="fas fa-sort"></i></span></th>
+                        <th class="col-product"><i class="fas fa-box"></i> PRODUCT <span class="sort-icon"><i class="fas fa-sort"></i></span></th>
+                        <th class="col-action"><i class="fas fa-tag"></i> ACTION <span class="sort-icon"><i class="fas fa-sort"></i></span></th>
+                        <th class="col-qty"><i class="fas fa-exchange-alt"></i> QTY <span class="sort-icon"><i class="fas fa-sort"></i></span></th>
+                        <th class="col-prev"><i class="fas fa-arrow-left"></i> PREV <span class="sort-icon"><i class="fas fa-sort"></i></span></th>
+                        <th class="col-new"><i class="fas fa-arrow-right"></i> NEW <span class="sort-icon"><i class="fas fa-sort"></i></span></th>
+                        <th class="col-note"><i class="fas fa-pen"></i> NOTE <span class="sort-icon"><i class="fas fa-sort"></i></span></th>
+                        <th class="col-user"><i class="fas fa-user"></i> BY <span class="sort-icon"><i class="fas fa-sort"></i></span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td class="col-date">
+                            <span class="date-main">{{ log.created_at|date:"Y-m-d" }}</span>
+                            <span class="date-sub">{{ log.created_at|date:"H:i" }}</span>
+                        </td>
+                        <td class="col-product">
+                            <div class="product-info">
+                                <span class="product-name">
+                                    {% if log.product %}
+                                        <a href="{% url 'Ecom:product_admin_detail' log.product.id %}">{{ log.product.name }}</a>
+                                    {% elif log.variant %}
+                                        <a href="{% url 'Ecom:product_admin_detail' log.variant.product.id %}">{{ log.variant.product.name }}</a>
+                                    {% else %}
+                                        <span style="color:var(--text-muted);">Deleted Item</span>
+                                    {% endif %}
                                 </span>
-                            </td>
-                            <td>
-                                {% if log.quantity_change > 0 %}
-                                    <span class="text-success">+{{ log.quantity_change }}</span>
-                                {% else %}
-                                    <span class="text-danger">{{ log.quantity_change }}</span>
+                                <span class="product-sku">
+                                    {% if log.product %}SKU: {{ log.product.sku }}
+                                    {% elif log.variant %}SKU: {{ log.variant.sku }}
+                                    {% else %}SKU: N/A{% endif %}
+                                </span>
+                                {% if log.variant %}
+                                    {% if log.variant.color or log.variant.size %}
+                                    <span class="product-variant">
+                                        {% if log.variant.color %}<i class="fas fa-palette"></i> {{ log.variant.color }}{% endif %}
+                                        {% if log.variant.color and log.variant.size %} / {% endif %}
+                                        {% if log.variant.size %}<i class="fas fa-ruler"></i> {{ log.variant.size }}{% endif %}
+                                    </span>
+                                    {% endif %}
                                 {% endif %}
-                            </td>
-                            <td>{{ log.previous_quantity }}</td>
-                            <td>{{ log.new_quantity }}</td>
-                            <td>{{ log.note|default:"-" }}</td>
-                            <td>{{ log.created_by.full_name|default:"System" }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="8" class="text-center py-4">
-                                <i class="fas fa-clipboard-list fa-3x text-muted"></i>
-                                <p class="mt-2">No inventory logs found.</p>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Pagination -->
-            {% if logs.has_other_pages %}
-            <nav>
-                <ul class="pagination justify-content-center">
-                    {% if logs.has_previous %}
-                        <li class="page-item"><a class="page-link" href="?page={{ logs.previous_page_number }}">Previous</a></li>
-                    {% endif %}
-                    {% for i in logs.paginator.page_range %}
-                        <li class="page-item {% if logs.number == i %}active{% endif %}">
-                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
-                        </li>
+                            </div>
+                        </td>
+                        <td class="col-action">
+                            <span class="action-badge {{ log.action }}">
+                                <i class="fas 
+                                    {% if log.action == 'purchase' %}fa-cart-plus
+                                    {% elif log.action == 'sale' %}fa-shopping-cart
+                                    {% elif log.action == 'return' %}fa-undo-alt
+                                    {% elif log.action == 'restock' %}fa-boxes
+                                    {% else %}fa-edit{% endif %}">
+                                </i>
+                                {{ log.get_action_display }}
+                            </span>
+                        </td>
+                        <td class="col-qty">
+                            <span class="qty-change {% if log.quantity_change > 0 %}positive{% else %}negative{% endif %}">
+                                {% if log.quantity_change > 0 %}+{% endif %}{{ log.quantity_change }}
+                            </span>
+                        </td>
+                        <td class="col-prev"><span class="qty-number">{{ log.previous_quantity }}</span></td>
+                        <td class="col-new"><span class="qty-number">{{ log.new_quantity }}</span></td>
+                        <td class="col-note">
+                            <span class="note-text">
+                                {{ log.note|default:"—" }}
+                            </span>
+                        </td>
+                        <td class="col-user">
+                            <div class="user-cell">
+                                <div class="avatar">
+                                    {{ log.created_by.full_name|slice:":1"|default:"S" }}
+                                </div>
+                                <span class="name">{{ log.created_by.full_name|default:"System" }}</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <div class="icon-wrapper">
+                                    <i class="fas fa-clipboard-list"></i>
+                                </div>
+                                <h4>No Inventory Logs Found</h4>
+                                <p>Inventory logs will appear here when stock changes occur.<br>Start by adding or updating products.</p>
+                            </div>
+                        </td>
+                    </tr>
                     {% endfor %}
-                    {% if logs.has_next %}
-                        <li class="page-item"><a class="page-link" href="?page={{ logs.next_page_number }}">Next</a></li>
-                    {% endif %}
-                </ul>
-            </nav>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== PAGINATION ===== -->
+        {% if logs.has_other_pages %}
+        <div class="pagination-wrap">
+            {% if logs.has_previous %}
+            <a class="page" href="?page={{ logs.previous_page_number }}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% else %}
+            <span class="page disabled"><i class="fas fa-chevron-left"></i></span>
+            {% endif %}
+
+            {% for i in logs.paginator.page_range %}
+                {% if logs.number == i %}
+                <span class="page active">{{ i }}</span>
+                {% elif i > logs.number|add:'-3' and i < logs.number|add:'3' %}
+                <a class="page" href="?page={{ i }}">{{ i }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if logs.has_next %}
+            <a class="page" href="?page={{ logs.next_page_number }}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% else %}
+            <span class="page disabled"><i class="fas fa-chevron-right"></i></span>
             {% endif %}
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

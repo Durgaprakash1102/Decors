@@ -1,63 +1,860 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Admin Signup - MyStore{% endblock %}
+{% block title %}Admin Signup - ShubhDecor{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-user-shield fa-3x text-primary"></i>
-                        <h3 class="mt-3">Admin Registration</h3>
-                        <p class="text-muted">Create your admin account</p>
-                    </div>
-                    
-                    <form method="POST" novalidate>
-                        {% csrf_token %}
-                        
-                        {% for field in form %}
-                        <div class="mb-3">
-                            <label for="{{ field.id_for_label }}" class="form-label">
-                                {{ field.label }}
-                                {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
-                            </label>
-                            {{ field }}
-                            {% if field.errors %}
-                                <div class="text-danger small mt-1">
-                                    {% for error in field.errors %}
-                                        <i class="fas fa-exclamation-circle"></i> {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
-                        
-                        <div class="alert alert-info small">
-                            <i class="fas fa-info-circle"></i> 
-                            Need admin secret key? Contact system administrator.
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-envelope"></i> Register & Verify Email
-                        </button>
-                    </form>
-                    
-                    <hr class="my-4">
-                    <div class="text-center">
-                        <p class="mb-0">Already have an admin account? 
-                            <a href="{% url 'Ecom:login' %}" class="text-primary">Login</a>
-                        </p>
-                        <p class="mb-0 mt-2">
-                            Register as Customer? 
-                            <a href="{% url 'Ecom:customer_signup' %}" class="text-success">Customer Signup</a>
-                        </p>
-                    </div>
-                </div>
+
+<style>
+    /* ============================================================
+       ADMIN SIGNUP - UNIQUE SHAPE DESIGN (FIXED)
+       Fixed Template | Clean Shape | No Errors
+       ============================================================ */
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    :root {
+        --primary: #5c121f;
+        --primary-light: #7a1a2b;
+        --gold: #F4B400;
+        --white: #ffffff;
+        --shadow: 0 20px 60px rgba(0,0,0,0.04);
+        --shadow-hover: 0 30px 80px rgba(0,0,0,0.08);
+        --transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        --font-body: 'Inter', sans-serif;
+        --font-primary: 'Playfair Display', serif;
+    }
+
+    /* ============================================================
+       PAGE WRAPPER
+       ============================================================ */
+    .admin-wrapper {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        background: #f5f2ef;
+        font-family: var(--font-body);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* ============================================================
+       MAIN CONTAINER
+       ============================================================ */
+    .admin-container {
+        width: 100%;
+        max-width: 1150px;
+        background: var(--white);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: all var(--transition);
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: row;
+        min-height: 550px;
+    }
+
+    .admin-container:hover {
+        box-shadow: var(--shadow-hover);
+        transform: translateY(-6px);
+    }
+
+    /* ============================================================
+       LEFT SIDE - UNIQUE SHAPE WITH IMAGE
+       ============================================================ */
+    .shape-side {
+        flex: 0 0 45%;
+        position: relative;
+        overflow: hidden;
+        min-height: 550px;
+    }
+
+    /* UNIQUE SHAPE - DIAGONAL CUT */
+    .shape-side::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--primary);
+        clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%);
+        z-index: 1;
+    }
+
+    /* Secondary Shape Overlay */
+    .shape-side .shape-overlay {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        clip-path: polygon(0 0, 100% 0, 80% 100%, 0 100%);
+        z-index: 2;
+        opacity: 0.6;
+    }
+
+    /* Image Container - Inside Shape */
+    .shape-side .image-wrap {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 3;
+        clip-path: polygon(0 0, 100% 0, 80% 100%, 0 100%);
+        overflow: hidden;
+    }
+
+    .shape-side .image-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: all var(--transition);
+    }
+
+    .shape-side .image-wrap img:hover {
+        transform: scale(1.03);
+    }
+
+    /* Logo Overlay on Image */
+    .shape-side .logo-overlay {
+        position: absolute;
+        top: 30px;
+        left: 35px;
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .shape-side .logo-overlay .logo-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(255,255,255,0.06);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(244,180,0,0.04);
+    }
+
+    .shape-side .logo-overlay .logo-icon i {
+        color: var(--gold);
+        font-size: 16px;
+    }
+
+    .shape-side .logo-overlay .logo-text {
+        font-family: var(--font-primary);
+        font-weight: 800;
+        font-size: 20px;
+        color: #ffffff;
+        letter-spacing: -0.5px;
+    }
+
+    .shape-side .logo-overlay .logo-text span {
+        color: var(--gold);
+    }
+
+    /* Content Overlay on Image */
+    .shape-side .content-overlay {
+        position: absolute;
+        bottom: 40px;
+        left: 35px;
+        z-index: 5;
+        max-width: 300px;
+    }
+
+    .shape-side .content-overlay h2 {
+        font-family: var(--font-primary);
+        font-size: 28px;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 6px;
+        letter-spacing: -0.3px;
+        line-height: 1.1;
+    }
+
+    .shape-side .content-overlay h2 .gold {
+        color: var(--gold);
+    }
+
+    .shape-side .content-overlay p {
+        font-size: 13px;
+        color: rgba(255,255,255,0.25);
+        line-height: 1.7;
+        font-weight: 300;
+        margin: 0;
+    }
+
+    /* Badge on Shape */
+    .shape-side .badge-shape {
+        position: absolute;
+        top: 30px;
+        right: 20px;
+        z-index: 6;
+        padding: 4px 14px;
+        background: rgba(244,180,0,0.06);
+        border: 1px solid rgba(244,180,0,0.04);
+        border-radius: 50px;
+        font-size: 10px;
+        color: var(--gold);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .shape-side .badge-shape i {
+        font-size: 11px;
+    }
+
+    /* ============================================================
+       RIGHT SIDE - FORM
+       ============================================================ */
+    .form-side {
+        flex: 0 0 55%;
+        padding: 50px 50px 50px 45px;
+        background: var(--white);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 550px;
+    }
+
+    .form-side .form-header {
+        margin-bottom: 28px;
+    }
+
+    .form-side .form-header .step-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 14px;
+        background: rgba(92,18,31,0.04);
+        border-radius: 50px;
+        font-size: 10px;
+        color: var(--primary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 10px;
+    }
+
+    .form-side .form-header .step-tag i {
+        color: var(--gold);
+        font-size: 11px;
+    }
+
+    .form-side .form-header h3 {
+        font-family: var(--font-primary);
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0;
+        letter-spacing: -0.3px;
+    }
+
+    .form-side .form-header h3 span {
+        color: var(--primary);
+    }
+
+    .form-side .form-header p {
+        font-size: 14px;
+        color: var(--text-light);
+        margin: 4px 0 0;
+        font-weight: 400;
+    }
+
+    /* ---- Form Fields ---- */
+    .form-side .form-group {
+        margin-bottom: 16px;
+        width: 100%;
+    }
+
+    .form-side .form-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 5px;
+        letter-spacing: 0.2px;
+    }
+
+    .form-side .form-group label .required {
+        color: var(--primary);
+        margin-left: 2px;
+    }
+
+    .form-side .form-group .field-wrap {
+        position: relative;
+        width: 100%;
+    }
+
+    .form-side .form-group .field-wrap .icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 15px;
+        transition: all var(--transition);
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    .form-side .form-group .field-wrap:focus-within .icon {
+        color: var(--primary);
+        transform: translateY(-50%) scale(1.05);
+    }
+
+    .form-side .form-group .form-control {
+        width: 100%;
+        height: 46px;
+        padding: 0 14px 0 42px;
+        background: var(--bg-light);
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        font-size: 14px;
+        font-family: var(--font-body);
+        color: var(--text);
+        transition: all var(--transition);
+        outline: none;
+        display: block;
+        line-height: 46px;
+    }
+
+    .form-side .form-group .form-control:focus {
+        background: var(--white);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(92,18,31,0.04);
+        transform: translateY(-1px);
+    }
+
+    .form-side .form-group .form-control::placeholder {
+        color: var(--text-muted);
+        font-weight: 300;
+        font-size: 13px;
+    }
+
+    .form-side .form-group .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+
+    .form-side .form-group .text-danger {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: 500;
+    }
+
+    /* ---- Alert ---- */
+    .form-side .alert-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        background: rgba(244,180,0,0.03);
+        border-radius: 12px;
+        border: 1px solid rgba(244,180,0,0.04);
+        margin: 16px 0 18px;
+    }
+
+    .form-side .alert-box i {
+        color: var(--gold);
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .form-side .alert-box p {
+        font-size: 12px;
+        color: var(--text-light);
+        margin: 0;
+        font-weight: 400;
+        line-height: 1.4;
+    }
+
+    .form-side .alert-box p strong {
+        color: var(--text);
+        font-weight: 600;
+    }
+
+    /* ---- Button ---- */
+    .form-side .btn {
+        width: 100%;
+        height: 48px;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        font-family: var(--font-body);
+        cursor: pointer;
+        transition: all var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-decoration: none;
+        background: var(--primary);
+        color: var(--white);
+        box-shadow: 0 4px 16px rgba(92,18,31,0.08);
+    }
+
+    .form-side .btn:hover {
+        background: var(--primary-light);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(92,18,31,0.15);
+    }
+
+    .form-side .btn i {
+        font-size: 16px;
+    }
+
+    /* ---- Links ---- */
+    .form-side .links {
+        margin-top: 18px;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .form-side .links a {
+        font-size: 13px;
+        color: var(--text-light);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .form-side .links a:hover {
+        color: var(--primary);
+    }
+
+    .form-side .links a i {
+        font-size: 13px;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+
+    @media (max-width: 1024px) {
+        .shape-side {
+            flex: 0 0 42%;
+            min-height: 480px;
+        }
+        .shape-side .content-overlay h2 {
+            font-size: 24px;
+        }
+        .form-side {
+            flex: 0 0 58%;
+            padding: 35px 30px;
+            min-height: 480px;
+        }
+        .form-side .form-header h3 {
+            font-size: 24px;
+        }
+    }
+
+    @media (max-width: 820px) {
+        .admin-wrapper {
+            padding: 20px 16px;
+        }
+
+        .admin-container {
+            flex-direction: column;
+            border-radius: 20px;
+            min-height: auto;
+        }
+
+        .admin-container:hover {
+            transform: none;
+        }
+
+        .shape-side {
+            flex: 0 0 100%;
+            min-height: 320px;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .shape-side::before {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+
+        .shape-side .shape-overlay {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+
+        .shape-side .image-wrap {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+
+        .shape-side .content-overlay {
+            bottom: 30px;
+            left: 25px;
+        }
+        .shape-side .content-overlay h2 {
+            font-size: 24px;
+        }
+        .shape-side .content-overlay p {
+            font-size: 12px;
+        }
+
+        .shape-side .badge-shape {
+            top: 20px;
+            right: 20px;
+        }
+
+        .shape-side .logo-overlay {
+            top: 20px;
+            left: 25px;
+        }
+        .shape-side .logo-overlay .logo-text {
+            font-size: 18px;
+        }
+
+        .form-side {
+            flex: 0 0 100%;
+            padding: 28px 24px;
+            min-height: auto;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .form-side .form-header h3 {
+            font-size: 24px;
+        }
+
+        .form-side .form-group .form-control {
+            height: 44px;
+            font-size: 14px;
+            padding-left: 40px;
+            line-height: 44px;
+        }
+
+        .form-side .btn {
+            height: 46px;
+            font-size: 14px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .admin-wrapper {
+            padding: 14px 10px;
+        }
+
+        .admin-container {
+            border-radius: 16px;
+        }
+
+        .shape-side {
+            min-height: 280px;
+        }
+
+        .shape-side .logo-overlay {
+            top: 16px;
+            left: 16px;
+        }
+        .shape-side .logo-overlay .logo-text {
+            font-size: 16px;
+        }
+        .shape-side .logo-overlay .logo-icon {
+            width: 34px;
+            height: 34px;
+        }
+        .shape-side .logo-overlay .logo-icon i {
+            font-size: 14px;
+        }
+
+        .shape-side .badge-shape {
+            top: 16px;
+            right: 16px;
+            font-size: 9px;
+            padding: 3px 10px;
+        }
+
+        .shape-side .content-overlay {
+            bottom: 20px;
+            left: 16px;
+            max-width: 200px;
+        }
+        .shape-side .content-overlay h2 {
+            font-size: 20px;
+        }
+        .shape-side .content-overlay p {
+            font-size: 12px;
+        }
+
+        .form-side {
+            padding: 22px 16px;
+        }
+
+        .form-side .form-header .step-tag {
+            font-size: 9px;
+            padding: 3px 12px;
+        }
+        .form-side .form-header h3 {
+            font-size: 22px;
+        }
+        .form-side .form-header p {
+            font-size: 12px;
+        }
+
+        .form-side .form-group {
+            margin-bottom: 14px;
+        }
+        .form-side .form-group label {
+            font-size: 11px;
+        }
+
+        .form-side .form-group .form-control {
+            height: 42px;
+            font-size: 13px;
+            padding-left: 38px;
+            line-height: 42px;
+            border-radius: 10px;
+        }
+
+        .form-side .form-group .field-wrap .icon {
+            font-size: 14px;
+            left: 12px;
+        }
+
+        .form-side .btn {
+            height: 44px;
+            font-size: 13px;
+            border-radius: 10px;
+        }
+
+        .form-side .alert-box {
+            padding: 8px 12px;
+            margin: 14px 0 16px;
+        }
+        .form-side .alert-box p {
+            font-size: 11px;
+        }
+
+        .form-side .links {
+            gap: 12px;
+        }
+        .form-side .links a {
+            font-size: 12px;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .admin-wrapper {
+            padding: 10px 6px;
+        }
+
+        .admin-container {
+            border-radius: 14px;
+        }
+
+        .shape-side {
+            min-height: 240px;
+        }
+
+        .shape-side .content-overlay h2 {
+            font-size: 18px;
+        }
+        .shape-side .content-overlay p {
+            font-size: 11px;
+        }
+
+        .form-side {
+            padding: 18px 12px;
+        }
+
+        .form-side .form-header h3 {
+            font-size: 20px;
+        }
+
+        .form-side .form-group .form-control {
+            height: 38px;
+            font-size: 12px;
+            padding-left: 34px;
+            line-height: 38px;
+            border-radius: 8px;
+        }
+
+        .form-side .form-group .field-wrap .icon {
+            font-size: 12px;
+            left: 10px;
+        }
+
+        .form-side .btn {
+            height: 38px;
+            font-size: 12px;
+            border-radius: 8px;
+        }
+
+        .form-side .links a {
+            font-size: 11px;
+        }
+    }
+</style>
+
+<!-- ============================================================
+   ADMIN SIGNUP - UNIQUE SHAPE DESIGN (FIXED)
+   ============================================================ -->
+<div class="admin-wrapper">
+
+    <div class="admin-container">
+
+        <!-- ===== LEFT SIDE - UNIQUE SHAPE ===== -->
+        <div class="shape-side">
+
+            <!-- Shape Overlays -->
+            <div class="shape-overlay"></div>
+
+            <!-- Image Inside Shape -->
+            <div class="image-wrap">
+                <img src="{% static 'images/signup.png' %}" alt="Admin">
             </div>
+
+            <!-- Logo Overlay -->
+            <div class="logo-overlay">
+                <div class="logo-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <div class="logo-text">Shubh<span>Decor</span></div>
+            </div>
+
+            <!-- Badge -->
+            <div class="badge-shape">
+                <i class="fas fa-shield-halved"></i> Admin Portal
+            </div>
+
+            <!-- Content Overlay -->
+            <div class="content-overlay">
+                <h2>Admin <span class="gold">Registration</span></h2>
+                <p>Create your admin account to manage the platform</p>
+            </div>
+
         </div>
+
+        <!-- ===== RIGHT SIDE - FORM ===== -->
+        <div class="form-side">
+
+            <div class="form-header">
+                <div class="step-tag">
+                    <i class="fas fa-user-shield"></i> Admin Signup
+                </div>
+                <h3>Create <span>Admin</span> Account</h3>
+                <p>Fill in the details to register as an admin</p>
+            </div>
+
+            <form method="POST" novalidate id="adminSignupForm">
+                {% csrf_token %}
+
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                        <span class="required">*</span>
+                        {% endif %}
+                    </label>
+
+                    <div class="field-wrap">
+                        <!-- Username -->
+                        {% if 'username' in field.name or 'user' in field.name %}
+                            <i class="fas fa-user icon"></i>
+                        <!-- Email -->
+                        {% elif 'email' in field.name %}
+                            <i class="fas fa-envelope icon"></i>
+                        <!-- Password -->
+                        {% elif 'password' in field.name %}
+                            <i class="fas fa-lock icon"></i>
+                        <!-- Confirm Password -->
+                        {% elif 'confirm' in field.name %}
+                            <i class="fas fa-check-circle icon"></i>
+                        <!-- Secret Key -->
+                        {% elif 'secret' in field.name or 'key' in field.name %}
+                            <i class="fas fa-key icon"></i>
+                        <!-- Default -->
+                        {% else %}
+                            <i class="fas fa-user icon"></i>
+                        {% endif %}
+                        {{ field }}
+                    </div>
+
+                    {% if field.errors %}
+                    <div class="text-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {% for error in field.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <div class="alert-box">
+                    <i class="fas fa-info-circle"></i>
+                    <p><strong>Note:</strong> Need admin secret key? Contact system administrator.</p>
+                </div>
+
+                <button type="submit" form="adminSignupForm" class="btn">
+                    <i class="fas fa-envelope"></i> Register &amp; Verify Email
+                </button>
+
+            </form>
+
+            <div class="links">
+                <a href="{% url 'Ecom:login' %}">
+                    <i class="fas fa-arrow-left"></i> Already Admin? Login
+                </a>
+                <a href="{% url 'Ecom:customer_signup' %}">
+                    <i class="fas fa-user"></i> Customer Signup
+                </a>
+            </div>
+
+        </div>
+
     </div>
+
 </div>
+
+<!-- ============================================================
+   JAVASCRIPT
+   ============================================================ -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var firstInput = document.querySelector('.form-control');
+        if (firstInput) {
+            firstInput.focus();
+        }
+
+        document.querySelectorAll('.form-control').forEach(function(input) {
+            input.addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+                var errorDiv = this.closest('.form-group').querySelector('.text-danger');
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+            });
+        });
+    });
+</script>
+
 {% endblock %}

@@ -1,4 +1,3 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,6 +12,7 @@
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    {% load static %}
 
     <style>
         /* ===== RESET & BASE ===== */
@@ -21,13 +21,11 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             background: #f7f5f2;
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
         }
-
         a {
             text-decoration: none;
             color: inherit;
@@ -64,7 +62,7 @@
             background: var(--primary);
             color: #fef6e8;
             font-size: 12px;
-            padding: 8px 7%;
+            padding: 6px 7%;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -99,8 +97,6 @@
             flex-wrap: wrap;
             background: var(--bg-white);
         }
-
-        /* --- Logo --- */
         .logo-img {
             display: flex;
             align-items: center;
@@ -117,7 +113,7 @@
             filter: drop-shadow(0 4px 12px rgba(123, 30, 30, 0.15));
         }
 
-        /* --- Clean Search Bar with Global Search --- */
+        /* --- Clean Search Bar --- */
         .search-box {
             flex: 1 1 300px;
             display: flex;
@@ -430,7 +426,6 @@
             display: block;
         }
 
-        /* Username display in account icon */
         .account-username {
             font-size: 10px;
             font-weight: 600;
@@ -444,7 +439,7 @@
         }
 
         /* ============================================ */
-        /* TIER 3 : SHOP + CATEGORIES + SUBCATEGORIES  */
+        /* TIER 3 : SHOP + CATEGORIES + SUBCATEGORIES   */
         /* ============================================ */
         .tier-3 {
             background: #FEF7ED;
@@ -460,7 +455,7 @@
             display: flex;
             align-items: center;
             gap: 0;
-            padding: 7px 0;
+            padding: 4px 0;
             width: 100%;
             overflow-x: auto;
             overflow-y: visible;
@@ -473,20 +468,20 @@
             display: none;
         }
 
-        /* --- HOME - FIXED --- */
+        /* --- HOME - FIXED (no scroll) --- */
         .nav-home {
             font-family: 'Playfair Display', serif;
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 700;
             font-style: italic;
             color: var(--primary);
-            padding: 4px 18px 4px 0;
+            padding: 3px 14px 3px 0;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             letter-spacing: 0.5px;
             flex-shrink: 0;
-            margin-right: 12px;
+            margin-right: 10px;
             transition: var(--transition);
             background: #FEF7ED;
             border-right: 2px solid var(--border);
@@ -498,7 +493,7 @@
             text-decoration: none;
         }
         .nav-home i {
-            font-size: 16px;
+            font-size: 14px;
             color: var(--primary);
             transition: var(--transition);
         }
@@ -511,31 +506,31 @@
             transform: scale(1.1);
         }
 
-        /* --- SHOP LINK - FIXED --- */
+        /* --- SHOP LINK - FIXED (no scroll) --- */
         .nav-shop {
             font-family: 'Playfair Display', serif;
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 700;
             font-style: italic;
             color: var(--primary);
-            padding: 4px 18px 4px 12px;
+            padding: 3px 14px 3px 10px;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             letter-spacing: 0.5px;
             flex-shrink: 0;
-            margin-right: 12px;
+            margin-right: 10px;
             transition: var(--transition);
             background: #FEF7ED;
             border-right: 2px solid var(--border);
             position: sticky;
-            left: 60px;
+            left: 48px;
             z-index: 5;
             box-shadow: 12px 0 20px -12px rgba(254, 247, 237, 0.98);
             text-decoration: none;
         }
         .nav-shop i {
-            font-size: 16px;
+            font-size: 14px;
             color: var(--primary);
             transition: var(--transition);
         }
@@ -549,25 +544,25 @@
         }
 
         /* ============================================ */
-        /* SHOP BY CATEGORY DROPDOWN - FIXED            */
+        /* SHOP BY CATEGORY DROPDOWN - FIXED (no scroll) */
         /* ============================================ */
         .category-dropdown {
             position: relative;
             display: inline-block;
             flex-shrink: 0;
-            margin-right: 12px;
+            margin-right: 10px;
         }
         .category-dropdown > a {
             font-family: 'Inter', sans-serif;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             color: var(--text-dark);
-            padding: 8px 16px;
-            border-radius: 8px;
+            padding: 5px 12px;
+            border-radius: 6px;
             transition: var(--transition);
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             background: var(--bg-white);
             border: 1px solid var(--border);
             text-decoration: none;
@@ -580,28 +575,34 @@
         }
         .category-dropdown > a i.fa-chevron-down {
             transition: var(--transition);
-            font-size: 12px;
-        }
-        .category-dropdown:hover > a i.fa-chevron-down {
-            transform: rotate(180deg);
+            font-size: 11px;
         }
 
         /* Dropdown Menu */
         .category-dropdown .dropdown-menu {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 0;
+            position: fixed;
+            top: auto;
+            left: auto;
             background: #ffffff;
             min-width: 240px;
-            padding: 8px 0;
+            padding: 6px 0;
             border-radius: 12px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
             border: 1px solid var(--border);
-            z-index: 1000;
+            z-index: 9999;
             opacity: 0;
             visibility: hidden;
-            transform: translateY(-10px);
-            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+            transform: translateY(-10px) scale(0.98);
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+            pointer-events: none;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .category-dropdown .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
         }
         .category-dropdown .dropdown-menu::before {
             content: '';
@@ -615,137 +616,157 @@
             border-left: 1px solid var(--border);
             border-top: 1px solid var(--border);
         }
-        .category-dropdown:hover .dropdown-menu,
-        .category-dropdown .dropdown-menu.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
 
-        /* Category Item with Subcategories */
+        /* Category Item */
         .category-dropdown .dropdown-item {
-            position: relative;
             padding: 0;
+            position: relative;
         }
-        .category-dropdown .dropdown-item > a {
+        .category-dropdown .dropdown-item > .category-label {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 18px;
+            padding: 6px 16px;
             color: var(--text-dark);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
-            transition: var(--transition);
             font-family: 'Inter', sans-serif;
-            text-decoration: none;
+            cursor: pointer;
             border-radius: 0;
+            background: transparent;
+            transition: var(--transition);
         }
-        .category-dropdown .dropdown-item > a:hover {
+        .category-dropdown .dropdown-item > .category-label:hover {
             background: var(--bg-light);
             color: var(--primary);
         }
-        .category-dropdown .dropdown-item > a i {
-            font-size: 12px;
+        .category-dropdown .dropdown-item > .category-label i {
+            font-size: 11px;
             color: var(--text-light);
             transition: var(--transition);
         }
-        .category-dropdown .dropdown-item:hover > a i {
+        .category-dropdown .dropdown-item:hover > .category-label i {
             transform: translateX(3px);
             color: var(--primary);
         }
 
-        /* Subcategory Dropdown (Nested) */
-        .category-dropdown .sub-dropdown {
-            position: absolute;
-            top: 0;
-            left: 100%;
+        /* ============================================ */
+        /* SUBCATEGORY - CLEAN CARD (NO OVERLAY/BLUR)   */
+        /* ============================================ */
+        .sub-dropdown-card {
+            position: fixed;
             background: #ffffff;
-            min-width: 220px;
-            padding: 8px 0;
             border-radius: 12px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
             border: 1px solid var(--border);
-            z-index: 1001;
-            margin-left: 4px;
+            padding: 8px 0;
+            z-index: 10000;
+            display: none;
+            max-height: 70vh;
+            overflow-y: auto;
+            min-width: 200px;
+            max-width: 280px;
             opacity: 0;
-            visibility: hidden;
-            transform: translateX(-10px);
-            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+            transform: scale(0.95) translateX(-10px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
         }
-        .category-dropdown .sub-dropdown::before {
-            content: '';
-            position: absolute;
-            top: 12px;
-            left: -6px;
-            transform: rotate(45deg);
-            width: 10px;
-            height: 10px;
-            background: #ffffff;
-            border-left: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
-        }
-        .category-dropdown .dropdown-item:hover .sub-dropdown {
+        .sub-dropdown-card.active {
+            display: block;
             opacity: 1;
-            visibility: visible;
-            transform: translateX(0);
+            transform: scale(1) translateX(0);
         }
-        .category-dropdown .dropdown-item .sub-dropdown.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(0);
+        .sub-dropdown-card .sub-close {
+            display: none;
         }
-        .category-dropdown .sub-dropdown a {
+        .sub-dropdown-card a {
             display: block;
             padding: 6px 18px;
             color: var(--text-dark);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 400;
             transition: var(--transition);
             text-decoration: none;
             font-family: 'Inter', sans-serif;
         }
-        .category-dropdown .sub-dropdown a:hover {
+        .sub-dropdown-card a:hover {
             background: var(--bg-light);
             color: var(--primary);
             padding-left: 24px;
         }
+        .sub-dropdown-card .sub-title {
+            padding: 4px 18px 8px;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 4px;
+            font-family: 'Playfair Display', serif;
+        }
 
-        /* Scrollable Categories */
+        /* ===== SCROLLABLE CATEGORIES WITH IMAGES ===== */
+        .scrollable-wrapper {
+            flex: 1;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 2px 0;
+        }
+        .scrollable-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+
         .scrollable-items {
             display: flex;
             align-items: center;
-            gap: 28px;
-            padding: 3px 0 3px 6px;
-            flex-shrink: 0;
+            gap: 14px;
+            padding: 2px 6px 2px 2px;
+            white-space: nowrap;
         }
         .scrollable-items a {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             font-family: 'Inter', sans-serif;
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 500;
             color: var(--text-dark);
             transition: var(--transition);
-            padding: 4px 0;
-            letter-spacing: 0.3px;
-            white-space: nowrap;
+            padding: 3px 6px;
+            letter-spacing: 0.2px;
             flex-shrink: 0;
-            position: relative;
             text-decoration: none;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.5);
+            border: 1px solid transparent;
         }
-        .scrollable-items a::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 2.5px;
-            background: var(--secondary);
+        .scrollable-items a img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border);
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+        .scrollable-items a span {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-dark);
             transition: var(--transition);
         }
         .scrollable-items a:hover {
-            color: var(--primary);
+            background: white;
+            border-color: var(--secondary);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
         }
-        .scrollable-items a:hover::after {
-            width: 100%;
+        .scrollable-items a:hover img {
+            border-color: var(--secondary);
+            transform: scale(1.05);
+        }
+        .scrollable-items a:hover span {
+            color: var(--primary);
         }
 
         /* --- Scroll Hint --- */
@@ -772,9 +793,7 @@
             opacity: 0.5;
         }
 
-        /* ============================================================
-                   TOAST NOTIFICATION - Glass Morphism Effect
-                   ============================================================ */
+        /* ===== TOAST NOTIFICATION ===== */
         .toast-container {
             position: fixed;
             top: 90px;
@@ -786,7 +805,6 @@
             max-width: 380px;
             width: 100%;
         }
-
         .toast-notification {
             background: rgba(255, 255, 255, 0.72);
             backdrop-filter: blur(16px) saturate(180%);
@@ -812,20 +830,10 @@
             transform: translateX(120%);
             opacity: 0;
         }
-
-        /* Glass border accent colors */
-        .toast-notification.toast-success {
-            border-left: 4px solid #28a745;
-        }
-        .toast-notification.toast-error {
-            border-left: 4px solid #dc3545;
-        }
-        .toast-notification.toast-warning {
-            border-left: 4px solid #ffc107;
-        }
-        .toast-notification.toast-info {
-            border-left: 4px solid #17a2b8;
-        }
+        .toast-notification.toast-success { border-left: 4px solid #28a745; }
+        .toast-notification.toast-error { border-left: 4px solid #dc3545; }
+        .toast-notification.toast-warning { border-left: 4px solid #ffc107; }
+        .toast-notification.toast-info { border-left: 4px solid #17a2b8; }
 
         .toast-notification .toast-icon {
             font-size: 20px;
@@ -833,22 +841,12 @@
             margin-top: 2px;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05));
         }
-        .toast-notification .toast-icon.success {
-            color: #28a745;
-        }
-        .toast-notification .toast-icon.error {
-            color: #dc3545;
-        }
-        .toast-notification .toast-icon.warning {
-            color: #ffc107;
-        }
-        .toast-notification .toast-icon.info {
-            color: #17a2b8;
-        }
+        .toast-notification .toast-icon.success { color: #28a745; }
+        .toast-notification .toast-icon.error { color: #dc3545; }
+        .toast-notification .toast-icon.warning { color: #ffc107; }
+        .toast-notification .toast-icon.info { color: #17a2b8; }
 
-        .toast-notification .toast-content {
-            flex: 1;
-        }
+        .toast-notification .toast-content { flex: 1; }
         .toast-notification .toast-content h4 {
             font-size: 13px;
             font-weight: 600;
@@ -889,7 +887,6 @@
             transform: rotate(90deg);
         }
 
-        /* Glass progress bar */
         .toast-notification .toast-progress {
             position: absolute;
             bottom: 0;
@@ -900,933 +897,689 @@
             animation: toastProgress 5s linear forwards;
             border-radius: 0 2px 0 0;
         }
-        .toast-notification.toast-success .toast-progress {
-            background: #28a745;
-        }
-        .toast-notification.toast-error .toast-progress {
-            background: #dc3545;
-        }
-        .toast-notification.toast-warning .toast-progress {
-            background: #ffc107;
-        }
-        .toast-notification.toast-info .toast-progress {
-            background: #17a2b8;
-        }
+        .toast-notification.toast-success .toast-progress { background: #28a745; }
+        .toast-notification.toast-error .toast-progress { background: #dc3545; }
+        .toast-notification.toast-warning .toast-progress { background: #ffc107; }
+        .toast-notification.toast-info .toast-progress { background: #17a2b8; }
 
         @keyframes toastProgress {
-            0% {
-                width: 100%;
-            }
-            100% {
-                width: 0%;
-            }
+            0% { width: 100%; }
+            100% { width: 0%; }
         }
 
         /* ===== RESPONSIVE ===== */
-        /* ============================================ */
-        /* RESPONSIVE FIXES                            */
-        /* ============================================ */
         @media (max-width: 1024px) {
-            .tier-1,
-            .tier-2,
-            .tier-3 {
-                padding-left: 5%;
-                padding-right: 5%;
-            }
-            .scrollable-items {
-                gap: 22px;
-            }
-            .search-box {
-                flex: 1 1 240px;
-            }
-            .nav-shop {
-                left: 50px;
-                font-size: 14px;
-                padding-right: 14px;
-                padding-left: 10px;
-            }
-            .category-dropdown .dropdown-menu {
-                min-width: 220px;
-            }
-            .category-dropdown .sub-dropdown {
-                min-width: 200px;
-            }
+            .tier-1, .tier-2, .tier-3 { padding-left: 5%; padding-right: 5%; }
+            .scrollable-items { gap: 12px; }
+            .search-box { flex: 1 1 240px; }
+            .nav-shop { left: 44px; font-size: 12px; padding-right: 12px; padding-left: 8px; }
+            .category-dropdown .dropdown-menu { min-width: 200px; }
         }
 
         @media (max-width: 820px) {
-            .tier-1 {
-                justify-content: center;
-                gap: 4px 12px;
-                font-size: 11px;
-                padding: 4px 5%;
-            }
-            .tier-2 {
-                gap: 10px;
-                padding: 6px 5%;
-            }
-            .logo-img img {
-                height: 34px;
-            }
-            .search-box {
-                flex: 1 1 180px;
-                min-width: 120px;
-                height: 36px;
-            }
-            .search-box input {
-                font-size: 12px;
-                padding: 0 14px;
-            }
-            .search-box button {
-                width: 40px;
-                font-size: 14px;
-            }
-            .icons {
-                gap: 10px;
-            }
-            .icon-item {
-                font-size: 10px;
-                min-width: 32px;
-            }
-            .icon-item i {
-                font-size: 16px;
-            }
-            .scrollable-items {
-                gap: 18px;
-            }
-            .scrollable-items a {
-                font-size: 12px;
-            }
-            .nav-home {
-                font-size: 14px;
-                padding-right: 14px;
-                gap: 6px;
-                margin-right: 10px;
-            }
-            .nav-shop {
-                font-size: 14px;
-                padding-right: 14px;
-                padding-left: 10px;
-                left: 48px;
-                margin-right: 10px;
-            }
-            .nav-home i,
-            .nav-shop i {
-                font-size: 14px;
-            }
-            .account-username {
-                font-size: 9px;
-                max-width: 50px;
-            }
-            .account-dropdown .dropdown-menu {
-                min-width: 150px;
-            }
-            .toast-container {
-                top: 80px;
-                right: 20px;
-                max-width: 320px;
-            .search-suggestions {
-                max-height: 300px;
-            }
-            .category-dropdown .dropdown-menu {
-                min-width: 200px;
-                left: -10px;
-            }
-            .category-dropdown .sub-dropdown {
-                min-width: 180px;
-                left: 90%;
-            }
-            .category-dropdown > a {
-                font-size: 12px;
-                padding: 6px 14px;
-            }
+            .tier-1 { justify-content: center; gap: 4px 12px; font-size: 11px; padding: 4px 5%; }
+            .tier-2 { gap: 10px; padding: 6px 5%; }
+            .logo-img img { height: 34px; }
+            .search-box { flex: 1 1 180px; min-width: 120px; height: 36px; }
+            .search-box input { font-size: 12px; padding: 0 14px; }
+            .search-box button { width: 40px; font-size: 14px; }
+            .icons { gap: 10px; }
+            .icon-item { font-size: 10px; min-width: 32px; }
+            .icon-item i { font-size: 16px; }
+            .scrollable-items a img { width: 22px; height: 22px; }
+            .scrollable-items a span { font-size: 10px; }
+            .nav-home { font-size: 12px; padding-right: 12px; gap: 5px; margin-right: 8px; }
+            .nav-shop { font-size: 12px; padding-right: 12px; padding-left: 8px; left: 42px; margin-right: 8px; }
+            .nav-home i, .nav-shop i { font-size: 13px; }
+            .account-username { font-size: 9px; max-width: 50px; }
+            .account-dropdown .dropdown-menu { min-width: 150px; }
+            .toast-container { top: 80px; right: 20px; max-width: 320px; }
+            .search-suggestions { max-height: 300px; }
+            .category-dropdown .dropdown-menu { min-width: 180px; }
+            .category-dropdown > a { font-size: 11px; padding: 4px 10px; }
         }
 
         @media (max-width: 640px) {
-            .tier-1 {
-                flex-direction: column;
-                align-items: center;
-                padding: 4px 4%;
-                font-size: 10px;
-                gap: 2px;
-            }
-            .tier-1 .left i,
-            .tier-1 .right i {
-                font-size: 11px;
-                margin-right: 4px;
-            }
-
-            .tier-2 {
-                flex-direction: row;
-                flex-wrap: wrap;
-                align-items: center;
-                gap: 8px;
-                padding: 6px 4%;
-            }
-            .logo-img {
-                flex: 0 0 auto;
-            }
-            .logo-img img {
-                height: 32px;
-            }
-
-            .search-box {
-                flex: 1 1 100%;
-                max-width: 100%;
-                height: 36px;
-                order: 3;
-            }
-            .search-box input {
-                font-size: 12px;
-                padding: 0 14px;
-            }
-            .search-box button {
-                width: 40px;
-                font-size: 14px;
-            }
-
-            .icons {
-                justify-content: flex-end;
-                gap: 10px;
-                flex: 0 0 auto;
-            }
-            .icon-item {
-                font-size: 9px;
-                min-width: 30px;
-            }
-            .icon-item i {
-                font-size: 15px;
-            }
-            .account-username {
-                font-size: 8px;
-                max-width: 40px;
-            }
-            .account-dropdown .dropdown-menu {
-                min-width: 140px;
-                right: -10px;
-            }
-            .account-dropdown .dropdown-menu::before {
-                right: 16px;
-            }
-
-            .tier-3 {
-                padding: 0 4%;
-            }
-            .scrollable-items {
-                gap: 12px;
-                padding: 2px 0 2px 4px;
-            }
-            .scrollable-items a {
-                font-size: 11px;
-                letter-spacing: 0.2px;
-            }
-            .nav-home {
-                font-size: 13px;
-                padding-right: 10px;
-                gap: 5px;
-                margin-right: 8px;
-            }
-            .nav-shop {
-                font-size: 13px;
-                padding-right: 10px;
-                padding-left: 8px;
-                left: 42px;
-                margin-right: 8px;
-            }
-            .nav-home i,
-            .nav-shop i {
-                font-size: 13px;
-            }
-            .scroll-hint {
+            .tier-1 { flex-direction: column; align-items: center; padding: 4px 4%; font-size: 10px; gap: 2px; }
+            .tier-2 { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px; padding: 6px 4%; }
+            .logo-img { flex: 0 0 auto; }
+            .logo-img img { height: 32px; }
+            .search-box { flex: 1 1 100%; max-width: 100%; height: 36px; order: 3; }
+            .search-box input { font-size: 12px; padding: 0 14px; }
+            .search-box button { width: 40px; font-size: 14px; }
+            .icons { justify-content: flex-end; gap: 10px; flex: 0 0 auto; }
+            .icon-item { font-size: 9px; min-width: 30px; }
+            .icon-item i { font-size: 15px; }
+            .account-username { font-size: 8px; max-width: 40px; }
+            .account-dropdown .dropdown-menu { min-width: 140px; right: -10px; }
+            .account-dropdown .dropdown-menu::before { right: 16px; }
+            .tier-3 { padding: 0 4%; }
+            
+            /* HIDE horizontal categories on mobile */
+            .scrollable-wrapper {
                 display: none !important;
             }
-
-            .toast-container {
-                top: 75px;
-                right: 12px;
-                left: 12px;
-                max-width: 100%;
-                width: auto;
+            
+            .nav-home { font-size: 12px; padding-right: 8px; gap: 4px; margin-right: 6px; }
+            .nav-shop { font-size: 12px; padding-right: 8px; padding-left: 6px; left: 36px; margin-right: 6px; }
+            .nav-home i, .nav-shop i { font-size: 12px; }
+            .scroll-hint { display: none !important; }
+            .toast-container { top: 75px; right: 12px; left: 12px; max-width: 100%; width: auto; }
+            .toast-notification { padding: 12px 16px; border-radius: 12px; }
+            .toast-notification .toast-icon { font-size: 18px; }
+            .toast-notification .toast-content h4 { font-size: 12px; }
+            .toast-notification .toast-content p { font-size: 11px; }
+            .search-suggestions { max-height: 250px; top: calc(100% + 4px); }
+            .search-suggestion-item { padding: 8px 12px; }
+            .search-suggestion-item .suggestion-image { width: 32px; height: 32px; }
+            
+            /* Mobile dropdown positioning */
+            .category-dropdown .dropdown-menu { 
+                min-width: 180px; 
+                max-width: 90vw;
+                left: 5% !important;
+                right: 5% !important;
+                top: auto !important;
             }
-            .toast-notification {
-                padding: 12px 16px;
-                border-radius: 12px;
+            .category-dropdown > a { font-size: 11px; padding: 4px 10px; }
+            
+            /* Mobile sub-card - centered popup with close button */
+            .sub-dropdown-card {
+                position: fixed;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) scale(0.95) !important;
+                width: 85vw;
+                max-width: 380px;
+                min-width: unset;
+                opacity: 0;
+                transition: opacity 0.25s ease, transform 0.25s ease;
             }
-            .toast-notification .toast-icon {
-                font-size: 18px;
+            .sub-dropdown-card.active {
+                transform: translate(-50%, -50%) scale(1) !important;
+                opacity: 1;
             }
-            .toast-notification .toast-content h4 {
-                font-size: 12px;
+            .sub-dropdown-card .sub-close {
+                display: block;
+                text-align: right;
+                padding: 4px 16px 4px;
+                font-size: 20px;
+                cursor: pointer;
+                color: var(--text-light);
             }
-            .toast-notification .toast-content p {
-                font-size: 11px;
-            .search-suggestions {
-                max-height: 250px;
-                top: calc(100% + 4px);
-            }
-            .search-suggestion-item {
-                padding: 8px 12px;
-            }
-            .search-suggestion-item .suggestion-image {
-                width: 32px;
-                height: 32px;
-            }
-            .category-dropdown .dropdown-menu {
-                min-width: 180px;
-                left: -20px;
-            }
-            .category-dropdown .sub-dropdown {
-                min-width: 160px;
-                left: 85%;
-            }
-            .category-dropdown > a {
-                font-size: 12px;
-                padding: 6px 12px;
+            .sub-dropdown-card .sub-close:hover {
+                color: var(--primary);
             }
         }
 
         @media (max-width: 400px) {
-            .scrollable-items {
-                gap: 10px;
-            }
-            .scrollable-items a {
-                font-size: 10px;
-            }
-            .nav-home {
-                font-size: 12px;
-                padding-right: 8px;
-                gap: 4px;
-                margin-right: 6px;
-            }
-            .nav-shop {
-                font-size: 12px;
-                padding-right: 8px;
-                padding-left: 6px;
-                left: 36px;
-                margin-right: 6px;
-            }
-            .nav-home i,
-            .nav-shop i {
-                font-size: 12px;
-            }
-            .tier-1 {
-                font-size: 9px;
-            }
-            .icon-item {
-                font-size: 8px;
-                min-width: 26px;
-            }
-            .icon-item i {
-                font-size: 13px;
-            }
-            .logo-img img {
-                height: 28px;
-            }
-            .search-box {
-                height: 32px;
-            }
-            .search-box input {
-                font-size: 11px;
-                padding: 0 12px;
-            }
-            .search-box button {
-                width: 34px;
-                font-size: 12px;
-            }
-            .account-username {
-                font-size: 7px;
-                max-width: 32px;
-            }
-            .account-dropdown .dropdown-menu {
-                min-width: 120px;
-                right: -6px;
-            }
-            .account-dropdown .dropdown-menu a {
-                font-size: 12px;
-                padding: 6px 12px;
-            }
-            .toast-notification {
-                padding: 10px 14px;
-            }
-            .toast-notification .toast-icon {
-                font-size: 16px;
-            }
-            .toast-notification .toast-content h4 {
-                font-size: 11px;
-            }
-            .toast-notification .toast-content p {
-                font-size: 10px;
-            }
-        }
-
-        /* ===== DEMO CONTENT ===== */
-        .demo-content {
-            padding: 80px 7%;
-            text-align: center;
-            background: var(--bg-light);
-        }
-        .demo-content h3 {
-            font-family: 'Playfair Display', serif;
-            color: var(--primary);
-            font-weight: 600;
-            font-size: 28px;
-            letter-spacing: -0.3px;
-        }
-        .demo-content p {
-            color: var(--text-light);
-            max-width: 500px;
-            margin: 12px auto 0;
-            font-weight: 400;
-            line-height: 1.7;
-        }
-        .demo-content .highlight {
-            color: var(--primary);
-            font-weight: 600;
-            .category-dropdown > a {
-                font-size: 11px;
-                padding: 4px 10px;
-            }
-            .category-dropdown .dropdown-menu {
-                min-width: 160px;
-                left: -30px;
-            }
-            .category-dropdown .sub-dropdown {
-                min-width: 140px;
-                left: 80%;
-            }
-        }
-        .demo-content .btn-toast {
-            display: inline-block;
-            margin-top: 16px;
-            padding: 10px 24px;
-            background: var(--primary);
-            color: #fff;
-            border-radius: 30px;
-            font-size: 13px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .demo-content .btn-toast:hover {
-            background: var(--accent);
-            transform: translateY(-2px);
+            .nav-home { font-size: 11px; padding-right: 6px; gap: 3px; margin-right: 4px; }
+            .nav-shop { font-size: 11px; padding-right: 6px; padding-left: 4px; left: 30px; margin-right: 4px; }
+            .nav-home i, .nav-shop i { font-size: 11px; }
+            .tier-1 { font-size: 9px; }
+            .icon-item { font-size: 8px; min-width: 26px; }
+            .icon-item i { font-size: 13px; }
+            .logo-img img { height: 28px; }
+            .search-box { height: 32px; }
+            .search-box input { font-size: 11px; padding: 0 12px; }
+            .search-box button { width: 34px; font-size: 12px; }
+            .account-username { font-size: 7px; max-width: 32px; }
+            .account-dropdown .dropdown-menu { min-width: 120px; right: -6px; }
+            .account-dropdown .dropdown-menu a { font-size: 12px; padding: 6px 12px; }
+            .toast-notification { padding: 10px 14px; }
+            .toast-notification .toast-icon { font-size: 16px; }
+            .toast-notification .toast-content h4 { font-size: 11px; }
+            .toast-notification .toast-content p { font-size: 10px; }
+            .category-dropdown > a { font-size: 10px; padding: 3px 8px; }
+            .category-dropdown .dropdown-menu { min-width: 160px; }
+            .sub-dropdown-card { max-width: 92vw; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== 3‑TIER HEADER ===== -->
-    <header class="header-stack">
+<!-- ===== 3‑TIER HEADER ===== -->
+<header class="header-stack">
 
-        <!-- TIER 1 : Top Bar -->
-        <div class="tier-1">
-            <span class="left"><i class="fa-solid fa-truck"></i> Free Shipping on Orders Above ₹999</span>
-            <span class="right"><i class="fa-regular fa-calendar"></i> Festive Sale • Up to 30% OFF</span>
+    <!-- TIER 1 : Top Bar -->
+    <div class="tier-1">
+        <span class="left"><i class="fa-solid fa-truck"></i> Free Shipping on Orders Above ₹999</span>
+        <span class="right"><i class="fa-regular fa-calendar"></i> Festive Sale • Up to 30% OFF</span>
+    </div>
+
+    <!-- TIER 2 : Logo + Search + Icons -->
+    <div class="tier-2">
+        <div class="logo-img">
+            <img src="{% static 'images/decorlogo.png' %}" alt="ShubhDecor" />
         </div>
 
-        <!-- TIER 2 : Logo + Search + Icons -->
-        <div class="tier-2">
-            <div class="logo-img">
-                <img src="{% static 'images/decorlogo.png' %}" alt="ShubhDecor" />
-            </div>
+        <div class="search-box">
+            <form method="GET" action="{% url 'Ecom:shop' %}" id="globalSearchForm">
+                <input type="text" name="search" id="globalSearchInput" placeholder="Search for products, brands, categories..." autocomplete="off" />
+                <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </form>
+            <div id="searchSuggestions" class="search-suggestions"></div>
+        </div>
 
-            <div class="search-box">
-                <form method="GET" action="{% url 'Ecom:shop' %}" id="globalSearchForm">
-                    <input type="text" name="search" id="globalSearchInput" placeholder="Search for products, brands, categories..." autocomplete="off" />
-                    <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
-                </form>
-                <div id="searchSuggestions" class="search-suggestions"></div>
-            </div>
+        <div class="icons">
+            <a href="{% url 'Ecom:shop' %}?is_featured=1" class="icon-item" style="text-decoration:none;">
+                <i class="fa-regular fa-heart"></i>
+                Wishlist
+            </a>
 
-            <div class="icons">
-                <a href="{% url 'Ecom:shop' %}?is_featured=1" class="icon-item" style="text-decoration:none;">
-                    <i class="fa-regular fa-star"></i>
-                    Featured
-                </a>
-
-                <!-- Account Dropdown -->
-                <div class="account-dropdown icon-item" id="accountDropdown">
-                    <div>
-                        <i class="fa-regular fa-user"></i>
-                        <span class="account-username">
-                            {% if user.is_authenticated %}
-                                {{ user.full_name|truncatechars:8 }}
-                            {% else %}
-                                Account
-                            {% endif %}
-                        </span>
-                    </div>
-                    <div class="dropdown-menu">
+            <!-- Account Dropdown -->
+            <div class="account-dropdown icon-item" id="accountDropdown">
+                <div>
+                    <i class="fa-regular fa-user"></i>
+                    <span class="account-username">
                         {% if user.is_authenticated %}
-                            {% if user.is_staff or user.is_superuser %}
-                                <a href="{% url 'Ecom:admin_dashboard' %}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
-                            {% else %}
-                                <a href="{% url 'Ecom:profile' %}"><i class="fa-regular fa-user"></i> Profile</a>
-                            {% endif %}
+                            {{ user.full_name|truncatechars:8 }}
+                        {% else %}
+                            Account
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="dropdown-menu">
+                    {% if user.is_authenticated %}
+                        {% if user.is_staff or user.is_superuser %}
+                            <a href="{% url 'Ecom:admin_dashboard' %}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                        {% else %}
                             <a href="{% url 'Ecom:profile' %}"><i class="fa-regular fa-user"></i> Profile</a>
-                            <a href="{% url 'Ecom:change_password' %}"><i class="fa-solid fa-key"></i> Change Password</a>
-                            <a href="{% url 'Ecom:recently_viewed' %}"><i class="fa-solid fa-clock-rotate-left"></i> Recently Viewed</a>
-                            <div class="divider"></div>
-                            <a href="{% url 'Ecom:logout' %}" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
-                        {% else %}
-                            <a href="{% url 'Ecom:login' %}" id="loginLink"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
-                            <a href="{% url 'Ecom:login' %}"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
-                            <a href="{% url 'Ecom:customer_signup' %}"><i class="fa-solid fa-user-plus"></i> Register</a>
                         {% endif %}
-                    </div>
+                        <div class="divider"></div>
+                        <a href="{% url 'Ecom:logout' %}" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                    {% else %}
+                        <a href="{% url 'Ecom:login' %}" id="loginLink"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+                       
+                    {% endif %}
                 </div>
-
-                <a href="{% url 'Ecom:shop' %}" class="icon-item" style="text-decoration:none;">
-                    <i class="fa-solid fa-bag-shopping"></i>
-                    Cart
-                </div>
-                    
-                </a>
             </div>
+
+            <a href="{% url 'Ecom:shop' %}" class="icon-item" style="text-decoration:none;">
+                <i class="fa-solid fa-bag-shopping"></i>
+                Cart
+            </a>
         </div>
+    </div>
 
-        <!-- TIER 3 : Fixed HOME + SHOP + Category Dropdown + Dynamic Categories -->
-        <div class="tier-3">
-            <div class="nav-scroll">
-                <!-- Home Link -->
-                <a href="{% url 'Ecom:home' %}" class="nav-home"><i class="fa-solid fa-house"></i> Home</a>
+    <!-- TIER 3 -->
+    <div class="tier-3">
+        <div class="nav-scroll">
+            <a href="{% url 'Ecom:home' %}" class="nav-home"><i class="fa-solid fa-house"></i> Home</a>
+            <a href="{% url 'Ecom:shop' %}" class="nav-shop"><i class="fa-solid fa-store"></i> Shop</a>
 
-                <!-- Shop Link -->
-                <a href="{% url 'Ecom:shop' %}" class="nav-shop"><i class="fa-solid fa-store"></i> Shop</a>
-
-                <!-- Shop by Category Dropdown -->
-                <div class="category-dropdown">
-                    <a href="javascript:void(0)">
-                        <i class="fa-solid fa-bars"></i> Shop by Category <i class="fa-solid fa-chevron-down"></i>
-                    </a>
-                    <div class="dropdown-menu">
-                        {% if categories %}
-                            {% for category in categories %}
-                                <div class="dropdown-item">
-                                    <a href="{% url 'Ecom:category_shop' category.slug %}">
-                                        {{ category.name }}
-                                        <i class="fa-solid fa-chevron-right"></i>
-                                    </a>
-                                    {% if category.subcategories.exists %}
-                                        <div class="sub-dropdown">
-                                            {% for subcategory in category.subcategories.all %}
-                                                <a href="{% url 'Ecom:subcategory_shop' subcategory.slug %}">
-                                                    {{ subcategory.name }}
-                                                </a>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="dropdown-item">
-                                <a href="{% url 'Ecom:shop' %}">No Categories Found</a>
+            <!-- Shop by Category -->
+            <div class="category-dropdown" id="categoryDropdown">
+                <a href="javascript:void(0)" id="categoryToggle">
+                    <i class="fa-solid fa-bars"></i> Shop by Category <i class="fa-solid fa-chevron-down"></i>
+                </a>
+                <div class="dropdown-menu" id="categoryMenu">
+                    {% if categories %}
+                        {% for category in categories %}
+                            <div class="dropdown-item" data-category="{{ category.id }}" data-catname="{{ category.name }}">
+                                <span class="category-label">
+                                    {{ category.name }}
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </span>
                             </div>
-                        {% endif %}
-                    </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="dropdown-item">
+                            <span class="category-label">No Categories Found</span>
+                        </div>
+                    {% endif %}
                 </div>
+            </div>
 
-                <!-- Scrollable Categories -->
+            <!-- Scrollable Categories - HIDDEN ON MOBILE -->
+            <div class="scrollable-wrapper" id="scrollableWrapper">
                 <div class="scrollable-items">
                     {% for category in categories %}
-                        <a href="{% url 'Ecom:category_shop' category.slug %}">{{ category.name }}</a>
+                        <a href="{% url 'Ecom:category_shop' category.slug %}">
+                            {% if category.image %}
+                                <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                            {% else %}
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%23e9ecef'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='10' fill='%236c757d' font-family='Inter'%3E%3C/text%3E%3C/svg%3E" alt="{{ category.name }}">
+                            {% endif %}
+                            <span>{{ category.name }}</span>
+                        </a>
                     {% endfor %}
                 </div>
             </div>
-            <span class="scroll-hint"><i class="fa-regular fa-hand-pointer"></i> scroll</span>
         </div>
-    </header>
+        <span class="scroll-hint"><i class="fa-regular fa-hand-pointer"></i> scroll</span>
+    </div>
+</header>
 
-    <!-- ===== TOAST CONTAINER ===== -->
-    <div class="toast-container" id="toastContainer"></div>
+<!-- ===== SUBCATEGORY CARD (NO OVERLAY) ===== -->
+<div class="sub-dropdown-card" id="subCard">
+    <div class="sub-close"><i class="fa-solid fa-times"></i></div>
+    <div class="sub-title" id="subTitle">Subcategories</div>
+    <div id="subContent"></div>
+</div>
 
-    
+<!-- ===== TOAST CONTAINER ===== -->
+<div class="toast-container" id="toastContainer"></div>
 
-    <!-- ===== JAVASCRIPT ===== -->
-    <!-- ===== JAVASCRIPT for Dropdown + Search ===== -->
-    <script>
-        // ============================================
-        // ACCOUNT DROPDOWN TOGGLE
-        // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
-            // ===== Dropdown Toggle =====
-            const dropdown = document.getElementById('accountDropdown');
-            
-            dropdown.addEventListener('click', function(e) {
-                e.stopPropagation();
-                this.classList.toggle('active');
-            });
-
-            document.addEventListener('click', function(e) {
-                if (!dropdown.contains(e.target)) {
-                    dropdown.classList.remove('active');
-                }
-            });
-
-            const menu = dropdown.querySelector('.dropdown-menu');
-            if (menu) {
-                menu.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ===== Account Dropdown =====
+        const dropdown = document.getElementById('accountDropdown');
+        dropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+            this.classList.toggle('active');
+        });
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove('active');
             }
+        });
 
-            // ===== Glass Toast System =====
-            const container = document.getElementById('toastContainer');
-
-            window.showToast = function(title, message, type = 'success') {
-                const toast = document.createElement('div');
-                toast.className = `toast-notification toast-${type}`;
-                
-                let iconHtml = '';
-                let iconClass = 'success';
-                if (type === 'success') {
-                    iconHtml = '<i class="fa-solid fa-circle-check"></i>';
-                    iconClass = 'success';
-                } else if (type === 'error') {
-                    iconHtml = '<i class="fa-solid fa-circle-xmark"></i>';
-                    iconClass = 'error';
-                } else if (type === 'warning') {
-                    iconHtml = '<i class="fa-solid fa-triangle-exclamation"></i>';
-                    iconClass = 'warning';
-                } else if (type === 'info') {
-                    iconHtml = '<i class="fa-solid fa-circle-info"></i>';
-                    iconClass = 'info';
-                }
-
-                toast.innerHTML = `
-                    <div class="toast-icon ${iconClass}">${iconHtml}</div>
-                    <div class="toast-content">
-                        <h4>${title}</h4>
-                        <p>${message}</p>
-                    </div>
-                    <button class="toast-close"><i class="fa-solid fa-xmark"></i></button>
-                    <div class="toast-progress"></div>
-                `;
-
-                container.appendChild(toast);
-
-                setTimeout(() => toast.classList.add('show'), 50);
-
-                const closeBtn = toast.querySelector('.toast-close');
-                closeBtn.addEventListener('click', function() {
-                    closeToast(toast);
-                });
-
-                setTimeout(() => {
-                    closeToast(toast);
-                }, 5000);
-
-                return toast;
-            };
-
-            function closeToast(toast) {
+        // ===== Toast System =====
+        const container = document.getElementById('toastContainer');
+        window.showToast = function(title, message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast-notification toast-${type}`;
+            let iconHtml = '', iconClass = 'success';
+            if (type === 'success') { iconHtml = '<i class="fa-solid fa-circle-check"></i>'; iconClass = 'success'; }
+            else if (type === 'error') { iconHtml = '<i class="fa-solid fa-circle-xmark"></i>'; iconClass = 'error'; }
+            else if (type === 'warning') { iconHtml = '<i class="fa-solid fa-triangle-exclamation"></i>'; iconClass = 'warning'; }
+            else if (type === 'info') { iconHtml = '<i class="fa-solid fa-circle-info"></i>'; iconClass = 'info'; }
+            toast.innerHTML = `
+                <div class="toast-icon ${iconClass}">${iconHtml}</div>
+                <div class="toast-content"><h4>${title}</h4><p>${message}</p></div>
+                <button class="toast-close"><i class="fa-solid fa-xmark"></i></button>
+                <div class="toast-progress"></div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 50);
+            toast.querySelector('.toast-close').addEventListener('click', function() {
                 toast.classList.add('hiding');
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.parentNode.removeChild(toast);
-                    }
-                }, 500);
+                setTimeout(() => toast.remove(), 500);
+            });
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => toast.remove(), 500);
+            }, 5000);
+            return toast;
+        };
+
+        // ===== Django Messages =====
+        {% if messages %}
+            {% for message in messages %}
+                setTimeout(function() {
+                    let type = 'success', title = 'Success';
+                    if ('{{ message.tags }}' === 'error') { type = 'error'; title = 'Error'; }
+                    else if ('{{ message.tags }}' === 'warning') { type = 'warning'; title = 'Warning'; }
+                    else if ('{{ message.tags }}' === 'info') { type = 'info'; title = 'Info'; }
+                    showToast(title, '{{ message }}', type);
+                }, 300 + {{ forloop.counter0 }} * 200);
+            {% endfor %}
+        {% endif %}
+
+        // ============================================
+        // SUBCATEGORY DATA
+        // ============================================
+        const subData = {};
+        {% for category in categories %}
+            subData[{{ category.id }}] = {
+                name: "{{ category.name }}",
+                subs: [
+                    {% for subcategory in category.subcategories.all %}
+                        { name: "{{ subcategory.name }}", slug: "{{ subcategory.slug }}" },
+                    {% endfor %}
+                ]
+            };
+        {% endfor %}
+
+        // ============================================
+        // DOM ELEMENTS
+        // ============================================
+        const catDropdown = document.getElementById('categoryDropdown');
+        const catMenu = document.getElementById('categoryMenu');
+        const catToggle = document.getElementById('categoryToggle');
+        const subCard = document.getElementById('subCard');
+        const subTitle = document.getElementById('subTitle');
+        const subContent = document.getElementById('subContent');
+        const subClose = subCard.querySelector('.sub-close');
+        const scrollableWrapper = document.getElementById('scrollableWrapper');
+
+        let isMobile = window.innerWidth <= 640;
+        let hoverTimer = null;
+        let isSubHovered = false;
+        let isCategoryHovered = false;
+
+        // Hide horizontal categories on mobile
+        if (isMobile && scrollableWrapper) {
+            scrollableWrapper.style.display = 'none';
+        }
+
+        // ============================================
+        // POSITION DROPDOWN
+        // ============================================
+        function positionDropdown() {
+            if (!catDropdown || !catMenu) return;
+            const rect = catDropdown.getBoundingClientRect();
+            catMenu.style.top = (rect.bottom + 6) + 'px';
+            catMenu.style.left = rect.left + 'px';
+            catMenu.style.minWidth = Math.max(240, rect.width) + 'px';
+        }
+
+        // ============================================
+        // SHOW/HIDE DROPDOWN
+        // ============================================
+        function showDropdown() {
+            positionDropdown();
+            catMenu.classList.add('show');
+        }
+
+        function hideDropdown() {
+            catMenu.classList.remove('show');
+            if (!isSubHovered) {
+                hideSubCard();
+            }
+        }
+
+        // ============================================
+        // SHOW/HIDE SUBCATEGORY CARD (NO OVERLAY)
+        // ============================================
+        function showSubCard(categoryId, element) {
+            const data = subData[categoryId];
+            if (!data || !data.subs || data.subs.length === 0) {
+                return;
             }
 
-            // ===== Handle Django Messages =====
-            {% if messages %}
-                {% for message in messages %}
-                    setTimeout(function() {
-                        let type = 'success';
-                        let title = 'Success';
-                        if ('{{ message.tags }}' === 'error') {
-                            type = 'error';
-                            title = 'Error';
-                        } else if ('{{ message.tags }}' === 'warning') {
-                            type = 'warning';
-                            title = 'Warning';
-                        } else if ('{{ message.tags }}' === 'info') {
-                            type = 'info';
-                            title = 'Info';
+            subTitle.textContent = data.name;
+            subContent.innerHTML = '';
+            data.subs.forEach(function(sub) {
+                const link = document.createElement('a');
+                link.href = '/subcategory/' + sub.slug + '/';
+                link.textContent = sub.name;
+                subContent.appendChild(link);
+            });
+
+            // Position the card
+            if (isMobile) {
+                subCard.style.top = '50%';
+                subCard.style.left = '50%';
+                subCard.style.transform = 'translate(-50%, -50%) scale(0.95)';
+                subCard.style.maxWidth = '85vw';
+                subCard.style.minWidth = 'unset';
+            } else {
+                // Position beside the category
+                const rect = element.getBoundingClientRect();
+                let left = rect.right + 12;
+                let top = rect.top - 10;
+                
+                const cardWidth = 280;
+                if (left + cardWidth > window.innerWidth - 20) {
+                    left = rect.left - cardWidth - 12;
+                }
+                if (top + 400 > window.innerHeight - 20) {
+                    top = window.innerHeight - 420;
+                }
+                if (top < 20) top = 20;
+                
+                subCard.style.top = top + 'px';
+                subCard.style.left = left + 'px';
+                subCard.style.transform = 'scale(0.95) translateX(-10px)';
+                subCard.style.maxWidth = cardWidth + 'px';
+                subCard.style.minWidth = '200px';
+            }
+
+            subCard.classList.add('active');
+        }
+
+        function hideSubCard() {
+            subCard.classList.remove('active');
+        }
+
+        // ============================================
+        // DESKTOP: CLICK on Shop by Category opens dropdown
+        // ============================================
+        if (catToggle) {
+            catToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (catMenu.classList.contains('show')) {
+                    hideDropdown();
+                } else {
+                    positionDropdown();
+                    catMenu.classList.add('show');
+                }
+            });
+        }
+
+        // ============================================
+        // DESKTOP: HOVER on category shows subcategories beside it
+        // ============================================
+        document.querySelectorAll('.dropdown-item').forEach(function(item) {
+            const label = item.querySelector('.category-label');
+            if (label) {
+                // Desktop hover - show subcategories
+                item.addEventListener('mouseenter', function(e) {
+                    if (!isMobile) {
+                        isCategoryHovered = true;
+                        const categoryId = this.dataset.category;
+                        if (categoryId) {
+                            if (hoverTimer) {
+                                clearTimeout(hoverTimer);
+                                hoverTimer = null;
+                            }
+                            showSubCard(categoryId, this);
                         }
-                        showToast(title, '{{ message }}', type);
-                    }, 300 + {{ forloop.counter0 }} * 200);
-                {% endfor %}
-            {% endif %}
-
-            // ===== Handle Login/Logout clicks =====
-            const loginLink = document.getElementById('loginLink');
-            const logoutLink = document.getElementById('logoutLink');
-
-            if (loginLink) {
-                loginLink.addEventListener('click', function(e) {
-                    showToast('Redirecting...', 'Taking you to login page.', 'info');
-                });
-            }
-
-            if (logoutLink) {
-                logoutLink.addEventListener('click', function(e) {
-                    showToast('Logging out...', 'See you soon!', 'success');
-                });
-            }
-            // ============================================
-            // CATEGORY DROPDOWN - HOVER FUNCTIONALITY
-            // ============================================
-            const categoryDropdown = document.querySelector('.category-dropdown');
-            if (categoryDropdown) {
-                // For desktop hover
-                categoryDropdown.addEventListener('mouseenter', function() {
-                    const menu = this.querySelector('.dropdown-menu');
-                    if (menu) {
-                        menu.classList.add('show');
-                    }
-                });
-                categoryDropdown.addEventListener('mouseleave', function() {
-                    const menu = this.querySelector('.dropdown-menu');
-                    if (menu) {
-                        menu.classList.remove('show');
                     }
                 });
 
-                // For mobile/click support
-                const dropdownLink = categoryDropdown.querySelector('> a');
-                if (dropdownLink) {
-                    dropdownLink.addEventListener('click', function(e) {
+                item.addEventListener('mouseleave', function(e) {
+                    if (!isMobile) {
+                        isCategoryHovered = false;
+                        if (!isSubHovered) {
+                            hoverTimer = setTimeout(() => {
+                                hideSubCard();
+                                hoverTimer = null;
+                            }, 300);
+                        }
+                    }
+                });
+
+                // Click also works on mobile (tap to open)
+                label.addEventListener('click', function(e) {
+                    if (isMobile) {
                         e.preventDefault();
                         e.stopPropagation();
-                        const menu = categoryDropdown.querySelector('.dropdown-menu');
-                        if (menu) {
-                            menu.classList.toggle('show');
+                        const categoryId = item.dataset.category;
+                        if (categoryId) {
+                            hideSubCard();
+                            setTimeout(() => {
+                                showSubCard(categoryId, item);
+                            }, 50);
                         }
-                    });
+                    }
+                });
+            }
+        });
+
+        // ============================================
+        // SUBCARD HOVER - keep it open
+        // ============================================
+        subCard.addEventListener('mouseenter', function() {
+            isSubHovered = true;
+            if (hoverTimer) {
+                clearTimeout(hoverTimer);
+                hoverTimer = null;
+            }
+        });
+
+        subCard.addEventListener('mouseleave', function(e) {
+            isSubHovered = false;
+            if (!isMobile) {
+                if (!isCategoryHovered) {
+                    hoverTimer = setTimeout(() => {
+                        hideSubCard();
+                        hoverTimer = null;
+                    }, 300);
                 }
             }
+        });
 
-            // ============================================
-            // SUBCATEGORY DROPDOWN - HOVER FUNCTIONALITY
-            // ============================================
-            document.querySelectorAll('.dropdown-item').forEach(function(item) {
-                const subDropdown = item.querySelector('.sub-dropdown');
-                if (subDropdown) {
-                    // For desktop hover
-                    item.addEventListener('mouseenter', function() {
-                        subDropdown.classList.add('show');
-                    });
-                    item.addEventListener('mouseleave', function() {
-                        subDropdown.classList.remove('show');
-                    });
+        // ============================================
+        // CLOSE DROPDOWN ON OUTSIDE CLICK
+        // ============================================
+        document.addEventListener('click', function(e) {
+            if (!catDropdown.contains(e.target) && !catMenu.contains(e.target) && !subCard.contains(e.target)) {
+                hideDropdown();
+                hideSubCard();
+            }
+        });
 
-                    // For mobile/click support on the category link
-                    const categoryLink = item.querySelector('> a');
-                    if (categoryLink) {
-                        categoryLink.addEventListener('click', function(e) {
-                            // If there's a subdropdown, prevent navigation on click
-                            // and toggle the subdropdown instead
-                            if (subDropdown) {
-                                e.preventDefault();
-                                subDropdown.classList.toggle('show');
-                            }
-                        });
-                    }
+        // ============================================
+        // CLOSE SUBCATEGORIES (Mobile close button)
+        // ============================================
+        subClose.addEventListener('click', function(e) {
+            e.stopPropagation();
+            hideSubCard();
+            if (isMobile) {
+                hideDropdown();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideSubCard();
+                hideDropdown();
+            }
+        });
+
+        // ============================================
+        // WINDOW RESIZE
+        // ============================================
+        window.addEventListener('resize', function() {
+            const newIsMobile = window.innerWidth <= 640;
+            if (newIsMobile !== isMobile) {
+                isMobile = newIsMobile;
+                if (scrollableWrapper) {
+                    scrollableWrapper.style.display = isMobile ? 'none' : '';
                 }
-            });
+                hideDropdown();
+                hideSubCard();
+            }
+            if (catMenu.classList.contains('show')) {
+                positionDropdown();
+            }
+        });
 
-            // Close dropdowns when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.category-dropdown')) {
-                    document.querySelectorAll('.category-dropdown .dropdown-menu').forEach(function(menu) {
-                        menu.classList.remove('show');
-                    });
-                }
-            });
+        // ============================================
+        // GLOBAL SEARCH
+        // ============================================
+        const searchInput = document.getElementById('globalSearchInput');
+        const suggestions = document.getElementById('searchSuggestions');
+        let debounceTimer;
 
-            // ============================================
-            // GLOBAL SEARCH WITH LIVE SUGGESTIONS
-            // ============================================
-            const searchInput = document.getElementById('globalSearchInput');
-            const suggestionsContainer = document.getElementById('searchSuggestions');
-            let debounceTimer;
-
-            if (!searchInput) return;
-
+        if (searchInput) {
             searchInput.addEventListener('input', function() {
                 clearTimeout(debounceTimer);
                 const query = this.value.trim();
-                
-                if (query.length < 2) {
-                    suggestionsContainer.classList.remove('active');
-                    return;
-                }
-
-                debounceTimer = setTimeout(function() {
-                    fetchSuggestions(query);
-                }, 300);
+                if (query.length < 2) { suggestions.classList.remove('active'); return; }
+                debounceTimer = setTimeout(() => fetchSuggestions(query), 300);
             });
 
             searchInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    suggestionsContainer.classList.remove('active');
-                    searchInput.blur();
-                }
+                if (e.key === 'Escape') { suggestions.classList.remove('active'); this.blur(); }
             });
 
             document.addEventListener('click', function(e) {
-                if (!e.target.closest('.search-box')) {
-                    suggestionsContainer.classList.remove('active');
-                }
+                if (!e.target.closest('.search-box')) suggestions.classList.remove('active');
             });
+        }
 
-            function fetchSuggestions(query) {
-                suggestionsContainer.innerHTML = `
-                    <div class="search-loading">
-                        <div class="spinner"></div>
+        function fetchSuggestions(query) {
+            suggestions.innerHTML = `<div class="search-loading"><div class="spinner"></div></div>`;
+            suggestions.classList.add('active');
+            fetch(`/api/search/?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => renderSuggestions(data))
+                .catch(() => {
+                    suggestions.innerHTML = `<div class="search-suggestion-empty"><i class="fas fa-exclamation-circle"></i><span>Error loading suggestions</span></div>`;
+                });
+        }
+
+        function renderSuggestions(data) {
+            if (!data.results || data.results.length === 0) {
+                suggestions.innerHTML = `<div class="search-suggestion-empty"><i class="fas fa-search"></i><span>No results found for "${data.query}"</span></div>`;
+                return;
+            }
+            let html = '';
+            const categories = data.results.filter(r => r.type === 'category');
+            const subcategories = data.results.filter(r => r.type === 'subcategory');
+            const products = data.results.filter(r => r.type === 'product');
+            const variants = data.results.filter(r => r.type === 'variant');
+
+            if (categories.length) {
+                html += `<div class="search-suggestion-header">Categories</div>`;
+                categories.forEach(item => { html += createSuggestionItem(item); });
+                html += `<div class="search-suggestion-divider"></div>`;
+            }
+            if (subcategories.length) {
+                html += `<div class="search-suggestion-header">Subcategories</div>`;
+                subcategories.forEach(item => { html += createSuggestionItem(item); });
+                html += `<div class="search-suggestion-divider"></div>`;
+            }
+            if (products.length) {
+                html += `<div class="search-suggestion-header">Products</div>`;
+                products.forEach(item => { html += createSuggestionItem(item); });
+                html += `<div class="search-suggestion-divider"></div>`;
+            }
+            if (variants.length) {
+                html += `<div class="search-suggestion-header">Variants</div>`;
+                variants.forEach(item => { html += createSuggestionItem(item); });
+                html += `<div class="search-suggestion-divider"></div>`;
+            }
+            html += `<a href="/shop/?search=${encodeURIComponent(data.query)}" class="search-suggestion-item" style="justify-content:center;color:var(--primary);font-weight:600;"><span>View all results (${data.count})</span><i class="fas fa-arrow-right"></i></a>`;
+            suggestions.innerHTML = html;
+            suggestions.classList.add('active');
+        }
+
+        function createSuggestionItem(item) {
+            const iconMap = { 'category': 'fa-folder', 'subcategory': 'fa-tag', 'product': 'fa-box', 'variant': 'fa-cube' };
+            const iconClass = iconMap[item.type] || 'fa-search';
+            const typeLabel = item.type.charAt(0).toUpperCase() + item.type.slice(1);
+            let extraInfo = '', imageHtml = '', priceHtml = '';
+            if (item.type === 'product' || item.type === 'variant') {
+                if (item.image) imageHtml = `<img src="${item.image}" alt="${item.name}" class="suggestion-image">`;
+                if (item.price) priceHtml = `<span class="suggestion-price">₹${parseFloat(item.price).toFixed(2)}</span>`;
+                if (item.type === 'variant') extraInfo = `<span class="suggestion-subtitle">${item.product_name}</span>`;
+            }
+            if (item.type === 'subcategory') extraInfo = `<span class="suggestion-subtitle">${item.category}</span>`;
+            if (item.type === 'category' && item.description) extraInfo = `<span class="suggestion-subtitle">${item.description}</span>`;
+            return `
+                <a href="${item.url}" class="search-suggestion-item">
+                    ${imageHtml || `<div class="suggestion-icon ${item.type}"><i class="fas ${iconClass}"></i></div>`}
+                    <div class="suggestion-info">
+                        <div class="suggestion-title">${item.name}</div>
+                        ${extraInfo}
+                        <span class="suggestion-type">${typeLabel}</span>
                     </div>
-                `;
-                suggestionsContainer.classList.add('active');
+                    ${priceHtml}
+                </a>
+            `;
+        }
 
-                fetch(`/api/search/?q=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        renderSuggestions(data);
-                    })
-                    .catch(error => {
-                        console.error('Search error:', error);
-                        suggestionsContainer.innerHTML = `
-                            <div class="search-suggestion-empty">
-                                <i class="fas fa-exclamation-circle"></i>
-                                <span>Error loading suggestions</span>
-                            </div>
-                        `;
-                    });
-            }
-
-            function renderSuggestions(data) {
-                if (!data.results || data.results.length === 0) {
-                    suggestionsContainer.innerHTML = `
-                        <div class="search-suggestion-empty">
-                            <i class="fas fa-search"></i>
-                            <span>No results found for "${data.query}"</span>
-                        </div>
-                    `;
-                    return;
-                }
-
-                let html = '';
-
-                const categories = data.results.filter(r => r.type === 'category');
-                const subcategories = data.results.filter(r => r.type === 'subcategory');
-                const products = data.results.filter(r => r.type === 'product');
-                const variants = data.results.filter(r => r.type === 'variant');
-
-                if (categories.length > 0) {
-                    html += `<div class="search-suggestion-header">Categories</div>`;
-                    categories.forEach(item => {
-                        html += createSuggestionItem(item);
-                    });
-                    html += `<div class="search-suggestion-divider"></div>`;
-                }
-
-                if (subcategories.length > 0) {
-                    html += `<div class="search-suggestion-header">Subcategories</div>`;
-                    subcategories.forEach(item => {
-                        html += createSuggestionItem(item);
-                    });
-                    html += `<div class="search-suggestion-divider"></div>`;
-                }
-
-                if (products.length > 0) {
-                    html += `<div class="search-suggestion-header">Products</div>`;
-                    products.forEach(item => {
-                        html += createSuggestionItem(item);
-                    });
-                    html += `<div class="search-suggestion-divider"></div>`;
-                }
-
-                if (variants.length > 0) {
-                    html += `<div class="search-suggestion-header">Variants</div>`;
-                    variants.forEach(item => {
-                        html += createSuggestionItem(item);
-                    });
-                    html += `<div class="search-suggestion-divider"></div>`;
-                }
-
-                html += `
-                    <a href="/shop/?search=${encodeURIComponent(data.query)}" class="search-suggestion-item" style="justify-content:center;color:var(--primary);font-weight:600;">
-                        <span>View all results (${data.count})</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                `;
-
-                suggestionsContainer.innerHTML = html;
-                suggestionsContainer.classList.add('active');
-            }
-
-            function createSuggestionItem(item) {
-                const iconMap = {
-                    'category': 'fa-folder',
-                    'subcategory': 'fa-tag',
-                    'product': 'fa-box',
-                    'variant': 'fa-cube'
-                };
-                
-                const iconClass = iconMap[item.type] || 'fa-search';
-                const typeLabel = item.type.charAt(0).toUpperCase() + item.type.slice(1);
-                
-                let extraInfo = '';
-                let imageHtml = '';
-                let priceHtml = '';
-
-                if (item.type === 'product') {
-                    if (item.image) {
-                        imageHtml = `<img src="${item.image}" alt="${item.name}" class="suggestion-image">`;
-                    }
-                    if (item.price) {
-                        priceHtml = `<span class="suggestion-price">₹${parseFloat(item.price).toFixed(2)}</span>`;
-                    }
-                }
-
-                if (item.type === 'variant') {
-                    if (item.image) {
-                        imageHtml = `<img src="${item.image}" alt="${item.name}" class="suggestion-image">`;
-                    }
-                    if (item.price) {
-                        priceHtml = `<span class="suggestion-price">₹${parseFloat(item.price).toFixed(2)}</span>`;
-                    }
-                    extraInfo = `<span class="suggestion-subtitle">${item.product_name}</span>`;
-                }
-
-                if (item.type === 'subcategory') {
-                    extraInfo = `<span class="suggestion-subtitle">${item.category}</span>`;
-                }
-
-                if (item.type === 'category') {
-                    if (item.description) {
-                        extraInfo = `<span class="suggestion-subtitle">${item.description}</span>`;
-                    }
-                }
-
-                return `
-                    <a href="${item.url}" class="search-suggestion-item">
-                        ${imageHtml || `<div class="suggestion-icon ${item.type}"><i class="fas ${iconClass}"></i></div>`}
-                        <div class="suggestion-info">
-                            <div class="suggestion-title">${item.name}</div>
-                            ${extraInfo}
-                            <span class="suggestion-type">${typeLabel}</span>
-                        </div>
-                        ${priceHtml}
-                    </a>
-                `;
-            }
-
-            document.getElementById('globalSearchForm').addEventListener('submit', function(e) {
+        const searchForm = document.getElementById('globalSearchForm');
+        if (searchForm) {
+            searchForm.addEventListener('submit', function(e) {
                 const input = document.getElementById('globalSearchInput');
                 if (input.value.trim().length < 2) {
                     e.preventDefault();
                     input.focus();
                     input.style.borderColor = '#dc3545';
-                    setTimeout(() => {
-                        input.style.borderColor = '';
-                    }, 2000);
+                    setTimeout(() => input.style.borderColor = '', 2000);
                 }
             });
-        });
-    </script>
+        }
+    });
+</script>
 
 </body>
 </html>

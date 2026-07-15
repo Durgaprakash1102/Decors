@@ -1,679 +1,1952 @@
-
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
 {% block title %}{{ product.name }} - MyStore Admin{% endblock %}
 
-{% block extra_css %}
-<style>
-    .variant-detail-card {
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 15px;
-        background: #f8f9fa;
-        transition: all 0.2s;
-    }
-    .variant-detail-card:hover {
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .variant-detail-card .variant-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-    }
-    .variant-detail-card .variant-name {
-        font-size: 16px;
-        font-weight: 600;
-        color: #333;
-    }
-    .variant-detail-card .variant-sku {
-        color: #6c757d;
-        font-size: 13px;
-    }
-    .variant-detail-card .variant-images {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-top: 10px;
-    }
-    .variant-detail-card .variant-images img {
-        width: 60px;
-        height: 60px;
-        object-fit: cover;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-        transition: transform 0.2s;
-    }
-    .variant-detail-card .variant-images img:hover {
-        transform: scale(1.5);
-        z-index: 100;
-        position: relative;
-    }
-    .variant-detail-card .variant-attributes {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 5px;
-        margin-top: 8px;
-    }
-    .variant-detail-card .variant-attributes .badge {
-        font-size: 11px;
-    }
-    .variant-detail-card .variant-stock {
-        font-size: 14px;
-    }
-    .variant-detail-card .variant-price {
-        font-size: 14px;
-        font-weight: 600;
-    }
-    .variant-detail-card .variant-offer {
-        font-size: 13px;
-        color: #ff6b6b;
-        font-weight: 600;
-    }
-    .variant-detail-card .variant-warranty {
-        font-size: 13px;
-        color: #6c757d;
-    }
-    .image-gallery {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 10px;
-    }
-    .image-gallery .image-item {
-        position: relative;
-        border-radius: 8px;
-        overflow: hidden;
-        border: 1px solid #e9ecef;
-    }
-    .image-gallery .image-item img {
-        width: 100%;
-        height: 120px;
-        object-fit: cover;
-    }
-    .image-gallery .image-item .badge {
-        position: absolute;
-        top: 5px;
-        left: 5px;
-        font-size: 10px;
-    }
-    .stats-card {
-        border-left: 4px solid;
-        padding: 12px 15px;
-        background: #f8f9fa;
-        border-radius: 4px;
-        margin-bottom: 10px;
-    }
-    .stats-card.primary { border-color: #0d6efd; }
-    .stats-card.success { border-color: #28a745; }
-    .stats-card.warning { border-color: #ffc107; }
-    .stats-card.danger { border-color: #dc3545; }
-    .stats-card.info { border-color: #17a2b8; }
-    .stats-card .label { font-size: 12px; color: #6c757d; }
-    .stats-card .value { font-size: 18px; font-weight: 600; }
-
-    .offer-badge {
-        background: #ff6b6b;
-        color: white;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 600;
-        display: inline-block;
-        animation: pulse-offer 2s infinite;
-    }
-    @keyframes pulse-offer {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-    }
-    
-    .price-breakdown {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-    .price-breakdown .original {
-        color: #6c757d;
-        text-decoration: line-through;
-        font-size: 14px;
-    }
-    .price-breakdown .discounted {
-        color: #28a745;
-        font-weight: 700;
-        font-size: 16px;
-    }
-    .price-breakdown .offer-tag {
-        background: #ff6b6b;
-        color: white;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 600;
-    }
-    .price-breakdown .offer-tag i {
-        margin-right: 3px;
-    }
-    .price-breakdown .product-discount-tag {
-        background: #dc3545;
-        color: white;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 600;
-    }
-    .price-breakdown .product-discount-tag i {
-        margin-right: 3px;
-    }
-    .price-breakdown .best-deal-tag {
-        background: #28a745;
-        color: white;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 600;
-    }
-    .price-breakdown .best-deal-tag i {
-        margin-right: 3px;
-    }
-    .price-breakdown .savings-text {
-        font-size: 13px;
-        font-weight: 600;
-        color: #28a745;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-box text-primary"></i> {{ product.name }}</h2>
-        <div>
-            <a href="{% url 'Ecom:product_smart_edit' product.id %}" class="btn btn-primary">
-                <i class="fas fa-edit"></i> Edit
+
+<style>
+:root {
+    --primary: #5c121f;
+    --primary-light: #7a1a2b;
+    --primary-gradient: linear-gradient(145deg, #5c121f, #8B2336);
+    --secondary: #f4b400;
+    --success: #10b981;
+    --success-bg: #d1fae5;
+    --danger: #ef4444;
+    --danger-bg: #fee2e2;
+    --warning: #f59e0b;
+    --warning-bg: #fef3c7;
+    --info: #3b82f6;
+    --bg: #f5f3f0;
+    --white: #ffffff;
+    --border: #e5e0db;
+    --text: #1a1a2e;
+    --text-muted: #6b7280;
+    --shadow: 0 2px 12px rgba(0,0,0,0.04);
+    --shadow-hover: 0 8px 32px rgba(92,18,31,0.1);
+    --radius: 14px;
+    --radius-sm: 10px;
+    --radius-xs: 6px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* =====================================================
+   PAGE HEADER
+   ===================================================== */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px 24px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    width: 100%;
+}
+
+.page-header .left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.page-header .left .icon-box {
+    width: 42px;
+    height: 42px;
+    background: var(--primary-gradient);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 18px;
+    box-shadow: 0 4px 12px rgba(92,18,31,0.2);
+}
+
+.page-header .left h1 {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+    max-width: 400px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.page-header .actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.page-header .actions .btn {
+    padding: 8px 18px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    font-family: inherit;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 4px 12px rgba(92,18,31,0.2);
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(92,18,31,0.3);
+}
+.btn-secondary {
+    background: var(--border);
+    color: var(--text);
+}
+.btn-secondary:hover {
+    background: #d4d0cc;
+    transform: translateY(-2px);
+}
+
+/* =====================================================
+   MAIN LAYOUT - LEFT FIXED, RIGHT SCROLLABLE
+   ===================================================== */
+.product-main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    background: var(--white);
+    width: 100%;
+    min-height: 600px;
+    overflow: hidden;
+}
+
+/* Left Side - Fixed */
+.left-side {
+    padding: 24px 20px 24px 24px;
+    background: var(--white);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    position: sticky;
+    top: 0;
+}
+
+/* Right Side - Scrollable */
+.right-side {
+    padding: 24px 24px 24px 20px;
+    background: var(--white);
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.right-side::-webkit-scrollbar {
+    width: 4px;
+}
+.right-side::-webkit-scrollbar-track {
+    background: transparent;
+}
+.right-side::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+.right-side::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* =====================================================
+   LEFT SIDE - IMAGES
+   ===================================================== */
+.image-main {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    background: #faf8f6;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.image-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 10px;
+}
+
+.image-main .no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    color: var(--text-muted);
+    background: var(--bg);
+}
+
+/* Badges */
+.image-main .badges-container {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.image-main .badges-container .badge {
+    padding: 4px 14px;
+    border-radius: 30px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: white;
+}
+
+.badge-new { background: var(--primary); color: #d4d0cc; }
+.badge-featured { background: var(--secondary); color: var(--text); }
+.badge-bestseller { background: var(--danger); }
+.badge-offer { background: #f97316; }
+
+/* ===== Image Thumbnails - Product Images Only ===== */
+.image-thumbs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 10px 0 4px;
+    flex-shrink: 0;
+    scrollbar-width: thin;
+}
+
+.image-thumbs::-webkit-scrollbar {
+    height: 4px;
+}
+.image-thumbs::-webkit-scrollbar-track {
+    background: var(--bg);
+    border-radius: 4px;
+}
+.image-thumbs::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+.image-thumbs::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+.image-thumbs .thumb {
+    flex: 0 0 70px;
+    height: 70px;
+    border-radius: var(--radius-xs);
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid var(--border);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.image-thumbs .thumb:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.image-thumbs .thumb.active {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(92,18,31,0.15);
+}
+
+.image-thumbs .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-thumbs .thumb .thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    color: var(--text-muted);
+    font-size: 24px;
+}
+
+/* ===== VARIANT SECTION ===== */
+.variant-section {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 2px solid var(--border);
+    flex-shrink: 0;
+}
+
+.variant-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.variant-section-title i {
+    color: var(--primary);
+    font-size: 14px;
+}
+
+.variant-section-title .variant-count {
+    background: var(--primary);
+    color: white;
+    font-size: 10px;
+    padding: 1px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+}
+
+.variant-thumbs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 0 8px;
+    flex-shrink: 0;
+    scrollbar-width: thin;
+}
+
+.variant-thumbs::-webkit-scrollbar {
+    height: 4px;
+}
+.variant-thumbs::-webkit-scrollbar-track {
+    background: var(--bg);
+    border-radius: 4px;
+}
+.variant-thumbs::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+}
+
+.variant-thumbs .thumb {
+    flex: 0 0 60px;
+    height: 60px;
+    border-radius: var(--radius-xs);
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid var(--border);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.variant-thumbs .thumb:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.variant-thumbs .thumb.active {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgba(244, 180, 0, 0.3);
+}
+
+.variant-thumbs .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.variant-thumbs .thumb .thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    color: var(--text-muted);
+    font-size: 20px;
+}
+
+.variant-thumbs .thumb .variant-label {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: var(--secondary);
+    color: var(--text);
+    font-size: 8px;
+    font-weight: 800;
+    padding: 1px 7px;
+    border-radius: 6px 0 0 0;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Main Product thumb in variant section */
+.variant-thumbs .thumb.main-product-thumb {
+    border-color: var(--primary);
+    background: var(--primary);
+}
+
+.variant-thumbs .thumb.main-product-thumb .main-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--primary);
+    color: white;
+    font-size: 7px;
+    font-weight: 700;
+    padding: 2px 0;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.variant-thumbs .thumb.main-product-thumb .thumb-placeholder {
+    background: var(--primary-light);
+    color: white;
+}
+
+.variant-thumbs .thumb.main-product-thumb img {
+    opacity: 0.9;
+}
+
+/* =====================================================
+   RIGHT SIDE - PRODUCT INFO
+   ===================================================== */
+.right-side .product-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.3;
+    margin: 0;
+}
+
+.right-side .product-sku {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* Rating Row */
+.right-side .rating-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.rating-row .rating-box {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    background: var(--success);
+    color: white;
+    border-radius: var(--radius-xs);
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.rating-row .rating-box i {
+    font-size: 12px;
+}
+
+.rating-row .review-count {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* ===== SHORT DESCRIPTION ===== */
+.short-description {
+    padding: 6px 0;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+}
+
+.short-description i {
+    color: var(--primary);
+    margin-right: 6px;
+    font-size: 13px;
+}
+
+.short-description .not-specified {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ===== PRICE ===== */
+.price-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+}
+
+.price-section .original {
+    font-size: 15px;
+    color: var(--text-muted);
+    text-decoration: line-through;
+}
+
+.price-section .current {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.price-section .discount-tag {
+    padding: 4px 14px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--danger);
+    color: white;
+}
+
+.price-section .offer-tag {
+    padding: 4px 14px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #f97316;
+    color: white;
+}
+
+.price-section .savings {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--success);
+}
+
+/* ===== DIRECTION INDICATOR ===== */
+.direction-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-bottom: 1px dashed var(--border);
+    padding-bottom: 8px;
+}
+
+.direction-indicator i {
+    color: var(--primary);
+    font-size: 14px;
+}
+
+.direction-indicator .highlight {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+/* Offer Banner */
+.offer-banner {
+    padding: 8px 14px;
+    background: #fef3c7;
+    border-left: 4px solid #f97316;
+    border-radius: var(--radius-xs);
+    font-size: 13px;
+}
+
+.offer-banner i {
+    color: #f97316;
+    margin-right: 6px;
+}
+.offer-banner strong {
+    color: var(--text);
+}
+.offer-banner .save-amount {
+    color: var(--success);
+    font-weight: 700;
+}
+
+/* ===== DETAILS GRID ===== */
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 16px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+
+.details-grid .detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(229,224,219,0.3);
+}
+
+.details-grid .detail-item:last-child {
+    border-bottom: none;
+}
+
+.details-grid .detail-item .label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.details-grid .detail-item .value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.details-grid .detail-item .value .not-specified {
+    color: var(--text-muted);
+    font-style: italic;
+    font-weight: 400;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.right-side .action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+}
+
+.right-side .action-buttons .btn {
+    padding: 8px 18px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    font-family: inherit;
+}
+
+.btn-edit {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 4px 12px rgba(92,18,31,0.2);
+}
+.btn-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(92,18,31,0.3);
+}
+
+.btn-view {
+    background: var(--info);
+    color: white;
+}
+.btn-view:hover {
+    transform: translateY(-2px);
+}
+
+.btn-delete {
+    background: var(--danger);
+    color: white;
+}
+.btn-delete:hover {
+    transform: translateY(-2px);
+}
+
+/* =====================================================
+   BOTTOM SECTION - TABS
+   ===================================================== */
+.product-bottom {
+    width: 100%;
+}
+
+.product-bottom .bottom-tabs {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-top: 8px;
+}
+
+.bottom-tabs .tab-nav {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border);
+    background: #faf8f6;
+    overflow-x: auto;
+}
+
+.bottom-tabs .tab-nav button {
+    padding: 12px 24px;
+    border: none;
+    background: none;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    white-space: nowrap;
+}
+
+.bottom-tabs .tab-nav button:hover {
+    color: var(--text);
+}
+
+.bottom-tabs .tab-nav button.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    background: var(--white);
+}
+
+.bottom-tabs .tab-content {
+    padding: 20px 24px;
+    display: none;
+}
+
+.bottom-tabs .tab-content.active {
+    display: block;
+}
+
+.bottom-tabs .tab-content .tab-body {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+}
+
+.bottom-tabs .tab-content .tab-body .not-specified {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* =====================================================
+   REVIEWS TABLE STYLES
+   ===================================================== */
+.reviews-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.reviews-table thead {
+    background: var(--bg);
+}
+
+.reviews-table th {
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border-bottom: 2px solid var(--border);
+}
+
+.reviews-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.reviews-table tr:hover {
+    background: var(--bg);
+}
+
+.reviews-table .rating-stars {
+    color: #f59e0b;
+}
+
+.reviews-table .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.reviews-table .badge-approved {
+    background: var(--success-bg);
+    color: var(--success);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.reviews-table .badge-pending {
+    background: var(--warning-bg);
+    color: var(--warning);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.reviews-table .badge-verified {
+    background: var(--success-bg);
+    color: var(--success);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.reviews-table .btn-sm {
+    padding: 4px 8px;
+    font-size: 11px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.reviews-table .btn-sm:hover {
+    transform: scale(1.05);
+}
+
+.reviews-table .btn-success-sm {
+    background: var(--success);
+    color: white;
+}
+
+.reviews-table .btn-danger-sm {
+    background: var(--danger);
+    color: white;
+}
+
+.reviews-table .review-text {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+@media (max-width: 992px) {
+    .product-main {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: auto;
+        gap: 0;
+    }
+    .left-side {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 16px;
+        height: auto;
+        position: static;
+    }
+    .right-side {
+        padding: 16px;
+        height: auto;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    .image-main {
+        height: 350px;
+    }
+    .image-thumbs .thumb {
+        flex: 0 0 60px;
+        height: 60px;
+    }
+    .variant-thumbs .thumb {
+        flex: 0 0 50px;
+        height: 50px;
+    }
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 12px 14px;
+    }
+    .page-header .left h1 {
+        font-size: 16px;
+        max-width: 100%;
+        white-space: normal;
+    }
+    .page-header .actions {
+        width: 100%;
+    }
+    .page-header .actions .btn {
+        flex: 1;
+        justify-content: center;
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+    .left-side {
+        padding: 12px;
+    }
+    .right-side {
+        padding: 12px;
+        max-height: 450px;
+    }
+    .image-main {
+        height: 280px;
+    }
+    .image-thumbs .thumb {
+        flex: 0 0 55px;
+        height: 55px;
+    }
+    .variant-thumbs .thumb {
+        flex: 0 0 45px;
+        height: 45px;
+    }
+    .right-side .product-name {
+        font-size: 20px;
+    }
+    .price-section .current {
+        font-size: 22px;
+    }
+    .bottom-tabs .tab-nav button {
+        padding: 10px 16px;
+        font-size: 12px;
+    }
+    .bottom-tabs .tab-content {
+        padding: 14px 16px;
+    }
+    .product-bottom {
+        padding: 0 12px 12px;
+    }
+    .variant-section-title {
+        font-size: 11px;
+    }
+    .reviews-table {
+        font-size: 12px;
+    }
+    .reviews-table th,
+    .reviews-table td {
+        padding: 6px 8px;
+    }
+    .reviews-table .review-text {
+        max-width: 100px;
+    }
+}
+
+@media (max-width: 576px) {
+    .image-main {
+        height: 220px;
+    }
+    .image-thumbs .thumb {
+        flex: 0 0 50px;
+        height: 50px;
+    }
+    .variant-thumbs .thumb {
+        flex: 0 0 40px;
+        height: 40px;
+    }
+    .variant-thumbs .thumb .variant-label {
+        font-size: 7px;
+        padding: 1px 5px;
+    }
+    .right-side .product-name {
+        font-size: 18px;
+    }
+    .price-section .current {
+        font-size: 20px;
+    }
+    .price-section {
+        padding: 8px 12px;
+    }
+    .details-grid .detail-item {
+        flex-direction: column;
+        gap: 2px;
+    }
+    .right-side .action-buttons .btn {
+        flex: 1;
+        justify-content: center;
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+    .direction-indicator {
+        font-size: 11px;
+    }
+    .short-description {
+        font-size: 13px;
+    }
+    .reviews-table {
+        font-size: 11px;
+    }
+    .reviews-table th,
+    .reviews-table td {
+        padding: 4px 6px;
+    }
+    .reviews-table .review-text {
+        max-width: 60px;
+    }
+}
+</style>
+
+<!-- =====================================================
+PAGE
+===================================================== -->
+
+<!-- ===== HEADER ===== -->
+<div class="page-header">
+    <div class="left">
+        <div class="icon-box">
+            <i class="fas fa-box"></i>
+        </div>
+        <h1 id="headerProductName">{{ product.name }}</h1>
+    </div>
+    <div class="actions">
+        <a href="{% url 'Ecom:product_smart_edit' product.id %}" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+        <a href="{% url 'Ecom:product_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="product-main">
+
+    <!-- ===== LEFT SIDE - FIXED ===== -->
+    <div class="left-side">
+        <!-- Main Image -->
+        <div class="image-main" id="mainImageContainer">
+            <img src="{{ product.images.first.image.url|default:'#' }}" alt="{{ product.name }}" id="mainImage">
+            
+            <div class="badges-container">
+                {% if product.is_new %}
+                    <span class="badge badge-new"><i class="fas fa-fire"></i> New</span>
+                {% endif %}
+                {% if product.is_featured %}
+                    <span class="badge badge-featured"><i class="fas fa-star"></i> Featured</span>
+                {% endif %}
+                {% if product.is_best_seller %}
+                    <span class="badge badge-bestseller"><i class="fas fa-trophy"></i> Best Seller</span>
+                {% endif %}
+                {% if product.offer_name and product.offer_name != "Product Discount" %}
+                    <span class="badge badge-offer"><i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:15 }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Product Images Thumbnails -->
+        <div class="image-thumbs" id="thumbGallery">
+            {% for img in product.images.all %}
+                <div class="thumb {% if forloop.first %}active{% endif %}" onclick="showProductDetails('{{ img.image.url }}', this)" data-type="product">
+                    <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}">
+                </div>
+            {% endfor %}
+            
+            {% if not product.images.exists %}
+                <div class="thumb">
+                    <div class="thumb-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- ===== VARIANT IMAGES SECTION - SEPARATE ===== -->
+        {% if product.variants.exists %}
+            <div class="variant-section">
+                <div class="variant-section-title">
+                    <i class="fas fa-cubes"></i> Variant Images
+                    <span class="variant-count">{{ product.variants.count }}</span>
+                </div>
+                <div class="variant-thumbs" id="variantThumbGallery">
+                    <!-- MAIN PRODUCT OPTION - Always first -->
+                    <div class="thumb main-product-thumb" onclick="showMainProduct()" data-type="main" title="Main Product">
+                        {% if product.images.first %}
+                            <img src="{{ product.images.first.image.url }}" alt="Main Product">
+                        {% else %}
+                            <div class="thumb-placeholder">
+                                <i class="fas fa-box"></i>
+                            </div>
+                        {% endif %}
+                        <span class="main-label">Main</span>
+                    </div>
+                    
+                    <!-- Variants -->
+                    {% for variant in product.variants.all %}
+                        {% if variant.images.exists %}
+                            {% for img in variant.images.all|slice:":1" %}
+                                <div class="thumb variant-thumb" onclick="selectVariant({{ variant.id }})" data-variant-id="{{ variant.id }}" data-type="variant" title="{{ variant.name|default:'Variant' }}">
+                                    <img src="{{ img.image.url }}" alt="{{ variant.name|default:'Variant' }}">
+                                    <span class="variant-label">{{ forloop.parentloop.counter }}</span>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="thumb variant-thumb" onclick="selectVariant({{ variant.id }})" data-variant-id="{{ variant.id }}" data-type="variant" title="{{ variant.name|default:'Variant' }}">
+                                <div class="thumb-placeholder">
+                                    <i class="fas fa-cube"></i>
+                                </div>
+                                <span class="variant-label">{{ forloop.counter }}</span>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- ===== RIGHT SIDE - SCROLLABLE ===== -->
+    <div class="right-side" id="productInfo">
+        
+        <!-- Name & SKU -->
+        <h1 class="product-name" id="productName">{{ product.name }}</h1>
+        <div class="product-sku" id="productSku">SKU: {{ product.sku }}</div>
+
+        <!-- Rating -->
+        <div class="rating-row">
+            <div class="rating-box">
+                <i class="fas fa-star"></i>
+                {{ product.average_rating|floatformat:1 }}
+            </div>
+            <span class="review-count">{{ product.total_reviews }} reviews</span>
+            <span class="review-count" style="color:var(--text-muted);">
+                <i class="fas fa-shield-alt" style="color:var(--primary);"></i>
+                {{ product.warranty_months }} months warranty
+            </span>
+        </div>
+
+        <!-- ===== SHORT DESCRIPTION ===== -->
+        <div class="short-description" id="shortDescription">
+            <i class="fas fa-quote-left"></i>
+            <span id="shortDescText">{{ product.short_description|default:"No short description available." }}</span>
+        </div>
+
+        <!-- ===== PRICE ===== -->
+        <div class="price-section" id="productPrice">
+            <span class="original" id="originalPrice">₹{{ product.price|floatformat:2 }}</span>
+            
+            {% if product.offer_name and product.offer_name != "Product Discount" %}
+                <span class="current" id="currentPrice">₹{{ product.offer_price|floatformat:2 }}</span>
+                <span class="offer-tag"><i class="fas fa-gift"></i> Offer</span>
+                <span class="savings">Save ₹{{ product.total_savings|floatformat:2 }}</span>
+            {% elif product.discount_percentage > 0 %}
+                <span class="current" id="currentPrice">₹{{ product.final_price|floatformat:2 }}</span>
+                <span class="discount-tag">{{ product.discount_percentage|floatformat:0 }}% OFF</span>
+            {% else %}
+                <span class="current" id="currentPrice">₹{{ product.price|floatformat:2 }}</span>
+            {% endif %}
+        </div>
+
+        <!-- ===== DIRECTION INDICATOR ===== -->
+        <div class="direction-indicator">
+            <i class="fas fa-arrow-right"></i>
+            <span>
+                <span class="highlight">Variant:</span> 
+                Click on any <strong>numbered</strong> variant image below to view variant details
+            </span>
+        </div>
+
+        <!-- Offer Banner -->
+        {% if product.offer_name and product.offer_name != "Product Discount" %}
+            <div class="offer-banner">
+                <i class="fas fa-gift"></i>
+                <strong>{{ product.offer_name }}</strong> applied!
+                <span class="save-amount">Save ₹{{ product.total_savings|floatformat:2 }}</span>
+            </div>
+        {% endif %}
+
+        <!-- ===== DETAILS GRID ===== -->
+        <div class="details-grid" id="detailsGrid">
+            <div class="detail-item">
+                <span class="label">Category</span>
+                <span class="value" id="detailCategory">{{ product.category.name }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Subcategory</span>
+                <span class="value" id="detailSubcategory">{% if product.subcategory %}{{ product.subcategory.name }}{% else %}<span class="not-specified">Not specified</span>{% endif %}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Brand</span>
+                <span class="value" id="detailBrand">{% if product.brand %}{{ product.brand }}{% else %}<span class="not-specified">Not specified</span>{% endif %}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Color</span>
+                <span class="value" id="detailColor">{% if product.color %}{{ product.color }}{% else %}<span class="not-specified">Not specified</span>{% endif %}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Size</span>
+                <span class="value" id="detailSize">{% if product.size %}{{ product.size }}{% else %}<span class="not-specified">Not specified</span>{% endif %}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Material</span>
+                <span class="value" id="detailMaterial">{% if product.material %}{{ product.material }}{% else %}<span class="not-specified">Not specified</span>{% endif %}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Weight</span>
+                <span class="value" id="detailWeight">{% if product.weight %}{{ product.weight }} kg{% else %}<span class="not-specified">Not specified</span>{% endif %}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Dimensions</span>
+                <span class="value" id="detailDimensions">{% if product.dimensions %}{{ product.dimensions }}{% else %}<span class="not-specified">Not specified</span>{% endif %}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Stock</span>
+                <span class="value" id="stockValue">
+                    {% if product.is_out_of_stock %}
+                        <span style="color:var(--danger);font-weight:600;">Out of Stock (0)</span>
+                    {% elif product.is_low_stock %}
+                        <span style="color:var(--warning);font-weight:600;">Low Stock ({{ product.stock_quantity }})</span>
+                    {% else %}
+                        <span style="color:var(--success);font-weight:600;">In Stock ({{ product.stock_quantity }})</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Warranty</span>
+                <span class="value" id="detailWarranty">{% if product.warranty_months > 0 %}{{ product.warranty_months }} months{% else %}<span class="not-specified">No warranty</span>{% endif %}</span>
+            </div>
+            <div class="detail-item" style="grid-column: span 2;">
+                <span class="label">Status</span>
+                <span class="value" id="detailStatus">
+                    {% if product.is_active %}
+                        <span style="color:var(--success);font-weight:600;"><i class="fas fa-check-circle"></i> Active</span>
+                    {% else %}
+                        <span style="color:var(--text-muted);font-weight:600;"><i class="fas fa-circle"></i> Inactive</span>
+                    {% endif %}
+                    {% if product.is_featured %}
+                        <span class="badge badge-featured" style="font-size:9px;padding:2px 8px;margin-left:6px;">Featured</span>
+                    {% endif %}
+                    {% if product.is_new %}
+                        <span class="badge badge-new" style="font-size:9px;padding:2px 8px;">New</span>
+                    {% endif %}
+                    {% if product.is_best_seller %}
+                        <span class="badge badge-bestseller" style="font-size:9px;padding:2px 8px;">Best Seller</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- ===== ACTION BUTTONS ===== -->
+        <div class="action-buttons">
+            <a href="{% url 'Ecom:product_smart_edit' product.id %}" class="btn btn-edit">
+                <i class="fas fa-edit"></i> Edit Product
             </a>
-            <a href="{% url 'Ecom:product_list' %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back
+            <a href="{% url 'Ecom:product_detail' product.id %}" class="btn btn-view" target="_blank">
+                <i class="fas fa-eye"></i> View on Store
+            </a>
+            <a href="{% url 'Ecom:product_delete' product.id %}" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this product?')">
+                <i class="fas fa-trash"></i> Delete
             </a>
         </div>
     </div>
 
-    <div class="row">
-        <!-- ============================================ -->
-        <!-- MAIN CONTENT (Left Column)                   -->
-        <!-- ============================================ -->
-        <div class="col-md-8">
-            
-            <!-- Product Images -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-images text-success"></i> Product Images</h5>
-                </div>
-                <div class="card-body">
-                    {% if product.images.exists %}
-                        <div class="image-gallery">
-                            {% for img in product.images.all %}
-                                <div class="image-item">
-                                    <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}">
-                                    {% if img.is_primary %}
-                                        <span class="badge bg-success">Primary</span>
+</div>
+
+<!-- ===== BOTTOM SECTION - TABS ===== -->
+<div class="product-bottom">
+    <div class="bottom-tabs">
+        <div class="tab-nav">
+            <button class="active" onclick="switchTab(this, 'description')">Description</button>
+            <button onclick="switchTab(this, 'specifications')">Specifications</button>
+            <button onclick="switchTab(this, 'features')">Features</button>
+            <button onclick="switchTab(this, 'warranty')">Warranty</button>
+            <button onclick="switchTab(this, 'variants')">All Variants</button>
+            <button onclick="switchTab(this, 'reviews')">
+                <i class="fas fa-star" style="color:#f59e0b;"></i> Reviews 
+                <span class="badge">{{ product.total_reviews }}</span>
+            </button>
+        </div>
+
+        <!-- Description -->
+        <div class="tab-content active" id="tab-description">
+            <div class="tab-body" id="tabDescription">
+                {% if product.description %}
+                    {{ product.description|safe }}
+                {% else %}
+                    <p class="not-specified">No description available.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Specifications -->
+        <div class="tab-content" id="tab-specifications">
+            <div class="tab-body" id="tabSpecifications">
+                {% if product.specifications %}
+                    {{ product.specifications|safe }}
+                {% else %}
+                    <p class="not-specified">No specifications available.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="tab-content" id="tab-features">
+            <div class="tab-body" id="tabFeatures">
+                {% if product.features %}
+                    {{ product.features|safe }}
+                {% else %}
+                    <p class="not-specified">No features available.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Warranty -->
+        <div class="tab-content" id="tab-warranty">
+            <div class="tab-body" id="tabWarranty">
+                <p><strong>Warranty Period:</strong> <span id="warrantyPeriod">{{ product.warranty_months }}</span> months</p>
+                {% if product.warranty_details %}
+                    {{ product.warranty_details|safe }}
+                {% else %}
+                    <p class="not-specified">No warranty details available.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- All Variants -->
+        <div class="tab-content" id="tab-variants">
+            <div class="tab-body">
+                {% if product.variants.exists %}
+                    {% for variant in product.variants.all %}
+                        <div style="padding:12px 16px;margin-bottom:10px;background:var(--bg);border-radius:var(--radius-xs);border:1px solid var(--border);">
+                            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                                <div>
+                                    <strong>{{ variant.name|default:"Variant" }}</strong>
+                                    <span style="color:var(--text-muted);font-size:13px;">({{ variant.sku }})</span>
+                                </div>
+                                <div>
+                                    {% if variant.is_active %}
+                                        <span class="badge" style="background:var(--success);color:white;">Active</span>
+                                    {% else %}
+                                        <span class="badge" style="background:var(--text-muted);color:white;">Inactive</span>
                                     {% endif %}
                                 </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="text-muted text-center py-3">No images uploaded.</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Product Details -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-info-circle text-primary"></i> Product Details</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>SKU:</strong> <code>{{ product.sku }}</code></p>
-                            <p><strong>Brand:</strong> {{ product.brand|default:"-" }}</p>
-                            <p><strong>Category:</strong> {{ product.category.name }}</p>
-                            <p><strong>Subcategory:</strong> {{ product.subcategory.name|default:"-" }}</p>
-                            <p><strong>Color:</strong> {{ product.color|default:"-" }}</p>
-                            <p><strong>Size:</strong> {{ product.size|default:"-" }}</p>
-                            <p><strong>Material:</strong> {{ product.material|default:"-" }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Weight:</strong> {{ product.weight|default:"-" }} kg</p>
-                            <p><strong>Dimensions:</strong> {{ product.dimensions|default:"-" }}</p>
-                            <p><strong>Warranty:</strong> {{ product.warranty_months }} months</p>
-                            <p><strong>Stock:</strong> {{ product.stock_quantity }}</p>
-                        </div>
-                    </div>
-                    
-                    <!-- ============================================ -->
-                    <!-- PRODUCT PRICE WITH OFFER DISPLAY            -->
-                    <!-- ============================================ -->
-                    <hr>
-                    <h6>Pricing</h6>
-                    <div class="price-breakdown">
-                        <span class="original">₹{{ product.price|floatformat:2 }}</span>
-                        
-                        {% if product.offer_name and product.offer_name != "Product Discount" %}
-                            <!-- Offer Applied -->
-                            <span class="discounted">₹{{ product.offer_price|floatformat:2 }}</span>
-                            <span class="offer-tag">
-                                <i class="fas fa-gift"></i> {{ product.offer_name }}
-                            </span>
-                            <span class="savings-text">
-                                Save ₹{{ product.total_savings|floatformat:2 }}
-                            </span>
-                        {% elif product.discount_percentage > 0 %}
-                            <!-- Product Discount Only -->
-                            <span class="discounted">₹{{ product.final_price|floatformat:2 }}</span>
-                            <span class="product-discount-tag">
-                                <i class="fas fa-tags"></i> {{ product.discount_percentage|floatformat:0 }}% OFF
-                            </span>
-                        {% else %}
-                            <!-- No Discount -->
-                            <span class="discounted">₹{{ product.price|floatformat:2 }}</span>
-                            <span class="text-muted">No discount</span>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Offer Banner (if offer applied) -->
-                    {% if product.offer_name and product.offer_name != "Product Discount" %}
-                        <div class="mt-2 p-2 bg-light rounded" style="border-left: 4px solid #ff6b6b;">
-                            <i class="fas fa-gift text-danger"></i>
-                            <strong>{{ product.offer_name }}</strong> applied on this product!
-                            <span class="text-success">Save ₹{{ product.total_savings|floatformat:2 }}</span>
-                        </div>
-                    {% endif %}
-                    
-                    <hr>
-                    <h6>Short Description</h6>
-                    <p>{{ product.short_description }}</p>
-                    
-                    <hr>
-                    <h6>Description</h6>
-                    <div class="p-3 bg-light rounded">{{ product.description|safe }}</div>
-                    
-                    {% if product.specifications %}
-                    <hr>
-                    <h6>Specifications</h6>
-                    <div class="p-3 bg-light rounded">{{ product.specifications|safe }}</div>
-                    {% endif %}
-                    
-                    {% if product.features %}
-                    <hr>
-                    <h6>Features</h6>
-                    <div class="p-3 bg-light rounded">{{ product.features|safe }}</div>
-                    {% endif %}
-                    
-                    {% if product.warranty_details %}
-                    <hr>
-                    <h6>Warranty Details</h6>
-                    <p>{{ product.warranty_details }}</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Variants with Details and Offer Support -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-cubes text-warning"></i> Variants ({{ product.variants.count }})</h5>
-                </div>
-                <div class="card-body">
-                    {% if product.variants.exists %}
-                        {% for variant in product.variants.all %}
-                            <div class="variant-detail-card">
-                                <div class="variant-header">
-                                    <div>
-                                        <span class="variant-name">
-                                            {% if variant.name %}
-                                                {{ variant.name }}
-                                            {% else %}
-                                                {% if variant.color and variant.size %}
-                                                    {{ variant.color }} / {{ variant.size }}
-                                                {% elif variant.color %}
-                                                    {{ variant.color }}
-                                                {% elif variant.size %}
-                                                    {{ variant.size }}
-                                                {% else %}
-                                                    Variant
-                                                {% endif %}
-                                            {% endif %}
-                                        </span>
-                                        <span class="variant-sku">({{ variant.sku }})</span>
-                                    </div>
-                                    <div>
-                                        <!-- ============================================ -->
-                                        <!-- VARIANT OFFER TAG                          -->
-                                        <!-- ============================================ -->
-                                        {% if variant.offer_name and variant.offer_name != "Product Discount" %}
-                                            <span class="offer-badge me-1">
-                                                <i class="fas fa-gift"></i> {{ variant.offer_name|truncatechars:10 }}
-                                            </span>
-                                        {% endif %}
-                                        {% if variant.is_active %}
-                                            <span class="badge bg-success">Active</span>
-                                        {% else %}
-                                            <span class="badge bg-secondary">Inactive</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <!-- ============================================ -->
-                                        <!-- VARIANT PRICE WITH OFFER DISPLAY            -->
-                                        <!-- ============================================ -->
-                                        <div class="variant-price">
-                                            <div class="price-breakdown">
-                                                <span class="original">₹{{ variant.price|floatformat:2 }}</span>
-                                                
-                                                {% if variant.offer_name and variant.offer_name != "Product Discount" %}
-                                                    <!-- Variant has Offer Applied -->
-                                                    <span class="discounted">₹{{ variant.offer_price|floatformat:2 }}</span>
-                                                    <span class="offer-tag">
-                                                        <i class="fas fa-gift"></i> Offer
-                                                    </span>
-                                                    <span class="savings-text">
-                                                        Save ₹{{ variant.total_savings|floatformat:2 }}
-                                                    </span>
-                                                {% elif variant.discount_percentage > 0 %}
-                                                    <!-- Variant has Product Discount Only -->
-                                                    <span class="discounted">₹{{ variant.final_price|floatformat:2 }}</span>
-                                                    <span class="product-discount-tag">
-                                                        <i class="fas fa-tags"></i> {{ variant.discount_percentage|floatformat:0 }}%
-                                                    </span>
-                                                {% else %}
-                                                    <!-- No Discount -->
-                                                    <span class="discounted">₹{{ variant.price|floatformat:2 }}</span>
-                                                    <span class="text-muted">No discount</span>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Variant Offer Name (if applied) -->
-                                        {% if variant.offer_name and variant.offer_name != "Product Discount" %}
-                                            <div class="variant-offer mt-1">
-                                                <i class="fas fa-tag"></i> {{ variant.offer_name }}
-                                            </div>
-                                        {% endif %}
-                                        
-                                        <div class="variant-stock mt-1">
-                                            Stock: 
-                                            {% if variant.is_out_of_stock %}
-                                                <span class="text-danger fw-bold">Out of Stock</span>
-                                            {% elif variant.is_low_stock %}
-                                                <span class="text-warning fw-bold">{{ variant.stock_quantity }} left</span>
-                                                <span class="text-muted ms-1">(threshold: {{ variant.low_stock_threshold }})</span>
-                                            {% else %}
-                                                <span class="text-success fw-bold">{{ variant.stock_quantity }}</span>
-                                            {% endif %}
-                                        </div>
-                                        <div class="variant-warranty mt-1">
-                                            <i class="fas fa-shield-alt"></i> Warranty: {{ variant.warranty_months }} months
-                                            {% if variant.warranty_details %}
-                                                <span class="text-muted ms-1" title="{{ variant.warranty_details }}">
-                                                    <i class="fas fa-info-circle"></i>
-                                                </span>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="variant-attributes">
-                                            {% if variant.color %}
-                                                <span class="badge bg-light text-dark border">{{ variant.color }}</span>
-                                            {% endif %}
-                                            {% if variant.size %}
-                                                <span class="badge bg-light text-dark border">{{ variant.size }}</span>
-                                            {% endif %}
-                                            {% if variant.material %}
-                                                <span class="badge bg-light text-dark border">{{ variant.material }}</span>
-                                            {% endif %}
-                                            {% if variant.weight %}
-                                                <span class="badge bg-light text-dark border">{{ variant.weight }} kg</span>
-                                            {% endif %}
-                                        </div>
-                                        {% if variant.description or variant.specifications or variant.features %}
-                                            <div class="mt-2">
-                                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#variant-desc-{{ variant.id }}">
-                                                    <i class="fas fa-chevron-down"></i> Show Details
-                                                </button>
-                                                <div class="collapse mt-2" id="variant-desc-{{ variant.id }}">
-                                                    <div class="p-2 bg-light rounded">
-                                                        {% if variant.description %}
-                                                            <div><strong>Description:</strong> {{ variant.description|safe }}</div>
-                                                        {% endif %}
-                                                        {% if variant.specifications %}
-                                                            <div class="mt-1"><strong>Specifications:</strong> {{ variant.specifications|safe }}</div>
-                                                        {% endif %}
-                                                        {% if variant.features %}
-                                                            <div class="mt-1"><strong>Features:</strong> {{ variant.features|safe }}</div>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="variant-images">
-                                            {% if variant.images.exists %}
-                                                {% for img in variant.images.all|slice:":4" %}
-                                                    <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:variant.sku }}" title="Variant image">
-                                                {% endfor %}
-                                                {% if variant.images.count > 4 %}
-                                                    <span class="badge bg-secondary d-flex align-items-center justify-content-center" style="width:60px;height:60px;border-radius:4px;">
-                                                        +{{ variant.images.count|add:"-4" }}
-                                                    </span>
-                                                {% endif %}
-                                            {% else %}
-                                                <div class="text-muted" style="font-size:12px;">No images</div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="text-muted text-center py-3">No variants for this product.</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Reviews -->
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-star text-warning"></i> Reviews ({{ product.total_reviews }})</h5>
-                </div>
-                <div class="card-body">
-                    {% if product.reviews.exists %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>User</th>
-                                        <th>Rating</th>
-                                        <th>Title</th>
-                                        <th>Review</th>
-                                        <th>Verified</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for review in product.reviews.all|slice:":10" %}
-                                    <tr>
-                                        <td>{{ review.user.full_name }}</td>
-                                        <td>
-                                            <span class="text-warning">★ {{ review.rating }}</span>
-                                            <span class="text-muted small">{{ review.rating_stars }}</span>
-                                        </td>
-                                        <td>{{ review.title|default:"-" }}</td>
-                                        <td>{{ review.review_text|truncatechars:30 }}</td>
-                                        <td>
-                                            {% if review.is_verified_purchase %}
-                                                <span class="badge bg-success">Yes</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">No</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if review.is_approved %}
-                                                <span class="badge bg-success">Approved</span>
-                                            {% else %}
-                                                <span class="badge bg-warning text-dark">Pending</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <div class="btn-group">
-                                                {% if not review.is_approved %}
-                                                    <a href="{% url 'Ecom:review_approve' review.id %}" class="btn btn-sm btn-success" title="Approve">
-                                                        <i class="fas fa-check"></i>
-                                                    </a>
-                                                {% endif %}
-                                                <a href="{% url 'Ecom:review_delete' review.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')" title="Delete">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
+                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;font-size:13px;">
+                                <div><strong>Price:</strong> ₹{{ variant.price|floatformat:2 }}</div>
+                                <div><strong>Stock:</strong> {{ variant.stock_quantity }}</div>
+                                <div><strong>Warranty:</strong> {{ variant.warranty_months }} months</div>
+                                {% if variant.color %}<div><strong>Color:</strong> {{ variant.color }}</div>{% endif %}
+                                {% if variant.size %}<div><strong>Size:</strong> {{ variant.size }}</div>{% endif %}
+                                {% if variant.material %}<div><strong>Material:</strong> {{ variant.material }}</div>{% endif %}
+                                {% if variant.weight %}<div><strong>Weight:</strong> {{ variant.weight }} kg</div>{% endif %}
+                            </div>
+                            {% if variant.images.exists %}
+                                <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+                                    {% for img in variant.images.all %}
+                                        <img src="{{ img.image.url }}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid var(--border);">
                                     {% endfor %}
-                                </tbody>
-                            </table>
+                                </div>
+                            {% endif %}
                         </div>
-                        {% if product.reviews.count > 10 %}
-                            <a href="{% url 'Ecom:review_list' %}" class="btn btn-sm btn-info">View All Reviews</a>
-                        {% endif %}
-                    {% else %}
-                        <p class="text-muted text-center py-3">No reviews yet.</p>
-                    {% endif %}
-                </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="not-specified">No variants available.</p>
+                {% endif %}
             </div>
         </div>
 
         <!-- ============================================ -->
-        <!-- SIDEBAR (Right Column)                      -->
+        <!-- REVIEWS TAB                                  -->
         <!-- ============================================ -->
-        <div class="col-md-4">
-            
-            <!-- Statistics -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-bar text-primary"></i> Statistics</h5>
-                </div>
-                <div class="card-body">
-                    <div class="stats-card primary">
-                        <div class="label">Average Rating</div>
-                        <div class="value">
-                            {% if product.average_rating > 0 %}
-                                ★ {{ product.average_rating }}
-                            {% else %}
-                                No ratings
-                            {% endif %}
+        <div class="tab-content" id="tab-reviews">
+            <div class="tab-body">
+                {% if product.reviews.exists %}
+                    <!-- Review Summary Stats -->
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));gap:12px;margin-bottom:20px;">
+                        <div style="background:var(--bg);padding:12px 16px;border-radius:var(--radius-xs);text-align:center;">
+                            <div style="font-size:12px;color:var(--text-muted);">Average Rating</div>
+                            <div style="font-size:24px;font-weight:800;color:var(--primary);">
+                                {{ product.average_rating|floatformat:1 }} 
+                                <span style="font-size:14px;color:#f59e0b;">★</span>
+                            </div>
+                        </div>
+                        <div style="background:var(--bg);padding:12px 16px;border-radius:var(--radius-xs);text-align:center;">
+                            <div style="font-size:12px;color:var(--text-muted);">Total Reviews</div>
+                            <div style="font-size:24px;font-weight:800;color:var(--text);">{{ product.total_reviews }}</div>
+                        </div>
+                        <div style="background:var(--bg);padding:12px 16px;border-radius:var(--radius-xs);text-align:center;">
+                            <div style="font-size:12px;color:var(--text-muted);">Verified Purchases</div>
+                            <div style="font-size:24px;font-weight:800;color:var(--success);">
+                                {{ product.reviews.all|length|yesno:"0" }}
+                            </div>
                         </div>
                     </div>
-                    <div class="stats-card info">
-                        <div class="label">Total Reviews</div>
-                        <div class="value">{{ product.total_reviews }}</div>
-                    </div>
-                    <div class="stats-card success">
-                        <div class="label">Total Variants</div>
-                        <div class="value">{{ product.variants.count }}</div>
-                    </div>
-                    <div class="stats-card warning">
-                        <div class="label">Total Images</div>
-                        <div class="value">{{ product.images.count }}</div>
-                    </div>
-                    <!-- Offer Stats -->
-                    <div class="stats-card" style="border-color: #ff6b6b;">
-                        <div class="label">Offer Status</div>
-                        <div class="value">
-                            {% if product.offer_name and product.offer_name != "Product Discount" %}
-                                <span class="text-success">
-                                    <i class="fas fa-gift"></i> {{ product.offer_name }}
-                                    <small class="text-muted">(Save ₹{{ product.total_savings|floatformat:2 }})</small>
-                                </span>
-                            {% elif product.discount_percentage > 0 %}
-                                <span class="text-warning">
-                                    <i class="fas fa-tags"></i> {{ product.discount_percentage|floatformat:0 }}% OFF
-                                </span>
-                            {% else %}
-                                <span class="text-muted">No discount</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="stats-card {% if product.is_out_of_stock %}danger{% elif product.is_low_stock %}warning{% else %}success{% endif %}">
-                        <div class="label">Stock Status</div>
-                        <div class="value">
-                            {% if product.is_out_of_stock %}
-                                <span class="text-danger">Out of Stock</span>
-                            {% elif product.is_low_stock %}
-                                <span class="text-warning">Low Stock ({{ product.stock_quantity }})</span>
-                            {% else %}
-                                <span class="text-success">In Stock ({{ product.stock_quantity }})</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Quick Actions -->
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-cog text-primary"></i> Quick Actions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'Ecom:product_smart_edit' product.id %}" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> Edit Product
-                        </a>
-                        <a href="{% url 'Ecom:product_delete' product.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this product?')">
-                            <i class="fas fa-trash"></i> Delete Product
-                        </a>
-                        <a href="{% url 'Ecom:product_detail' product.id %}" class="btn btn-info" target="_blank">
-                            <i class="fas fa-eye"></i> View on Store
-                        </a>
-                        <button class="btn btn-outline-secondary" onclick="window.print()">
-                            <i class="fas fa-print"></i> Print Details
-                        </button>
+                    <!-- Reviews Table -->
+                    <div style="overflow-x:auto;">
+                        <table class="reviews-table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Rating</th>
+                                    <th>Title</th>
+                                    <th>Review</th>
+                                    <th>Verified</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for review in product.reviews.all|slice:":20" %}
+                                <tr>
+                                    <td>
+                                        <div style="display:flex;align-items:center;gap:8px;">
+                                            <div class="user-avatar">
+                                                {{ review.user.first_name|make_list|first|default:"U" }}
+                                            </div>
+                                            <div>
+                                                <div style="font-weight:500;font-size:13px;">{{ review.user.full_name }}</div>
+                                                <div style="font-size:10px;color:var(--text-muted);">{{ review.created_at|date:"M d, Y" }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="display:flex;align-items:center;gap:4px;">
+                                            <span class="rating-stars">★</span>
+                                            <span style="font-weight:600;">{{ review.rating }}</span>
+                                            <span style="font-size:10px;color:var(--text-muted);">/ 5</span>
+                                        </div>
+                                    </td>
+                                    <td style="font-weight:500;font-size:13px;">{{ review.title|default:"-" }}</td>
+                                    <td>
+                                        <div class="review-text" title="{{ review.review_text }}">
+                                            {{ review.review_text|truncatechars:60 }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if review.is_verified_purchase %}
+                                            <span class="badge-verified"><i class="fas fa-check"></i> Verified</span>
+                                        {% else %}
+                                            <span style="color:var(--text-muted);font-size:11px;">Unverified</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if review.is_approved %}
+                                            <span class="badge-approved"><i class="fas fa-check-circle"></i> Approved</span>
+                                        {% else %}
+                                            <span class="badge-pending"><i class="fas fa-clock"></i> Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div style="display:flex;gap:4px;">
+                                            {% if not review.is_approved %}
+                                                <a href="{% url 'Ecom:review_approve' review.id %}" class="btn-sm btn-success-sm" title="Approve Review">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                            {% endif %}
+                                            <a href="{% url 'Ecom:review_delete' review.id %}" class="btn-sm btn-danger-sm" onclick="return confirm('Are you sure you want to delete this review?')" title="Delete Review">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-            </div>
 
-            <!-- Quick Info -->
-            <div class="card shadow-sm mt-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-clock text-muted"></i> Quick Info</h5>
-                </div>
-                <div class="card-body">
-                    <p><strong>Created:</strong> {{ product.created_at|date:"M d, Y H:i" }}</p>
-                    <p><strong>Last Updated:</strong> {{ product.updated_at|date:"M d, Y H:i" }}</p>
-                    <p><strong>Status:</strong> 
-                        {% if product.is_active %}
-                            <span class="badge bg-success">Active</span>
-                        {% else %}
-                            <span class="badge bg-secondary">Inactive</span>
-                        {% endif %}
-                    </p>
-                    <p>
-                        {% if product.is_featured %}<span class="badge bg-warning">Featured</span>{% endif %}
-                        {% if product.is_new %}<span class="badge bg-info">New</span>{% endif %}
-                        {% if product.is_best_seller %}<span class="badge bg-danger">Best Seller</span>{% endif %}
-                    </p>
-                    <!-- Offer Info -->
-                    {% if product.offer_name and product.offer_name != "Product Discount" %}
-                        <p>
-                            <span class="badge" style="background:#ff6b6b;color:white;">
-                                <i class="fas fa-gift"></i> {{ product.offer_name }}
-                            </span>
-                        </p>
+                    {% if product.reviews.count > 20 %}
+                        <div style="text-align:center;margin-top:15px;">
+                            <a href="{% url 'Ecom:review_list' %}" class="btn" style="background:var(--primary-gradient);color:white;padding:8px 24px;border-radius:var(--radius-xs);text-decoration:none;font-weight:600;font-size:13px;">
+                                <i class="fas fa-eye"></i> View All {{ product.reviews.count }} Reviews
+                            </a>
+                        </div>
                     {% endif %}
-                </div>
+                {% else %}
+                    <div style="text-align:center;padding:40px 20px;color:var(--text-muted);">
+                        <i class="fas fa-star" style="font-size:48px;opacity:0.3;display:block;margin-bottom:12px;"></i>
+                        <p style="font-size:16px;font-weight:500;">No reviews yet</p>
+                        <p style="font-size:14px;">This product hasn't received any reviews. Encourage customers to leave feedback!</p>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+<!-- =====================================================
+JAVASCRIPT
+===================================================== -->
+<script>
+// ============================================
+// VARIANT DATA - INCLUDING ALL IMAGES
+// ============================================
+const variantData = {
+    {% for variant in product.variants.all %}
+    {{ variant.id }}: {
+        name: "{{ variant.name|default:'Variant'|escapejs }}",
+        sku: "{{ variant.sku|escapejs }}",
+        short_description: "{% if variant.short_description %}{{ variant.short_description|escapejs }}{% else %}{{ product.short_description|default:'No short description available.'|escapejs }}{% endif %}",
+        color: "{{ variant.color|default:'Not specified'|escapejs }}",
+        size: "{{ variant.size|default:'Not specified'|escapejs }}",
+        material: "{{ variant.material|default:'Not specified'|escapejs }}",
+        weight: "{% if variant.weight %}{{ variant.weight }} kg{% else %}Not specified{% endif %}",
+        dimensions: "{% if variant.dimensions %}{{ variant.dimensions }}{% else %}Not specified{% endif %}",
+        price: "{{ variant.offer_price|floatformat:2 }}",
+        original_price: "{{ variant.price|floatformat:2 }}",
+        has_discount: "{% if variant.price != variant.offer_price %}true{% else %}false{% endif %}",
+        stock: "{{ variant.stock_quantity }}",
+        stock_status: "{% if variant.is_out_of_stock %}out{% elif variant.is_low_stock %}low{% else %}in{% endif %}",
+        stock_text: "{% if variant.is_out_of_stock %}Out of Stock{% elif variant.is_low_stock %}Low Stock ({{ variant.stock_quantity }}){% else %}In Stock ({{ variant.stock_quantity }}){% endif %}",
+        warranty: "{{ variant.warranty_months }} months",
+        category: "{{ product.category.name|escapejs }}",
+        subcategory: "{{ product.subcategory.name|default:'Not specified'|escapejs }}",
+        brand: "{{ variant.brand|default:product.brand|default:'Not specified'|escapejs }}",
+        is_active: "{{ variant.is_active|yesno:'true,false' }}",
+        // ALL VARIANT IMAGES
+        images: [
+            {% for img in variant.images.all %}
+            "{{ img.image.url }}",
+            {% endfor %}
+        ],
+        description: "{% if variant.description %}{{ variant.description|escapejs }}{% endif %}",
+        specifications: "{% if variant.specifications %}{{ variant.specifications|escapejs }}{% endif %}",
+        features: "{% if variant.features %}{{ variant.features|escapejs }}{% endif %}",
+        warranty_details: "{% if variant.warranty_details %}{{ variant.warranty_details|escapejs }}{% endif %}"
+    },
+    {% endfor %}
+};
+
+// ============================================
+// PRODUCT DATA
+// ============================================
+const productData = {
+    name: "{{ product.name|escapejs }}",
+    sku: "{{ product.sku|escapejs }}",
+    short_description: "{{ product.short_description|default:'No short description available.'|escapejs }}",
+    category: "{{ product.category.name|escapejs }}",
+    subcategory: "{{ product.subcategory.name|default:'Not specified'|escapejs }}",
+    brand: "{{ product.brand|default:'Not specified'|escapejs }}",
+    color: "{{ product.color|default:'Not specified'|escapejs }}",
+    size: "{{ product.size|default:'Not specified'|escapejs }}",
+    material: "{{ product.material|default:'Not specified'|escapejs }}",
+    weight: "{% if product.weight %}{{ product.weight }} kg{% else %}Not specified{% endif %}",
+    dimensions: "{{ product.dimensions|default:'Not specified'|escapejs }}",
+    price: "{{ product.price|floatformat:2 }}",
+    offer_price: "{{ product.offer_price|floatformat:2 }}",
+    original_price: "{{ product.price|floatformat:2 }}",
+    has_discount: "{% if product.offer_name and product.offer_name != 'Product Discount' %}true{% elif product.discount_percentage > 0 %}true{% else %}false{% endif %}",
+    stock: "{{ product.stock_quantity }}",
+    stock_status: "{% if product.is_out_of_stock %}out{% elif product.is_low_stock %}low{% else %}in{% endif %}",
+    stock_text: "{% if product.is_out_of_stock %}Out of Stock{% elif product.is_low_stock %}Low Stock ({{ product.stock_quantity }}){% else %}In Stock ({{ product.stock_quantity }}){% endif %}",
+    warranty: "{{ product.warranty_months }} months",
+    is_active: "{{ product.is_active|yesno:'true,false' }}",
+    is_featured: "{{ product.is_featured|yesno:'true,false' }}",
+    is_new: "{{ product.is_new|yesno:'true,false' }}",
+    is_best_seller: "{{ product.is_best_seller|yesno:'true,false' }}",
+    // PRODUCT IMAGES
+    images: [
+        {% for img in product.images.all %}
+        "{{ img.image.url }}",
+        {% endfor %}
+    ],
+    description: "{% if product.description %}{{ product.description|escapejs }}{% endif %}",
+    specifications: "{% if product.specifications %}{{ product.specifications|escapejs }}{% endif %}",
+    features: "{% if product.features %}{{ product.features|escapejs }}{% endif %}",
+    warranty_details: "{% if product.warranty_details %}{{ product.warranty_details|escapejs }}{% endif %}"
+};
+
+// ============================================
+// SHOW PRODUCT DETAILS (Main Product)
+// ============================================
+function showProductDetails(imageUrl, element) {
+    // Update main image
+    const mainImage = document.getElementById('mainImage');
+    if (mainImage && imageUrl) {
+        mainImage.src = imageUrl;
+    }
+    
+    // Update active thumb - Product images
+    const thumbs = document.querySelectorAll('.image-thumbs .thumb');
+    thumbs.forEach(thumb => thumb.classList.remove('active'));
+    if (element) {
+        element.classList.add('active');
+    }
+    
+    // Remove active from variant thumbs including main
+    const variantThumbs = document.querySelectorAll('.variant-thumbs .thumb');
+    variantThumbs.forEach(thumb => thumb.classList.remove('active'));
+    
+    // Update Product Name
+    document.getElementById('productName').textContent = productData.name;
+    document.getElementById('headerProductName').textContent = productData.name;
+    
+    // Update SKU
+    document.getElementById('productSku').textContent = 'SKU: ' + productData.sku;
+    
+    // Update Short Description
+    document.getElementById('shortDescText').textContent = productData.short_description;
+    
+    // Update Price
+    const originalEl = document.getElementById('originalPrice');
+    const currentEl = document.getElementById('currentPrice');
+    if (productData.has_discount === 'true') {
+        originalEl.textContent = '₹' + productData.original_price;
+        currentEl.textContent = '₹' + productData.offer_price;
+    } else {
+        originalEl.textContent = '₹' + productData.price;
+        currentEl.textContent = '₹' + productData.price;
+    }
+    
+    // Update Details Grid
+    document.getElementById('detailCategory').textContent = productData.category;
+    document.getElementById('detailSubcategory').textContent = productData.subcategory;
+    document.getElementById('detailBrand').textContent = productData.brand;
+    document.getElementById('detailColor').textContent = productData.color;
+    document.getElementById('detailSize').textContent = productData.size;
+    document.getElementById('detailMaterial').textContent = productData.material;
+    document.getElementById('detailWeight').textContent = productData.weight;
+    document.getElementById('detailDimensions').textContent = productData.dimensions;
+    document.getElementById('detailWarranty').textContent = productData.warranty;
+    
+    // Update Stock
+    const stockValue = document.getElementById('stockValue');
+    if (productData.stock_status === 'in') {
+        stockValue.innerHTML = '<span style="color:var(--success);font-weight:600;">In Stock (' + productData.stock + ')</span>';
+    } else if (productData.stock_status === 'low') {
+        stockValue.innerHTML = '<span style="color:var(--warning);font-weight:600;">Low Stock (' + productData.stock + ')</span>';
+    } else {
+        stockValue.innerHTML = '<span style="color:var(--danger);font-weight:600;">Out of Stock (0)</span>';
+    }
+    
+    // Update Status
+    let statusHtml = '';
+    if (productData.is_active === 'true') {
+        statusHtml = '<span style="color:var(--success);font-weight:600;"><i class="fas fa-check-circle"></i> Active</span>';
+    } else {
+        statusHtml = '<span style="color:var(--text-muted);font-weight:600;"><i class="fas fa-circle"></i> Inactive</span>';
+    }
+    if (productData.is_featured === 'true') {
+        statusHtml += ' <span class="badge badge-featured" style="font-size:9px;padding:2px 8px;margin-left:6px;">Featured</span>';
+    }
+    if (productData.is_new === 'true') {
+        statusHtml += ' <span class="badge badge-new" style="font-size:9px;padding:2px 8px;">New</span>';
+    }
+    if (productData.is_best_seller === 'true') {
+        statusHtml += ' <span class="badge badge-bestseller" style="font-size:9px;padding:2px 8px;">Best Seller</span>';
+    }
+    document.getElementById('detailStatus').innerHTML = statusHtml;
+    
+    // Update Tabs
+    document.getElementById('tabDescription').innerHTML = productData.description || '<p class="not-specified">No description available.</p>';
+    document.getElementById('tabSpecifications').innerHTML = productData.specifications || '<p class="not-specified">No specifications available.</p>';
+    document.getElementById('tabFeatures').innerHTML = productData.features || '<p class="not-specified">No features available.</p>';
+    document.getElementById('warrantyPeriod').textContent = productData.warranty;
+    document.getElementById('tabWarranty').innerHTML = (productData.warranty_details ? productData.warranty_details : '<p class="not-specified">No warranty details available.</p>');
+}
+
+// ============================================
+// RESTORE PRODUCT GALLERY (Main Product)
+// ============================================
+function restoreProductGallery() {
+    const mainImage = document.getElementById('mainImage');
+    const galleryContainer = document.getElementById('thumbGallery');
+    
+    // Clear existing
+    galleryContainer.innerHTML = '';
+    
+    // Restore product images
+    if (productData.images && productData.images.length > 0) {
+        productData.images.forEach((imgUrl, index) => {
+            const thumbDiv = document.createElement('div');
+            thumbDiv.className = `thumb ${index === 0 ? 'active' : ''}`;
+            thumbDiv.onclick = function() {
+                showProductDetails(imgUrl, this);
+            };
+            
+            const img = document.createElement('img');
+            img.src = imgUrl;
+            img.alt = productData.name;
+            thumbDiv.appendChild(img);
+            galleryContainer.appendChild(thumbDiv);
+        });
+        
+        // Set main image to first product image
+        mainImage.src = productData.images[0];
+    } else {
+        // If no images, show placeholder
+        const thumbDiv = document.createElement('div');
+        thumbDiv.className = 'thumb';
+        const placeholder = document.createElement('div');
+        placeholder.className = 'thumb-placeholder';
+        placeholder.innerHTML = '<i class="fas fa-image"></i>';
+        thumbDiv.appendChild(placeholder);
+        galleryContainer.appendChild(thumbDiv);
+        mainImage.src = '#';
+    }
+    
+    // Remove active from all variant thumbs
+    const variantThumbs = document.querySelectorAll('.variant-thumbs .thumb');
+    variantThumbs.forEach(thumb => thumb.classList.remove('active'));
+    
+    // Remove active from product thumbs
+    const productThumbs = document.querySelectorAll('.image-thumbs .thumb');
+    productThumbs.forEach(thumb => thumb.classList.remove('active'));
+    if (productThumbs.length > 0) {
+        productThumbs[0].classList.add('active');
+    }
+}
+
+// ============================================
+// SHOW MAIN PRODUCT
+// ============================================
+function showMainProduct() {
+    // Restore the product gallery
+    restoreProductGallery();
+    
+    // Update all product details
+    // Product Name
+    document.getElementById('productName').textContent = productData.name;
+    document.getElementById('headerProductName').textContent = productData.name;
+    
+    // SKU
+    document.getElementById('productSku').textContent = 'SKU: ' + productData.sku;
+    
+    // Short Description
+    document.getElementById('shortDescText').textContent = productData.short_description;
+    
+    // Price
+    const originalEl = document.getElementById('originalPrice');
+    const currentEl = document.getElementById('currentPrice');
+    if (productData.has_discount === 'true') {
+        originalEl.textContent = '₹' + productData.original_price;
+        currentEl.textContent = '₹' + productData.offer_price;
+    } else {
+        originalEl.textContent = '₹' + productData.price;
+        currentEl.textContent = '₹' + productData.price;
+    }
+    
+    // Details Grid
+    document.getElementById('detailCategory').textContent = productData.category;
+    document.getElementById('detailSubcategory').textContent = productData.subcategory;
+    document.getElementById('detailBrand').textContent = productData.brand;
+    document.getElementById('detailColor').textContent = productData.color;
+    document.getElementById('detailSize').textContent = productData.size;
+    document.getElementById('detailMaterial').textContent = productData.material;
+    document.getElementById('detailWeight').textContent = productData.weight;
+    document.getElementById('detailDimensions').textContent = productData.dimensions;
+    document.getElementById('detailWarranty').textContent = productData.warranty;
+    
+    // Stock
+    const stockValue = document.getElementById('stockValue');
+    if (productData.stock_status === 'in') {
+        stockValue.innerHTML = '<span style="color:var(--success);font-weight:600;">In Stock (' + productData.stock + ')</span>';
+    } else if (productData.stock_status === 'low') {
+        stockValue.innerHTML = '<span style="color:var(--warning);font-weight:600;">Low Stock (' + productData.stock + ')</span>';
+    } else {
+        stockValue.innerHTML = '<span style="color:var(--danger);font-weight:600;">Out of Stock (0)</span>';
+    }
+    
+    // Status
+    let statusHtml = '';
+    if (productData.is_active === 'true') {
+        statusHtml = '<span style="color:var(--success);font-weight:600;"><i class="fas fa-check-circle"></i> Active</span>';
+    } else {
+        statusHtml = '<span style="color:var(--text-muted);font-weight:600;"><i class="fas fa-circle"></i> Inactive</span>';
+    }
+    if (productData.is_featured === 'true') {
+        statusHtml += ' <span class="badge badge-featured" style="font-size:9px;padding:2px 8px;margin-left:6px;">Featured</span>';
+    }
+    if (productData.is_new === 'true') {
+        statusHtml += ' <span class="badge badge-new" style="font-size:9px;padding:2px 8px;">New</span>';
+    }
+    if (productData.is_best_seller === 'true') {
+        statusHtml += ' <span class="badge badge-bestseller" style="font-size:9px;padding:2px 8px;">Best Seller</span>';
+    }
+    document.getElementById('detailStatus').innerHTML = statusHtml;
+    
+    // Tabs
+    document.getElementById('tabDescription').innerHTML = productData.description || '<p class="not-specified">No description available.</p>';
+    document.getElementById('tabSpecifications').innerHTML = productData.specifications || '<p class="not-specified">No specifications available.</p>';
+    document.getElementById('tabFeatures').innerHTML = productData.features || '<p class="not-specified">No features available.</p>';
+    document.getElementById('warrantyPeriod').textContent = productData.warranty;
+    document.getElementById('tabWarranty').innerHTML = (productData.warranty_details ? productData.warranty_details : '<p class="not-specified">No warranty details available.</p>');
+}
+
+// ============================================
+// SELECT VARIANT - REPLACES GALLERY IMAGES
+// ============================================
+function selectVariant(variantId) {
+    const data = variantData[variantId];
+    if (!data) return;
+    
+    // ===== GET VARIANT IMAGES FROM DATA =====
+    const variantImages = data.images || [];
+    
+    // ===== REPLACE MAIN IMAGE GALLERY =====
+    const mainImage = document.getElementById('mainImage');
+    const galleryContainer = document.getElementById('thumbGallery');
+    
+    // Clear existing product images from gallery
+    galleryContainer.innerHTML = '';
+    
+    // Add variant images to gallery
+    if (variantImages.length > 0) {
+        variantImages.forEach((imgUrl, index) => {
+            const thumbDiv = document.createElement('div');
+            thumbDiv.className = `thumb ${index === 0 ? 'active' : ''}`;
+            thumbDiv.onclick = function() {
+                showProductDetails(imgUrl, this);
+            };
+            
+            const img = document.createElement('img');
+            img.src = imgUrl;
+            img.alt = data.name || 'Variant';
+            thumbDiv.appendChild(img);
+            galleryContainer.appendChild(thumbDiv);
+        });
+        
+        // Set main image to first variant image
+        mainImage.src = variantImages[0];
+    } else {
+        // If no images, show placeholder
+        const thumbDiv = document.createElement('div');
+        thumbDiv.className = 'thumb';
+        const placeholder = document.createElement('div');
+        placeholder.className = 'thumb-placeholder';
+        placeholder.innerHTML = '<i class="fas fa-image"></i>';
+        thumbDiv.appendChild(placeholder);
+        galleryContainer.appendChild(thumbDiv);
+        mainImage.src = '#';
+    }
+    
+    // ===== UPDATE ACTIVE STATES =====
+    // Remove active from all variant thumbs
+    const variantThumbs = document.querySelectorAll('.variant-thumbs .thumb');
+    variantThumbs.forEach(thumb => thumb.classList.remove('active'));
+    
+    // Add active to selected variant
+    const variantThumb = document.querySelector(`.variant-thumbs .thumb[data-variant-id="${variantId}"]`);
+    if (variantThumb) {
+        variantThumb.classList.add('active');
+    }
+    
+    // ===== UPDATE PRODUCT DETAILS WITH VARIANT DATA =====
+    // Update Product Name
+    const variantName = data.name !== 'Variant' ? data.name : '';
+    if (variantName) {
+        document.getElementById('productName').textContent = variantName;
+        document.getElementById('headerProductName').textContent = variantName + ' - ' + productData.name;
+    } else {
+        document.getElementById('productName').textContent = productData.name;
+        document.getElementById('headerProductName').textContent = productData.name;
+    }
+    
+    // Update SKU
+    document.getElementById('productSku').textContent = 'SKU: ' + data.sku;
+    
+    // Update Short Description
+    document.getElementById('shortDescText').textContent = data.short_description;
+    
+    // Update Price
+    const originalEl = document.getElementById('originalPrice');
+    const currentEl = document.getElementById('currentPrice');
+    if (data.has_discount === 'true') {
+        originalEl.textContent = '₹' + data.original_price;
+        currentEl.textContent = '₹' + data.price;
+    } else {
+        originalEl.textContent = '₹' + data.price;
+        currentEl.textContent = '₹' + data.price;
+    }
+    
+    // Update Details Grid with Variant Data
+    document.getElementById('detailCategory').textContent = data.category;
+    document.getElementById('detailSubcategory').textContent = data.subcategory;
+    document.getElementById('detailBrand').textContent = data.brand;
+    document.getElementById('detailColor').textContent = data.color;
+    document.getElementById('detailSize').textContent = data.size;
+    document.getElementById('detailMaterial').textContent = data.material;
+    document.getElementById('detailWeight').textContent = data.weight;
+    document.getElementById('detailDimensions').textContent = data.dimensions || 'Not specified';
+    document.getElementById('detailWarranty').textContent = data.warranty;
+    
+    // Update Stock
+    const stockValue = document.getElementById('stockValue');
+    if (data.stock_status === 'in') {
+        stockValue.innerHTML = '<span style="color:var(--success);font-weight:600;">In Stock (' + data.stock + ')</span>';
+    } else if (data.stock_status === 'low') {
+        stockValue.innerHTML = '<span style="color:var(--warning);font-weight:600;">Low Stock (' + data.stock + ')</span>';
+    } else {
+        stockValue.innerHTML = '<span style="color:var(--danger);font-weight:600;">Out of Stock (0)</span>';
+    }
+    
+    // Update Status
+    let statusHtml = '';
+    if (data.is_active === 'true') {
+        statusHtml = '<span style="color:var(--success);font-weight:600;"><i class="fas fa-check-circle"></i> Active</span>';
+    } else {
+        statusHtml = '<span style="color:var(--text-muted);font-weight:600;"><i class="fas fa-circle"></i> Inactive</span>';
+    }
+    document.getElementById('detailStatus').innerHTML = statusHtml;
+    
+    // Update Tabs with Variant Data
+    document.getElementById('tabDescription').innerHTML = data.description || '<p class="not-specified">No description available.</p>';
+    document.getElementById('tabSpecifications').innerHTML = data.specifications || '<p class="not-specified">No specifications available.</p>';
+    document.getElementById('tabFeatures').innerHTML = data.features || '<p class="not-specified">No features available.</p>';
+    document.getElementById('warrantyPeriod').textContent = data.warranty;
+    document.getElementById('tabWarranty').innerHTML = data.warranty_details ? data.warranty_details : '<p class="not-specified">No warranty details available.</p>';
+}
+
+// ============================================
+// TAB SWITCHING
+// ============================================
+function switchTab(button, tabName) {
+    const allButtons = document.querySelectorAll('.bottom-tabs .tab-nav button');
+    allButtons.forEach(btn => btn.classList.remove('active'));
+    button.classList.add('active');
+    
+    const allTabs = document.querySelectorAll('.bottom-tabs .tab-content');
+    allTabs.forEach(tab => tab.classList.remove('active'));
+    
+    const targetTab = document.getElementById('tab-' + tabName);
+    if (targetTab) {
+        targetTab.classList.add('active');
+    }
+}
+
+// ============================================
+// AUTO-LOAD - Set first product image as active
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    const firstThumb = document.querySelector('.image-thumbs .thumb:first-child');
+    if (firstThumb) {
+        firstThumb.classList.add('active');
+    }
+});
+</script>
 {% endblock %}

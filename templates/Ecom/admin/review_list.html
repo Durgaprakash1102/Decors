@@ -1,79 +1,800 @@
-{% extends 'base.html' %}
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
-{% block title %}Reviews - MyStore{% endblock %}
+{% block title %}Reviews Management{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-star text-warning"></i> Product Reviews</h2>
-    </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Product</th>
-                            <th>User</th>
-                            <th>Rating</th>
-                            <th>Title</th>
-                            <th>Review</th>
-                            <th>Verified</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for review in reviews %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td><a href="{% url 'Ecom:product_admin_detail' review.product.id %}">{{ review.product.name }}</a></td>
-                            <td>{{ review.user.full_name }}</td>
-                            <td><span class="text-warning">★ {{ review.rating }}</span></td>
-                            <td>{{ review.title|default:"-" }}</td>
-                            <td>{{ review.review_text|truncatechars:50 }}</td>
-                            <td>
-                                {% if review.is_verified_purchase %}
-                                    <span class="badge bg-success">Yes</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">No</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if review.is_approved %}
-                                    <span class="badge bg-success">Approved</span>
-                                {% else %}
-                                    <span class="badge bg-warning text-dark">Pending</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <div class="btn-group">
-                                    {% if not review.is_approved %}
-                                        <a href="{% url 'Ecom:review_approve' review.id %}" class="btn btn-sm btn-success">
-                                            <i class="fas fa-check"></i>
-                                        </a>
-                                    {% endif %}
-                                    <a href="{% url 'Ecom:review_delete' review.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="9" class="text-center py-4">
-                                <i class="fas fa-star fa-3x text-muted"></i>
-                                <p class="mt-2">No reviews found.</p>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+<style>
+:root {
+    --primary: #6C1B2A;
+    --primary-light: #8B2336;
+    --primary-dark: #4A1220;
+    --secondary: #FFB800;
+    --bg: #F7F5F2;
+    --white: #FFFFFF;
+    --border: #E8E3DE;
+    --text: #1A1A1A;
+    --text-muted: #8A8580;
+    --success: #0EA776;
+    --danger: #E84C4C;
+    --warning: #F59E0B;
+    --shadow: 0 4px 20px rgba(0,0,0,0.06);
+    --shadow-hover: 0 8px 40px rgba(108,27,42,0.12);
+    --radius: 20px;
+    --radius-sm: 12px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+}
+
+/* ===== HEADER ===== */
+.review-header {
+    margin-bottom: 30px;
+}
+
+.review-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.review-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.review-header h1 i {
+    color: var(--secondary);
+    font-size: 30px;
+}
+
+.review-header h1 span {
+    background: var(--primary);
+    color: var(--white);
+    font-size: 14px;
+    padding: 4px 16px;
+    border-radius: 30px;
+    font-weight: 600;
+}
+
+.header-date {
+    background: var(--white);
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ===== STATS ===== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.stat-item {
+    background: var(--white);
+    padding: 22px 24px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--primary);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover::before {
+    opacity: 1;
+}
+
+.stat-item:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--primary);
+}
+
+.stat-item .stat-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.stat-item .stat-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-item .stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.stat-item .stat-icon.blue { background: rgba(108,27,42,0.08); color: var(--primary); }
+.stat-item .stat-icon.yellow { background: rgba(245,158,11,0.12); color: var(--warning); }
+.stat-item .stat-icon.green { background: rgba(14,167,118,0.12); color: var(--success); }
+.stat-item .stat-icon.red { background: rgba(232,76,76,0.12); color: var(--danger); }
+
+.stat-item .stat-number {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+    letter-spacing: -1px;
+}
+
+.stat-item .stat-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+}
+
+/* ===== FILTER BAR ===== */
+.filter-bar {
+    background: var(--white);
+    padding: 14px 20px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-bar .filter-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filter-btn {
+    padding: 7px 18px;
+    border-radius: 30px;
+    border: 2px solid var(--border);
+    background: var(--white);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.filter-btn.active {
+    background: var(--primary);
+    color: var(--white);
+    border-color: var(--primary);
+}
+
+.filter-btn .count-badge {
+    background: rgba(0,0,0,0.08);
+    padding: 0 10px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 20px;
+    text-align: center;
+}
+
+.filter-btn.active .count-badge {
+    background: rgba(255,255,255,0.2);
+}
+
+.filter-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+}
+
+.search-wrap {
+    flex: 1;
+    min-width: 180px;
+    position: relative;
+    margin-left: auto;
+}
+
+.search-wrap input {
+    width: 100%;
+    padding: 9px 16px 9px 40px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: var(--bg);
+    font-family: inherit;
+}
+
+.search-wrap input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--white);
+    box-shadow: 0 0 0 4px rgba(108,27,42,0.06);
+}
+
+.search-wrap i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+/* ===== TABLE ===== */
+.table-wrapper {
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+thead {
+    background: var(--primary);
+}
+
+thead th {
+    padding: 14px 18px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--white);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+tbody td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+tbody tr {
+    transition: all 0.2s ease;
+}
+
+tbody tr:hover {
+    background: rgba(108,27,42,0.02);
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Product */
+.product-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.product-link:hover {
+    text-decoration: underline;
+}
+
+/* Rating */
+.rating-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rating-box .stars {
+    color: var(--secondary);
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+.rating-box .num {
+    font-weight: 700;
+}
+
+/* Badges */
+.badge {
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-success {
+    background: rgba(14,167,118,0.12);
+    color: var(--success);
+}
+
+.badge-warning {
+    background: rgba(245,158,11,0.12);
+    color: var(--warning);
+}
+
+.badge-muted {
+    background: #f3f4f6;
+    color: var(--text-muted);
+}
+
+.badge-verified {
+    background: rgba(14,167,118,0.1);
+    color: var(--success);
+}
+
+.badge-unverified {
+    background: #f3f4f6;
+    color: var(--text-muted);
+}
+
+/* Actions */
+.action-group {
+    display: flex;
+    gap: 4px;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.action-btn.approve {
+    background: rgba(14,167,118,0.1);
+    color: var(--success);
+}
+
+.action-btn.approve:hover {
+    background: var(--success);
+    color: white;
+    transform: scale(1.1);
+}
+
+.action-btn.delete {
+    background: rgba(232,76,76,0.08);
+    color: var(--danger);
+}
+
+.action-btn.delete:hover {
+    background: var(--danger);
+    color: white;
+    transform: scale(1.1);
+}
+
+/* ===== EMPTY ===== */
+.empty-state {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.empty-state i {
+    font-size: 56px;
+    color: var(--border);
+    margin-bottom: 16px;
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+
+.empty-state p {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.no-results {
+    display: none;
+    padding: 40px 20px;
+    text-align: center;
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    border: 2px dashed var(--border);
+    margin-top: 16px;
+}
+
+.no-results i {
+    font-size: 40px;
+    color: var(--border);
+    margin-bottom: 12px;
+}
+
+.no-results h4 {
+    font-size: 18px;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.no-results p {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 992px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .review-header h1 {
+        font-size: 22px;
+    }
+    
+    .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-wrap {
+        margin-left: 0;
+    }
+    
+    .filter-divider {
+        display: none;
+    }
+    
+    table td, table th {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .stat-item {
+        padding: 16px 18px;
+    }
+    
+    .stat-item .stat-number {
+        font-size: 24px;
+    }
+    
+    .filter-btn {
+        padding: 5px 12px;
+        font-size: 12px;
+    }
+}
+</style>
+
+<!-- ===== HEADER ===== -->
+<div class="review-header">
+    <div class="review-header-top">
+        <h1>
+            <i class="fas fa-star"></i>
+            Reviews
+            <span>{{ total_count|default:0 }}</span>
+        </h1>
+        <div class="header-date">
+            <i class="far fa-calendar-alt"></i>
+            {% now "F d, Y" %}
         </div>
     </div>
 </div>
+
+<!-- ===== STATS ===== -->
+<div class="stats-grid">
+    <div class="stat-item" onclick="filterReviews('all')">
+        <div class="stat-top">
+            <span class="stat-label">All Reviews</span>
+            <div class="stat-icon blue">
+                <i class="fas fa-list"></i>
+            </div>
+        </div>
+        <div class="stat-number">{{ total_count|default:0 }}</div>
+        <div class="stat-sub">Total reviews</div>
+    </div>
+    
+    <div class="stat-item" onclick="filterReviews('pending')">
+        <div class="stat-top">
+            <span class="stat-label">Pending</span>
+            <div class="stat-icon yellow">
+                <i class="fas fa-clock"></i>
+            </div>
+        </div>
+        <div class="stat-number">{{ pending_count|default:0 }}</div>
+        <div class="stat-sub">Awaiting approval</div>
+    </div>
+    
+    <div class="stat-item" onclick="filterReviews('approved')">
+        <div class="stat-top">
+            <span class="stat-label">Approved</span>
+            <div class="stat-icon green">
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+        <div class="stat-number">{{ approved_count|default:0 }}</div>
+        <div class="stat-sub">Published</div>
+    </div>
+    
+    <div class="stat-item" onclick="filterReviews('rejected')">
+        <div class="stat-top">
+            <span class="stat-label">Rejected</span>
+            <div class="stat-icon red">
+                <i class="fas fa-times-circle"></i>
+            </div>
+        </div>
+        <div class="stat-number">{{ rejected_count|default:0 }}</div>
+        <div class="stat-sub">Hidden</div>
+    </div>
+</div>
+
+<!-- ===== FILTER ===== -->
+<div class="filter-bar">
+    <span class="filter-label">Filter:</span>
+    
+    <button class="filter-btn active" data-filter="all" onclick="filterReviews('all')">
+        All <span class="count-badge">{{ total_count|default:0 }}</span>
+    </button>
+    <button class="filter-btn" data-filter="pending" onclick="filterReviews('pending')">
+        Pending <span class="count-badge">{{ pending_count|default:0 }}</span>
+    </button>
+    <button class="filter-btn" data-filter="approved" onclick="filterReviews('approved')">
+        Approved <span class="count-badge">{{ approved_count|default:0 }}</span>
+    </button>
+    <button class="filter-btn" data-filter="rejected" onclick="filterReviews('rejected')">
+        Rejected <span class="count-badge">{{ rejected_count|default:0 }}</span>
+    </button>
+    
+    <div class="filter-divider"></div>
+    
+    <div class="search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search reviews..." onkeyup="filterReviews()">
+    </div>
+</div>
+
+<!-- ===== TABLE ===== -->
+<div class="table-wrapper">
+    <div class="table-scroll">
+        <table id="reviewsTable">
+            <thead>
+                <tr>
+                    <th style="width:50px;">#</th>
+                    <th>Product</th>
+                    <th>Customer</th>
+                    <th>Rating</th>
+                    <th>Title</th>
+                    <th>Review</th>
+                    <th>Verified</th>
+                    <th>Status</th>
+                    <th style="width:100px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for review in reviews %}
+                <tr data-status="{% if review.is_approved %}approved{% else %}pending{% endif %}"
+                    data-search="{{ review.user.full_name|lower }} {{ review.product.name|lower }} {{ review.review_text|lower }} {{ review.title|lower }}">
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <a href="{% url 'Ecom:product_admin_detail' review.product.id %}" class="product-link">
+                            {{ review.product.name }}
+                        </a>
+                    </td>
+                    <td>{{ review.user.full_name }}</td>
+                    <td>
+                        <div class="rating-box">
+                            <span class="stars">
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                                {% endfor %}
+                            </span>
+                            <span class="num">{{ review.rating }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        {% if review.title %}
+                            {{ review.title|truncatechars:30 }}
+                        {% else %}
+                            <span style="color:var(--text-muted);font-size:12px;">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if review.review_text %}
+                            {{ review.review_text }}
+                        {% else %}
+                            <span style="color:var(--text-muted);font-size:12px;">No text</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if review.is_verified_purchase %}
+                            <span class="badge badge-verified"><i class="fas fa-check"></i> Yes</span>
+                        {% else %}
+                            <span class="badge badge-unverified"><i class="fas fa-times"></i> No</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if review.is_approved %}
+                            <span class="badge badge-success"><i class="fas fa-check-circle"></i> Approved</span>
+                        {% else %}
+                            <span class="badge badge-warning"><i class="fas fa-clock"></i> Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-group">
+                            {% if not review.is_approved %}
+                                <a href="{% url 'Ecom:review_approve' review.id %}" 
+                                   class="action-btn approve" 
+                                   title="Approve"
+                                   onclick="return confirm('Approve this review?')">
+                                    <i class="fas fa-check"></i>
+                                </a>
+                            {% endif %}
+                            <a href="{% url 'Ecom:review_delete' review.id %}" 
+                               class="action-btn delete" 
+                               title="Delete"
+                               onclick="return confirm('Delete this review?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9">
+                        <div class="empty-state">
+                            <i class="fas fa-star"></i>
+                            <h3>No Reviews Yet</h3>
+                            <p>Reviews will appear here once customers start leaving feedback.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ===== NO RESULTS ===== -->
+<div class="no-results" id="noResults">
+    <i class="fas fa-search"></i>
+    <h4>No Matches Found</h4>
+    <p>Try adjusting your search or filter criteria.</p>
+</div>
+
+<script>
+function filterReviews(filterType) {
+    const searchInput = document.getElementById('searchInput').value.toLowerCase().trim();
+    
+    if (!filterType) {
+        const activeBtn = document.querySelector('.filter-btn.active');
+        filterType = activeBtn ? activeBtn.getAttribute('data-filter') : 'all';
+    } else {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        const targetBtn = document.querySelector(`[data-filter="${filterType}"]`);
+        if (targetBtn) targetBtn.classList.add('active');
+    }
+    
+    const rows = document.querySelectorAll('#reviewsTable tbody tr:not(:has(.empty-state))');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        const status = row.getAttribute('data-status');
+        const searchData = row.getAttribute('data-search') || '';
+        
+        let statusMatch = filterType === 'all' || status === filterType;
+        let searchMatch = true;
+        if (searchInput) {
+            searchMatch = searchData.includes(searchInput);
+        }
+        
+        if (statusMatch && searchMatch) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    const noResults = document.getElementById('noResults');
+    const emptyState = document.querySelector('.empty-state');
+    
+    if (visibleCount === 0 && !emptyState) {
+        noResults.style.display = 'block';
+    } else {
+        noResults.style.display = 'none';
+    }
+}
+
+// Search
+document.getElementById('searchInput').addEventListener('input', function() {
+    filterReviews();
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey && e.key === 'f') || e.key === '/') {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+    }
+    if (e.key === 'Escape') {
+        const searchInput = document.getElementById('searchInput');
+        if (document.activeElement === searchInput) {
+            searchInput.value = '';
+            filterReviews();
+            searchInput.blur();
+        }
+    }
+});
+
+// Ensure counts display correctly
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Reviews loaded - Total: {{ total_count|default:0 }}, Pending: {{ pending_count|default:0 }}, Approved: {{ approved_count|default:0 }}, Rejected: {{ rejected_count|default:0 }}');
+});
+</script>
+
 {% endblock %}

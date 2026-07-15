@@ -1,68 +1,1328 @@
-{% extends 'base.html' %}
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
 {% block title %}{{ action }} Category - MyStore{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-{% if action == 'Create' %}plus-circle{% else %}edit{% endif %} text-primary"></i> {{ action }} Category</h2>
-                <a href="{% url 'Ecom:category_list' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back
-                </a>
-            </div>
 
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Name <span class="text-danger">*</span></label>
-                            {{ form.name }}
-                            {% if form.name.errors %}
-                                <div class="text-danger small">{{ form.name.errors }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            {{ form.description }}
-                            {% if form.description.errors %}
-                                <div class="text-danger small">{{ form.description.errors }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Image</label>
-                            {% if category.image %}
-                                <div class="mb-2">
-                                    <img src="{{ category.image.url }}" width="100" height="100" style="object-fit:cover; border-radius:4px;">
+<style>
+:root {
+    --primary: #5c121f;
+    --primary-light: #7a1a2b;
+    --primary-dark: #3d0c14;
+    --secondary: #F4B400;
+    --bg: #f8f6f4;
+    --white: #ffffff;
+    --border: #e8e4e0;
+    --text: #1d1d1d;
+    --text-light: #6d6d6d;
+    --text-muted: #888888;
+    --success: #2e9d57;
+    --danger: #d64045;
+    --shadow: 0 10px 30px rgba(0,0,0,0.06);
+    --shadow-hover: 0 20px 50px rgba(92,18,31,0.12);
+    --transition: 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-xs: 8px;
+    --font-primary: 'Inter', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    
+    /* Professional Light Colors for Right Side */
+    --right-bg-start: #e8e0d8;
+    --right-bg-end: #d5cdc4;
+    --right-text: #3d3530;
+    --right-text-light: #6b635c;
+    --right-card-bg: rgba(255, 255, 255, 0.75);
+    --right-card-border: rgba(255, 255, 255, 0.3);
+    --right-accent: #8a7a6a;
+    --right-accent-light: #b8aa9a;
+    --right-badge-bg: rgba(255, 255, 255, 0.5);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* ===== MAIN WRAPPER ===== */
+.category-form-wrapper {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background: var(--bg);
+}
+
+/* ===== SPLIT LAYOUT ===== */
+.split-container {
+    display: flex;
+    min-height: calc(100vh - 200px);
+    background: var(--bg);
+}
+
+/* ===== LEFT SIDE - FORM ===== */
+.split-left {
+    flex: 0 0 55%;
+    padding: 30px 20px 40px 24px;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    min-height: calc(100vh - 200px);
+    order: 1;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+}
+
+/* ===== FORM HEADER ===== */
+.form-header {
+    margin-bottom: 18px;
+}
+
+.form-header .form-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    font-family: var(--font-primary);
+    letter-spacing: -0.3px;
+    margin: 0 0 2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-header .form-title i {
+    color: var(--secondary);
+    font-size: 20px;
+}
+
+.form-header .form-subtitle {
+    color: var(--text-light);
+    font-size: 13px;
+    margin: 0;
+    padding-left: 34px;
+}
+
+/* ===== FORM CARD ===== */
+.form-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    border: 1px solid var(--border);
+    overflow: visible;
+    transition: var(--transition);
+}
+
+.form-card:hover {
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+
+.form-card-body {
+    padding: 24px 26px 26px;
+}
+
+/* ===== FORM GROUP ===== */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group:last-of-type {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 5px;
+    font-family: var(--font-body);
+}
+
+.form-label .label-icon {
+    color: var(--primary);
+    font-size: 13px;
+}
+
+.form-label .required-star {
+    color: var(--danger);
+    font-weight: 700;
+}
+
+.form-label .optional-badge {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--bg);
+    padding: 1px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-left: 4px;
+}
+
+/* ===== FORM INPUTS ===== */
+.form-control {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-xs);
+    font-size: 14px;
+    font-family: var(--font-body);
+    color: var(--text);
+    background: var(--white);
+    transition: var(--transition);
+    outline: none;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(92, 18, 31, 0.06);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+    font-weight: 300;
+}
+
+.form-control.textarea {
+    resize: vertical;
+    min-height: 75px;
+    line-height: 1.6;
+}
+
+/* ===== CHARACTER COUNTER ===== */
+.char-counter {
+    text-align: right;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.char-counter .char-count {
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+/* ===== IMAGE UPLOAD ===== */
+.image-preview-container {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.image-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: var(--transition);
+}
+
+.image-preview:hover {
+    border-color: var(--primary);
+}
+
+.image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-preview .no-image-placeholder {
+    color: var(--text-muted);
+    font-size: 20px;
+}
+
+.image-preview.has-image {
+    border-color: var(--secondary);
+}
+
+.image-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 18px;
+    background: var(--bg);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-light);
+    font-family: var(--font-body);
+}
+
+.image-upload-btn:hover {
+    border-color: var(--primary);
+    background: rgba(92, 18, 31, 0.04);
+    color: var(--primary);
+}
+
+.image-upload-wrapper input[type="file"] {
+    display: none;
+}
+
+.image-upload-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+}
+
+/* ===== TOGGLE SWITCH ===== */
+.toggle-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px;
+    background: var(--bg);
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--border);
+}
+
+.toggle-switch {
+    position: relative;
+    width: 42px;
+    height: 22px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #ccc;
+    transition: var(--transition);
+    border-radius: 30px;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 14px;
+    width: 14px;
+    left: 4px;
+    bottom: 4px;
+    background: white;
+    transition: var(--transition);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: var(--success);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+}
+
+.toggle-label-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.toggle-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.toggle-description {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* ===== FORM ACTIONS ===== */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 18px;
+    margin-top: 18px;
+    border-top: 2px solid var(--bg);
+}
+
+.btn-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 22px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.btn-modern.btn-primary {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.btn-modern.btn-primary:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(92, 18, 31, 0.2);
+}
+
+.btn-modern.btn-secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-modern.btn-secondary:hover {
+    background: var(--border);
+    transform: translateY(-2px);
+}
+
+/* ===== ERROR STYLING ===== */
+.form-control.error {
+    border-color: var(--danger);
+    background: #fff5f5;
+}
+
+.error-message {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--danger);
+    margin-top: 3px;
+    font-weight: 500;
+}
+
+/* ============================================================
+   RIGHT SIDE - LIGHT PROFESSIONAL DESIGN
+   ============================================================ */
+.split-right {
+    flex: 1;
+    background: linear-gradient(145deg, var(--right-bg-start) 0%, var(--right-bg-end) 100%);
+    padding: 30px 40px 40px 30px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    min-height: calc(100vh - 200px);
+    order: 2;
+}
+
+/* Subtle Pattern Overlay */
+.split-right::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.split-right::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.right-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+}
+
+.right-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--right-badge-bg);
+    backdrop-filter: blur(10px);
+    padding: 4px 14px;
+    border-radius: 30px;
+    color: var(--right-text);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border: 1px solid var(--right-card-border);
+    margin-bottom: 12px;
+}
+
+.right-content h2 {
+    color: var(--right-text);
+    font-size: 20px;
+    font-weight: 700;
+    font-family: var(--font-primary);
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+
+.right-content .right-subtitle {
+    color: var(--right-text-light);
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+/* ===== SUGGESTION CARDS - GLASS EFFECT ===== */
+.suggestion-card {
+    background: var(--right-card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--right-card-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    transition: var(--transition);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.suggestion-card:hover {
+    background: rgba(255, 255, 255, 0.85);
+    transform: translateX(4px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.suggestion-card .suggestion-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 2px;
+}
+
+.suggestion-card .suggestion-icon {
+    width: 26px;
+    height: 26px;
+    background: rgba(138, 122, 106, 0.12);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--right-accent);
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.suggestion-card .suggestion-title {
+    color: var(--right-text);
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.suggestion-card .suggestion-desc {
+    color: var(--right-text-light);
+    font-size: 11px;
+    line-height: 1.4;
+    margin: 0 0 0 36px;
+}
+
+/* ===== EXAMPLE TAGS ===== */
+.examples-section {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.examples-section h4 {
+    color: var(--right-text-light);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+}
+
+.example-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.example-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--right-text);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    transition: var(--transition);
+}
+
+.example-tag:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.example-tag i {
+    font-size: 9px;
+    color: var(--right-accent);
+}
+
+/* ============================================================
+   RESPONSIVE - FORM FIRST ON MOBILE
+   ============================================================ */
+
+/* Desktop Large */
+@media (min-width: 1400px) {
+    .split-left {
+        padding: 40px 30px 40px 40px;
+    }
+    .split-right {
+        padding: 40px 60px 40px 40px;
+    }
+    .form-card-body {
+        padding: 28px 32px 30px;
+    }
+    .right-content {
+        max-width: 420px;
+    }
+}
+
+/* Desktop */
+@media (min-width: 993px) and (max-width: 1399px) {
+    .split-left {
+        padding: 30px 20px 30px 24px;
+    }
+    .split-right {
+        padding: 30px 36px 30px 24px;
+    }
+    .form-card-body {
+        padding: 22px 24px 24px;
+    }
+}
+
+/* Tablet */
+@media (max-width: 992px) {
+    .split-container {
+        flex-direction: column;
+        min-height: auto;
+    }
+    
+    .split-left {
+        flex: 1;
+        width: 100%;
+        padding: 20px 24px 28px;
+        min-height: auto;
+        align-items: flex-start;
+        order: 1;
+    }
+    
+    .split-right {
+        width: 100%;
+        padding: 20px 24px 24px;
+        min-height: 200px;
+        align-items: flex-start;
+        order: 2;
+    }
+    
+    .form-container {
+        max-width: 100%;
+    }
+    
+    .right-content {
+        max-width: 100%;
+    }
+    
+    .form-card-body {
+        padding: 20px 22px 22px;
+    }
+    
+    .form-header .form-title {
+        font-size: 20px;
+    }
+    
+    .right-content h2 {
+        font-size: 18px;
+    }
+}
+
+/* Mobile Large */
+@media (max-width: 768px) {
+    .split-left {
+        padding: 16px 16px 24px;
+    }
+    
+    .split-right {
+        padding: 16px 16px 20px;
+        min-height: 180px;
+    }
+    
+    .form-card-body {
+        padding: 16px 16px 18px;
+    }
+    
+    .form-header .form-title {
+        font-size: 18px;
+    }
+    
+    .form-header .form-subtitle {
+        font-size: 12px;
+        padding-left: 0;
+    }
+    
+    .right-content h2 {
+        font-size: 17px;
+    }
+    
+    .form-control {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    
+    .form-control.textarea {
+        min-height: 60px;
+    }
+    
+    .suggestion-card {
+        padding: 8px 12px;
+    }
+}
+
+/* Mobile Medium */
+@media (max-width: 576px) {
+    .split-left {
+        padding: 14px 12px 20px;
+    }
+    
+    .split-right {
+        padding: 14px 12px 18px;
+        min-height: 160px;
+    }
+    
+    .form-card-body {
+        padding: 14px 14px 16px;
+    }
+    
+    .form-header .form-title {
+        font-size: 17px;
+        gap: 8px;
+    }
+    
+    .form-header .form-title i {
+        font-size: 15px;
+    }
+    
+    .form-header .form-subtitle {
+        font-size: 11px;
+    }
+    
+    .form-label {
+        font-size: 12px;
+    }
+    
+    .form-control {
+        padding: 7px 12px;
+        font-size: 13px;
+    }
+    
+    .form-control.textarea {
+        min-height: 50px;
+    }
+    
+    .form-actions {
+        flex-direction: column-reverse;
+        gap: 8px;
+        padding-top: 14px;
+        margin-top: 14px;
+    }
+    
+    .btn-modern {
+        justify-content: center;
+        width: 100%;
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+    
+    .image-preview {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .image-upload-btn {
+        font-size: 11px;
+        padding: 5px 14px;
+    }
+    
+    .image-upload-hint {
+        font-size: 10px;
+    }
+    
+    .right-content h2 {
+        font-size: 16px;
+    }
+    
+    .right-content .right-subtitle {
+        font-size: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .suggestion-card {
+        padding: 8px 12px;
+        margin-bottom: 6px;
+    }
+    
+    .suggestion-card .suggestion-title {
+        font-size: 12px;
+    }
+    
+    .suggestion-card .suggestion-desc {
+        font-size: 10px;
+        margin-left: 0;
+    }
+    
+    .suggestion-card .suggestion-icon {
+        width: 22px;
+        height: 22px;
+        font-size: 11px;
+    }
+    
+    .example-tag {
+        font-size: 10px;
+        padding: 2px 10px;
+    }
+    
+    .toggle-wrapper {
+        padding: 6px 12px;
+        gap: 10px;
+    }
+    
+    .toggle-switch {
+        width: 38px;
+        height: 20px;
+    }
+    
+    .toggle-slider::before {
+        height: 12px;
+        width: 12px;
+        left: 4px;
+        bottom: 4px;
+    }
+    
+    .toggle-switch input:checked + .toggle-slider::before {
+        transform: translateX(18px);
+    }
+    
+    .toggle-label {
+        font-size: 12px;
+    }
+    
+    .toggle-description {
+        font-size: 10px;
+    }
+    
+    .form-group {
+        margin-bottom: 12px;
+    }
+    
+    .examples-section {
+        margin-top: 10px;
+        padding-top: 8px;
+    }
+    
+    .examples-section h4 {
+        font-size: 9px;
+    }
+    
+    .char-counter {
+        font-size: 10px;
+    }
+    
+    .error-message {
+        font-size: 11px;
+    }
+    
+    .right-badge {
+        font-size: 9px;
+        padding: 3px 12px;
+        margin-bottom: 10px;
+    }
+}
+
+/* Mobile Small */
+@media (max-width: 400px) {
+    .split-left {
+        padding: 10px 8px 16px;
+    }
+    
+    .split-right {
+        padding: 10px 8px 14px;
+        min-height: 140px;
+    }
+    
+    .form-card-body {
+        padding: 12px 10px 14px;
+    }
+    
+    .form-header .form-title {
+        font-size: 15px;
+    }
+    
+    .form-header .form-title i {
+        font-size: 14px;
+    }
+    
+    .form-header .form-subtitle {
+        font-size: 10px;
+    }
+    
+    .form-label {
+        font-size: 11px;
+    }
+    
+    .form-control {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    
+    .form-control.textarea {
+        min-height: 45px;
+    }
+    
+    .btn-modern {
+        font-size: 12px;
+        padding: 7px 12px;
+    }
+    
+    .right-content h2 {
+        font-size: 14px;
+    }
+    
+    .right-content .right-subtitle {
+        font-size: 11px;
+    }
+    
+    .suggestion-card .suggestion-title {
+        font-size: 11px;
+    }
+    
+    .suggestion-card .suggestion-desc {
+        font-size: 9px;
+    }
+    
+    .suggestion-card .suggestion-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+    }
+    
+    .example-tag {
+        font-size: 9px;
+        padding: 2px 8px;
+    }
+    
+    .image-preview {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .image-upload-btn {
+        font-size: 10px;
+        padding: 4px 10px;
+    }
+    
+    .toggle-wrapper {
+        padding: 6px 10px;
+        gap: 8px;
+    }
+    
+    .toggle-switch {
+        width: 34px;
+        height: 18px;
+    }
+    
+    .toggle-slider::before {
+        height: 10px;
+        width: 10px;
+        left: 4px;
+        bottom: 4px;
+    }
+    
+    .toggle-switch input:checked + .toggle-slider::before {
+        transform: translateX(16px);
+    }
+    
+    .toggle-label {
+        font-size: 11px;
+    }
+    
+    .toggle-description {
+        font-size: 9px;
+    }
+    
+    .form-group {
+        margin-bottom: 10px;
+    }
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.split-left {
+    animation: slideUp 0.5s ease;
+}
+
+.split-right {
+    animation: slideUp 0.5s ease 0.1s both;
+}
+
+.suggestion-card {
+    animation: fadeIn 0.6s ease both;
+}
+
+.suggestion-card:nth-child(1) { animation-delay: 0.1s; }
+.suggestion-card:nth-child(2) { animation-delay: 0.2s; }
+.suggestion-card:nth-child(3) { animation-delay: 0.3s; }
+
+.example-tag {
+    animation: fadeIn 0.6s ease both;
+}
+
+.example-tag:nth-child(1) { animation-delay: 0.1s; }
+.example-tag:nth-child(2) { animation-delay: 0.15s; }
+.example-tag:nth-child(3) { animation-delay: 0.2s; }
+.example-tag:nth-child(4) { animation-delay: 0.25s; }
+.example-tag:nth-child(5) { animation-delay: 0.3s; }
+.example-tag:nth-child(6) { animation-delay: 0.35s; }
+</style>
+
+<!-- ===== SPLIT LAYOUT ===== -->
+<div class="category-form-wrapper">
+    <div class="split-container">
+        
+        <!-- ===== LEFT SIDE - FORM ===== -->
+        <div class="split-left">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2 class="form-title">
+                        <i class="fas fa-{% if action == 'Create' %}plus-circle{% else %}edit{% endif %}"></i>
+                        {% if action == 'Create' %}New Category{% else %}Edit Category{% endif %}
+                    </h2>
+                    <p class="form-subtitle">
+                        {% if action == 'Create' %}Add a new category to organize your products{% else %}Update category details{% endif %}
+                    </p>
+                </div>
+                
+                <div class="form-card">
+                    <div class="form-card-body">
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-tag label-icon"></i>
+                                    Category Name <span class="required-star">*</span>
+                                    <span class="optional-badge">Required</span>
+                                </label>
+                                <input type="text" 
+                                       name="name" 
+                                       class="form-control {% if form.name.errors %}error{% endif %}"
+                                       placeholder="e.g., Living Room, Bedroom, Kitchen"
+                                       value="{{ form.name.value|default:'' }}"
+                                       maxlength="100"
+                                       required>
+                                {% if form.name.errors %}
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ form.name.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-align-left label-icon"></i>
+                                    Description
+                                    <span class="optional-badge">Optional</span>
+                                </label>
+                                <textarea name="description" 
+                                          class="form-control textarea {% if form.description.errors %}error{% endif %}"
+                                          placeholder="Brief description of this category..."
+                                          maxlength="500"
+                                          oninput="updateCharCount(this)">{{ form.description.value|default:'' }}</textarea>
+                                <div class="char-counter">
+                                    <span class="char-count" id="charCount">0</span> / 500 characters
                                 </div>
-                            {% endif %}
-                            {{ form.image }}
-                            {% if form.image.errors %}
-                                <div class="text-danger small">{{ form.image.errors }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="mb-3 form-check">
-                            {{ form.is_active }}
-                            <label class="form-check-label">Active</label>
-                        </div>
-                        
-                        <div class="d-flex justify-content-end gap-2">
-                            <a href="{% url 'Ecom:category_list' %}" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> {{ action }} Category
-                            </button>
-                        </div>
-                    </form>
+                                {% if form.description.errors %}
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ form.description.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-image label-icon"></i>
+                                    Category Image
+                                    <span class="optional-badge">Optional</span>
+                                </label>
+                                <div class="image-upload-wrapper">
+                                    <div class="image-preview-container">
+                                        <div class="image-preview {% if category.image %}has-image{% endif %}" id="imagePreview">
+                                            {% if category.image %}
+                                                <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                                            {% else %}
+                                                <div class="no-image-placeholder">
+                                                    <i class="fas fa-image"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <label class="image-upload-btn" for="imageUpload">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            {% if category.image %}Change Image{% else %}Upload Image{% endif %}
+                                        </label>
+                                    </div>
+                                    <input type="file" name="image" id="imageUpload" accept="image/*">
+                                    <div class="image-upload-hint">
+                                        <i class="fas fa-info-circle"></i> Recommended: 400x400px or larger
+                                    </div>
+                                    {% if form.image.errors %}
+                                        <div class="error-message">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ form.image.errors|join:", " }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-toggle-on label-icon"></i>
+                                    Status
+                                </label>
+                                <div class="toggle-wrapper">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" name="is_active" {% if form.is_active.value or action == 'Create' %}checked{% endif %}>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <div class="toggle-label-group">
+                                        <div class="toggle-label" id="statusLabel">
+                                            {% if form.is_active.value or action == 'Create' %}Active{% else %}Inactive{% endif %}
+                                        </div>
+                                        <div class="toggle-description" id="statusDescription">
+                                            {% if form.is_active.value or action == 'Create' %}Visible to customers{% else %}Hidden from customers{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <a href="{% url 'Ecom:category_list' %}" class="btn-modern btn-secondary">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn-modern btn-primary">
+                                    <i class="fas fa-save"></i> 
+                                    {% if action == 'Create' %}Create Category{% else %}Update Category{% endif %}
+                                </button>
+                            </div>
+                            
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
+        
+        <!-- ===== RIGHT SIDE - LIGHT PROFESSIONAL ===== -->
+        <div class="split-right">
+            <div class="right-content">
+                <div class="right-badge">
+                    <i class="fas fa-lightbulb"></i> Quick Tips
+                </div>
+                
+                <h2>Create Better Categories</h2>
+                <p class="right-subtitle">
+                    Simple tips to organize your store effectively.
+                </p>
+                
+                <div class="suggestion-card">
+                    <div class="suggestion-header">
+                        <div class="suggestion-icon">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <h4 class="suggestion-title">Be Clear & Specific</h4>
+                    </div>
+                    <p class="suggestion-desc">
+                        Use names that instantly tell customers what they'll find.
+                    </p>
+                </div>
+                
+                <div class="suggestion-card">
+                    <div class="suggestion-header">
+                        <div class="suggestion-icon">
+                            <i class="fas fa-keyword"></i>
+                        </div>
+                        <h4 class="suggestion-title">Use Relevant Keywords</h4>
+                    </div>
+                    <p class="suggestion-desc">
+                        Include search terms in your category name and description.
+                    </p>
+                </div>
+                
+                <div class="suggestion-card">
+                    <div class="suggestion-header">
+                        <div class="suggestion-icon">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <h4 class="suggestion-title">Add a Category Image</h4>
+                    </div>
+                    <p class="suggestion-desc">
+                        Visuals help customers quickly identify product sections.
+                    </p>
+                </div>
+                
+                <div class="examples-section">
+                    <h4>📌 Popular Category Names</h4>
+                    <div class="example-tags">
+                        <span class="example-tag"><i class="fas fa-couch"></i> Living Room</span>
+                        <span class="example-tag"><i class="fas fa-bed"></i> Bedroom</span>
+                        <span class="example-tag"><i class="fas fa-kitchen-set"></i> Kitchen</span>
+                        <span class="example-tag"><i class="fas fa-chair"></i> Outdoor</span>
+                        <span class="example-tag"><i class="fas fa-lamp"></i> Lighting</span>
+                        <span class="example-tag"><i class="fas fa-paint-brush"></i> Decor</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
     </div>
 </div>
+
+<script>
+    function updateCharCount(textarea) {
+        const count = textarea.value.length;
+        const counter = document.getElementById('charCount');
+        if (counter) {
+            counter.textContent = count;
+            counter.style.color = count > 450 ? (count > 490 ? 'var(--danger)' : 'var(--secondary)') : 'var(--text-light)';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Character Counter
+        const textarea = document.querySelector('textarea[name="description"]');
+        if (textarea) {
+            updateCharCount(textarea);
+            textarea.addEventListener('input', function() {
+                updateCharCount(this);
+            });
+        }
+
+        // Image Preview
+        const imageInput = document.getElementById('imageUpload');
+        const imagePreview = document.getElementById('imagePreview');
+
+        if (imageInput) {
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        imagePreview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
+                        imagePreview.classList.add('has-image');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Toggle Status
+        const toggleCheckbox = document.querySelector('.toggle-switch input');
+        const statusLabel = document.getElementById('statusLabel');
+        const statusDescription = document.getElementById('statusDescription');
+
+        if (toggleCheckbox) {
+            toggleCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    statusLabel.textContent = 'Active';
+                    statusDescription.textContent = 'Visible to customers';
+                    statusLabel.style.color = 'var(--success)';
+                } else {
+                    statusLabel.textContent = 'Inactive';
+                    statusDescription.textContent = 'Hidden from customers';
+                    statusLabel.style.color = 'var(--text-muted)';
+                }
+            });
+
+            if (toggleCheckbox.checked) {
+                statusLabel.style.color = 'var(--success)';
+            } else {
+                statusLabel.style.color = 'var(--text-muted)';
+            }
+        }
+
+        // Auto-focus
+        const firstNameInput = document.querySelector('input[name="name"]');
+        if (firstNameInput && !firstNameInput.value) {
+            setTimeout(() => firstNameInput.focus(), 300);
+        }
+    });
+</script>
+
 {% endblock %}

@@ -1,136 +1,1240 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Edit Profile - MyStore{% endblock %}
+{% block title %}Edit Profile - ShubhDecor{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'Ecom:profile' %}">Profile</a></li>
-                    <li class="breadcrumb-item active">Edit Profile</li>
-                </ol>
-            </nav>
-            
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-edit text-primary"></i> Edit Profile</h5>
-                </div>
-                <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data" novalidate>
-                        {% csrf_token %}
-                        
-                        <h6 class="border-bottom pb-2">Personal Information</h6>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ user_form.full_name.id_for_label }}" class="form-label">
-                                    Full Name <span class="text-danger">*</span>
-                                </label>
-                                {{ user_form.full_name }}
-                                {% if user_form.full_name.errors %}
-                                    <div class="text-danger small">
-                                        {% for error in user_form.full_name.errors %}
-                                            <i class="fas fa-exclamation-circle"></i> {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ user_form.phone.id_for_label }}" class="form-label">
-                                    Phone Number
-                                </label>
-                                {{ user_form.phone }}
-                                {% if user_form.phone.errors %}
-                                    <div class="text-danger small">
-                                        {% for error in user_form.phone.errors %}
-                                            <i class="fas fa-exclamation-circle"></i> {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <h6 class="border-bottom pb-2 mt-3">Profile Details</h6>
-                        
-                        <div class="mb-3">
-                            <label for="{{ profile_form.profile_picture.id_for_label }}" class="form-label">
-                                Profile Picture
-                            </label>
-                            {% if user.profile.profile_picture %}
-                                <div class="mb-2">
-                                    <img src="{{ user.profile.profile_picture.url }}" 
-                                         alt="Current Profile Picture" 
-                                         style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%;">
-                                </div>
-                            {% endif %}
-                            {{ profile_form.profile_picture }}
-                            {% if profile_form.profile_picture.errors %}
-                                <div class="text-danger small">
-                                    {% for error in profile_form.profile_picture.errors %}
-                                        <i class="fas fa-exclamation-circle"></i> {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="{{ profile_form.bio.id_for_label }}" class="form-label">
-                                Bio
-                            </label>
-                            {{ profile_form.bio }}
-                            {% if profile_form.bio.errors %}
-                                <div class="text-danger small">
-                                    {% for error in profile_form.bio.errors %}
-                                        <i class="fas fa-exclamation-circle"></i> {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ profile_form.date_of_birth.id_for_label }}" class="form-label">
-                                    Date of Birth
-                                </label>
-                                {{ profile_form.date_of_birth }}
-                                {% if profile_form.date_of_birth.errors %}
-                                    <div class="text-danger small">
-                                        {% for error in profile_form.date_of_birth.errors %}
-                                            <i class="fas fa-exclamation-circle"></i> {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ profile_form.gender.id_for_label }}" class="form-label">
-                                    Gender
-                                </label>
-                                {{ profile_form.gender }}
-                                {% if profile_form.gender.errors %}
-                                    <div class="text-danger small">
-                                        {% for error in profile_form.gender.errors %}
-                                            <i class="fas fa-exclamation-circle"></i> {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{% url 'Ecom:profile' %}" class="btn btn-secondary me-md-2">
-                                <i class="fas fa-times"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Update Profile
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+
+<style>
+/* ============================================================
+   DESIGN WITH BACKGROUND GRADIENT SHAPES
+   ============================================================ */
+:root {
+    --primary: #5c121f;
+    --primary-dark: #3d0c14;
+    --primary-light: #7a1a2b;
+    --gold: #F4B400;
+    --gold-light: #fcd34d;
+    --gold-dark: #d4a000;
+    --white: #ffffff;
+    --cream: #faf7f4;
+    --soft: #ede8e3;
+    --muted: #d5cdc6;
+    --text-dark: #1a1410;
+    --text-mid: #5a4f4a;
+    --text-light: #9a8f8a;
+    --shadow-sm: 0 2px 16px rgba(92,18,31,0.04);
+    --shadow-md: 0 8px 32px rgba(92,18,31,0.06);
+    --shadow-lg: 0 16px 56px rgba(92,18,31,0.08);
+    --shadow-xl: 0 24px 80px rgba(92,18,31,0.12);
+    --radius-xl: 28px;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-sans);
+    background: #f7f4f1;
+    color: var(--text-dark);
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* ============================================================
+   BACKGROUND GRADIENT SHAPES ONLY
+   ============================================================ */
+.bg-shapes {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* Shape 1 - Large Gradient Circle */
+.bg-shapes .shape-1 {
+    position: absolute;
+    top: -200px;
+    right: -150px;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        rgba(244,180,0,0.08) 0%, 
+        rgba(244,180,0,0.04) 30%, 
+        transparent 70%
+    );
+    animation: floatShape 25s ease-in-out infinite;
+}
+
+/* Shape 2 - Medium Gradient Circle */
+.bg-shapes .shape-2 {
+    position: absolute;
+    bottom: -150px;
+    left: -100px;
+    width: 450px;
+    height: 450px;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        rgba(92,18,31,0.06) 0%, 
+        rgba(92,18,31,0.03) 40%, 
+        transparent 70%
+    );
+    animation: floatShape 30s ease-in-out infinite reverse;
+}
+
+/* Shape 3 - Small Gold Gradient */
+.bg-shapes .shape-3 {
+    position: absolute;
+    top: 40%;
+    right: 5%;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        rgba(244,180,0,0.05) 0%, 
+        transparent 70%
+    );
+    animation: floatShape 20s ease-in-out infinite 2s;
+}
+
+/* Shape 4 - Small Primary Gradient */
+.bg-shapes .shape-4 {
+    position: absolute;
+    bottom: 30%;
+    left: 3%;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        rgba(92,18,31,0.04) 0%, 
+        transparent 70%
+    );
+    animation: floatShape 22s ease-in-out infinite reverse 1s;
+}
+
+/* Shape 5 - Blob Gradient */
+.bg-shapes .shape-5 {
+    position: absolute;
+    top: 15%;
+    left: 10%;
+    width: 250px;
+    height: 250px;
+    border-radius: 60% 40% 50% 50% / 40% 50% 60% 50%;
+    background: radial-gradient(circle, 
+        rgba(244,180,0,0.04) 0%, 
+        transparent 70%
+    );
+    animation: blobMove 18s ease-in-out infinite;
+}
+
+/* Shape 6 - Ring Gradient */
+.bg-shapes .shape-6 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        transparent 40%, 
+        rgba(244,180,0,0.02) 45%, 
+        transparent 50%
+    );
+    animation: pulseRing 12s ease-in-out infinite;
+}
+
+/* Shape 7 - Extra Small Dot */
+.bg-shapes .shape-7 {
+    position: absolute;
+    top: 60%;
+    right: 15%;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+        rgba(92,18,31,0.03) 0%, 
+        transparent 70%
+    );
+    animation: floatShape 28s ease-in-out infinite 3s;
+}
+
+/* Animations */
+@keyframes floatShape {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -40px) scale(1.05); }
+    66% { transform: translate(-20px, 25px) scale(0.95); }
+}
+
+@keyframes blobMove {
+    0%, 100% { 
+        border-radius: 60% 40% 50% 50% / 40% 50% 60% 50%;
+        transform: translate(0, 0) rotate(0deg);
+    }
+    50% { 
+        border-radius: 40% 60% 50% 50% / 50% 40% 60% 50%;
+        transform: translate(40px, -30px) rotate(180deg);
+    }
+}
+
+@keyframes pulseRing {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+}
+
+/* ============================================================
+   BOOTSTRAP OVERRIDE
+   ============================================================ */
+.form-control {
+    width: 100% !important;
+    padding: 14px 18px !important;
+    border: 2px solid var(--soft) !important;
+    border-radius: var(--radius-sm) !important;
+    font-size: 14px !important;
+    font-family: var(--font-sans) !important;
+    color: var(--text-dark) !important;
+    background: var(--white) !important;
+    height: 50px !important;
+    box-sizing: border-box !important;
+    box-shadow: none !important;
+    outline: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.form-control::placeholder {
+    color: var(--text-light) !important;
+    font-weight: 400 !important;
+    font-size: 13px !important;
+}
+
+.form-control:hover {
+    border-color: var(--gold) !important;
+    background: var(--cream) !important;
+}
+
+.form-control:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 4px rgba(92, 18, 31, 0.05) !important;
+    background: var(--white) !important;
+}
+
+.form-control.is-invalid,
+.form-control.error {
+    border-color: #dc3545 !important;
+    background: #fff8f8 !important;
+}
+
+.form-control.is-invalid:focus,
+.form-control.error:focus {
+    box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.06) !important;
+}
+
+textarea.form-control {
+    resize: vertical !important;
+    min-height: 80px !important;
+    height: auto !important;
+    line-height: 1.6 !important;
+    padding: 14px 18px !important;
+}
+
+select.form-control {
+    appearance: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235a4f4a' d='M6 8L0 0h12z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 18px center !important;
+    padding-right: 44px !important;
+    cursor: pointer !important;
+}
+
+.form-label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: var(--text-mid) !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    margin-bottom: 5px !important;
+}
+
+/* ============================================================
+   PAGE WRAPPER
+   ============================================================ */
+.page-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 24px 56px;
+}
+
+/* ============================================================
+   PAGE HEADER
+   ============================================================ */
+.page-header {
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.page-header-left h1 {
+    font-family: var(--font-serif);
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--text-dark);
+    letter-spacing: -0.02em;
+}
+
+.page-header-left h1 span {
+    color: var(--primary);
+    position: relative;
+}
+
+.page-header-left h1 span::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gold);
+    border-radius: 2px;
+    opacity: 0.3;
+}
+
+.page-header-left p {
+    font-size: 14px;
+    color: var(--text-light);
+    font-weight: 400;
+    margin-top: 2px;
+}
+
+.page-header-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: var(--primary);
+    color: var(--white);
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    box-shadow: 0 4px 16px rgba(92, 18, 31, 0.15);
+}
+
+.page-header-badge i {
+    color: var(--gold-light);
+}
+
+/* ============================================================
+   MAIN GRID
+   ============================================================ */
+.grid-main {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 28px;
+    align-items: start;
+}
+
+/* ============================================================
+   FORM CARD
+   ============================================================ */
+.form-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--soft);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.4s var(--transition);
+}
+
+.form-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.form-card-header {
+    padding: 18px 24px;
+    background: var(--cream);
+    border-bottom: 1px solid var(--soft);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.form-card-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.form-card-header-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.form-card-header h4 {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.form-card-header .status {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 16px;
+    border-radius: 50px;
+    background: var(--gold);
+    color: var(--text-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.form-card-body {
+    padding: 26px 28px 24px;
+}
+
+/* ============================================================
+   SECTION DIVIDER
+   ============================================================ */
+.section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0 18px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--cream);
+}
+
+.section-divider .num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.section-divider h5 {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.section-divider i {
+    color: var(--gold);
+    font-size: 14px;
+}
+
+/* ============================================================
+   FORM ROWS
+   ============================================================ */
+.row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.row-1 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* ============================================================
+   UPLOAD ZONE
+   ============================================================ */
+.upload-zone {
+    border: 2px dashed var(--soft);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: var(--cream);
+    cursor: pointer;
+    position: relative;
+}
+
+.upload-zone:hover {
+    border-color: var(--gold);
+    background: var(--white);
+}
+
+.upload-zone .icon {
+    font-size: 28px;
+    color: var(--text-light);
+    display: block;
+    margin-bottom: 6px;
+}
+
+.upload-zone .text {
+    font-size: 13px;
+    color: var(--text-mid);
+    font-weight: 500;
+}
+
+.upload-zone .text span {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.upload-zone .hint {
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: 4px;
+}
+
+.upload-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Preview */
+.preview-box {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    background: var(--cream);
+    border-radius: var(--radius-sm);
+    margin-top: 10px;
+}
+
+.preview-box img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--gold-light);
+}
+
+.preview-box .info .name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.preview-box .info .size {
+    font-size: 11px;
+    color: var(--text-light);
+}
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+.error-text {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: #dc3545;
+    margin-top: 3px;
+    font-weight: 500;
+}
+
+.error-text i {
+    font-size: 12px;
+}
+
+/* ============================================================
+   FORM ACTIONS
+   ============================================================ */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 20px;
+    margin-top: 4px;
+    border-top: 2px solid var(--cream);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 32px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s var(--transition);
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: var(--white);
+    box-shadow: 0 4px 16px rgba(92, 18, 31, 0.12);
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(92, 18, 31, 0.20);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-mid);
+    border: 2px solid var(--soft);
+}
+
+.btn-secondary:hover {
+    background: var(--cream);
+    border-color: var(--gold);
+    transform: translateY(-2px);
+}
+
+/* ============================================================
+   HELP SIDE
+   ============================================================ */
+.help-side {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Help Card */
+.help-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--soft);
+    padding: 24px 22px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.4s var(--transition);
+}
+
+.help-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.help-card .help-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(92, 18, 31, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+
+.help-card h5 {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 4px;
+}
+
+.help-card p {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+.help-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.help-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--cream);
+    border-radius: var(--radius-sm);
+    transition: all 0.3s ease;
+}
+
+.help-item:hover {
+    background: var(--white);
+    border: 1px solid var(--gold);
+    transform: translateX(4px);
+}
+
+.help-item .icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(92, 18, 31, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.help-item .text strong {
+    font-size: 13px;
+    color: var(--text-dark);
+    font-weight: 600;
+    display: block;
+}
+
+.help-item .text span {
+    font-size: 11px;
+    color: var(--text-light);
+    font-weight: 400;
+}
+
+/* Tips Card */
+.tips-card {
+    background: var(--primary);
+    border-radius: var(--radius-lg);
+    padding: 24px 22px;
+    color: var(--white);
+    box-shadow: var(--shadow-lg);
+    transition: all 0.4s var(--transition);
+}
+
+.tips-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+}
+
+.tips-card .tips-icon {
+    font-size: 28px;
+    color: var(--gold-light);
+    margin-bottom: 10px;
+}
+
+.tips-card h5 {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 6px;
+}
+
+.tips-card p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.6;
+    font-weight: 300;
+}
+
+.tips-card ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 12px;
+}
+
+.tips-card ul li {
+    padding: 8px 0;
+    font-size: 13px;
+    color: rgba(255,255,255,0.75);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.tips-card ul li:last-child {
+    border-bottom: none;
+}
+
+.tips-card ul li i {
+    color: var(--gold-light);
+    font-size: 14px;
+    width: 20px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1024px) {
+    .grid-main {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    
+    .help-side {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    
+    .bg-shapes .shape-1 {
+        width: 400px;
+        height: 400px;
+        top: -100px;
+        right: -80px;
+    }
+    
+    .bg-shapes .shape-2 {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .bg-shapes .shape-6 {
+        width: 350px;
+        height: 350px;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-wrap {
+        padding: 20px 16px 40px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .page-header-left h1 {
+        font-size: 24px;
+    }
+    
+    .page-header-badge {
+        padding: 6px 16px;
+        font-size: 11px;
+    }
+    
+    .form-card-header {
+        padding: 14px 16px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .form-card-header h4 {
+        font-size: 16px;
+    }
+    
+    .form-card-body {
+        padding: 18px 16px 16px;
+    }
+    
+    .row-2 {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        margin-bottom: 14px;
+    }
+    
+    .row-1 {
+        gap: 14px;
+        margin-bottom: 14px;
+    }
+    
+    .form-control {
+        padding: 11px 14px !important;
+        font-size: 13px !important;
+        height: 46px !important;
+    }
+    
+    .form-actions {
+        flex-direction: column-reverse;
+        padding-top: 16px;
+        gap: 10px;
+    }
+    
+    .btn {
+        font-size: 13px;
+        padding: 10px 20px;
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .help-side {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .help-card {
+        padding: 20px 18px;
+    }
+    
+    .tips-card {
+        padding: 20px 18px;
+    }
+    
+    .bg-shapes .shape-1 {
+        width: 250px;
+        height: 250px;
+    }
+    
+    .bg-shapes .shape-3,
+    .bg-shapes .shape-4,
+    .bg-shapes .shape-5,
+    .bg-shapes .shape-7 {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-wrap {
+        padding: 16px 12px 32px;
+    }
+    
+    .page-header-left h1 {
+        font-size: 20px;
+    }
+    
+    .page-header-left p {
+        font-size: 13px;
+    }
+    
+    .form-card-body {
+        padding: 14px 12px 12px;
+    }
+    
+    .form-control {
+        font-size: 12px !important;
+        height: 42px !important;
+        padding: 9px 12px !important;
+    }
+    
+    .bg-shapes .shape-2 {
+        width: 180px;
+        height: 180px;
+        bottom: -80px;
+        left: -60px;
+    }
+    
+    .bg-shapes .shape-6 {
+        width: 200px;
+        height: 200px;
+    }
+}
+</style>
+
+<!-- ============================================================
+   BACKGROUND GRADIENT SHAPES ONLY
+   ============================================================ -->
+<div class="bg-shapes">
+    <div class="shape-1"></div>
+    <div class="shape-2"></div>
+    <div class="shape-3"></div>
+    <div class="shape-4"></div>
+    <div class="shape-5"></div>
+    <div class="shape-6"></div>
+    <div class="shape-7"></div>
+</div>
+
+<!-- ============================================================
+   PAGE CONTENT
+   ============================================================ -->
+<div class="page-wrap">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1>Edit <span>Profile</span></h1>
+            <p>Update your personal information and preferences</p>
+        </div>
+        <div class="page-header-badge">
+            <i class="fas fa-check-circle"></i>
+            Editing
         </div>
     </div>
+
+    <!-- MAIN GRID -->
+    <div class="grid-main">
+
+        <!-- FORM -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="form-card-header-left">
+                    <div class="form-card-header-icon">
+                        <i class="fas fa-user-edit"></i>
+                    </div>
+                    <h4>Profile Details</h4>
+                </div>
+                <span class="status">
+                    <i class="fas fa-pen"></i> Edit
+                </span>
+            </div>
+
+            <div class="form-card-body">
+                <form method="POST" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    <!-- SECTION 1 -->
+                    <div class="section-divider">
+                        <span class="num">1</span>
+                        <i class="fas fa-user"></i>
+                        <h5>Personal Information</h5>
+                    </div>
+
+                    <div class="row-2">
+                        <div class="field">
+                            <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                            {{ user_form.full_name }}
+                            {% if user_form.full_name.errors %}
+                                <div class="error-text"><i class="fas fa-exclamation-circle"></i> {{ user_form.full_name.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="field">
+                            <label class="form-label">Phone <span class="text-muted">(Optional)</span></label>
+                            {{ user_form.phone }}
+                            {% if user_form.phone.errors %}
+                                <div class="error-text"><i class="fas fa-exclamation-circle"></i> {{ user_form.phone.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2 -->
+                    <div class="section-divider">
+                        <span class="num">2</span>
+                        <i class="fas fa-image"></i>
+                        <h5>Profile Details</h5>
+                    </div>
+
+                    <div class="row-1">
+                        <div class="field">
+                            <label class="form-label">Profile Picture</label>
+                            <div class="upload-zone">
+                                <span class="icon"><i class="fas fa-cloud-upload-alt"></i></span>
+                                <div class="text">
+                                    Drop or <span>browse</span> your photo
+                                </div>
+                                <div class="hint">PNG, JPG up to 5MB</div>
+                                {{ profile_form.profile_picture }}
+                            </div>
+                            {% if user.profile.profile_picture %}
+                                <div class="preview-box">
+                                    <img src="{{ user.profile.profile_picture.url }}" alt="Current">
+                                    <div class="info">
+                                        <div class="name">Current photo</div>
+                                        <div class="size">Click to change</div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if profile_form.profile_picture.errors %}
+                                <div class="error-text"><i class="fas fa-exclamation-circle"></i> {{ profile_form.profile_picture.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row-1">
+                        <div class="field">
+                            <label class="form-label">Bio <span class="text-muted">(Optional)</span></label>
+                            {{ profile_form.bio }}
+                            {% if profile_form.bio.errors %}
+                                <div class="error-text"><i class="fas fa-exclamation-circle"></i> {{ profile_form.bio.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row-2">
+                        <div class="field">
+                            <label class="form-label">Date of Birth <span class="text-muted">(Optional)</span></label>
+                            {{ profile_form.date_of_birth }}
+                            {% if profile_form.date_of_birth.errors %}
+                                <div class="error-text"><i class="fas fa-exclamation-circle"></i> {{ profile_form.date_of_birth.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="field">
+                            <label class="form-label">Gender <span class="text-muted">(Optional)</span></label>
+                            {{ profile_form.gender }}
+                            {% if profile_form.gender.errors %}
+                                <div class="error-text"><i class="fas fa-exclamation-circle"></i> {{ profile_form.gender.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{% url 'Ecom:profile' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Update Profile
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- HELP SIDE -->
+        <div class="help-side">
+
+            <div class="help-card">
+                <div class="help-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <h5>Why Update Profile?</h5>
+                <p>Keep your information current for a better shopping experience.</p>
+                
+                <div class="help-items">
+                    <div class="help-item">
+                        <div class="icon"><i class="fas fa-truck"></i></div>
+                        <div class="text">
+                            <strong>Faster Checkout</strong>
+                            <span>Save time with pre-filled details</span>
+                        </div>
+                    </div>
+                    <div class="help-item">
+                        <div class="icon"><i class="fas fa-gift"></i></div>
+                        <div class="text">
+                            <strong>Personalized Offers</strong>
+                            <span>Get recommendations just for you</span>
+                        </div>
+                    </div>
+                    <div class="help-item">
+                        <div class="icon"><i class="fas fa-shield-alt"></i></div>
+                        <div class="text">
+                            <strong>Secure Account</strong>
+                            <span>Keep your information protected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tips-card">
+                <div class="tips-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <h5>Quick Tips</h5>
+                <p>Make the most of your profile</p>
+                <ul>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        Add a profile photo for recognition
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        Keep your phone number updated
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        Write a bio to personalize your profile
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        Save multiple addresses for convenience
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
+
+<!-- ============================================================
+   JAVASCRIPT
+   ============================================================ -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const firstInput = document.querySelector('input[name="full_name"]');
+    if (firstInput && !firstInput.value) {
+        setTimeout(() => firstInput.focus(), 400);
+    }
+
+    const fileInput = document.querySelector('.upload-zone input[type="file"]');
+    const uploadZone = document.querySelector('.upload-zone');
+    
+    if (fileInput && uploadZone) {
+        uploadZone.addEventListener('click', function(e) {
+            if (e.target.tagName !== 'INPUT') {
+                fileInput.click();
+            }
+        });
+        
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    let preview = document.querySelector('.preview-box');
+                    if (!preview) {
+                        const wrap = document.createElement('div');
+                        wrap.className = 'preview-box';
+                        wrap.innerHTML = `
+                            <img src="${event.target.result}" alt="Preview">
+                            <div class="info">
+                                <div class="name">${file.name}</div>
+                                <div class="size">${(file.size / 1024).toFixed(0)} KB</div>
+                            </div>
+                        `;
+                        uploadZone.parentNode.appendChild(wrap);
+                    } else {
+                        const img = preview.querySelector('img');
+                        const nameEl = preview.querySelector('.name');
+                        const sizeEl = preview.querySelector('.size');
+                        if (img) img.src = event.target.result;
+                        if (nameEl) nameEl.textContent = file.name;
+                        if (sizeEl) sizeEl.textContent = (file.size / 1024).toFixed(0) + ' KB';
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    document.querySelectorAll('.form-control[required]').forEach(field => {
+        field.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.classList.add('error');
+            } else {
+                this.classList.remove('error');
+            }
+        });
+        field.addEventListener('focus', function() {
+            this.classList.remove('error');
+        });
+        field.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('error');
+            }
+        });
+    });
+});
+</script>
+
 {% endblock %}

@@ -1,244 +1,1174 @@
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
-{% block title %}{{ action }} Offer - MyStore{% endblock %}
-
-{% block extra_css %}
-<style>
-    .form-section {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-    }
-    .form-section .section-title {
-        font-weight: 600;
-        color: #1a1a2e;
-        margin-bottom: 15px;
-        font-size: 16px;
-    }
-    .form-section .section-title i {
-        color: #fd7e14;
-        margin-right: 8px;
-    }
-    .image-preview {
-        max-width: 150px;
-        max-height: 150px;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
-        margin-bottom: 10px;
-        object-fit: cover;
-    }
-    .help-text {
-        font-size: 12px;
-        color: #6c757d;
-        margin-top: 4px;
-    }
-</style>
-{% endblock %}
+{% block title %}{{ action }} Offer - ShubhDecor{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>
-                    <i class="fas fa-gift text-warning"></i> 
-                    {{ action }} Offer
-                </h2>
-                <a href="{% url 'Ecom:offer_list' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back
-                </a>
+
+<style>
+/* ============================================ */
+/* RESET & BASE                                */
+/* ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.offer-page {
+    padding: 20px 30px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #f5f3f0;
+    min-height: 100vh;
+}
+
+/* ============================================ */
+/* HEADER - MODERN                             */
+/* ============================================ */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 18px 28px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    border: 1px solid #e8e4e0;
+}
+
+.page-header .left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.page-header .left .icon-wrap {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(145deg, #5c121f, #7a1a2b);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 20px;
+    box-shadow: 0 4px 16px rgba(92,18,31,0.15);
+}
+
+.page-header .left h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0;
+}
+
+.page-header .left h1 .highlight {
+    color: #5c121f;
+}
+
+.page-header .left h1 small {
+    display: block;
+    font-size: 13px;
+    font-weight: 400;
+    color: #6b7280;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 22px;
+    background: #e8e4e0;
+    color: #1a1a2e;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    background: #5c121f;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(92,18,31,0.2);
+}
+
+/* ============================================ */
+/* FORM CARD - MODERN                          */
+/* ============================================ */
+.form-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 32px 36px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+    border: 1px solid #e8e4e0;
+}
+
+/* ============================================ */
+/* SECTIONS - CLEAN                             */
+/* ============================================ */
+.form-section {
+    margin-bottom: 20px;
+    padding: 20px 24px 24px;
+    background: #faf8f6;
+    border-radius: 10px;
+    border: 1px solid #e8e4e0;
+    transition: all 0.3s ease;
+}
+
+.form-section:hover {
+    border-color: rgba(92,18,31,0.15);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+}
+
+.form-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e8e4e0;
+}
+
+.section-title .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: #5c121f;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.section-title i {
+    color: #5c121f;
+    font-size: 16px;
+}
+
+.section-title .tag {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 14px;
+    border-radius: 50px;
+    background: rgba(92,18,31,0.06);
+    color: #5c121f;
+}
+
+/* ============================================ */
+/* FORM ROWS                                    */
+/* ============================================ */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a2e;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.form-group label .required {
+    color: #dc3545;
+}
+
+.form-group label .hint {
+    font-size: 11px;
+    font-weight: 400;
+    color: #6b7280;
+    margin-left: auto;
+}
+
+.form-group .help-text {
+    font-size: 11px;
+    color: #6b7280;
+    margin-top: 3px;
+}
+
+/* ============================================ */
+/* INPUTS - PREMIUM                            */
+/* ============================================ */
+.form-control,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #e8e4e0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1a1a2e;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.form-control:focus,
+.form-select:focus,
+.form-textarea:focus {
+    border-color: #5c121f;
+    box-shadow: 0 0 0 4px rgba(92,18,31,0.06);
+}
+
+.form-control.error,
+.form-select.error,
+.form-textarea.error {
+    border-color: #dc3545;
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 70px;
+}
+
+/* ============================================ */
+/* TOGGLE                                       */
+/* ============================================ */
+.toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-top: 4px;
+}
+
+.toggle {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle .slider {
+    position: absolute;
+    inset: 0;
+    background: #d4d0cc;
+    border-radius: 34px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.toggle .slider::before {
+    content: '';
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background: #ffffff;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.toggle input:checked + .slider {
+    background: #5c121f;
+}
+
+.toggle input:checked + .slider::before {
+    transform: translateX(22px);
+}
+
+.toggle-status {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1a1a2e;
+}
+
+.toggle-status .pill {
+    display: inline-block;
+    padding: 2px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.toggle-status .pill.active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.toggle-status .pill.inactive {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* ============================================ */
+/* IMAGE UPLOAD                                 */
+/* ============================================ */
+.image-wrap {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.image-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 10px;
+    border: 2px dashed #d4d0cc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #faf8f6;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.image-preview:hover {
+    border-color: #5c121f;
+}
+
+.image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-preview .empty {
+    text-align: center;
+    color: #adb5bd;
+}
+
+.image-preview .empty i {
+    display: block;
+    font-size: 30px;
+    margin-bottom: 4px;
+}
+
+.image-preview .empty span {
+    font-size: 11px;
+}
+
+.image-upload {
+    flex: 1;
+    min-width: 180px;
+}
+
+.image-upload .drop {
+    padding: 16px 20px;
+    border: 2px dashed #d4d0cc;
+    border-radius: 10px;
+    background: #faf8f6;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.image-upload .drop:hover {
+    border-color: #5c121f;
+    background: #f5f3f0;
+}
+
+.image-upload .drop input[type="file"] {
+    display: none;
+}
+
+.image-upload .drop label {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.image-upload .drop label i {
+    font-size: 22px;
+    color: #5c121f;
+}
+
+.image-upload .drop label span {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1a1a2e;
+}
+
+.image-upload .drop label small {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+/* ============================================ */
+/* ACTIONS                                      */
+/* ============================================ */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 22px;
+    margin-top: 8px;
+    border-top: 2px solid #e8e4e0;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 30px;
+    border: none;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-cancel {
+    background: #e8e4e0;
+    color: #1a1a2e;
+}
+
+.btn-cancel:hover {
+    background: #d4d0cc;
+    transform: translateY(-1px);
+}
+
+.btn-submit {
+    background: linear-gradient(145deg, #5c121f, #7a1a2b);
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(92,18,31,0.15);
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(92,18,31,0.25);
+}
+
+/* ============================================ */
+/* ERRORS                                       */
+/* ============================================ */
+.error-text {
+    font-size: 12px;
+    color: #dc3545;
+    margin-top: 3px;
+}
+
+/* ============================================ */
+/* RESPONSIVE                                   */
+/* ============================================ */
+
+/* Tablet */
+@media (max-width: 900px) {
+    .offer-page {
+        padding: 15px 20px 30px;
+    }
+    .form-card {
+        padding: 24px 24px;
+    }
+    .page-header {
+        padding: 14px 20px;
+    }
+}
+
+/* Mobile Large */
+@media (max-width: 768px) {
+    .offer-page {
+        padding: 12px 14px 24px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 14px 18px;
+    }
+    .page-header .left h1 {
+        font-size: 19px;
+    }
+    .btn-back {
+        justify-content: center;
+        padding: 8px 16px;
+    }
+    
+    .form-card {
+        padding: 16px 14px 20px;
+        border-radius: 12px;
+    }
+    .form-section {
+        padding: 14px 14px 18px;
+    }
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+    
+    .section-title {
+        font-size: 14px;
+        flex-wrap: wrap;
+    }
+    .section-title .num {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+    .section-title .tag {
+        font-size: 9px;
+        padding: 2px 10px;
+    }
+    
+    .form-control,
+    .form-select,
+    .form-textarea {
+        padding: 9px 12px;
+        font-size: 14px;
+    }
+    
+    .image-wrap {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .image-preview {
+        width: 100%;
+        max-width: 140px;
+        height: 120px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        padding-top: 16px;
+        gap: 8px;
+    }
+    .form-actions .btn {
+        justify-content: center;
+        width: 100%;
+        padding: 10px 20px;
+    }
+    
+    .toggle {
+        width: 42px;
+        height: 24px;
+    }
+    .toggle .slider::before {
+        height: 16px;
+        width: 16px;
+        left: 4px;
+        bottom: 4px;
+    }
+    .toggle input:checked + .slider::before {
+        transform: translateX(18px);
+    }
+}
+
+/* Mobile Small */
+@media (max-width: 480px) {
+    .offer-page {
+        padding: 8px 8px 16px;
+    }
+    
+    .page-header {
+        padding: 10px 12px;
+    }
+    .page-header .left .icon-wrap {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+        border-radius: 8px;
+    }
+    .page-header .left h1 {
+        font-size: 17px;
+    }
+    .page-header .left h1 small {
+        font-size: 11px;
+    }
+    
+    .form-card {
+        padding: 12px 10px 16px;
+    }
+    .form-section {
+        padding: 10px 10px 14px;
+    }
+    
+    .section-title {
+        font-size: 13px;
+    }
+    .section-title .num {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+    }
+    
+    .form-control,
+    .form-select,
+    .form-textarea {
+        font-size: 13px;
+        padding: 7px 10px;
+    }
+    
+    .form-group label {
+        font-size: 12px;
+    }
+    .form-group label .hint {
+        font-size: 10px;
+    }
+    
+    .image-preview {
+        max-width: 100px;
+        height: 100px;
+    }
+    .image-upload .drop {
+        padding: 10px 14px;
+    }
+    .image-upload .drop label i {
+        font-size: 18px;
+    }
+    .image-upload .drop label span {
+        font-size: 12px;
+    }
+    .image-upload .drop label small {
+        font-size: 10px;
+    }
+    
+    .form-actions .btn {
+        font-size: 13px;
+        padding: 8px 16px;
+    }
+    
+    .toggle-wrap {
+        gap: 8px;
+    }
+    .toggle {
+        width: 36px;
+        height: 20px;
+    }
+    .toggle .slider::before {
+        height: 14px;
+        width: 14px;
+        left: 3px;
+        bottom: 3px;
+    }
+    .toggle input:checked + .slider::before {
+        transform: translateX(16px);
+    }
+    .toggle-status {
+        font-size: 12px;
+    }
+    .toggle-status .pill {
+        font-size: 10px;
+        padding: 2px 8px;
+    }
+}
+
+/* ============================================ */
+/* PRINT                                       */
+/* ============================================ */
+@media print {
+    .offer-page {
+        padding: 20px !important;
+        background: #ffffff !important;
+    }
+    .btn-back,
+    .form-actions {
+        display: none !important;
+    }
+    .form-card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+    .form-section {
+        background: #ffffff !important;
+        border: 1px solid #eee !important;
+        page-break-inside: avoid;
+    }
+}
+</style>
+
+<!-- ============================================ -->
+<!-- PAGE                                         -->
+<!-- ============================================ -->
+<div class="offer-page">
+
+    <!-- ===== HEADER ===== -->
+    <div class="page-header">
+        <div class="left">
+            <div class="icon-wrap">
+                <i class="fas fa-gift"></i>
             </div>
-
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data" id="offerForm">
-                        {% csrf_token %}
-                        
-                        <!-- Basic Information -->
-                        <div class="form-section">
-                            <div class="section-title"><i class="fas fa-info-circle"></i> Basic Information</div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Offer Name <span class="text-danger">*</span></label>
-                                    {{ form.name }}
-                                    {% if form.name.errors %}
-                                        <div class="text-danger small">{{ form.name.errors }}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Status</label>
-                                    <div class="form-check mt-2">
-                                        {{ form.is_active }}
-                                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Active</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Offer Type <span class="text-danger">*</span></label>
-                                    {{ form.offer_type }}
-                                    {% if form.offer_type.errors %}
-                                        <div class="text-danger small">{{ form.offer_type.errors }}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Priority</label>
-                                    {{ form.priority }}
-                                    {% if form.priority.errors %}
-                                        <div class="text-danger small">{{ form.priority.errors }}</div>
-                                    {% endif %}
-                                    <div class="help-text">Higher number = higher priority</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Target Selection -->
-                        <div class="form-section" id="targetSection">
-                            <div class="section-title"><i class="fas fa-bullseye"></i> Target</div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3" id="productField">
-                                    <label class="form-label fw-bold">Product</label>
-                                    {{ form.product }}
-                                    {% if form.product.errors %}
-                                        <div class="text-danger small">{{ form.product.errors }}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="col-md-6 mb-3" id="categoryField">
-                                    <label class="form-label fw-bold">Category</label>
-                                    {{ form.category }}
-                                    {% if form.category.errors %}
-                                        <div class="text-danger small">{{ form.category.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Discount Details -->
-                        <div class="form-section">
-                            <div class="section-title"><i class="fas fa-percent"></i> Discount Details</div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Discount Type <span class="text-danger">*</span></label>
-                                    {{ form.discount_type }}
-                                    {% if form.discount_type.errors %}
-                                        <div class="text-danger small">{{ form.discount_type.errors }}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Discount Value <span class="text-danger">*</span></label>
-                                    {{ form.discount_value }}
-                                    {% if form.discount_value.errors %}
-                                        <div class="text-danger small">{{ form.discount_value.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Max Discount</label>
-                                    {{ form.max_discount }}
-                                    {% if form.max_discount.errors %}
-                                        <div class="text-danger small">{{ form.max_discount.errors }}</div>
-                                    {% endif %}
-                                    <div class="help-text">Only for percentage discounts</div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Minimum Order Amount</label>
-                                    {{ form.min_order_amount }}
-                                    {% if form.min_order_amount.errors %}
-                                        <div class="text-danger small">{{ form.min_order_amount.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Validity -->
-                        <div class="form-section">
-                            <div class="section-title"><i class="fas fa-calendar-alt"></i> Validity</div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Valid From <span class="text-danger">*</span></label>
-                                    {{ form.valid_from }}
-                                    {% if form.valid_from.errors %}
-                                        <div class="text-danger small">{{ form.valid_from.errors }}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Valid To <span class="text-danger">*</span></label>
-                                    {{ form.valid_to }}
-                                    {% if form.valid_to.errors %}
-                                        <div class="text-danger small">{{ form.valid_to.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Description & Image -->
-                        <div class="form-section">
-                            <div class="section-title"><i class="fas fa-image"></i> Description & Image</div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Description</label>
-                                {{ form.description }}
-                                {% if form.description.errors %}
-                                    <div class="text-danger small">{{ form.description.errors }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Banner Image</label>
-                                {% if offer and offer.banner_image %}
-                                    <div class="mb-2">
-                                        <img src="{{ offer.banner_image.url }}" alt="{{ offer.name }}" class="image-preview">
-                                    </div>
-                                {% endif %}
-                                {{ form.banner_image }}
-                                {% if form.banner_image.errors %}
-                                    <div class="text-danger small">{{ form.banner_image.errors }}</div>
-                                {% endif %}
-                                <div class="help-text">Recommended size: 800x400px</div>
-                            </div>
-                        </div>
-
-                        <!-- Submit -->
-                        <div class="d-flex justify-content-end gap-2">
-                            <a href="{% url 'Ecom:offer_list' %}" class="btn btn-secondary btn-lg">
-                                <i class="fas fa-times"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-save"></i> 
-                                {% if action == 'Create' %}Create Offer{% else %}Update Offer{% endif %}
-                            </button>
-                        </div>
-                    </form>
-                </div>
+            <div>
+                <h1>
+                    <span class="highlight">{{ action }}</span> Offer
+                    <small>{% if action == 'Create' %}Create a new discount offer{% else %}Update offer details{% endif %}</small>
+                </h1>
             </div>
         </div>
+        <a href="{% url 'Ecom:offer_list' %}" class="btn-back">
+            <i class="fas fa-arrow-left"></i>
+            Back
+        </a>
+    </div>
+
+    <!-- ===== FORM ===== -->
+    <div class="form-card">
+        <form method="POST" enctype="multipart/form-data" id="offerForm">
+            {% csrf_token %}
+
+            <!-- ====================================== -->
+            <!-- SECTION 1: BASIC                       -->
+            <!-- ====================================== -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span class="num">1</span>
+                    <i class="fas fa-info-circle"></i>
+                    Basic Information
+                    <span class="tag">Required</span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>
+                            Offer Name
+                            <span class="required">*</span>
+                            <span class="hint">Max 100</span>
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="error-text">{{ form.name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <div class="toggle-wrap">
+                            <div class="toggle">
+                                {{ form.is_active }}
+                                <span class="slider"></span>
+                            </div>
+                            <span class="toggle-status">
+                                <span class="pill {% if form.instance.is_active %}active{% else %}inactive{% endif %}" id="statusBadge">
+                                    {% if form.instance.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>
+                            Offer Type
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.offer_type }}
+                        {% if form.offer_type.errors %}
+                            <div class="error-text">{{ form.offer_type.errors.0 }}</div>
+                        {% endif %}
+                        <span class="help-text">Apply to products or categories</span>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Priority
+                            <span class="hint">Higher = Higher</span>
+                        </label>
+                        {{ form.priority }}
+                        {% if form.priority.errors %}
+                            <div class="error-text">{{ form.priority.errors.0 }}</div>
+                        {% endif %}
+                        <span class="help-text">Higher number takes precedence</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====================================== -->
+            <!-- SECTION 2: TARGET - NO SEARCH          -->
+            <!-- ====================================== -->
+            <div class="form-section" id="targetSection">
+                <div class="section-title">
+                    <span class="num">2</span>
+                    <i class="fas fa-bullseye"></i>
+                    Target Selection
+                    <span class="tag">Dynamic</span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" id="productField">
+                        <label>
+                            <i class="fas fa-cube" style="color:#5c121f;"></i>
+                            Select Product
+                        </label>
+                        {{ form.product }}
+                        {% if form.product.errors %}
+                            <div class="error-text">{{ form.product.errors.0 }}</div>
+                        {% endif %}
+                        <span class="help-text">Choose a specific product</span>
+                    </div>
+
+                    <div class="form-group" id="categoryField">
+                        <label>
+                            <i class="fas fa-folder" style="color:#f4b400;"></i>
+                            Select Category
+                        </label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <div class="error-text">{{ form.category.errors.0 }}</div>
+                        {% endif %}
+                        <span class="help-text">Choose a category</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====================================== -->
+            <!-- SECTION 3: DISCOUNT                    -->
+            <!-- ====================================== -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span class="num">3</span>
+                    <i class="fas fa-percent"></i>
+                    Discount Configuration
+                    <span class="tag">Core</span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>
+                            Discount Type
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.discount_type }}
+                        {% if form.discount_type.errors %}
+                            <div class="error-text">{{ form.discount_type.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Discount Value
+                            <span class="required">*</span>
+                            <span class="hint">₹ or %</span>
+                        </label>
+                        {{ form.discount_value }}
+                        {% if form.discount_value.errors %}
+                            <div class="error-text">{{ form.discount_value.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>
+                            Maximum Discount
+                            <span class="hint">Optional</span>
+                        </label>
+                        {{ form.max_discount }}
+                        {% if form.max_discount.errors %}
+                            <div class="error-text">{{ form.max_discount.errors.0 }}</div>
+                        {% endif %}
+                        <span class="help-text">Only for percentage discounts</span>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Minimum Order Amount
+                            <span class="hint">Optional</span>
+                        </label>
+                        {{ form.min_order_amount }}
+                        {% if form.min_order_amount.errors %}
+                            <div class="error-text">{{ form.min_order_amount.errors.0 }}</div>
+                        {% endif %}
+                        <span class="help-text">Minimum cart value required</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====================================== -->
+            <!-- SECTION 4: VALIDITY                    -->
+            <!-- ====================================== -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span class="num">4</span>
+                    <i class="fas fa-calendar-alt"></i>
+                    Validity Period
+                    <span class="tag">Schedule</span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>
+                            Valid From
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.valid_from }}
+                        {% if form.valid_from.errors %}
+                            <div class="error-text">{{ form.valid_from.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Valid To
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.valid_to }}
+                        {% if form.valid_to.errors %}
+                            <div class="error-text">{{ form.valid_to.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====================================== -->
+            <!-- SECTION 5: MEDIA                       -->
+            <!-- ====================================== -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span class="num">5</span>
+                    <i class="fas fa-image"></i>
+                    Media &amp; Description
+                    <span class="tag">Optional</span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group full">
+                        <label>Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="error-text">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group full">
+                        <label>Banner Image</label>
+                        <div class="image-wrap">
+                            <div class="image-preview">
+                                {% if offer and offer.banner_image %}
+                                    <img src="{{ offer.banner_image.url }}" alt="{{ offer.name }}">
+                                {% else %}
+                                    <div class="empty">
+                                        <i class="fas fa-image"></i>
+                                        <span>No image</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="image-upload">
+                                <div class="drop">
+                                    <label>
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <span>Upload Image</span>
+                                        <small>PNG, JPG, WEBP • Max 2MB</small>
+                                        {{ form.banner_image }}
+                                    </label>
+                                </div>
+                                {% if form.banner_image.errors %}
+                                    <div class="error-text">{{ form.banner_image.errors.0 }}</div>
+                                {% endif %}
+                                <span class="help-text">Recommended: 800×400px</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====================================== -->
+            <!-- ACTIONS                                 -->
+            <!-- ====================================== -->
+            <div class="form-actions">
+                <a href="{% url 'Ecom:offer_list' %}" class="btn btn-cancel">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-submit">
+                    <i class="fas fa-save"></i>
+                    {% if action == 'Create' %}
+                        Create Offer
+                    {% else %}
+                        Update Offer
+                    {% endif %}
+                </button>
+            </div>
+
+        </form>
     </div>
 </div>
 
+<!-- ============================================ -->
+<!-- JAVASCRIPT                                   -->
+<!-- ============================================ -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const offerType = document.getElementById('offer_type');
-        const productField = document.getElementById('productField');
-        const categoryField = document.getElementById('categoryField');
-        
-        function toggleTargetFields() {
-            const type = offerType.value;
-            if (type === 'product') {
-                productField.style.display = 'block';
-                categoryField.style.display = 'none';
-                document.getElementById('category_select').value = '';
-            } else if (type === 'category') {
-                productField.style.display = 'none';
-                categoryField.style.display = 'block';
-                document.getElementById('product_select').value = '';
-            } else {
-                productField.style.display = 'none';
-                categoryField.style.display = 'none';
-            }
+document.addEventListener('DOMContentLoaded', function() {
+    // ============================================
+    // OFFER TYPE TOGGLE
+    // ============================================
+    const offerType = document.getElementById('offer_type');
+    const productField = document.getElementById('productField');
+    const categoryField = document.getElementById('categoryField');
+
+    function toggleTargetFields() {
+        const type = offerType.value;
+        if (type === 'product') {
+            productField.style.display = 'block';
+            categoryField.style.display = 'none';
+        } else if (type === 'category') {
+            productField.style.display = 'none';
+            categoryField.style.display = 'block';
+        } else {
+            productField.style.display = 'none';
+            categoryField.style.display = 'none';
         }
-        
+    }
+
+    if (offerType) {
         offerType.addEventListener('change', toggleTargetFields);
         toggleTargetFields();
-    });
+    }
+
+    // ============================================
+    // STATUS TOGGLE
+    // ============================================
+    const statusCheck = document.getElementById('is_active');
+    const statusBadge = document.getElementById('statusBadge');
+
+    if (statusCheck && statusBadge) {
+        statusCheck.addEventListener('change', function() {
+            if (this.checked) {
+                statusBadge.textContent = 'Active';
+                statusBadge.className = 'pill active';
+            } else {
+                statusBadge.textContent = 'Inactive';
+                statusBadge.className = 'pill inactive';
+            }
+        });
+    }
+
+    // ============================================
+    // IMAGE PREVIEW
+    // ============================================
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.querySelector('.image-preview');
+                    const empty = preview.querySelector('.empty');
+                    if (empty) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Preview';
+                        preview.innerHTML = '';
+                        preview.appendChild(img);
+                    } else {
+                        const img = preview.querySelector('img');
+                        if (img) img.src = e.target.result;
+                    }
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+
+    // ============================================
+    // FORM VALIDATION
+    // ============================================
+    const form = document.getElementById('offerForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const name = document.getElementById('name');
+            const type = document.getElementById('offer_type');
+            const discType = document.getElementById('discount_type');
+            const discValue = document.getElementById('discount_value');
+            const from = document.getElementById('valid_from');
+            const to = document.getElementById('valid_to');
+
+            let hasError = false;
+
+            document.querySelectorAll('.error-text').forEach(el => el.remove());
+            document.querySelectorAll('.form-control, .form-select, .form-textarea').forEach(el => {
+                el.classList.remove('error');
+            });
+
+            function showError(field, msg) {
+                const parent = field.closest('.form-group');
+                if (parent) {
+                    const err = document.createElement('div');
+                    err.className = 'error-text';
+                    err.textContent = msg;
+                    parent.appendChild(err);
+                    field.classList.add('error');
+                }
+                hasError = true;
+            }
+
+            if (!name.value.trim()) showError(name, 'Offer name is required');
+            if (!type.value) showError(type, 'Please select an offer type');
+            if (!discType.value) showError(discType, 'Please select a discount type');
+            if (!discValue.value || parseFloat(discValue.value) <= 0) {
+                showError(discValue, 'Please enter a valid discount value');
+            }
+            if (!from.value) showError(from, 'Start date is required');
+            if (!to.value) showError(to, 'End date is required');
+
+            if (from.value && to.value) {
+                const d1 = new Date(from.value);
+                const d2 = new Date(to.value);
+                if (d2 <= d1) {
+                    showError(to, 'End date must be after start date');
+                }
+            }
+
+            if (hasError) {
+                e.preventDefault();
+                const first = document.querySelector('.error-text');
+                if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    }
+
+    // ============================================
+    // AUTO-FILL DATES
+    // ============================================
+    const fromInput = document.getElementById('valid_from');
+    const toInput = document.getElementById('valid_to');
+
+    if (fromInput && !fromInput.value) {
+        const now = new Date();
+        fromInput.value = now.toISOString().split('T')[0];
+    }
+
+    if (toInput && !toInput.value) {
+        const d = new Date();
+        d.setMonth(d.getMonth() + 3);
+        toInput.value = d.toISOString().split('T')[0];
+    }
+});
 </script>
+
 {% endblock %}

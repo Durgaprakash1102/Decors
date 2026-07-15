@@ -1,202 +1,951 @@
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
 {% block title %}{{ action }} Coupon - MyStore{% endblock %}
 
-{% block extra_css %}
-<style>
-    .form-section {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-    }
-    .form-section .section-title {
-        font-weight: 600;
-        color: #1a1a2e;
-        margin-bottom: 15px;
-        font-size: 16px;
-    }
-    .form-section .section-title i {
-        color: #0d6efd;
-        margin-right: 8px;
-    }
-    .image-preview {
-        max-width: 150px;
-        max-height: 150px;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
-        margin-bottom: 10px;
-        object-fit: cover;
-    }
-    .help-text {
-        font-size: 12px;
-        color: #6c757d;
-        margin-top: 4px;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>
-                    <i class="fas fa-ticket-alt text-primary"></i> 
+
+<style>
+/* ============================================================
+   COUPON FORM - CLEAN & BEAUTIFUL
+   ============================================================ */
+:root {
+    --cf-primary: #5c121f;
+    --cf-primary-light: #7a1a2b;
+    --cf-secondary: #F4B400;
+    --cf-gold: #c9a84c;
+    --cf-bg: #f5f0eb;
+    --cf-white: #ffffff;
+    --cf-border: #e0d8d0;
+    --cf-text: #1d1d1d;
+    --cf-text-muted: #999;
+    --cf-radius: 14px;
+    --cf-radius-sm: 8px;
+    --cf-font: 'Inter', -apple-system, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: var(--cf-font);
+    background: var(--cf-bg);
+    color: var(--cf-text);
+}
+
+/* ============================================================
+   WRAPPER
+   ============================================================ */
+.cf-main-wrap {
+    width: 100%;
+    padding: 12px 16px 12px;
+    background: var(--cf-bg);
+    min-height: calc(100vh - 180px);
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.cf-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px;
+    background: var(--cf-white);
+    border-radius: var(--cf-radius) var(--cf-radius) 0 0;
+    border: 1px solid var(--cf-border);
+    border-bottom: none;
+    position: relative;
+}
+
+.cf-top-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--cf-secondary), var(--cf-primary), var(--cf-secondary));
+}
+
+.cf-top-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.cf-top-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--cf-primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 16px;
+}
+
+.cf-top-heading {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--cf-text);
+    margin: 0;
+}
+
+.cf-top-heading .cf-heading-sub {
+    font-weight: 400;
+    color: var(--cf-text-muted);
+    font-size: 12px;
+    margin-left: 6px;
+}
+
+.cf-top-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--cf-bg);
+    color: var(--cf-text);
+    border: 1px solid var(--cf-border);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.cf-top-back:hover {
+    background: var(--cf-primary);
+    color: #fff;
+    border-color: var(--cf-primary);
+    transform: translateY(-2px);
+}
+
+/* ============================================================
+   SPLIT LAYOUT
+   ============================================================ */
+.cf-split-box {
+    display: flex;
+    background: var(--cf-white);
+    border-radius: 0 0 var(--cf-radius) var(--cf-radius);
+    border: 1px solid var(--cf-border);
+    border-top: none;
+    min-height: 500px;
+}
+
+/* ============================================================
+   FORM SIDE - SCROLLABLE
+   ============================================================ */
+.cf-form-area {
+    flex: 1;
+    padding: 20px 24px 24px;
+    border-right: 1px solid var(--cf-border);
+    overflow-y: auto;
+    max-height: 600px;
+}
+
+.cf-form-area::-webkit-scrollbar {
+    width: 4px;
+}
+.cf-form-area::-webkit-scrollbar-track {
+    background: transparent;
+}
+.cf-form-area::-webkit-scrollbar-thumb {
+    background: var(--cf-border);
+    border-radius: 10px;
+}
+.cf-form-area::-webkit-scrollbar-thumb:hover {
+    background: var(--cf-primary);
+}
+
+/* ============================================================
+   SIDEBAR - FIXED
+   ============================================================ */
+.cf-side-panel {
+    width: 300px;
+    padding: 20px 18px 24px;
+    background: #faf8f6;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100%;
+}
+
+/* ============================================================
+   SECTIONS
+   ============================================================ */
+.cf-box {
+    background: #faf8f6;
+    border-radius: var(--cf-radius-sm);
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    border: 1px solid var(--cf-border);
+    transition: all 0.3s ease;
+}
+
+.cf-box:last-child {
+    margin-bottom: 0;
+}
+
+.cf-box:hover {
+    border-color: var(--cf-gold);
+    box-shadow: 0 4px 16px rgba(201, 168, 76, 0.06);
+}
+
+.cf-box-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cf-text);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--cf-border);
+}
+
+.cf-box-title .cf-title-icon {
+    color: var(--cf-gold);
+    font-size: 15px;
+    width: 22px;
+    text-align: center;
+}
+
+/* ============================================================
+   BEAUTIFUL FORM FIELDS
+   ============================================================ */
+.cf-field-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.cf-field-row .cf-field {
+    flex: 1;
+    min-width: 180px;
+}
+
+.cf-field {
+    margin-bottom: 0;
+}
+
+.cf-field-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--cf-text);
+    margin-bottom: 6px;
+    display: block;
+}
+
+.cf-field-label .cf-required {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.cf-field-label .cf-optional {
+    font-weight: 400;
+    color: var(--cf-text-muted);
+    font-size: 10px;
+}
+
+/* ============================================================
+   ALL INPUTS - BEAUTIFULLY DESIGNED
+   ============================================================ */
+.cf-input-text,
+.cf-input-number,
+.cf-input-date,
+.cf-select,
+.cf-textarea {
+    width: 100%;
+    padding: 10px 16px;
+    border: 2px solid var(--cf-border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: var(--cf-font);
+    color: var(--cf-text);
+    background: var(--cf-white);
+    transition: all 0.3s ease;
+    outline: none;
+    height: 44px;
+}
+
+.cf-input-text:focus,
+.cf-input-number:focus,
+.cf-input-date:focus,
+.cf-select:focus,
+.cf-textarea:focus {
+    border-color: var(--cf-primary);
+    box-shadow: 0 0 0 4px rgba(92, 18, 31, 0.06);
+}
+
+.cf-input-text:hover,
+.cf-input-number:hover,
+.cf-input-date:hover,
+.cf-select:hover,
+.cf-textarea:hover {
+    border-color: #c8c0b8;
+}
+
+.cf-input-text::placeholder,
+.cf-input-number::placeholder,
+.cf-input-date::placeholder,
+.cf-textarea::placeholder {
+    color: var(--cf-text-muted);
+    font-weight: 300;
+    font-size: 12px;
+}
+
+.cf-input-text:disabled,
+.cf-input-number:disabled {
+    background: #f5f5f5;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* ============================================================
+   TEXTAREA
+   ============================================================ */
+.cf-textarea {
+    min-height: 80px;
+    height: auto;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+/* ============================================================
+   SELECT DROPDOWN
+   ============================================================ */
+.cf-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23999' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+/* ============================================================
+   CHECKBOX
+   ============================================================ */
+.cf-checkbox-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 6px;
+}
+
+.cf-checkbox-wrap .cf-checkbox-input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--cf-primary);
+    cursor: pointer;
+}
+
+.cf-checkbox-wrap .cf-checkbox-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--cf-text);
+    cursor: pointer;
+}
+
+/* ============================================================
+   FILE UPLOAD
+   ============================================================ */
+.cf-file-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+/* ===========================
+   MODERN CLEAN FORM FIELDS
+=========================== */
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"],
+input[type="url"],
+input[type="tel"],
+select,
+textarea{
+    width:100%;
+    padding:12px 16px;
+    background:#ffffff;
+    border:1px solid #dcdfe4;
+    border-radius:10px;
+    font-size:14px;
+    color:#2d3748;
+    outline:none;
+    transition:all .25s ease;
+    box-sizing:border-box;
+}
+
+/* Focus */
+
+input:focus,
+select:focus,
+textarea:focus{
+    background:#ffffff;
+    border-color:#5c121f;
+    box-shadow:0 0 0 3px rgba(92,18,31,.08);
+}
+
+/* Hover */
+
+input:hover,
+select:hover,
+textarea:hover{
+    border-color:#b5bcc7;
+}
+
+/* Placeholder */
+
+input::placeholder,
+textarea::placeholder{
+    color:#9aa0a6;
+}
+
+/* Textarea */
+
+textarea{
+    min-height:110px;
+    resize:vertical;
+}
+
+/* Select */
+
+select{
+    appearance:none;
+    cursor:pointer;
+    padding-right:40px;
+    background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath fill='%23666' d='M2 4l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 15px center;
+}
+
+/* Checkbox */
+
+input[type="checkbox"]{
+    width:18px;
+    height:18px;
+    accent-color:#5c121f;
+}
+
+/* File */
+
+input[type="file"]{
+    padding:10px;
+    border:1px dashed #cfd6dd;
+    border-radius:10px;
+    background:#fff;
+}
+
+input[type="file"]:hover{
+    border-color:#5c121f;
+}
+.cf-file-preview .cf-preview-img {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: var(--cf-radius-sm);
+    border: 2px solid var(--cf-border);
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.cf-file-preview .cf-preview-img:hover {
+    border-color: var(--cf-primary);
+    transform: scale(1.03);
+}
+
+.cf-file-upload {
+    border: 2px dashed var(--cf-border);
+    border-radius: var(--cf-radius-sm);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--cf-bg);
+    position: relative;
+}
+
+.cf-file-upload:hover {
+    border-color: var(--cf-primary);
+    background: rgba(92, 18, 31, 0.02);
+}
+
+.cf-file-upload .cf-upload-icon {
+    font-size: 30px;
+    color: var(--cf-text-muted);
+    margin-bottom: 6px;
+}
+
+.cf-file-upload .cf-upload-text {
+    font-size: 12px;
+    color: var(--cf-text-light);
+}
+
+.cf-file-upload .cf-upload-text strong {
+    color: var(--cf-primary);
+}
+
+.cf-file-upload .cf-upload-hint {
+    font-size: 10px;
+    color: var(--cf-text-muted);
+    margin-top: 3px;
+}
+
+.cf-file-upload .cf-file-input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* ============================================================
+   HELP & ERROR
+   ============================================================ */
+.cf-field-help {
+    font-size: 10px;
+    color: var(--cf-text-muted);
+    margin-top: 4px;
+}
+
+.cf-field-error {
+    font-size: 12px;
+    color: #dc2626;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+}
+
+/* ============================================================
+   SIDEBAR TIPS
+   ============================================================ */
+.cf-side-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--cf-text);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--cf-border);
+}
+
+.cf-side-title .cf-side-icon {
+    color: var(--cf-gold);
+}
+
+.cf-tip-card {
+    background: var(--cf-white);
+    border-radius: var(--cf-radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid var(--cf-border);
+    transition: all 0.3s ease;
+}
+
+.cf-tip-card:last-child {
+    margin-bottom: 0;
+}
+
+.cf-tip-card:hover {
+    border-color: var(--cf-gold);
+    transform: translateX(4px);
+}
+
+.cf-tip-card .cf-tip-icon {
+    color: var(--cf-gold);
+    font-size: 14px;
+    margin-right: 6px;
+}
+
+.cf-tip-card .cf-tip-heading {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--cf-text);
+    margin-bottom: 2px;
+}
+
+.cf-tip-card .cf-tip-description {
+    font-size: 10px;
+    color: var(--cf-text-light);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.cf-side-footer {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 2px solid var(--cf-border);
+}
+
+.cf-stats-wrapper {
+    background: var(--cf-white);
+    border-radius: var(--cf-radius-sm);
+    padding: 10px 14px;
+    border: 1px solid var(--cf-border);
+}
+
+.cf-stats-wrapper .cf-stats-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--cf-secondary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cf-text);
+    font-weight: 700;
+    font-size: 11px;
+    flex-shrink: 0;
+}
+
+.cf-stats-wrapper .cf-stats-heading {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--cf-text);
+}
+
+.cf-stats-wrapper .cf-stats-sub {
+    font-size: 9px;
+    color: var(--cf-text-muted);
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.cf-actions-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 2px solid var(--cf-border);
+}
+
+.cf-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-radius: var(--cf-radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-family: var(--cf-font);
+}
+
+.cf-btn-save {
+    background: var(--cf-primary);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(92, 18, 31, 0.15);
+}
+.cf-btn-save:hover {
+    background: var(--cf-primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(92, 18, 31, 0.25);
+    color: #fff;
+}
+
+.cf-btn-cancel {
+    background: var(--cf-bg);
+    color: var(--cf-text);
+    border: 1px solid var(--cf-border);
+}
+.cf-btn-cancel:hover {
+    background: var(--cf-border);
+    transform: translateY(-2px);
+    color: var(--cf-text);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 992px) {
+    .cf-split-box { flex-direction: column; }
+    .cf-form-area { border-right: none; border-bottom: 1px solid var(--cf-border); padding: 16px 18px; max-height: none; overflow-y: visible; }
+    .cf-side-panel { width: 100%; padding: 16px 18px; position: static; }
+    .cf-main-wrap { min-height: auto; padding: 8px 10px 8px; }
+}
+
+@media (max-width: 768px) {
+    .cf-main-wrap { padding: 6px 6px 6px; }
+    .cf-top-bar { flex-direction: column; align-items: flex-start; padding: 12px 14px; }
+    .cf-top-left { width: 100%; }
+    .cf-top-back { width: 100%; justify-content: center; margin-top: 4px; }
+    .cf-form-area { padding: 12px 14px; }
+    .cf-side-panel { padding: 12px 14px; }
+    .cf-box { padding: 12px 14px; }
+    .cf-input-text, .cf-input-number, .cf-input-date, .cf-select { height: 38px; font-size: 12px; padding: 7px 12px; }
+    .cf-textarea { font-size: 12px; padding: 7px 12px; min-height: 60px; }
+    .cf-field-row { flex-direction: column; gap: 10px; }
+    .cf-field-row .cf-field { min-width: auto; }
+    .cf-actions-row { flex-direction: column-reverse; }
+    .cf-btn { justify-content: center; width: 100%; }
+}
+
+@media (max-width: 480px) {
+    .cf-top-bar { padding: 10px 12px; }
+    .cf-top-heading { font-size: 14px; }
+    .cf-top-icon { width: 32px; height: 32px; font-size: 14px; }
+    .cf-form-area { padding: 10px 10px; }
+    .cf-side-panel { padding: 10px 10px; }
+    .cf-box { padding: 10px 10px; margin-bottom: 8px; }
+    .cf-box-title { font-size: 12px; }
+    .cf-btn { font-size: 12px; padding: 6px 14px; }
+}
+</style>
+
+<!-- ============================================================
+   HTML - COUPON FORM
+   ============================================================ -->
+<div class="cf-main-wrap">
+
+    <!-- HEADER -->
+    <div class="cf-top-bar">
+        <div class="cf-top-left">
+            <div class="cf-top-icon">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <div>
+                <h1 class="cf-top-heading">
                     {{ action }} Coupon
-                </h2>
-                <a href="{% url 'Ecom:coupon_list' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back
-                </a>
+                    <span class="cf-heading-sub">{% if action == 'Create' %}New{% else %}Update{% endif %}</span>
+                </h1>
+            </div>
+        </div>
+        <a href="{% url 'Ecom:coupon_list' %}" class="cf-top-back">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <!-- SPLIT LAYOUT -->
+    <div class="cf-split-box">
+
+        <!-- FORM SIDE -->
+        <div class="cf-form-area">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Basic Information -->
+                <div class="cf-box">
+                    <div class="cf-box-title">
+                        <i class="cf-title-icon fas fa-info-circle"></i> Basic Info
+                    </div>
+                    <div class="cf-field-row">
+                        <div class="cf-field">
+                            <label class="cf-field-label">Coupon Code <span class="cf-required">*</span></label>
+                            {{ form.code }}
+                            {% if form.code.errors %}
+                                <div class="cf-field-error"><i class="fas fa-exclamation-circle"></i> {{ form.code.errors|join:", " }}</div>
+                            {% endif %}
+                            <div class="cf-field-help">Auto uppercase</div>
+                        </div>
+                        <div class="cf-field">
+                            <label class="cf-field-label">Status</label>
+                            <div class="cf-checkbox-wrap">
+                                {{ form.is_active }}
+                                <label class="cf-checkbox-label" for="{{ form.is_active.id_for_label }}">Active</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discount Details -->
+                <div class="cf-box">
+                    <div class="cf-box-title">
+                        <i class="cf-title-icon fas fa-percent"></i> Discount
+                    </div>
+                    <div class="cf-field-row">
+                        <div class="cf-field">
+                            <label class="cf-field-label">Discount Type <span class="cf-required">*</span></label>
+                            {{ form.discount_type }}
+                            {% if form.discount_type.errors %}
+                                <div class="cf-field-error"><i class="fas fa-exclamation-circle"></i> {{ form.discount_type.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="cf-field">
+                            <label class="cf-field-label">Discount Value <span class="cf-required">*</span></label>
+                            {{ form.discount_value }}
+                            {% if form.discount_value.errors %}
+                                <div class="cf-field-error"><i class="fas fa-exclamation-circle"></i> {{ form.discount_value.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="cf-field-row" style="margin-top:8px;">
+                        <div class="cf-field">
+                            <label class="cf-field-label">Max Discount</label>
+                            {{ form.max_discount }}
+                            {% if form.max_discount.errors %}
+                                <div class="cf-field-error"><i class="fas fa-exclamation-circle"></i> {{ form.max_discount.errors|join:", " }}</div>
+                            {% endif %}
+                            <div class="cf-field-help">For percentage discounts</div>
+                        </div>
+                        <div class="cf-field">
+                            <label class="cf-field-label">Min Order Amount</label>
+                            {{ form.min_order_amount }}
+                            {% if form.min_order_amount.errors %}
+                                <div class="cf-field-error"><i class="fas fa-exclamation-circle"></i> {{ form.min_order_amount.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Usage Limits -->
+                <div class="cf-box">
+                    <div class="cf-box-title">
+                        <i class="cf-title-icon fas fa-users"></i> Usage
+                    </div>
+                    <div class="cf-field-row">
+                        <div class="cf-field">
+                            <label class="cf-field-label">Usage Limit</label>
+                            {{ form.usage_limit }}
+                            {% if form.usage_limit.errors %}
+                                <div class="cf-field-error"><i class="fas fa-exclamation-circle"></i> {{ form.usage_limit.errors|join:", " }}</div>
+                            {% endif %}
+                            <div class="cf-field-help">Leave empty for unlimited</div>
+                        </div>
+                        <div class="cf-field">
+                            <label class="cf-field-label">Used Count</label>
+                            <input type="number" class="cf-input-number" value="{{ coupon.used_count|default:'0' }}" disabled>
+                            <div class="cf-field-help">Auto-incremented</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Validity -->
+                <div class="cf-box">
+                    <div class="cf-box-title">
+                        <i class="cf-title-icon fas fa-calendar-alt"></i> Validity
+                    </div>
+                    <div class="cf-field-row">
+                        <div class="cf-field">
+                            <label class="cf-field-label">Valid From <span class="cf-required">*</span></label>
+                            {{ form.valid_from }}
+                            {% if form.valid_from.errors %}
+                                <div class="cf-field-error"><i class="fas fa-exclamation-circle"></i> {{ form.valid_from.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="cf-field">
+                            <label class="cf-field-label">Valid To <span class="cf-required">*</span></label>
+                            {{ form.valid_to }}
+                            {% if form.valid_to.errors %}
+                                <div class="cf-field-error"><i class="fas fa-exclamation-circle"></i> {{ form.valid_to.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description & Image -->
+                <div class="cf-box">
+                    <div class="cf-box-title">
+                        <i class="cf-title-icon fas fa-image"></i> Description & Image
+                    </div>
+                    <div class="cf-field">
+                        <label class="cf-field-label">Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="cf-field-error"><i class="fas fa-exclamation-circle"></i> {{ form.description.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="cf-field" style="margin-top:10px;">
+                        <label class="cf-field-label">Coupon Image</label>
+                        {% if coupon and coupon.image %}
+                            <div class="cf-file-preview">
+                                <img class="cf-preview-img" src="{{ coupon.image.url }}" alt="{{ coupon.code }}">
+                            </div>
+                        {% endif %}
+                        <div class="cf-file-upload" onclick="document.getElementById('id_image').click()">
+                            <div class="cf-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                            <div class="cf-upload-text"><strong>Click to upload</strong> or drag and drop</div>
+                            <div class="cf-upload-hint">Recommended: 400x200px</div>
+                            {{ form.image }}
+                        </div>
+                        {% if form.image.errors %}
+                            <div class="cf-field-error"><i class="fas fa-exclamation-circle"></i> {{ form.image.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="cf-actions-row">
+                    <a href="{% url 'Ecom:coupon_list' %}" class="cf-btn cf-btn-cancel">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="cf-btn cf-btn-save">
+                        <i class="fas fa-save"></i> 
+                        {% if action == 'Create' %}Create Coupon{% else %}Update Coupon{% endif %}
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="cf-side-panel">
+            <div class="cf-side-title">
+                <i class="cf-side-icon fas fa-lightbulb"></i> Quick Tips
             </div>
 
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <!-- Basic Information -->
-                        <div class="form-section">
-                            <div class="section-title"><i class="fas fa-info-circle"></i> Basic Information</div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Coupon Code <span class="text-danger">*</span></label>
-                                    {{ form.code }}
-                                    {% if form.code.errors %}
-                                        <div class="text-danger small">{{ form.code.errors }}</div>
-                                    {% endif %}
-                                    <div class="help-text">Will be automatically converted to uppercase</div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Status</label>
-                                    <div class="form-check mt-2">
-                                        {{ form.is_active }}
-                                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">Active</label>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="cf-tip-card">
+                <div>
+                    <span class="cf-tip-icon"><i class="fas fa-tag"></i></span>
+                    <span class="cf-tip-heading">Unique Code</span>
+                </div>
+                <p class="cf-tip-description">Create a memorable coupon code customers can easily remember.</p>
+            </div>
+
+            <div class="cf-tip-card">
+                <div>
+                    <span class="cf-tip-icon"><i class="fas fa-clock"></i></span>
+                    <span class="cf-tip-heading">Set Expiry</span>
+                </div>
+                <p class="cf-tip-description">Always set an expiry date to create urgency.</p>
+            </div>
+
+            <div class="cf-tip-card">
+                <div>
+                    <span class="cf-tip-icon"><i class="fas fa-chart-line"></i></span>
+                    <span class="cf-tip-heading">Track Usage</span>
+                </div>
+                <p class="cf-tip-description">Monitor usage to understand what offers work best.</p>
+            </div>
+
+            <div class="cf-side-footer">
+                <div class="cf-stats-wrapper">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div class="cf-stats-icon">%</div>
+                        <div>
+                            <div class="cf-stats-heading">Discount Stats</div>
+                            <div class="cf-stats-sub">Max discount applies automatically</div>
                         </div>
-
-                        <!-- Discount Details -->
-                        <div class="form-section">
-                            <div class="section-title"><i class="fas fa-percent"></i> Discount Details</div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Discount Type <span class="text-danger">*</span></label>
-                                    {{ form.discount_type }}
-                                    {% if form.discount_type.errors %}
-                                        <div class="text-danger small">{{ form.discount_type.errors }}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Discount Value <span class="text-danger">*</span></label>
-                                    {{ form.discount_value }}
-                                    {% if form.discount_value.errors %}
-                                        <div class="text-danger small">{{ form.discount_value.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Max Discount</label>
-                                    {{ form.max_discount }}
-                                    {% if form.max_discount.errors %}
-                                        <div class="text-danger small">{{ form.max_discount.errors }}</div>
-                                    {% endif %}
-                                    <div class="help-text">Only for percentage discounts</div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Minimum Order Amount</label>
-                                    {{ form.min_order_amount }}
-                                    {% if form.min_order_amount.errors %}
-                                        <div class="text-danger small">{{ form.min_order_amount.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Usage Limits -->
-                        <div class="form-section">
-                            <div class="section-title"><i class="fas fa-users"></i> Usage Limits</div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Usage Limit</label>
-                                    {{ form.usage_limit }}
-                                    {% if form.usage_limit.errors %}
-                                        <div class="text-danger small">{{ form.usage_limit.errors }}</div>
-                                    {% endif %}
-                                    <div class="help-text">Leave empty for unlimited uses</div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Used Count</label>
-                                    <input type="number" class="form-control" value="{{ coupon.used_count|default:'0' }}" disabled readonly>
-                                    <div class="help-text">Auto-incremented when coupon is used</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Validity -->
-                        <div class="form-section">
-                            <div class="section-title"><i class="fas fa-calendar-alt"></i> Validity</div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Valid From <span class="text-danger">*</span></label>
-                                    {{ form.valid_from }}
-                                    {% if form.valid_from.errors %}
-                                        <div class="text-danger small">{{ form.valid_from.errors }}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Valid To <span class="text-danger">*</span></label>
-                                    {{ form.valid_to }}
-                                    {% if form.valid_to.errors %}
-                                        <div class="text-danger small">{{ form.valid_to.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Description & Image -->
-                        <div class="form-section">
-                            <div class="section-title"><i class="fas fa-image"></i> Description & Image</div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Description</label>
-                                {{ form.description }}
-                                {% if form.description.errors %}
-                                    <div class="text-danger small">{{ form.description.errors }}</div>
-                                {% endif %}
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Coupon Image</label>
-                                {% if coupon and coupon.image %}
-                                    <div class="mb-2">
-                                        <img src="{{ coupon.image.url }}" alt="{{ coupon.code }}" class="image-preview">
-                                    </div>
-                                {% endif %}
-                                {{ form.image }}
-                                {% if form.image.errors %}
-                                    <div class="text-danger small">{{ form.image.errors }}</div>
-                                {% endif %}
-                                <div class="help-text">Recommended size: 400x200px</div>
-                            </div>
-                        </div>
-
-                        <!-- Submit -->
-                        <div class="d-flex justify-content-end gap-2">
-                            <a href="{% url 'Ecom:coupon_list' %}" class="btn btn-secondary btn-lg">
-                                <i class="fas fa-times"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-save"></i> 
-                                {% if action == 'Create' %}Create Coupon{% else %}Update Coupon{% endif %}
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const codeInput = document.getElementById('id_code');
+        if (codeInput) {
+            codeInput.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        }
+    });
+</script>
+
 {% endblock %}
