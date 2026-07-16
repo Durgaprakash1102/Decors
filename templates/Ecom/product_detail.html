@@ -1724,6 +1724,57 @@
         </div>
         {% endif %}
 
+
+        <!-- ============================================ -->
+<!-- RECENTLY VIEWED PRODUCTS                     -->
+<!-- ============================================ -->
+{% if recently_viewed_products %}
+<div class="recently-viewed">
+    <h3 class="section-title">
+        <i class="fas fa-history text-primary me-2"></i>
+        Recently Viewed
+    </h3>
+    <div class="recently-grid">
+        {% for viewed_product in recently_viewed_products %}
+            <div class="recently-card">
+                <div class="card-img">
+                    <a href="{% url 'Ecom:product_detail' viewed_product.id %}">
+                        {% if viewed_product.main_image %}
+                            <img src="{{ viewed_product.main_image }}" alt="{{ viewed_product.name }}" loading="lazy">
+                        {% else %}
+                            <div class="no-img"><i class="fas fa-image"></i></div>
+                        {% endif %}
+                    </a>
+                    {% if viewed_product.discount_percentage > 0 %}
+                        <span class="badge-tag" style="position:absolute;top:8px;left:8px;background:#dc3545;color:white;padding:2px 10px;border-radius:10px;font-size:10px;font-weight:600;z-index:2;">
+                            -{{ viewed_product.discount_percentage|floatformat:0 }}%
+                        </span>
+                    {% endif %}
+                    {% if viewed_product.is_out_of_stock %}
+                        <span class="badge-stock" style="position:absolute;bottom:8px;right:8px;background:#f8d7da;color:#721c24;padding:2px 10px;border-radius:10px;font-size:9px;font-weight:600;z-index:2;">
+                            Out of Stock
+                        </span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'Ecom:product_detail' viewed_product.id %}" class="card-title">
+                        {{ viewed_product.name|truncatechars:25 }}
+                    </a>
+                    <div class="card-price">
+                        ₹{{ viewed_product.final_price|floatformat:2 }}
+                        {% if viewed_product.discount_percentage > 0 %}
+                            <span class="original">₹{{ viewed_product.price }}</span>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'Ecom:product_detail' viewed_product.id %}" class="btn-view-sm">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
     </div>
 </div>
 

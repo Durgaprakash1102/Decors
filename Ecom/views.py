@@ -946,6 +946,20 @@ def product_detail_view(request, product_id):
     variants = product.variants.filter(is_active=True)
     
     # ============================================
+    # GET RECENTLY VIEWED PRODUCTS (excluding current)
+    # ============================================
+    recently_viewed_products = []
+    if request.user.is_authenticated:
+        # Use the class method to get recently viewed
+        recently_viewed_items = RecentlyViewed.get_recently_viewed(request.user, limit=10)
+        
+        # Exclude current product and get product objects
+        recently_viewed_products = [
+            item.product for item in recently_viewed_items 
+            if item.product.id != product.id
+        ]
+    
+    # ============================================
     # CHECK IF PRODUCT IS IN CART OR WISHLIST
     # ============================================
     in_cart = False
@@ -975,13 +989,13 @@ def product_detail_view(request, product_id):
         'reviews': reviews,
         'similar_products': similar_products,
         'variants': variants,
+        'recently_viewed_products': recently_viewed_products,  # ✅ Make sure this is here
         'in_cart': in_cart,
         'cart_item_id': cart_item_id,
         'in_wishlist': in_wishlist,
         'wishlist_item_id': wishlist_item_id,
     }
     return render(request, 'Ecom/product_detail.html', context)
-
 # ==================== PRODUCT DETAIL VIEW (Admin) ====================
 
 @login_required
