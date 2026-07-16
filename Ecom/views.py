@@ -655,16 +655,497 @@ def set_default_address_view(request, address_id):
     return redirect('Ecom:profile')
 
 # ==================== ADMIN DASHBOARD ====================
+# views.py - Complete admin_dashboard_view with all analytics
+
+from django.db.models import Sum, Count, Avg, Q, F, Max, Min
+from django.db.models.functions import TruncMonth, TruncDay, TruncWeek, ExtractHour
+from datetime import datetime, timedelta
+import calendar
+from decimal import Decimal
+
 @login_required
 def admin_dashboard_view(request):
     if not request.user.is_admin:
         messages.error(request, 'Access denied. Admin only.')
         return redirect('Ecom:home')
     
+    # ============================================
+    # GET FILTER PARAMETERS
+    # ============================================
+    filter_type = request.GET.get('filter_type', 'month')
+    selected_month = request.GET.get('selected_month', '')
+    selected_date = request.GET.get('selected_date', '')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    
+    # ============================================
+    # BASE QUERYSETS
+    # ============================================
+    # For orders - exclude pending payment orders
+    orders = Order.objects.exclude(payment_status='pending').exclude(status='failed')
+    all_orders = Order.objects.all()
+    
+    # Apply date filters
+    if filter_type == 'month' and selected_month:
+        try:
+            year, month = selected_month.split('-')
+            year, month = int(year), int(month)
+            start_date = datetime(year, month, 1)
+            if month == 12:
+                end_date = datetime(year + 1, 1, 1)
+            else:
+                end_date = datetime(year, month + 1, 1)
+            orders = orders.filter(created_at__gte=start_date, created_at__lt=end_date)
+            all_orders = all_orders.filter(created_at__gte=start_date, created_at__lt=end_date)
+        except (ValueError, IndexError):
+            pass
+    
+    elif filter_type == 'date' and selected_date:
+        try:
+            date_obj = datetime.strptime(selected_date, '%Y-%m-%d')
+            orders = orders.filter(created_at__date=date_obj.date())
+            all_orders = all_orders.filter(created_at__date=date_obj.date())
+        except ValueError:
+            pass
+    
+    elif filter_type == 'custom' and date_from and date_to:
+        try:
+            from_date = datetime.strptime(date_from, '%Y-%m-%d')
+            to_date = datetime.strptime(date_to, '%Y-%m-%d') + timedelta(days=1)
+            orders = orders.filter(created_at__gte=from_date, created_at__lt=to_date)
+            all_orders = all_orders.filter(created_at__gte=from_date, created_at__lt=to_date)
+        except ValueError:
+            pass
+    
+    # ============================================
+    # ORDER STATISTICS
+    # ============================================
+    total_orders = orders.count()
+    total_revenue = orders.aggregate(total=Sum('total_amount'))['total'] or Decimal('0')
+    avg_order_value = orders.aggregate(avg=Avg('total_amount'))['avg'] or Decimal('0')
+    
+    # Order status breakdown
+    status_counts = {
+        'pending': all_orders.filter(status='pending').count(),
+        'processing': orders.filter(status='processing').count(),
+        'shipped': orders.filter(status='shipped').count(),
+        'delivered': orders.filter(status='delivered').count(),
+        'cancelled': orders.filter(status='cancelled').count(),
+        'failed': all_orders.filter(status='failed').count(),
+    }
+    
+    # Payment status breakdown
+    payment_counts = {
+        'pending': all_orders.filter(payment_status='pending').count(),
+        'paid': orders.filter(payment_status='paid').count(),
+        'refunded': orders.filter(payment_status='refunded').count(),
+        'failed': all_orders.filter(payment_status='failed').count(),
+    }
+    
+    # ============================================
+    # ANALYTICS DASHBOARD
+    # ============================================
+    
+    # 1. Revenue Over Time (Monthly)
+    revenue_over_time = Order.objects.exclude(
+        payment_status='pending'
+    ).exclude(
+        status='failed'
+    ).annotate(
+        month=TruncMonth('created_at')
+    ).values('month').annotate(
+        total=Sum('total_amount'),
+        count=Count('id')
+    ).order_by('month')[:12]
+    
+    # 2. Daily Revenue (Current Month)
+    daily_revenue = Order.objects.exclude(
+        payment_status='pending'
+    ).exclude(
+        status='failed'
+    ).filter(
+        created_at__month=datetime.now().month,
+        created_at__year=datetime.now().year
+    ).annotate(
+        day=TruncDay('created_at')
+    ).values('day').annotate(
+        total=Sum('total_amount'),
+        count=Count('id')
+    ).order_by('day')
+    
+    # 3. Hourly Sales Distribution (SQLite Compatible)
+    hourly_sales = []
+    try:
+        # For SQLite, we need to use raw SQL or filter differently
+        # Get today's orders and group by hour in Python
+        today_orders = Order.objects.exclude(
+            payment_status='pending'
+        ).exclude(
+            status='failed'
+        ).filter(
+            created_at__date=datetime.now().date()
+        )
+        
+        hourly_counts = {}
+        hourly_revenues = {}
+        for order in today_orders:
+            hour = order.created_at.hour
+            hourly_counts[hour] = hourly_counts.get(hour, 0) + 1
+            hourly_revenues[hour] = hourly_revenues.get(hour, 0) + float(order.total_amount)
+        
+        for hour in range(24):
+            hourly_sales.append({
+                'hour': hour,
+                'count': hourly_counts.get(hour, 0),
+                'total': hourly_revenues.get(hour, 0)
+            })
+    except Exception:
+        hourly_sales = []
+    
+    # 4. Top Selling Products (by quantity)
+    top_products = OrderItem.objects.filter(
+        order__in=orders
+    ).values(
+        'product_id', 'product_name'
+    ).annotate(
+        total_quantity=Sum('quantity'),
+        total_revenue=Sum('total')
+    ).order_by('-total_quantity')[:10]
+    
+    # 5. Top Selling Products (by revenue)
+    top_products_by_revenue = OrderItem.objects.filter(
+        order__in=orders
+    ).values(
+        'product_id', 'product_name'
+    ).annotate(
+        total_quantity=Sum('quantity'),
+        total_revenue=Sum('total')
+    ).order_by('-total_revenue')[:10]
+    
+    # 6. Category Performance
+    category_performance = OrderItem.objects.filter(
+        order__in=orders,
+        product__category__isnull=False
+    ).values(
+        'product__category__name'
+    ).annotate(
+        total_quantity=Sum('quantity'),
+        total_revenue=Sum('total'),
+        order_count=Count('order', distinct=True)
+    ).order_by('-total_revenue')[:10]
+    
+    # 7. Monthly Orders Summary
+    monthly_summary = Order.objects.exclude(
+        payment_status='pending'
+    ).exclude(
+        status='failed'
+    ).annotate(
+        month=TruncMonth('created_at')
+    ).values('month').annotate(
+        total_orders=Count('id'),
+        total_revenue=Sum('total_amount'),
+        avg_order_value=Avg('total_amount')
+    ).order_by('-month')[:12]
+    
+    # ============================================
+    # USER ANALYTICS
+    # ============================================
+    
+    total_customers = User.objects.filter(role='customer').count()
+    total_admins = User.objects.filter(role='admin').count()
+    total_users = User.objects.count()
+    
+    new_users_last_30_days = User.objects.filter(
+        created_at__gte=datetime.now() - timedelta(days=30)
+    ).count()
+    
+    # Most Active Users
+    most_active_users = User.objects.filter(
+        role='customer',
+        orders__in=orders
+    ).annotate(
+        order_count=Count('orders'),
+        total_spent=Sum('orders__total_amount'),
+        last_order=Max('orders__created_at')
+    ).filter(
+        order_count__gt=0
+    ).order_by('-order_count')[:10]
+    
+    # Top Users by Orders
+    top_users_by_orders = User.objects.filter(
+        role='customer'
+    ).annotate(
+        order_count=Count('orders'),
+        total_spent=Sum('orders__total_amount'),
+        avg_spent=Avg('orders__total_amount')
+    ).filter(
+        order_count__gt=0
+    ).order_by('-order_count')[:10]
+    
+    # Top Users by Revenue
+    top_users_by_revenue = User.objects.filter(
+        role='customer'
+    ).annotate(
+        order_count=Count('orders'),
+        total_spent=Sum('orders__total_amount')
+    ).filter(
+        total_spent__gt=0
+    ).order_by('-total_spent')[:10]
+    
+    # User Registration Trend
+    user_registration_trend = User.objects.filter(
+        created_at__gte=datetime.now() - timedelta(days=180)
+    ).annotate(
+        month=TruncMonth('created_at')
+    ).values('month').annotate(
+        count=Count('id')
+    ).order_by('month')
+    
+    # User Roles Distribution
+    user_roles = User.objects.values('role').annotate(
+        count=Count('id')
+    )
+    
+    # Active Users
+    active_users_last_30_days = User.objects.filter(
+        last_login__gte=datetime.now() - timedelta(days=30)
+    ).count()
+    
+    # Inactive Users
+    inactive_users = User.objects.filter(
+        Q(last_login__lt=datetime.now() - timedelta(days=90)) | 
+        Q(last_login__isnull=True)
+    ).count()
+    
+    # ============================================
+    # REVIEW ANALYTICS
+    # ============================================
+    
+    total_reviews = ProductReview.objects.count()
+    approved_reviews = ProductReview.objects.filter(is_approved=True).count()
+    pending_reviews = ProductReview.objects.filter(is_approved=False).count()
+    verified_reviews = ProductReview.objects.filter(is_verified_purchase=True).count()
+    
+    avg_rating = ProductReview.objects.filter(is_approved=True).aggregate(
+        avg=Avg('rating')
+    )['avg'] or 0
+    
+    rating_distribution = {
+        1: ProductReview.objects.filter(rating=1, is_approved=True).count(),
+        2: ProductReview.objects.filter(rating=2, is_approved=True).count(),
+        3: ProductReview.objects.filter(rating=3, is_approved=True).count(),
+        4: ProductReview.objects.filter(rating=4, is_approved=True).count(),
+        5: ProductReview.objects.filter(rating=5, is_approved=True).count(),
+    }
+    
+    most_reviewed_products = Product.objects.annotate(
+        review_count=Count('reviews', filter=Q(reviews__is_approved=True)),
+        avg_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True))
+    ).filter(
+        review_count__gt=0
+    ).order_by('-review_count')[:10]
+    
+    highest_rated_products = Product.objects.annotate(
+        review_count=Count('reviews', filter=Q(reviews__is_approved=True)),
+        avg_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True))
+    ).filter(
+        review_count__gt=2
+    ).order_by('-avg_rating')[:10]
+    
+    review_trend = ProductReview.objects.filter(
+        created_at__gte=datetime.now() - timedelta(days=180)
+    ).annotate(
+        month=TruncMonth('created_at')
+    ).values('month').annotate(
+        count=Count('id'),
+        avg_rating=Avg('rating')
+    ).order_by('month')
+    
+    recent_reviews = ProductReview.objects.select_related(
+        'product', 'user'
+    ).order_by('-created_at')[:10]
+    
+    if total_reviews > 0:
+        approval_rate = (approved_reviews / total_reviews) * 100
+    else:
+        approval_rate = 0
+    
+    if total_reviews > 0:
+        satisfaction_score = (avg_rating / 5) * 100
+    else:
+        satisfaction_score = 0
+    
+    # ============================================
+    # PRODUCT STATISTICS
+    # ============================================
+    
+    total_products = Product.objects.filter(is_active=True).count()
+    total_products_inactive = Product.objects.filter(is_active=False).count()
+    featured_products = Product.objects.filter(is_active=True, is_featured=True).count()
+    best_seller_products = Product.objects.filter(is_active=True, is_best_seller=True).count()
+    new_products = Product.objects.filter(is_active=True, is_new=True).count()
+    
+    low_stock_products = Product.objects.filter(
+        is_active=True,
+        stock_quantity__lte=F('low_stock_threshold')
+    ).order_by('stock_quantity')[:10]
+    
+    low_stock_count = low_stock_products.count()
+    
+    out_of_stock_count = Product.objects.filter(
+        is_active=True,
+        stock_quantity=0
+    ).count()
+    
+    category_counts = Category.objects.annotate(
+        product_count=Count('products', filter=Q(products__is_active=True))
+    ).order_by('-product_count')[:10]
+    
+    # ============================================
+    # ORDER ANALYTICS
+    # ============================================
+    
+    # Best Day for Orders (SQLite Compatible)
+    best_day = None
+    try:
+        # Get all orders and calculate day of week in Python
+        all_orders_list = orders.values('created_at')
+        day_counts = {}
+        day_revenues = {}
+        for order in all_orders_list:
+            day = order['created_at'].weekday()  # 0=Monday, 6=Sunday
+            day_counts[day] = day_counts.get(day, 0) + 1
+        
+        if day_counts:
+            best_day_index = max(day_counts, key=day_counts.get)
+            best_day = {'weekday': str(best_day_index)}
+    except Exception:
+        best_day = None
+    
+    order_value_ranges = {
+    '0_500': orders.filter(total_amount__lt=500).count(),
+    '501_1000': orders.filter(total_amount__gte=500, total_amount__lt=1000).count(),
+    '1001_5000': orders.filter(total_amount__gte=1000, total_amount__lt=5000).count(),
+    '5001_10000': orders.filter(total_amount__gte=5000, total_amount__lt=10000).count(),
+    '10000_plus': orders.filter(total_amount__gte=10000).count(),
+    }
+    
+    repeat_customers = User.objects.filter(
+        orders__in=orders
+    ).annotate(
+        order_count=Count('orders')
+    ).filter(
+        order_count__gt=1
+    ).count()
+    
+    one_time_customers = User.objects.filter(
+        orders__in=orders
+    ).annotate(
+        order_count=Count('orders')
+    ).filter(
+        order_count=1
+    ).count()
+    
+    # ============================================
+    # CUSTOMER LIFETIME VALUE
+    # ============================================
+    
+    customer_ltv = User.objects.filter(
+        role='customer',
+        orders__payment_status='paid'
+    ).distinct().annotate(
+        total_spent=Sum('orders__total_amount'),
+        order_count=Count('orders'),
+        avg_order_value=Avg('orders__total_amount')
+    ).order_by('-total_spent')[:10]
+    
+    # ============================================
+    # RECENT ORDERS
+    # ============================================
+    recent_orders = orders.order_by('-created_at')[:10]
+    
+    # ============================================
+    # MONTH OPTIONS FOR FILTER
+    # ============================================
+    month_options = []
+    for i in range(12):
+        month_date = datetime.now() - timedelta(days=30 * i)
+        month_options.append({
+            'value': month_date.strftime('%Y-%m'),
+            'label': month_date.strftime('%B %Y'),
+            'selected': selected_month == month_date.strftime('%Y-%m')
+        })
+    
     context = {
-        'total_users': User.objects.filter(role='customer').count(),
-        'total_admins': User.objects.filter(role='admin').count(),
-        'total_addresses': Address.objects.count(),
+        # Order Stats
+        'total_orders': total_orders,
+        'total_revenue': total_revenue,
+        'avg_order_value': avg_order_value,
+        'status_counts': status_counts,
+        'payment_counts': payment_counts,
+        'order_value_ranges': order_value_ranges,
+        'repeat_customers': repeat_customers,
+        'one_time_customers': one_time_customers,
+        
+        # Analytics
+        'revenue_over_time': revenue_over_time,
+        'daily_revenue': daily_revenue,
+        'hourly_sales': hourly_sales,
+        'top_products': top_products,
+        'top_products_by_revenue': top_products_by_revenue,
+        'category_performance': category_performance,
+        'monthly_summary': monthly_summary,
+        'best_day': best_day,
+        
+        # User Analytics
+        'total_users': total_users,
+        'total_customers': total_customers,
+        'total_admins': total_admins,
+        'new_users_last_30_days': new_users_last_30_days,
+        'active_users_last_30_days': active_users_last_30_days,
+        'inactive_users': inactive_users,
+        'most_active_users': most_active_users,
+        'top_users_by_orders': top_users_by_orders,
+        'top_users_by_revenue': top_users_by_revenue,
+        'user_registration_trend': user_registration_trend,
+        'user_roles': user_roles,
+        'customer_ltv': customer_ltv,
+        
+        # Review Analytics
+        'total_reviews': total_reviews,
+        'approved_reviews': approved_reviews,
+        'pending_reviews': pending_reviews,
+        'verified_reviews': verified_reviews,
+        'avg_rating': avg_rating,
+        'rating_distribution': rating_distribution,
+        'most_reviewed_products': most_reviewed_products,
+        'highest_rated_products': highest_rated_products,
+        'review_trend': review_trend,
+        'recent_reviews': recent_reviews,
+        'approval_rate': approval_rate,
+        'satisfaction_score': satisfaction_score,
+        
+        # Product Stats
+        'total_products': total_products,
+        'total_products_inactive': total_products_inactive,
+        'featured_products': featured_products,
+        'best_seller_products': best_seller_products,
+        'new_products': new_products,
+        'low_stock_products': low_stock_products,
+        'low_stock_count': low_stock_count,
+        'out_of_stock_count': out_of_stock_count,
+        'category_counts': category_counts,
+        
+        # Recent
+        'recent_orders': recent_orders,
+        
+        # Filter values
+        'filter_type': filter_type,
+        'selected_month': selected_month,
+        'selected_date': selected_date,
+        'date_from': date_from,
+        'date_to': date_to,
+        'month_options': month_options,
     }
     return render(request, 'Ecom/admin/dashboard.html', context)
 
