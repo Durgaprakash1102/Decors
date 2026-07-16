@@ -826,13 +826,22 @@
                             Categories
                             <span class="count">{{ filter_options.categories.count }}</span>
                         </div>
-                        {% for cat in filter_options.categories %}
-                            <a href="{% url 'Ecom:category_shop' cat.slug %}" class="filter-option" style="text-decoration:none;">
-                                <input type="checkbox" disabled {% if current_filters.category == cat.id|stringformat:"s" %}checked{% endif %}>
-                                <label>{{ cat.name }}</label>
-                                <span class="badge-count">{{ cat.count }}</span>
-                            </a>
-                        {% endfor %}
+                        <form method="GET" id="categoryFilterForm">
+                            {% for key, value in current_filters.items %}
+                                {% if key != 'category' and value %}
+                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                {% endif %}
+                            {% endfor %}
+                            {% for cat in filter_options.categories %}
+                                <div class="filter-option">
+                                    <input type="checkbox" name="category" value="{{ cat.id }}" 
+                                           onchange="this.form.submit()"
+                                           {% if current_filters.category == cat.id|stringformat:"s" %}checked{% endif %}>
+                                    <label>{{ cat.name }}</label>
+                                    <span class="badge-count">{{ cat.count }}</span>
+                                </div>
+                            {% endfor %}
+                        </form>
                     </div>
                     {% endif %}
 
@@ -845,13 +854,22 @@
                             Subcategories
                             <span class="count">{{ filter_options.subcategories.count }}</span>
                         </div>
-                        {% for sub in filter_options.subcategories %}
-                            <a href="{% url 'Ecom:subcategory_shop' sub.slug %}" class="filter-option" style="text-decoration:none;">
-                                <input type="checkbox" disabled {% if current_filters.subcategory == sub.id|stringformat:"s" %}checked{% endif %}>
-                                <label>{{ sub.name }}</label>
-                                <span class="badge-count">{{ sub.count }}</span>
-                            </a>
-                        {% endfor %}
+                        <form method="GET" id="subcategoryFilterForm">
+                            {% for key, value in current_filters.items %}
+                                {% if key != 'subcategory' and value %}
+                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                {% endif %}
+                            {% endfor %}
+                            {% for sub in filter_options.subcategories %}
+                                <div class="filter-option">
+                                    <input type="checkbox" name="subcategory" value="{{ sub.id }}" 
+                                           onchange="this.form.submit()"
+                                           {% if current_filters.subcategory == sub.id|stringformat:"s" %}checked{% endif %}>
+                                    <label>{{ sub.name }}</label>
+                                    <span class="badge-count">{{ sub.count }}</span>
+                                </div>
+                            {% endfor %}
+                        </form>
                     </div>
                     {% endif %}
 
@@ -1128,14 +1146,12 @@
                     <!-- ============================================ -->
                     <!-- CLEAR ALL FILTERS                           -->
                     <!-- ============================================ -->
-                    {% if active_filters %}
                     <div class="filter-section">
                         <a href="{% if category %}{% url 'Ecom:category_shop' category.slug %}{% elif subcategory %}{% url 'Ecom:subcategory_shop' subcategory.slug %}{% else %}{% url 'Ecom:shop' %}{% endif %}" 
                            class="btn btn-outline-danger btn-sm w-100">
                             <i class="fas fa-times-circle"></i> Clear All Filters
                         </a>
                     </div>
-                    {% endif %}
                 </div>
             </div>
 
@@ -1201,6 +1217,16 @@
                                     <span class="remove" onclick="removeFilter('materials','{{ value }}')">&times;</span>
                                 </span>
                             {% endfor %}
+                        {% elif key == 'category' %}
+                            <span class="filter-tag">
+                                Category: {{ value }}
+                                <span class="remove" onclick="removeFilter('category','')">&times;</span>
+                            </span>
+                        {% elif key == 'subcategory' %}
+                            <span class="filter-tag">
+                                Subcategory: {{ value }}
+                                <span class="remove" onclick="removeFilter('subcategory','')">&times;</span>
+                            </span>
                         {% elif key == 'rating' %}
                             <span class="filter-tag">
                                 Rating: {{ value }}★ &amp; Up
@@ -1367,7 +1393,7 @@
                                 </div>
                                 <div class="product-actions">
                                     <a href="{% url 'Ecom:product_detail' product.id %}" class="btn-view">
-                                        <i class="fas fa-eye"></i> View
+                                        <i class="fas fa-eye"></i] View
                                     </a>
                                     <button class="btn-cart" {% if product.is_out_of_stock %}disabled{% endif %} onclick="addToCart({{ product.id }})">
                                         <i class="fas fa-shopping-cart"></i>
@@ -1496,26 +1522,9 @@
     // ADD TO CART
     // ============================================
     function addToCart(productId) {
+        // TODO: Implement AJAX add to cart
         alert('Product ' + productId + ' added to cart!');
     }
-
-    // ============================================
-    // AUTO-SUBMIT FORMS ON CHANGE
-    // ============================================
-    document.addEventListener('DOMContentLoaded', function() {
-        // Auto-submit checkbox forms
-        document.querySelectorAll('form input[type="checkbox"], form input[type="radio"]').forEach(function(input) {
-            if (input.closest('#brandFilterForm') || 
-                input.closest('#colorFilterForm') || 
-                input.closest('#sizeFilterForm') || 
-                input.closest('#materialFilterForm') ||
-                input.closest('#ratingFilterForm') || 
-                input.closest('#statusFilterForm') ||
-                input.closest('#popularityFilterForm')) {
-                // Already handled by onchange attribute
-            }
-        });
-    });
 
     // ============================================
     // SEARCH FORM SUBMIT ON ENTER
@@ -1524,6 +1533,18 @@
         if (e.key === 'Enter') {
             this.closest('form').submit();
         }
+    });
+
+    // ============================================
+    // AUTO-SUBMIT FORMS ON CHANGE
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // All filter forms with checkboxes and radio buttons auto-submit on change
+        document.querySelectorAll('.filter-option input[type="checkbox"], .filter-option input[type="radio"]').forEach(function(input) {
+            input.addEventListener('change', function() {
+                this.closest('form').submit();
+            });
+        });
     });
 </script>
 {% endblock %}
