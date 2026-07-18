@@ -1,0 +1,77 @@
+<!-- templates/emails/refund_completed.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refund Completed</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #28a745; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+        .content { padding: 30px; background: #f8f9fa; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 5px 5px; }
+        .footer { text-align: center; padding: 20px; color: #6c757d; font-size: 14px; }
+        .btn { display: inline-block; padding: 10px 25px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; }
+        .order-details { background: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .complete-box { background: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745; }
+        .status-badge { display: inline-block; padding: 5px 15px; background: #28a745; color: white; border-radius: 20px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>✅ Refund Completed</h2>
+            <p>Order #{{ order.order_number }}</p>
+        </div>
+        
+        <div class="content">
+            <p>Dear <strong>{{ user.full_name }}</strong>,</p>
+            
+            <p>We are happy to inform you that your <strong>refund</strong> for Order #<strong>{{ order.order_number }}</strong> has been <strong>completed</strong>.</p>
+            
+            <div class="order-details">
+                <p><strong>Order Date:</strong> {{ order.created_at|date:"F d, Y H:i" }}</p>
+                <p><strong>Refund Amount:</strong> ₹{{ order.refund_amount|default:order.total_amount }}</p>
+                <p><strong>Refund Method:</strong> 
+                    {% if order.refund_method == 'razorpay' %}
+                        Razorpay Auto-Refund
+                    {% else %}
+                        Manual Bank Transfer
+                    {% endif %}
+                </p>
+                <p><strong>Completed On:</strong> {{ order.refund_completed_at|date:"F d, Y H:i" }}</p>
+                <p><strong>Status:</strong> <span class="status-badge">Completed</span></p>
+            </div>
+            
+            <div class="complete-box">
+                <h4>✅ Refund Summary</h4>
+                <p><strong>Refund Status:</strong> Successfully Completed</p>
+                <p><strong>Refund Amount:</strong> ₹{{ order.refund_amount|default:order.total_amount }}</p>
+                {% if order.refund_method == 'razorpay' %}
+                <p><strong>Transaction ID:</strong> {{ order.refund_transaction_id }}</p>
+                <p><small>The refund has been credited to your original payment method.</small></p>
+                {% else %}
+                <p><small>The refund has been transferred to your bank account.</small></p>
+                {% endif %}
+            </div>
+            
+            <p>We hope you have a great experience with {{ site_name }}. We look forward to serving you again!</p>
+            
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="{{ order_url }}" class="btn">View Order Details</a>
+            </p>
+            
+            <p>If you have any questions, please contact our support team.</p>
+            
+            <p>Thank you for shopping with us!</p>
+            <p><strong>Team {{ site_name }}</strong></p>
+        </div>
+        
+        <div class="footer">
+            <p>Need help? Contact us at <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+            <p>&copy; {{ site_name }}. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

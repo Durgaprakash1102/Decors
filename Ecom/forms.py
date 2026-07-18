@@ -683,3 +683,321 @@ class BannerForm(forms.ModelForm):
             'image': 'Banner Image',
             'is_active': 'Active',
         }
+
+# forms.py - Complete file
+
+from django import forms
+from django.core.exceptions import ValidationError
+from django.forms.widgets import FileInput
+import os
+
+
+# ============================================
+# CUSTOM MULTIPLE FILE INPUT WIDGET
+# ============================================
+
+class MultipleFileInput(FileInput):
+    allow_multiple_selected = True
+    
+    def __init__(self, attrs=None):
+        default_attrs = {'multiple': True, 'accept': 'image/*', 'class': 'form-control'}
+        if attrs:
+            default_attrs.update(attrs)
+        super().__init__(default_attrs)
+
+
+class MultipleFileField(forms.FileField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data if d is not None]
+            # Validate each file
+            for file in result:
+                if hasattr(file, 'size') and file.size > 5 * 1024 * 1024:
+                    raise ValidationError(f'File "{file.name}" exceeds 5MB limit.')
+            return result
+        return [single_file_clean(data, initial)] if data else []
+
+
+# ============================================
+# CUSTOMER FORMS
+# ============================================
+
+class CancellationForm(forms.Form):
+    reason = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': 4, 
+            'placeholder': 'Please explain why you want to cancel this order...',
+            'class': 'form-control'
+        }),
+        label='Reason for Cancellation',
+        max_length=500,
+        required=True
+    )
+
+
+# forms.py - Updated ReturnForm
+
+class ReturnForm(forms.Form):
+    REASON_CHOICES = [
+        ('defective', 'Product is Defective/Damaged'),
+        ('wrong_item', 'Wrong Item Received'),
+        ('quality_issue', 'Quality Issue'),
+        ('not_as_described', 'Product Not as Described'),
+        ('changed_mind', 'Changed Mind'),
+        ('other', 'Other'),
+    ]
+    
+    reason = forms.ChoiceField(
+        choices=REASON_CHOICES, 
+        label='Reason for Return',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': 4, 
+            'placeholder': 'Please provide more details about the issue...',
+            'class': 'form-control'
+        }),
+        label='Detailed Description',
+        max_length=1000,
+        required=True
+    )
+    bank_details = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': 4, 
+            'placeholder': 'Please provide your bank details for refund:\n\nAccount Holder Name:\nBank Name:\nAccount Number:\nIFSC Code:\nUPI ID:',
+            'class': 'form-control',
+            'id': 'bank_details'
+        }),
+        label='Bank Details for Refund',
+        required=True,
+        help_text='Please provide your bank details for refund processing'
+    )
+    images = MultipleFileField(
+        required=True,
+        label='Upload Images (Required)',
+        help_text='Please upload images showing the issue (max 5 images, max 5MB each)'
+    )
+    
+    def clean_bank_details(self):
+        bank_details = self.cleaned_data.get('bank_details', '').strip()
+        if not bank_details:
+            raise ValidationError('Please provide your bank details for refund processing.')
+        
+        # Basic validation - check if it contains key information
+        required_fields = ['Account Holder', 'Bank Name', 'Account Number', 'IFSC']
+        missing_fields = []
+        for field in required_fields:
+            if field.lower() not in bank_details.lower():
+                missing_fields.append(field)
+        
+        if missing_fields:
+            raise ValidationError(f'Please provide complete bank details including: {", ".join(missing_fields)}')
+        
+        return bank_details
+    
+    def clean_images(self):
+        images = self.cleaned_data.get('images', [])
+        if not images:
+            raise ValidationError('Please upload at least one image.')
+        
+        if len(images) > 5:
+            raise ValidationError('You can upload a maximum of 5 images.')
+        
+        for image in images:
+            ext = os.path.splitext(image.name)[1].lower()
+            allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']
+            if ext not in allowed_extensions:
+                raise ValidationError(f'Image "{image.name}" has invalid format. Allowed: JPG, PNG, GIF, WEBP, BMP')
+        
+        return images
+class ReplacementForm(forms.Form):
+    REASON_CHOICES = [
+        ('defective', 'Product is Defective/Damaged'),
+        ('wrong_item', 'Wrong Item Received'),
+        ('quality_issue', 'Quality Issue'),
+        ('not_as_described', 'Product Not as Described'),
+        ('other', 'Other'),
+    ]
+    
+    reason = forms.ChoiceField(
+        choices=REASON_CHOICES, 
+        label='Reason for Replacement',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': 4, 
+            'placeholder': 'Please provide more details about the issue...',
+            'class': 'form-control'
+        }),
+        label='Detailed Description',
+        max_length=1000,
+        required=True
+    )
+    images = MultipleFileField(
+        required=True,
+        label='Upload Images (Required)',
+        help_text='Please upload images showing the issue (max 5 images, max 5MB each)'
+    )
+    
+    def clean_images(self):
+        images = self.cleaned_data.get('images', [])
+        if not images:
+            raise ValidationError('Please upload at least one image.')
+        
+        if len(images) > 5:
+            raise ValidationError('You can upload a maximum of 5 images.')
+        
+        for image in images:
+            ext = os.path.splitext(image.name)[1].lower()
+            allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']
+            if ext not in allowed_extensions:
+                raise ValidationError(f'Image "{image.name}" has invalid format. Allowed: JPG, PNG, GIF, WEBP, BMP')
+        
+        return images
+
+
+# ============================================
+# ADMIN FORMS
+# ============================================
+
+class AdminCancellationActionForm(forms.Form):
+    ACTION_CHOICES = [
+        ('approve', 'Approve Cancellation'),
+        ('reject', 'Reject Cancellation'),
+    ]
+    
+    action = forms.ChoiceField(
+        choices=ACTION_CHOICES, 
+        label='Action',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    notes = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': 3, 
+            'placeholder': 'Add notes...',
+            'class': 'form-control'
+        }),
+        required=False,
+        label='Notes'
+    )
+    refund_method = forms.ChoiceField(
+        choices=[
+            ('razorpay', 'Razorpay Auto-Refund'),
+            ('manual', 'Manual Bank Transfer')
+        ],
+        required=False,
+        label='Refund Method',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    bank_details = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': 3, 
+            'placeholder': 'Enter bank details for manual transfer:\nAccount Holder Name:\nBank Name:\nAccount Number:\nIFSC Code:\nUPI ID:',
+            'class': 'form-control'
+        }),
+        required=False,
+        label='Bank Details (for manual transfer)'
+    )
+
+
+# forms.py - AdminReturnActionForm
+
+class AdminReturnActionForm(forms.Form):
+    ACTION_CHOICES = [
+        ('approve', 'Approve Return'),
+        ('reject', 'Reject Return'),
+        ('mark_received', 'Mark Items as Received'),
+        ('initiate_refund', 'Initiate Refund'),
+        ('mark_refund_completed', 'Mark Refund as Completed'),
+        ('complete_return', 'Complete Return'),
+    ]
+    
+    action = forms.ChoiceField(
+        choices=ACTION_CHOICES, 
+        label='Action',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    notes = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': 3, 
+            'placeholder': 'Add notes or rejection reason...',
+            'class': 'form-control',
+            'id': 'id_notes'
+        }),
+        required=False,
+        label='Notes'
+    )
+    refund_method = forms.ChoiceField(
+        choices=[
+            ('', '-- Select Refund Method --'),
+            ('razorpay', 'Razorpay Auto-Refund (Recommended)'),
+            ('manual', 'Manual Bank Transfer')
+        ],
+        required=False,
+        label='Refund Method',
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_refund_method'})
+    )
+    refund_amount = forms.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        required=False,
+        label='Refund Amount',
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'id': 'id_refund_amount',
+            'step': '0.01',
+            'placeholder': 'Enter refund amount'
+        })
+    )
+    bank_details = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': 4, 
+            'placeholder': 'Enter customer\'s bank details for manual transfer:\n\nAccount Holder Name:\nBank Name:\nAccount Number:\nIFSC Code:\nUPI ID:',
+            'class': 'form-control',
+            'id': 'id_bank_details'
+        }),
+        required=False,
+        label='Bank Details (Required for Manual Transfer)'
+    )
+
+class AdminReplacementActionForm(forms.Form):
+    ACTION_CHOICES = [
+        ('approve', 'Approve Replacement'),
+        ('reject', 'Reject Replacement'),
+        ('mark_shipped', 'Mark Replacement as Shipped'),
+        ('mark_delivered', 'Mark Replacement as Delivered'),
+        ('complete_replacement', 'Complete Replacement'),
+    ]
+    
+    action = forms.ChoiceField(
+        choices=ACTION_CHOICES, 
+        label='Action',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    notes = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': 3, 
+            'placeholder': 'Add notes...',
+            'class': 'form-control'
+        }),
+        required=False,
+        label='Notes'
+    )
+    tracking_number = forms.CharField(
+        max_length=100,
+        required=False,
+        label='Tracking Number',
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    tracking_url = forms.URLField(
+        required=False,
+        label='Tracking URL',
+        widget=forms.URLInput(attrs={'class': 'form-control'})
+    )

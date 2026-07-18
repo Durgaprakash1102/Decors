@@ -1,0 +1,72 @@
+<!-- templates/emails/replacement_approved.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Replacement Approved</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #28a745; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+        .content { padding: 30px; background: #f8f9fa; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 5px 5px; }
+        .footer { text-align: center; padding: 20px; color: #6c757d; font-size: 14px; }
+        .btn { display: inline-block; padding: 10px 25px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; }
+        .order-details { background: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .replacement-info { background: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745; }
+        .status-badge { display: inline-block; padding: 5px 15px; background: #28a745; color: white; border-radius: 20px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>✅ Replacement Approved</h2>
+            <p>Order #{{ order.order_number }}</p>
+        </div>
+        
+        <div class="content">
+            <p>Dear <strong>{{ user.full_name }}</strong>,</p>
+            
+            <p>Your replacement request for Order #<strong>{{ order.order_number }}</strong> has been <strong>approved</strong>.</p>
+            
+            <div class="order-details">
+                <p><strong>Order Date:</strong> {{ order.created_at|date:"F d, Y H:i" }}</p>
+                <p><strong>Original Order Total:</strong> ₹{{ order.total_amount }}</p>
+                <p><strong>Status:</strong> <span class="status-badge">Replacement Approved</span></p>
+            </div>
+            
+            <div class="replacement-info">
+                <h4>📦 Replacement Order Created</h4>
+                <p><strong>Replacement Order #:</strong> {{ replacement_order.order_number }}</p>
+                <p><strong>Replacement Status:</strong> Processing</p>
+                <p><strong>Items:</strong> All items from the original order</p>
+                <p><strong>Cost:</strong> ₹0 (Free Replacement)</p>
+                <p><small>The replacement order will be processed and shipped to you.</small></p>
+            </div>
+            
+            <p><strong>What happens next?</strong></p>
+            <ol>
+                <li>Your replacement order is being processed</li>
+                <li>You will receive shipping updates for the replacement order</li>
+                <li>The replacement items will be delivered to your address</li>
+                <li>No payment is required for the replacement</li>
+            </ol>
+            
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="{{ order_url }}" class="btn">View Replacement Order</a>
+            </p>
+            
+            <p>If you have any questions, please contact our support team.</p>
+            
+            <p>Thank you for shopping with us!</p>
+            <p><strong>Team {{ site_name }}</strong></p>
+        </div>
+        
+        <div class="footer">
+            <p>Need help? Contact us at <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+            <p>&copy; {{ site_name }}. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

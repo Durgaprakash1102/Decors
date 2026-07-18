@@ -1,0 +1,71 @@
+<!-- templates/emails/return_requested.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Return Request Received</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #ffc107; color: #333; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+        .content { padding: 30px; background: #f8f9fa; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 5px 5px; }
+        .footer { text-align: center; padding: 20px; color: #6c757d; font-size: 14px; }
+        .btn { display: inline-block; padding: 10px 25px; background: #ffc107; color: #333; text-decoration: none; border-radius: 5px; }
+        .order-details { background: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .info-box { background: #cce5ff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #007bff; }
+        .status-badge { display: inline-block; padding: 5px 15px; background: #ffc107; color: #333; border-radius: 20px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>🔄 Return Request Received</h2>
+            <p>Order #{{ order.order_number }}</p>
+        </div>
+        
+        <div class="content">
+            <p>Dear <strong>{{ user.full_name }}</strong>,</p>
+            
+            <p>We have received your request to return Order #<strong>{{ order.order_number }}</strong>.</p>
+            
+            <div class="order-details">
+                <p><strong>Order Date:</strong> {{ order.created_at|date:"F d, Y H:i" }}</p>
+                <p><strong>Delivery Date:</strong> {{ order.delivery_date|date:"F d, Y" }}</p>
+                <p><strong>Order Total:</strong> ₹{{ order.total_amount }}</p>
+                <p><strong>Return Reason:</strong> {{ order.get_return_reason_display }}</p>
+                <p><strong>Status:</strong> <span class="status-badge">Requested</span></p>
+            </div>
+            
+            <div class="info-box">
+                <h4>📋 Return Summary</h4>
+                <p><strong>Description:</strong></p>
+                <p style="background: white; padding: 10px; border-radius: 5px;">{{ order.return_description }}</p>
+            </div>
+            
+            <p><strong>What happens next?</strong></p>
+            <ol>
+                <li>Our team will review your return request</li>
+                <li>You will receive a confirmation email once the request is processed</li>
+                <li>If approved, you will receive return shipping instructions</li>
+                <li>Your refund will be processed after we receive the items</li>
+            </ol>
+            
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="{{ order_url }}" class="btn">View Order Details</a>
+            </p>
+            
+            <p>If you have any questions, please contact our support team.</p>
+            
+            <p>Thank you for shopping with us!</p>
+            <p><strong>Team {{ site_name }}</strong></p>
+        </div>
+        
+        <div class="footer">
+            <p>Need help? Contact us at <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+            <p>&copy; {{ site_name }}. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

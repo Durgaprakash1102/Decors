@@ -1,0 +1,296 @@
+<!-- templates/Ecom/orders/request_return.html -->
+
+{% load static %}
+
+{% block title %}Request Return - Order #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'Ecom:orders' %}">My Orders</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'Ecom:order_detail' order.id %}">Order #{{ order.order_number }}</a></li>
+            <li class="breadcrumb-item active">Request Return</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="fas fa-undo"></i> Request Return</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Window Reminder -->
+                    <div class="alert {% if return_window_days > 0 %}alert-info{% else %}alert-danger{% endif %}">
+                        <i class="fas fa-clock"></i>
+                        {% if return_window_days > 0 %}
+                            You have <strong>{{ return_window_days }}</strong> day{{ return_window_days|pluralize }} left to request a return.
+                        {% else %}
+                            <strong>Return window has expired!</strong> You can no longer request a return for this order.
+                        {% endif %}
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Order Summary</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>SKU</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in order_items %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    {% if item.product and item.product.main_image %}
+                                                    <img src="{{ item.product.main_image }}" class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                                    {% endif %}
+                                                    <span>{{ item.product_name }}</span>
+                                                </div>
+                                            </td>
+                                            <td>{{ item.sku }}</td>
+                                            <td>{{ item.quantity }}</td>
+                                            <td>₹{{ item.final_price }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-active">
+                                            <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                            <td><strong>₹{{ order.total_amount }}</strong></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Return Form -->
+                    <form method="post" enctype="multipart/form-data" id="returnForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.reason.id_for_label }}" class="form-label">
+                                Reason for Return <span class="text-danger">*</span>
+                            </label>
+                            {{ form.reason }}
+                            {% if form.reason.errors %}
+                            <div class="text-danger">{{ form.reason.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">
+                                Detailed Description <span class="text-danger">*</span>
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="text-danger">{{ form.description.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">Please describe the issue in detail. This helps us process your return faster.</small>
+                        </div>
+
+                        <!-- Bank Details Section - Always shown -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Bank Details for Refund <span class="text-danger">*</span>
+                            </label>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="account_holder" class="form-label small">Account Holder Name</label>
+                                            <input type="text" class="form-control form-control-sm" id="account_holder" 
+                                                   placeholder="Enter account holder name" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="bank_name" class="form-label small">Bank Name</label>
+                                            <input type="text" class="form-control form-control-sm" id="bank_name" 
+                                                   placeholder="Enter bank name" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="account_number" class="form-label small">Account Number</label>
+                                            <input type="text" class="form-control form-control-sm" id="account_number" 
+                                                   placeholder="Enter account number" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="ifsc_code" class="form-label small">IFSC Code</label>
+                                            <input type="text" class="form-control form-control-sm" id="ifsc_code" 
+                                                   placeholder="Enter IFSC code" required>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label for="upi_id" class="form-label small">UPI ID (Optional)</label>
+                                            <input type="text" class="form-control form-control-sm" id="upi_id" 
+                                                   placeholder="Enter UPI ID (optional)">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Please provide your bank details for refund processing. This information is securely stored.
+                                    </small>
+                                </div>
+                            </div>
+                            <!-- Hidden field to store combined bank details -->
+                            <textarea id="bank_details" name="bank_details" style="display:none;"></textarea>
+                            {% if form.bank_details.errors %}
+                            <div class="text-danger">{{ form.bank_details.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.images.id_for_label }}" class="form-label">
+                                Upload Images <span class="text-danger">*</span>
+                            </label>
+                            {{ form.images }}
+                            {% if form.images.errors %}
+                            <div class="text-danger">{{ form.images.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i> 
+                                Please upload clear images showing the issue. Max 5 images (JPG, PNG, GIF, WEBP, BMP), max 5MB each.
+                                <span class="text-danger">Images are mandatory for return requests.</span>
+                            </small>
+                            <div id="imagePreview" class="row mt-3"></div>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Return Policy:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Return must be requested within 7 days of delivery</li>
+                                <li>Items must be in original condition with packaging</li>
+                                <li>Return shipping charges are borne by the customer</li>
+                                <li>Refund will be processed after items are received and inspected</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'Ecom:order_detail' order.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </a>
+                            <button type="submit" class="btn btn-warning" id="submitBtn">
+                                <i class="fas fa-paper-plane"></i> Submit Return Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Update hidden bank details field before form submission
+document.getElementById('returnForm').addEventListener('submit', function(e) {
+    const accountHolder = document.getElementById('account_holder').value.trim();
+    const bankName = document.getElementById('bank_name').value.trim();
+    const accountNumber = document.getElementById('account_number').value.trim();
+    const ifscCode = document.getElementById('ifsc_code').value.trim();
+    const upiId = document.getElementById('upi_id').value.trim();
+    
+    // Validate bank details
+    if (!accountHolder || !bankName || !accountNumber || !ifscCode) {
+        e.preventDefault();
+        alert('Please fill in all required bank details (Account Holder Name, Bank Name, Account Number, IFSC Code).');
+        return false;
+    }
+    
+    // Combine bank details into a formatted string
+    let bankDetails = '';
+    bankDetails += `Account Holder Name: ${accountHolder}\n`;
+    bankDetails += `Bank Name: ${bankName}\n`;
+    bankDetails += `Account Number: ${accountNumber}\n`;
+    bankDetails += `IFSC Code: ${ifscCode}\n`;
+    if (upiId) bankDetails += `UPI ID: ${upiId}`;
+    
+    document.getElementById('bank_details').value = bankDetails;
+    
+    // Validate images
+    const images = document.getElementById('id_images');
+    if (images.files.length === 0) {
+        e.preventDefault();
+        alert('Please upload at least one image showing the issue.');
+        return false;
+    }
+    
+    // Disable button to prevent double submission
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+});
+
+// Image preview
+document.getElementById('id_images').addEventListener('change', function(e) {
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';
+    
+    const files = e.target.files;
+    if (files.length === 0) {
+        preview.innerHTML = '<div class="col-12 text-muted">No images selected</div>';
+        return;
+    }
+    
+    if (files.length > 5) {
+        alert('You can upload a maximum of 5 images.');
+        this.value = '';
+        preview.innerHTML = '<div class="col-12 text-danger">Please select up to 5 images only.</div>';
+        return;
+    }
+    
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.size > 5 * 1024 * 1024) {
+            alert(`Image "${file.name}" exceeds 5MB limit.`);
+            this.value = '';
+            preview.innerHTML = '<div class="col-12 text-danger">One or more images exceed 5MB limit.</div>';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const col = document.createElement('div');
+            col.className = 'col-4 col-md-3 mb-3';
+            col.innerHTML = `
+                <div class="position-relative">
+                    <img src="${e.target.result}" class="img-fluid rounded border" style="height: 120px; width: 100%; object-fit: cover;">
+                    <span class="badge bg-dark position-absolute top-0 end-0 m-1">${i + 1}</span>
+                    <div class="text-center small mt-1 text-truncate">${file.name}</div>
+                </div>
+            `;
+            preview.appendChild(col);
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Real-time validation styling
+document.querySelectorAll('#account_holder, #bank_name, #account_number, #ifsc_code').forEach(input => {
+    input.addEventListener('blur', function() {
+        if (this.value.trim()) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            this.classList.remove('is-valid');
+            this.classList.add('is-invalid');
+        }
+    });
+});
+</script>
+
+<style>
+/* Optional: Add some spacing and styling */
+#bankDetailsSection .form-control-sm {
+    font-size: 0.9rem;
+}
+</style>
+{% endblock %}

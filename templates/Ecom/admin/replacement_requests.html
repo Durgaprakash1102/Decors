@@ -1,0 +1,149 @@
+<!-- templates/Ecom/admin/replacement_requests.html -->
+
+{% load static %}
+
+{% block title %}Replacement Requests{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-exchange-alt text-primary"></i> Replacement Requests</h2>
+        <div>
+            <span class="badge bg-warning p-2">{{ stats.pending }} Pending</span>
+            <span class="badge bg-success p-2">{{ stats.approved }} Approved</span>
+            <span class="badge bg-danger p-2">{{ stats.rejected }} Rejected</span>
+            <span class="badge bg-secondary p-2">{{ stats.completed }} Completed</span>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h5 class="card-title">{{ stats.pending }}</h5>
+                    <p class="card-text mb-0">Pending</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">{{ stats.approved }}</h5>
+                    <p class="card-text mb-0">Approved</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5 class="card-title">{{ stats.rejected }}</h5>
+                    <p class="card-text mb-0">Rejected</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-secondary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">{{ stats.completed }}</h5>
+                    <p class="card-text mb-0">Completed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Filter by Status</label>
+                    <select name="status" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Active</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                        <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+                        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed (All)</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <a href="{% url 'Ecom:admin_replacement_requests' %}" class="btn btn-secondary">Clear Filters</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Requests Table -->
+    <div class="card shadow">
+        <div class="card-body">
+            {% if replacements %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Reason</th>
+                            <th>Requested At</th>
+                            <th>Status</th>
+                            <th>Replacement Order</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in replacements %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'Ecom:admin_replacement_detail' order.id %}">
+                                    #{{ order.order_number }}
+                                </a>
+                            </td>
+                            <td>
+                                <div>{{ order.user.full_name }}</div>
+                                <small class="text-muted">{{ order.user.email }}</small>
+                            </td>
+                            <td>₹{{ order.total_amount }}</td>
+                            <td>{{ order.get_replacement_reason_display|default:"N/A" }}</td>
+                            <td>{{ order.replacement_requested_at|date:"F d, Y H:i" }}</td>
+                            <td>
+                                {% if order.replacement_completed %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% elif order.replacement_approved %}
+                                    <span class="badge bg-warning text-dark">Approved</span>
+                                {% elif order.replacement_rejected %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if order.replacement_order %}
+                                    <a href="{% url 'Ecom:admin_order_detail' order.replacement_order.id %}">
+                                        #{{ order.replacement_order.order_number }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'Ecom:admin_replacement_detail' order.id %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> Review
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                <h5>No active replacement requests</h5>
+                <p class="text-muted">All replacement requests have been processed.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

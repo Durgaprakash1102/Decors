@@ -1,0 +1,74 @@
+Summary of All Analytics Included:
+Order Analytics
+
+    Total Orders, Revenue, Average Order Value
+
+    Order Status Breakdown (Pending, Processing, Shipped, Delivered, Cancelled, Failed)
+
+    Payment Status Breakdown (Paid, Pending, Refunded, Failed)
+
+    Order Value Distribution
+
+    Repeat vs One-Time Customers
+
+    Best Day for Orders
+
+    Monthly Revenue & Orders Trend
+
+    Hourly Sales Distribution
+
+User Analytics
+
+    Total Users, Customers, Admins
+
+    New Users (Last 30 Days)
+
+    Active Users (Last 30 Days)
+
+    Inactive Users
+
+    Most Active Users (by order count)
+
+    Top Users by Orders
+
+    Top Users by Revenue
+
+    User Registration Trend
+
+    User Roles Distribution
+
+    Customer Lifetime Value (LTV)
+
+Review Analytics
+
+    Total, Approved, Pending Reviews
+
+    Verified Reviews
+
+    Average Rating
+
+    Rating Distribution (1-5 stars)
+
+    Most Reviewed Products
+
+    Highest Rated Products
+
+    Review Trend
+
+    Review Approval Rate
+
+    Customer Satisfaction Score
+
+Product Analytics
+
+    Total Products, Inactive Products
+
+    Featured, Best Seller, New Products
+
+    Low Stock Products
+
+    Out of Stock Products
+
+    Category Performance
+
+    Top Selling Products (by quantity & revenue)

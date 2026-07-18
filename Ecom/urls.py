@@ -132,4 +132,21 @@ path('admin/orders/', admin_order_list_view, name='admin_order_list'),
     path('admin/banners/<int:banner_id>/edit/', banner_edit_view, name='banner_edit'),
     path('admin/banners/<int:banner_id>/delete/', banner_delete_view, name='banner_delete'),
     path('admin/banners/<int:banner_id>/toggle/', banner_toggle_status_view, name='banner_toggle'),
+    path('order/<int:order_id>/cancel/', views.cancel_order_view, name='cancel_order'),
+    path('admin/cancellations/', views.admin_cancellation_requests_view, name='admin_cancellation_requests'),
+    path('admin/cancellation/<int:order_id>/', views.admin_cancellation_detail_view, name='admin_cancellation_detail'),
+    
+    # ============================================
+    # RETURN URLS
+    # ============================================
+    path('order/<int:order_id>/return/', views.request_return_view, name='request_return'),
+    path('admin/returns/', views.admin_return_requests_view, name='admin_return_requests'),
+    path('admin/return/<int:order_id>/', views.admin_return_detail_view, name='admin_return_detail'),
+    
+    # ============================================
+    # REPLACEMENT URLS
+    # ============================================
+    path('order/<int:order_id>/replacement/', views.request_replacement_view, name='request_replacement'),
+    path('admin/replacements/', views.admin_replacement_requests_view, name='admin_replacement_requests'),
+    path('admin/replacement/<int:order_id>/', views.admin_replacement_detail_view, name='admin_replacement_detail'),
 ]

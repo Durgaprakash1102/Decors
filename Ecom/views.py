@@ -3804,19 +3804,46 @@ def orders_view(request):
     return render(request, 'Ecom/orders.html', {'orders': orders})
 
 
+# views.py - Update your existing order_detail_view
+
 @login_required
 def order_detail_view(request, order_id):
-    """View order details - Admin can view any, Customers only their own"""
+    """Order detail view with cancellation/return/replacement actions"""
     if request.user.is_admin or request.user.is_superuser:
         order = get_object_or_404(Order, id=order_id)
+        is_admin = True
     else:
         order = get_object_or_404(Order, id=order_id, user=request.user)
+        is_admin = False
     
+    items = order.items.all()
     transactions = order.transactions.all()
+    
+    # Check actions availability
+    can_cancel = order.can_cancel
+    can_request_return = order.can_request_return
+    can_request_replacement = order.can_request_replacement
+    
+    # Check if actions already requested
+    cancellation_requested = order.cancellation_requested
+    return_requested = order.return_requested
+    replacement_requested = order.replacement_requested
+    
     context = {
         'order': order,
+        'items': items,
         'transactions': transactions,
-        'is_admin_view': request.user.is_admin or request.user.is_superuser,
+        'is_admin': is_admin,
+        'can_cancel': can_cancel,
+        'can_request_return': can_request_return,
+        'can_request_replacement': can_request_replacement,
+        'cancellation_requested': cancellation_requested,
+        'return_requested': return_requested,
+        'replacement_requested': replacement_requested,
+        'return_window_days': order.return_window_remaining,
+        'return_status_display': order.return_status_display,
+        'replacement_status_display': order.replacement_status_display,
+        'refund_status_display': order.refund_status_display,
     }
     return render(request, 'Ecom/order_detail.html', context)
 
@@ -4235,21 +4262,46 @@ logger = logging.getLogger(__name__)
 # ORDER MANAGEMENT VIEWS (Admin/Superuser)
 # ============================================
 
+# views.py - Updated admin_order_list_view and admin_order_detail_view
+
 @staff_member_required
 def admin_order_list_view(request):
     """
     Admin view to list all orders with filters
-    Excludes pending payment orders and their counts
+    Excludes:
+    - Pending payment orders
+    - Failed orders
+    - Orders with cancellation/return/replacement requests (they have their own sections)
     """
     # ============================================
-    # EXCLUDE PENDING PAYMENT ORDERS
+    # EXCLUDE ORDERS WITH SPECIAL REQUESTS
     # ============================================
-    # Only show orders with payment_status != 'pending'
-    # Also exclude failed orders
+    # Base queryset - exclude pending payments and failed orders
     orders = Order.objects.select_related('user', 'coupon', 'offer').exclude(
         payment_status='pending'
     ).exclude(
         status='failed'
+    )
+    
+    # ============================================
+    # EXCLUDE ORDERS WITH CANCELLATION REQUESTS
+    # ============================================
+    orders = orders.exclude(
+        cancellation_requested=True
+    )
+    
+    # ============================================
+    # EXCLUDE ORDERS WITH RETURN REQUESTS
+    # ============================================
+    orders = orders.exclude(
+        return_requested=True
+    )
+    
+    # ============================================
+    # EXCLUDE ORDERS WITH REPLACEMENT REQUESTS
+    # ============================================
+    orders = orders.exclude(
+        replacement_requested=True
     )
     
     # ============================================
@@ -4298,12 +4350,38 @@ def admin_order_list_view(request):
     # ============================================
     # ORDER STATISTICS (Only show active orders)
     # ============================================
-    # Get all orders for count (excluding pending)
+    # Get all orders for count (excluding pending, failed, and special requests)
     active_orders = Order.objects.exclude(
         payment_status='pending'
     ).exclude(
         status='failed'
+    ).exclude(
+        cancellation_requested=True
+    ).exclude(
+        return_requested=True
+    ).exclude(
+        replacement_requested=True
     )
+    
+    # Get counts for special requests (to show in stats)
+    cancellation_count = Order.objects.filter(
+        cancellation_requested=True,
+        status__in=['pending', 'processing']
+    ).count()
+    
+    return_count = Order.objects.filter(
+        return_requested=True,
+        return_completed=False
+    ).exclude(
+        status='cancelled'
+    ).count()
+    
+    replacement_count = Order.objects.filter(
+        replacement_requested=True,
+        replacement_completed=False
+    ).exclude(
+        status='cancelled'
+    ).count()
     
     stats = {
         'total': active_orders.count(),
@@ -4313,6 +4391,10 @@ def admin_order_list_view(request):
         'cancelled': active_orders.filter(status='cancelled').count(),
         'paid': active_orders.filter(payment_status='paid').count(),
         'refunded': active_orders.filter(payment_status='refunded').count(),
+        # Add special request counts
+        'cancellation_requests': cancellation_count,
+        'return_requests': return_count,
+        'replacement_requests': replacement_count,
     }
     
     # ============================================
@@ -4347,19 +4429,40 @@ def admin_order_list_view(request):
         'payment_status_choices': Order.PAYMENT_STATUS_CHOICES,
     }
     return render(request, 'Ecom/admin/order_list.html', context)
+
+
 @staff_member_required
 def admin_order_detail_view(request, order_id):
     """
     Admin view to see order details
+    Shows all orders regardless of status (for admin to view complete details)
     """
     order = get_object_or_404(Order, id=order_id)
     transactions = order.transactions.all()
     items = order.items.all()
     
+    # Check if order has any special requests
+    has_cancellation_request = order.cancellation_requested
+    has_return_request = order.return_requested
+    has_replacement_request = order.replacement_requested
+    
+    # Get related special request URLs
+    special_request_urls = {}
+    if has_cancellation_request:
+        special_request_urls['cancellation'] = reverse('Ecom:admin_cancellation_detail', args=[order.id])
+    if has_return_request:
+        special_request_urls['return'] = reverse('Ecom:admin_return_detail', args=[order.id])
+    if has_replacement_request:
+        special_request_urls['replacement'] = reverse('Ecom:admin_replacement_detail', args=[order.id])
+    
     context = {
         'order': order,
         'items': items,
         'transactions': transactions,
+        'has_cancellation_request': has_cancellation_request,
+        'has_return_request': has_return_request,
+        'has_replacement_request': has_replacement_request,
+        'special_request_urls': special_request_urls,
     }
     return render(request, 'Ecom/admin/order_detail.html', context)
 
@@ -4695,3 +4798,496 @@ def banner_toggle_status_view(request, banner_id):
     status = 'activated' if banner.is_active else 'deactivated'
     messages.success(request, f'Banner "{banner.title}" {status} successfully!')
     return redirect('Ecom:banner_list')
+
+# views.py - Add these views
+
+from .forms import CancellationForm, ReturnForm, ReplacementForm
+from .utils import (
+    process_cancellation, approve_cancellation, reject_cancellation,
+    process_return_request, approve_return, reject_return, 
+    mark_return_items_received, complete_return,
+    process_replacement_request, approve_replacement, reject_replacement,
+    complete_replacement, initiate_refund, mark_refund_completed
+)
+
+# ============================================
+# CANCELLATION VIEWS
+# ============================================
+
+@login_required
+def cancel_order_view(request, order_id):
+    """Customer view to request order cancellation"""
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    if not order.can_cancel:
+        messages.error(request, 'This order cannot be cancelled. Orders can only be cancelled when status is Pending or Processing.')
+        return redirect('Ecom:order_detail', order_id=order.id)
+    
+    if request.method == 'POST':
+        form = CancellationForm(request.POST)
+        if form.is_valid():
+            reason = form.cleaned_data['reason']
+            process_cancellation(order, reason, request)
+            messages.success(request, f'Cancellation request submitted for Order #{order.order_number}')
+            return redirect('Ecom:order_detail', order_id=order.id)
+    else:
+        form = CancellationForm()
+    
+    context = {
+        'order': order,
+        'form': form,
+    }
+    return render(request, 'Ecom/orders/cancel_order.html', context)
+
+
+# ============================================
+# RETURN VIEWS (Full Order)
+# ============================================
+# views.py - Update these views
+
+# views.py - Updated request_return_view
+
+@login_required
+def request_return_view(request, order_id):
+    """Customer view to request return for full order"""
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    if not order.can_request_return:
+        messages.error(request, 'Return cannot be requested for this order. Order must be delivered within 7 days.')
+        return redirect('Ecom:order_detail', order_id=order.id)
+    
+    if request.method == 'POST':
+        form = ReturnForm(request.POST, request.FILES)
+        if form.is_valid():
+            reason = form.cleaned_data['reason']
+            description = form.cleaned_data['description']
+            bank_details = form.cleaned_data['bank_details']
+            images = request.FILES.getlist('images')
+            
+            # Debug - check if bank_details is received
+            print(f"Bank Details Received: {bank_details}")
+            
+            # Process return request with bank details
+            process_return_request(order, reason, description, bank_details, images, request)
+            
+            messages.success(request, f'Return request submitted for Order #{order.order_number}')
+            return redirect('Ecom:order_detail', order_id=order.id)
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, error)
+    else:
+        form = ReturnForm()
+    
+    context = {
+        'order': order,
+        'form': form,
+        'return_window_days': order.return_window_remaining,
+        'order_items': order.items.all(),
+    }
+    return render(request, 'Ecom/orders/request_return.html', context)
+
+@login_required
+def request_replacement_view(request, order_id):
+    """Customer view to request replacement for full order"""
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    if not order.can_request_replacement:
+        messages.error(request, 'Replacement cannot be requested for this order. Order must be delivered within 7 days.')
+        return redirect('Ecom:order_detail', order_id=order.id)
+    
+    if request.method == 'POST':
+        form = ReplacementForm(request.POST, request.FILES)
+        if form.is_valid():
+            reason = form.cleaned_data['reason']
+            description = form.cleaned_data['description']
+            images = form.cleaned_data.get('images', [])  # This will be a list of files
+            
+            process_replacement_request(order, reason, description, images, request)
+            messages.success(request, f'Replacement request submitted for Order #{order.order_number}')
+            return redirect('Ecom:order_detail', order_id=order.id)
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, error)
+    else:
+        form = ReplacementForm()
+    
+    context = {
+        'order': order,
+        'form': form,
+        'replacement_window_days': order.return_window_remaining,
+        'order_items': order.items.all(),
+    }
+    return render(request, 'Ecom/orders/request_replacement.html', context)
+
+from .forms import AdminCancellationActionForm, AdminReturnActionForm, AdminReplacementActionForm
+
+# ============================================
+# ADMIN - CANCELLATION REQUESTS
+# ============================================
+
+# views.py - Updated admin_cancellation_requests_view
+
+@staff_member_required
+def admin_cancellation_requests_view(request):
+    """Admin view to manage cancellation requests"""
+    # Only show pending cancellations that are not completed
+    cancellations = Order.objects.filter(
+        cancellation_requested=True,
+        status__in=['pending', 'processing'],  # Only pending/processing
+        cancelled_at__isnull=True,  # Not already cancelled
+        refund_completed=False,  # Not fully refunded
+    ).select_related('user').order_by('-cancellation_requested_at')
+    
+    # Also include cancelled orders that need refund
+    cancelled_pending_refund = Order.objects.filter(
+        status='cancelled',
+        payment_status='paid',
+        refund_requested=False,
+        refund_completed=False,
+    ).select_related('user').order_by('-cancelled_at')
+    
+    stats = {
+        'pending': cancellations.count(),
+        'pending_refund': cancelled_pending_refund.count(),
+        'total': Order.objects.filter(cancellation_requested=True).count(),
+    }
+    
+    context = {
+        'cancellations': cancellations,
+        'cancelled_pending_refund': cancelled_pending_refund,
+        'stats': stats,
+    }
+    return render(request, 'Ecom/admin/cancellation_requests.html', context)
+
+
+# views.py - Fixed admin_cancellation_detail_view
+
+@staff_member_required
+def admin_cancellation_detail_view(request, order_id):
+    """Admin view to handle individual cancellation request"""
+    order = get_object_or_404(Order, id=order_id)
+    
+    if request.method == 'POST':
+        form = AdminCancellationActionForm(request.POST)
+        if form.is_valid():
+            action = form.cleaned_data['action']
+            notes = form.cleaned_data.get('notes', '')
+            
+            try:
+                if action == 'approve':
+                    # Check if payment is paid
+                    if order.payment_status == 'paid':
+                        refund_method = form.cleaned_data.get('refund_method')
+                        bank_details = form.cleaned_data.get('bank_details', '')
+                        
+                        # Validate refund method
+                        if not refund_method:
+                            messages.error(request, 'Please select a refund method.')
+                            return redirect('Ecom:admin_cancellation_detail', order_id=order.id)
+                        
+                        if refund_method == 'manual' and not bank_details:
+                            messages.error(request, 'Please enter bank details for manual transfer.')
+                            return redirect('Ecom:admin_cancellation_detail', order_id=order.id)
+                    else:
+                        refund_method = None
+                        bank_details = None
+                    
+                    # Approve cancellation with refund
+                    approve_cancellation(order, refund_method, bank_details, notes, request)
+                    
+                    if refund_method == 'razorpay':
+                        messages.success(request, f'Order #{order.order_number} cancelled and refund initiated via Razorpay.')
+                    elif refund_method == 'manual':
+                        messages.success(request, f'Order #{order.order_number} cancelled. Manual refund instructions sent.')
+                    else:
+                        messages.success(request, f'Order #{order.order_number} cancelled.')
+                    
+                elif action == 'reject':
+                    reject_cancellation(order, notes or 'No reason provided', request)
+                    messages.success(request, f'Cancellation request for Order #{order.order_number} rejected')
+                
+                return redirect('Ecom:admin_cancellation_detail', order_id=order.id)
+                
+            except Exception as e:
+                messages.error(request, f'Error: {str(e)}')
+    
+    else:
+        form = AdminCancellationActionForm()
+    
+    context = {
+        'order': order,
+        'form': form,
+        'items': order.items.all(),
+        'transactions': order.transactions.all(),
+    }
+    return render(request, 'Ecom/admin/cancellation_detail.html', context)
+# ============================================
+# ADMIN - RETURN REQUESTS
+# ============================================
+
+# views.py - Updated admin_return_requests_view
+
+@staff_member_required
+def admin_return_requests_view(request):
+    """Admin view to manage return requests"""
+    # Exclude completed returns
+    returns = Order.objects.filter(
+        return_requested=True,
+        return_completed=False,  # Not completed
+    ).select_related('user').order_by('-return_requested_at')
+    
+    # Also exclude if order is cancelled
+    returns = returns.exclude(status='cancelled')
+    
+    stats = {
+        'pending': returns.filter(return_approved=False, return_rejected=False).count(),
+        'approved': returns.filter(return_approved=True, return_items_received=False).count(),
+        'items_received': returns.filter(return_items_received=True, refund_requested=False).count(),
+        'rejected': returns.filter(return_rejected=True).count(),
+        'completed': Order.objects.filter(return_requested=True, return_completed=True).count(),
+        'total': returns.count(),
+    }
+    
+    status_filter = request.GET.get('status', '')
+    if status_filter == 'pending':
+        returns = returns.filter(return_approved=False, return_rejected=False)
+    elif status_filter == 'approved':
+        returns = returns.filter(return_approved=True, return_items_received=False)
+    elif status_filter == 'rejected':
+        returns = returns.filter(return_rejected=True)
+    elif status_filter == 'received':
+        returns = returns.filter(return_items_received=True, refund_requested=False)
+    elif status_filter == 'completed':
+        # For completed, show all completed returns
+        returns = Order.objects.filter(return_requested=True, return_completed=True)
+    else:
+        # Default: show all active returns
+        returns = Order.objects.filter(
+            return_requested=True,
+            return_completed=False,
+        ).exclude(status='cancelled')
+    
+    context = {
+        'returns': returns,
+        'stats': stats,
+        'status_filter': status_filter,
+    }
+    return render(request, 'Ecom/admin/return_requests.html', context)
+
+# views.py - admin_return_detail_view
+
+# views.py - Updated admin_return_detail_view
+# views.py - Fixed admin_return_detail_view
+
+@staff_member_required
+def admin_return_detail_view(request, order_id):
+    """Admin view to handle individual return request"""
+    order = get_object_or_404(Order, id=order_id)
+    
+    if request.method == 'POST':
+        form = AdminReturnActionForm(request.POST)
+        if form.is_valid():
+            action = form.cleaned_data['action']
+            notes = form.cleaned_data.get('notes', '')
+            
+            try:
+                with transaction.atomic():
+                    if action == 'approve':
+                        approve_return(order, request)
+                        messages.success(request, f'Return approved for Order #{order.order_number}')
+                    
+                    elif action == 'reject':
+                        reject_return(order, notes or 'No reason provided', request)
+                        messages.success(request, f'Return rejected for Order #{order.order_number}')
+                    
+                    elif action == 'mark_received':
+                        mark_return_items_received(order, request)
+                        messages.success(request, f'Return items marked as received for Order #{order.order_number}')
+                    
+                    elif action == 'initiate_refund':
+                        refund_method = form.cleaned_data.get('refund_method')
+                        
+                        # CRITICAL FIX: Use order.total_amount as default if not provided
+                        refund_amount = form.cleaned_data.get('refund_amount')
+                        if refund_amount is None or refund_amount <= 0:
+                            refund_amount = order.total_amount
+                            messages.info(request, f'Using order total amount ₹{refund_amount} for refund.')
+                        
+                        # Ensure refund_amount is Decimal
+                        try:
+                            refund_amount = Decimal(str(refund_amount))
+                        except (ValueError, TypeError):
+                            refund_amount = order.total_amount
+                            messages.warning(request, f'Invalid refund amount. Using order total ₹{refund_amount}.')
+                        
+                        # Get bank details - use customer's if available
+                        if order.return_bank_details:
+                            bank_details = order.return_bank_details
+                        else:
+                            bank_details = form.cleaned_data.get('bank_details', '')
+                        
+                        # Validate
+                        if not refund_method:
+                            messages.error(request, 'Please select a refund method.')
+                            return redirect('Ecom:admin_return_detail', order_id=order.id)
+                        
+                        if refund_method == 'manual' and not bank_details:
+                            messages.error(request, 'Please enter bank details for manual transfer.')
+                            return redirect('Ecom:admin_return_detail', order_id=order.id)
+                        
+                        # Initiate refund
+                        success, message = initiate_refund(
+                            order, 
+                            refund_amount, 
+                            refund_method, 
+                            bank_details, 
+                            f'Return refund. {notes}' if notes else 'Return refund',
+                            request
+                        )
+                        
+                        if success:
+                            messages.success(request, message)
+                        else:
+                            messages.error(request, message)
+                            return redirect('Ecom:admin_return_detail', order_id=order.id)
+                    
+                    elif action == 'mark_refund_completed':
+                        mark_refund_completed(order, request)
+                        messages.success(request, f'Refund marked as completed for Order #{order.order_number}')
+                    
+                    elif action == 'complete_return':
+                        complete_return(order, request)
+                        messages.success(request, f'Return completed for Order #{order.order_number}')
+                    
+                    return redirect('Ecom:admin_return_detail', order_id=order.id)
+                    
+            except Exception as e:
+                messages.error(request, f'Error: {str(e)}')
+                logger.error(f"Return action error for Order #{order.order_number}: {str(e)}")
+    
+    else:
+        # Pre-fill bank details from customer if available
+        initial_data = {}
+        if order.return_bank_details:
+            initial_data['bank_details'] = order.return_bank_details
+        form = AdminReturnActionForm(initial=initial_data)
+    
+    context = {
+        'order': order,
+        'form': form,
+        'items': order.items.all(),
+        'transactions': order.transactions.all(),
+        'return_images': order.return_images,
+    }
+    return render(request, 'Ecom/admin/return_detail.html', context)
+
+# ============================================
+# ADMIN - REPLACEMENT REQUESTS
+# ============================================
+# views.py - Updated admin_replacement_requests_view
+
+@staff_member_required
+def admin_replacement_requests_view(request):
+    """Admin view to manage replacement requests"""
+    # Exclude completed replacements
+    replacements = Order.objects.filter(
+        replacement_requested=True,
+        replacement_completed=False,  # Not completed
+    ).select_related('user').order_by('-replacement_requested_at')
+    
+    # Also exclude if order is cancelled
+    replacements = replacements.exclude(status='cancelled')
+    
+    stats = {
+        'pending': replacements.filter(replacement_approved=False, replacement_rejected=False).count(),
+        'approved': replacements.filter(replacement_approved=True, replacement_completed=False).count(),
+        'rejected': replacements.filter(replacement_rejected=True).count(),
+        'completed': Order.objects.filter(replacement_requested=True, replacement_completed=True).count(),
+        'total': replacements.count(),
+    }
+    
+    status_filter = request.GET.get('status', '')
+    if status_filter == 'pending':
+        replacements = replacements.filter(replacement_approved=False, replacement_rejected=False)
+    elif status_filter == 'approved':
+        replacements = replacements.filter(replacement_approved=True, replacement_completed=False)
+    elif status_filter == 'rejected':
+        replacements = replacements.filter(replacement_rejected=True)
+    elif status_filter == 'completed':
+        # For completed, show all completed replacements
+        replacements = Order.objects.filter(replacement_requested=True, replacement_completed=True)
+    else:
+        # Default: show all active replacements
+        replacements = Order.objects.filter(
+            replacement_requested=True,
+            replacement_completed=False,
+        ).exclude(status='cancelled')
+    
+    context = {
+        'replacements': replacements,
+        'stats': stats,
+        'status_filter': status_filter,
+    }
+    return render(request, 'Ecom/admin/replacement_requests.html', context)
+
+@staff_member_required
+def admin_replacement_detail_view(request, order_id):
+    """Admin view to handle individual replacement request"""
+    order = get_object_or_404(Order, id=order_id)
+    
+    if request.method == 'POST':
+        form = AdminReplacementActionForm(request.POST)
+        if form.is_valid():
+            action = form.cleaned_data['action']
+            notes = form.cleaned_data.get('notes', '')
+            
+            try:
+                with transaction.atomic():
+                    if action == 'approve':
+                        replacement_order = approve_replacement(order, request)
+                        messages.success(request, f'Replacement approved for Order #{order.order_number}. New order: #{replacement_order.order_number}')
+                    
+                    elif action == 'reject':
+                        reject_replacement(order, notes or 'No reason provided', request)
+                        messages.success(request, f'Replacement rejected for Order #{order.order_number}')
+                    
+                    elif action == 'mark_shipped':
+                        if order.replacement_order:
+                            order.replacement_order.status = 'shipped'
+                            order.replacement_order.save()
+                            messages.success(request, f'Replacement order #{order.replacement_order.order_number} marked as shipped')
+                        else:
+                            messages.error(request, 'No replacement order found')
+                    
+                    elif action == 'mark_delivered':
+                        if order.replacement_order:
+                            order.replacement_order.status = 'delivered'
+                            order.replacement_order.delivery_date = timezone.now()
+                            order.replacement_order.save()
+                            messages.success(request, f'Replacement order #{order.replacement_order.order_number} marked as delivered')
+                        else:
+                            messages.error(request, 'No replacement order found')
+                    
+                    elif action == 'complete_replacement':
+                        complete_replacement(order, request)
+                        messages.success(request, f'Replacement completed for Order #{order.order_number}')
+                    
+                    return redirect('Ecom:admin_replacement_detail', order_id=order.id)
+                    
+            except Exception as e:
+                messages.error(request, f'Error: {str(e)}')
+    
+    else:
+        form = AdminReplacementActionForm()
+    
+    context = {
+        'order': order,
+        'form': form,
+        'items': order.items.all(),
+        'replacement_order': order.replacement_order,
+        'replacement_images': order.replacement_images,
+    }
+    return render(request, 'Ecom/admin/replacement_detail.html', context)
+

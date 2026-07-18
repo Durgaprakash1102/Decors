@@ -1,0 +1,531 @@
+
+{% load static %}
+
+{% block title %}Replacement Request - Order #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'Ecom:admin_replacement_requests' %}">Replacement Requests</a></li>
+            <li class="breadcrumb-item active">Order #{{ order.order_number }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Order Details Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Replacement Request - Order #{{ order.order_number }}</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Customer Info -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Customer:</strong> {{ order.user.full_name }}</p>
+                            <p><strong>Email:</strong> {{ order.user.email }}</p>
+                            <p><strong>Phone:</strong> {{ order.user.phone|default:"N/A" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Order Date:</strong> {{ order.created_at|date:"F d, Y H:i" }}</p>
+                            <p><strong>Delivery Date:</strong> {{ order.delivery_date|date:"F d, Y"|default:"Not delivered" }}</p>
+                            <p><strong>Order Status:</strong> 
+                                <span class="badge bg-{% if order.status == 'delivered' %}success{% elif order.status == 'cancelled' %}danger{% else %}secondary{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </p>
+                            <p><strong>Payment Status:</strong> 
+                                <span class="badge bg-{% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'refunded' %}info{% else %}warning{% endif %}">
+                                    {{ order.get_payment_status_display }}
+                                </span>
+                            </p>
+                            <p><strong>Total Amount:</strong> ₹{{ order.total_amount }}</p>
+                            <p><strong>Replacement Status:</strong>
+                                <span class="badge bg-{% if order.replacement_completed %}success{% elif order.replacement_approved %}warning{% elif order.replacement_rejected %}danger{% else %}secondary{% endif %}">
+                                    {{ order.replacement_status_display }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Replacement Details -->
+                    <div class="mt-3">
+                        <h6>Replacement Details:</h6>
+                        <div class="bg-light p-3 rounded">
+                            <p><strong>Reason:</strong> {{ order.get_replacement_reason_display }}</p>
+                            <p><strong>Description:</strong></p>
+                            <p style="white-space: pre-line;">{{ order.replacement_description }}</p>
+                            <p class="text-muted mt-2">
+                                <small>Requested on: {{ order.replacement_requested_at|date:"F d, Y H:i" }}</small>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Replacement Images -->
+                    {% if replacement_images %}
+                    <div class="mt-3">
+                        <h6>Replacement Images:</h6>
+                        <div class="row">
+                            {% for image in replacement_images %}
+                            <div class="col-3 mb-2">
+                                <a href="{{ image }}" target="_blank">
+                                    <img src="{{ image }}" class="img-fluid rounded border" style="height: 120px; width: 100%; object-fit: cover;">
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Replacement Order -->
+                    {% if replacement_order %}
+                    <div class="mt-4">
+                        <div class="alert alert-success">
+                            <h6><i class="fas fa-check-circle"></i> Replacement Order Created</h6>
+                            <p class="mb-0">
+                                <strong>Order #:</strong> 
+                                <a href="{% url 'Ecom:admin_order_detail' replacement_order.id %}">
+                                    {{ replacement_order.order_number }}
+                                </a>
+                            </p>
+                            <p class="mb-0"><strong>Status:</strong> {{ replacement_order.get_status_display }}</p>
+                            <p class="mb-0"><strong>Amount:</strong> ₹{{ replacement_order.total_amount }} (Free)</p>
+                            {% if replacement_order.tracking_number %}
+                            <p class="mb-0"><strong>Tracking:</strong> {{ replacement_order.tracking_number }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Order Items -->
+                    <div class="mt-4">
+                        <h6>Order Items:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>SKU</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in items %}
+                                    <tr>
+                                        <td>{{ item.product_name }}</td>
+                                        <td>{{ item.sku }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>₹{{ item.final_price }}</td>
+                                        <td>₹{{ item.total }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-active">
+                                        <td colspan="4" class="text-end"><strong>Grand Total:</strong></td>
+                                        <td><strong>₹{{ order.total_amount }}</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Transactions -->
+                    <div class="mt-4">
+                        <h6>Transaction History:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tx in transactions %}
+                                    <tr>
+                                        <td>{{ tx.get_transaction_type_display }}</td>
+                                        <td>₹{{ tx.amount }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if tx.status == 'success' %}success{% elif tx.status == 'pending' %}warning{% else %}danger{% endif %}">
+                                                {{ tx.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ tx.created_at|date:"F d, Y H:i" }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">No transactions</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Admin Action Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-tools"></i> Admin Actions</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Current Status -->
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Current Status:</strong> 
+                        <span class="badge bg-{% if order.replacement_completed %}success{% elif order.replacement_approved %}warning{% elif order.replacement_rejected %}danger{% else %}secondary{% endif %}">
+                            {{ order.replacement_status_display }}
+                        </span>
+                        <br>
+                        <strong>Order Status:</strong> 
+                        <span class="badge bg-{% if order.status == 'delivered' %}success{% elif order.status == 'cancelled' %}danger{% else %}secondary{% endif %}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </div>
+
+                    <!-- Only show action form if not already completed -->
+                    {% if not order.replacement_completed and not order.status == 'cancelled' %}
+                    <form method="post" id="replacementForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.action.id_for_label }}" class="form-label">Action <span class="text-danger">*</span></label>
+                            {{ form.action }}
+                            <small class="text-muted">Select an action to perform on this replacement request.</small>
+                        </div>
+
+                        <!-- Tracking Fields - Shown for shipping/delivery actions -->
+                        <div class="mb-3" id="trackingFields" style="display:none;">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">📦 Tracking Information</h6>
+                                    <div class="mb-2">
+                                        <label for="{{ form.tracking_number.id_for_label }}" class="form-label">Tracking Number</label>
+                                        {{ form.tracking_number }}
+                                        <small class="text-muted">Enter the tracking number for the replacement shipment.</small>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="{{ form.tracking_url.id_for_label }}" class="form-label">Tracking URL</label>
+                                        {{ form.tracking_url }}
+                                        <small class="text-muted">Optional: Enter the tracking URL for customer to track.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-3">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                            {{ form.notes }}
+                            <small class="text-muted">Add any notes about this action (optional).</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100" id="submitBtn">
+                            <i class="fas fa-check"></i> Apply Action
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="alert {% if order.replacement_completed %}alert-success{% else %}alert-danger{% endif %}">
+                        <i class="fas fa-check-circle"></i>
+                        <strong>
+                            {% if order.replacement_completed %}
+                                Replacement Already Completed
+                            {% elif order.status == 'cancelled' %}
+                                Order Cancelled
+                            {% endif %}
+                        </strong>
+                        <p class="mb-0 small">
+                            {% if order.replacement_completed %}
+                                This replacement was completed on {{ order.replacement_completed_at|date:"F d, Y H:i" }}
+                            {% elif order.status == 'cancelled' %}
+                                This order was cancelled on {{ order.cancelled_at|date:"F d, Y H:i" }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Quick Actions - Only show if not completed -->
+                    {% if not order.replacement_completed and not order.status == 'cancelled' %}
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                {% if order.replacement_requested and not order.replacement_approved and not order.replacement_rejected %}
+                                    <button class="btn btn-success" onclick="quickAction('approve')">
+                                        <i class="fas fa-check"></i> Quick Approve
+                                    </button>
+                                    <button class="btn btn-danger" onclick="quickAction('reject')">
+                                        <i class="fas fa-times"></i> Quick Reject
+                                    </button>
+                                {% endif %}
+                                {% if order.replacement_approved and not order.replacement_completed %}
+                                    {% if replacement_order %}
+                                        {% if replacement_order.status == 'processing' %}
+                                            <button class="btn btn-info" onclick="quickActionWithTracking('mark_shipped')">
+                                                <i class="fas fa-shipping-fast"></i> Mark as Shipped
+                                            </button>
+                                        {% endif %}
+                                        {% if replacement_order.status == 'shipped' %}
+                                            <button class="btn btn-success" onclick="quickAction('mark_delivered')">
+                                                <i class="fas fa-check-circle"></i> Mark as Delivered
+                                            </button>
+                                        {% endif %}
+                                    {% endif %}
+                                    <button class="btn btn-secondary" onclick="quickAction('complete_replacement')">
+                                        <i class="fas fa-flag-checkered"></i> Complete Replacement
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Timeline Card -->
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-history"></i> Replacement Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success"></i>
+                            Order Placed - {{ order.created_at|date:"F d, Y H:i" }}
+                        </li>
+                        {% if order.delivery_date %}
+                        <li class="mb-2">
+                            <i class="fas fa-truck text-info"></i>
+                            Delivered - {{ order.delivery_date|date:"F d, Y" }}
+                        </li>
+                        {% endif %}
+                        {% if order.replacement_requested %}
+                        <li class="mb-2">
+                            <i class="fas fa-clock text-warning"></i>
+                            Replacement Requested - {{ order.replacement_requested_at|date:"F d, Y H:i" }}
+                            <br><small class="text-muted">Reason: {{ order.get_replacement_reason_display }}</small>
+                        </li>
+                        {% endif %}
+                        {% if order.replacement_approved %}
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success"></i>
+                            Replacement Approved - {{ order.replacement_approved_at|date:"F d, Y H:i" }}
+                        </li>
+                        {% endif %}
+                        {% if order.replacement_rejected %}
+                        <li class="mb-2">
+                            <i class="fas fa-times-circle text-danger"></i>
+                            Replacement Rejected - {{ order.replacement_rejected_at|date:"F d, Y H:i" }}
+                            <br><small class="text-muted">Reason: {{ order.replacement_rejection_reason }}</small>
+                        </li>
+                        {% endif %}
+                        {% if replacement_order %}
+                        <li class="mb-2">
+                            <i class="fas fa-file-invoice text-info"></i>
+                            Replacement Order Created - {{ replacement_order.created_at|date:"F d, Y H:i" }}
+                        </li>
+                        {% if replacement_order.status == 'shipped' or replacement_order.status == 'delivered' %}
+                        <li class="mb-2">
+                            <i class="fas fa-shipping-fast text-info"></i>
+                            Replacement Shipped - 
+                            {% if replacement_order.updated_at %}
+                                {{ replacement_order.updated_at|date:"F d, Y H:i" }}
+                            {% else %}
+                                {{ replacement_order.created_at|date:"F d, Y H:i" }}
+                            {% endif %}
+                            {% if replacement_order.tracking_number %}
+                                <br><small>Tracking: {{ replacement_order.tracking_number }}</small>
+                            {% endif %}
+                        </li>
+                        {% endif %}
+                        {% if replacement_order.delivery_date %}
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success"></i>
+                            Replacement Delivered - {{ replacement_order.delivery_date|date:"F d, Y" }}
+                        </li>
+                        {% endif %}
+                        {% endif %}
+                        {% if order.replacement_completed %}
+                        <li class="mb-2">
+                            <i class="fas fa-flag-checkered text-success"></i>
+                            Replacement Completed - {{ order.replacement_completed_at|date:"F d, Y H:i" }}
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Show/hide tracking fields based on action
+document.getElementById('id_action').addEventListener('change', function() {
+    const trackingFields = document.getElementById('trackingFields');
+    
+    if (this.value === 'mark_shipped' || this.value === 'mark_delivered') {
+        trackingFields.style.display = 'block';
+    } else {
+        trackingFields.style.display = 'none';
+    }
+});
+
+// Quick action buttons
+function quickAction(action) {
+    if (action === 'reject') {
+        const reason = prompt('Please enter the reason for rejection:');
+        if (reason === null) return;
+        if (!reason.trim()) {
+            alert('Please provide a reason for rejection.');
+            return;
+        }
+        document.getElementById('id_notes').value = reason;
+    }
+    
+    if (action === 'approve') {
+        if (!confirm('Are you sure you want to approve this replacement? A new replacement order will be created.')) {
+            return;
+        }
+    }
+    
+    if (action === 'complete_replacement') {
+        if (!confirm('Complete this replacement process? This action cannot be undone.')) {
+            return;
+        }
+    }
+    
+    if (action === 'mark_delivered') {
+        if (!confirm('Mark replacement as delivered? This will update the order status.')) {
+            return;
+        }
+    }
+    
+    document.getElementById('id_action').value = action;
+    document.getElementById('replacementForm').submit();
+}
+
+// Quick action with tracking number prompt
+function quickActionWithTracking(action) {
+    if (action === 'mark_shipped') {
+        const trackingNumber = prompt('Please enter the tracking number for the replacement shipment:');
+        if (trackingNumber === null) return;
+        if (!trackingNumber.trim()) {
+            alert('Please provide a tracking number.');
+            return;
+        }
+        document.getElementById('id_tracking_number').value = trackingNumber;
+        
+        const trackingUrl = prompt('Optional: Enter tracking URL (or leave blank):');
+        if (trackingUrl !== null) {
+            document.getElementById('id_tracking_url').value = trackingUrl;
+        }
+        
+        if (!confirm('Mark replacement as shipped with tracking number: ' + trackingNumber + '?')) {
+            return;
+        }
+    }
+    
+    document.getElementById('id_action').value = action;
+    document.getElementById('replacementForm').submit();
+}
+
+// Form validation
+document.getElementById('replacementForm').addEventListener('submit', function(e) {
+    const action = document.getElementById('id_action').value;
+    const notes = document.getElementById('id_notes');
+    const trackingNumber = document.getElementById('id_tracking_number');
+    
+    if (action === 'reject') {
+        if (!notes.value.trim()) {
+            e.preventDefault();
+            alert('Please provide a reason for rejection in the notes field.');
+            return false;
+        }
+    }
+    
+    if (action === 'mark_shipped') {
+        if (!trackingNumber.value.trim()) {
+            e.preventDefault();
+            alert('Please enter a tracking number for the replacement shipment.');
+            return false;
+        }
+    }
+    
+    if (action === 'approve') {
+        if (!confirm('Are you sure you want to approve this replacement request? A new replacement order will be created.')) {
+            e.preventDefault();
+            return false;
+        }
+    }
+});
+
+// Auto-show tracking fields if action is already mark_shipped or mark_delivered
+document.addEventListener('DOMContentLoaded', function() {
+    const actionField = document.getElementById('id_action');
+    const trackingFields = document.getElementById('trackingFields');
+    
+    if (actionField && (actionField.value === 'mark_shipped' || actionField.value === 'mark_delivered')) {
+        trackingFields.style.display = 'block';
+    }
+});
+</script>
+
+<style>
+/* Style improvements */
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card-header {
+    font-weight: 600;
+}
+
+.badge {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+}
+
+.timeline .list-unstyled {
+    margin-bottom: 0;
+}
+
+.timeline .list-unstyled li {
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.timeline .list-unstyled li:last-child {
+    border-bottom: none;
+}
+
+#trackingFields .card {
+    border: 1px solid #dee2e6;
+}
+
+#trackingFields .card-body {
+    padding: 15px;
+}
+
+/* Quick action buttons */
+.d-grid .btn {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.d-grid .btn:last-child {
+    margin-bottom: 0;
+}
+</style>
+{% endblock %}

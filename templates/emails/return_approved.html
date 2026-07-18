@@ -1,0 +1,84 @@
+<!-- templates/emails/return_approved.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Return Approved</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #28a745; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+        .content { padding: 30px; background: #f8f9fa; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 5px 5px; }
+        .footer { text-align: center; padding: 20px; color: #6c757d; font-size: 14px; }
+        .btn { display: inline-block; padding: 10px 25px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; }
+        .order-details { background: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .return-instructions { background: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745; }
+        .address-box { background: white; padding: 15px; border-radius: 5px; margin: 10px 0; border: 1px dashed #28a745; }
+        .status-badge { display: inline-block; padding: 5px 15px; background: #28a745; color: white; border-radius: 20px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>✅ Return Approved</h2>
+            <p>Order #{{ order.order_number }}</p>
+        </div>
+        
+        <div class="content">
+            <p>Dear <strong>{{ user.full_name }}</strong>,</p>
+            
+            <p>Your return request for Order #<strong>{{ order.order_number }}</strong> has been <strong>approved</strong>.</p>
+            
+            <div class="order-details">
+                <p><strong>Order Date:</strong> {{ order.created_at|date:"F d, Y H:i" }}</p>
+                <p><strong>Order Total:</strong> ₹{{ order.total_amount }}</p>
+                <p><strong>Status:</strong> <span class="status-badge">Approved</span></p>
+            </div>
+            
+            <div class="return-instructions">
+                <h4>📦 Return Instructions</h4>
+                <p>Please follow these steps to return your order:</p>
+                <ol>
+                    <li>Pack all items securely in the original packaging (if available)</li>
+                    <li>Include a copy of this email or your order number inside the package</li>
+                    <li>Ship the package to the address below</li>
+                    <li>Share the tracking number with us at <a href="mailto:{{ support_email }}">{{ support_email }}</a></li>
+                </ol>
+                
+                <div class="address-box">
+                    <p><strong>Return Address:</strong></p>
+                    <p style="margin: 0;">
+                        {{ site_name }} Returns<br>
+                        123 Business Street,<br>
+                        City, State - 123456<br>
+                        India
+                    </p>
+                </div>
+                
+                <p><strong>Important Notes:</strong></p>
+                <ul>
+                    <li>Return shipping charges are borne by the customer</li>
+                    <li>Please use a trackable shipping method</li>
+                    <li>Once we receive and inspect the items, we will process your refund</li>
+                </ul>
+            </div>
+            
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="{{ order_url }}" class="btn">View Order Details</a>
+            </p>
+            
+            <p>If you have any questions, please contact our support team.</p>
+            
+            <p>Thank you for shopping with us!</p>
+            <p><strong>Team {{ site_name }}</strong></p>
+        </div>
+        
+        <div class="footer">
+            <p>Need help? Contact us at <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+            <p>&copy; {{ site_name }}. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

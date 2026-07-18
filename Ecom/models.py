@@ -1585,7 +1585,9 @@ class Order(models.Model):
         ('processing', 'Processing'),
         ('shipped', 'Shipped'),
         ('delivered', 'Delivered'),
+        ('returned','Returned'),
         ('cancelled', 'Cancelled'),
+        ('replaced','Replaced'),
         ('failed', 'Failed'),
     ]
     
@@ -1629,6 +1631,74 @@ class Order(models.Model):
     tracking_number = models.CharField(max_length=100, blank=True, null=True)
     tracking_url = models.URLField(max_length=500, blank=True, null=True, help_text="URL to track the shipment")
     delivery_date = models.DateTimeField(null=True, blank=True)
+    # ========== CANCELLATION FIELDS ==========
+    cancellation_requested = models.BooleanField(default=False)
+    cancellation_requested_at = models.DateTimeField(null=True, blank=True)
+    cancellation_reason = models.TextField(blank=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+    
+    # ========== RETURN FIELDS (Full Order) ==========
+    return_requested = models.BooleanField(default=False)
+    return_requested_at = models.DateTimeField(null=True, blank=True)
+    return_reason = models.CharField(max_length=50, blank=True, choices=[
+        ('defective', 'Defective/Damaged'),
+        ('wrong_item', 'Wrong Item Received'),
+        ('quality_issue', 'Quality Issue'),
+        ('not_as_described', 'Product Not as Described'),
+        ('changed_mind', 'Changed Mind'),
+        ('other', 'Other'),
+    ])
+    return_description = models.TextField(blank=True)
+    return_images = models.JSONField(default=list, blank=True)  # Store image URLs
+    
+    return_approved = models.BooleanField(default=False)
+    return_approved_at = models.DateTimeField(null=True, blank=True)
+    return_rejected = models.BooleanField(default=False)
+    return_rejected_at = models.DateTimeField(null=True, blank=True)
+    return_rejection_reason = models.TextField(blank=True)
+    return_items_received = models.BooleanField(default=False)
+    return_items_received_at = models.DateTimeField(null=True, blank=True)
+    return_completed = models.BooleanField(default=False)
+    return_completed_at = models.DateTimeField(null=True, blank=True)
+    return_bank_details = models.TextField(blank=True, help_text="Customer's bank details for refund") 
+    
+    # ========== REPLACEMENT FIELDS (Full Order) ==========
+    replacement_requested = models.BooleanField(default=False)
+    replacement_requested_at = models.DateTimeField(null=True, blank=True)
+    replacement_reason = models.CharField(max_length=50, blank=True, choices=[
+        ('defective', 'Defective/Damaged'),
+        ('wrong_item', 'Wrong Item Received'),
+        ('quality_issue', 'Quality Issue'),
+        ('not_as_described', 'Product Not as Described'),
+        ('other', 'Other'),
+    ])
+    replacement_description = models.TextField(blank=True)
+    replacement_images = models.JSONField(default=list, blank=True)
+    
+    replacement_approved = models.BooleanField(default=False)
+    replacement_approved_at = models.DateTimeField(null=True, blank=True)
+    replacement_rejected = models.BooleanField(default=False)
+    replacement_rejected_at = models.DateTimeField(null=True, blank=True)
+    replacement_rejection_reason = models.TextField(blank=True)
+    replacement_order = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='original_order')
+    replacement_completed = models.BooleanField(default=False)
+    replacement_completed_at = models.DateTimeField(null=True, blank=True)
+    
+    # ========== REFUND FIELDS ==========
+    refund_requested = models.BooleanField(default=False)
+    refund_requested_at = models.DateTimeField(null=True, blank=True)
+    refund_approved = models.BooleanField(default=False)
+    refund_approved_at = models.DateTimeField(null=True, blank=True)
+    refund_completed = models.BooleanField(default=False)
+    refund_completed_at = models.DateTimeField(null=True, blank=True)
+    refund_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    refund_transaction_id = models.CharField(max_length=100, blank=True, null=True)
+    refund_method = models.CharField(max_length=20, blank=True, null=True, choices=[
+        ('razorpay', 'Razorpay Auto-Refund'),
+        ('manual', 'Manual Bank Transfer'),
+    ])
+    refund_bank_details = models.TextField(blank=True, help_text="Bank details for manual refund")
+    refund_notes = models.TextField(blank=True)
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
@@ -1677,9 +1747,110 @@ class Order(models.Model):
     
     @property
     def can_cancel(self):
-        """Check if order can be cancelled"""
-        return self.status in ['pending', 'processing'] and self.payment_status != 'refunded'
-
+        """Check if order can be cancelled (pending or processing status)"""
+        return (
+            self.status in ['pending', 'processing'] and
+            self.payment_status in ['pending', 'paid'] and
+            not self.cancellation_requested and
+            not self.return_requested and
+            not self.replacement_requested and
+            not self.refund_requested
+        )
+    
+    @property
+    def can_request_return(self):
+        """Check if return can be requested (delivered within 7 days)"""
+        if self.status != 'delivered':
+            return False
+        if self.return_requested or self.return_approved:
+            return False
+        if self.replacement_requested or self.replacement_approved:
+            return False
+        if self.cancellation_requested:
+            return False
+        if self.refund_requested or self.refund_approved:
+            return False
+        
+        if self.delivery_date:
+            days_since = (timezone.now() - self.delivery_date).days
+            return 0 <= days_since <= 7
+        return False
+    
+    @property
+    def can_request_replacement(self):
+        """Check if replacement can be requested (delivered within 7 days)"""
+        if self.status != 'delivered':
+            return False
+        if self.replacement_requested or self.replacement_approved:
+            return False
+        if self.return_requested or self.return_approved:
+            return False
+        if self.cancellation_requested:
+            return False
+        if self.refund_requested or self.refund_approved:
+            return False
+        
+        if self.delivery_date:
+            days_since = (timezone.now() - self.delivery_date).days
+            return 0 <= days_since <= 7
+        return False
+    
+    @property
+    def return_window_remaining(self):
+        """Days remaining for return/replacement"""
+        if self.delivery_date and self.status == 'delivered':
+            days_since = (timezone.now() - self.delivery_date).days
+            return max(0, 7 - days_since)
+        return 0
+    
+    @property
+    def can_initiate_refund(self):
+        """Check if refund can be initiated"""
+        return (
+            self.payment_status == 'paid' and
+            not self.refund_requested and
+            not self.refund_completed and
+            (self.return_approved or self.cancellation_requested)
+        )
+    
+    @property
+    def refund_status_display(self):
+        """Get refund status display"""
+        if self.refund_completed:
+            return 'Completed'
+        elif self.refund_approved:
+            return 'Processing'
+        elif self.refund_requested:
+            return 'Requested'
+        return 'Not Requested'
+    
+    @property
+    def return_status_display(self):
+        """Get return status display"""
+        if self.return_completed:
+            return 'Completed'
+        elif self.return_items_received:
+            return 'Items Received'
+        elif self.return_approved:
+            return 'Approved'
+        elif self.return_rejected:
+            return 'Rejected'
+        elif self.return_requested:
+            return 'Requested'
+        return 'Not Requested'
+    
+    @property
+    def replacement_status_display(self):
+        """Get replacement status display"""
+        if self.replacement_completed:
+            return 'Completed'
+        elif self.replacement_approved:
+            return 'Approved'
+        elif self.replacement_rejected:
+            return 'Rejected'
+        elif self.replacement_requested:
+            return 'Requested'
+        return 'Not Requested'
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')

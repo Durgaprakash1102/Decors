@@ -1,0 +1,204 @@
+<!-- templates/Ecom/orders/request_replacement.html -->
+
+{% load static %}
+
+{% block title %}Request Replacement - Order #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'Ecom:orders' %}">My Orders</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'Ecom:order_detail' order.id %}">Order #{{ order.order_number }}</a></li>
+            <li class="breadcrumb-item active">Request Replacement</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-exchange-alt"></i> Request Replacement</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Window Reminder -->
+                    <div class="alert {% if replacement_window_days > 0 %}alert-info{% else %}alert-danger{% endif %}">
+                        <i class="fas fa-clock"></i>
+                        {% if replacement_window_days > 0 %}
+                            You have <strong>{{ replacement_window_days }}</strong> day{{ replacement_window_days|pluralize }} left to request a replacement.
+                        {% else %}
+                            <strong>Replacement window has expired!</strong> You can no longer request a replacement for this order.
+                        {% endif %}
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Order Summary</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>SKU</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in order_items %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    {% if item.product and item.product.main_image %}
+                                                    <img src="{{ item.product.main_image }}" class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                                    {% endif %}
+                                                    <span>{{ item.product_name }}</span>
+                                                </div>
+                                            </td>
+                                            <td>{{ item.sku }}</td>
+                                            <td>{{ item.quantity }}</td>
+                                            <td>₹{{ item.final_price }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-active">
+                                            <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                            <td><strong>₹{{ order.total_amount }}</strong></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Replacement Form -->
+                    <form method="post" enctype="multipart/form-data" id="replacementForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.reason.id_for_label }}" class="form-label">
+                                Reason for Replacement <span class="text-danger">*</span>
+                            </label>
+                            {{ form.reason }}
+                            {% if form.reason.errors %}
+                            <div class="text-danger">{{ form.reason.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">
+                                Detailed Description <span class="text-danger">*</span>
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="text-danger">{{ form.description.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">Please describe the issue in detail. This helps us process your replacement faster.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.images.id_for_label }}" class="form-label">
+                                Upload Images <span class="text-danger">*</span>
+                            </label>
+                            {{ form.images }}
+                            {% if form.images.errors %}
+                            <div class="text-danger">{{ form.images.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i> 
+                                Please upload clear images showing the issue. Max 5 images (JPG, PNG, GIF, WEBP, BMP), max 5MB each.
+                                <span class="text-danger">Images are mandatory for replacement requests.</span>
+                            </small>
+                            <div id="imagePreview" class="row mt-3"></div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Replacement Policy:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Replacement must be requested within 7 days of delivery</li>
+                                <li>Items must be in original condition with packaging</li>
+                                <li>Replacement is free of cost (no additional charges)</li>
+                                <li>A new replacement order will be created for you</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'Ecom:order_detail' order.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fas fa-paper-plane"></i> Submit Replacement Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Image preview
+document.getElementById('id_images').addEventListener('change', function(e) {
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';
+    
+    const files = e.target.files;
+    if (files.length === 0) {
+        preview.innerHTML = '<div class="col-12 text-muted">No images selected</div>';
+        return;
+    }
+    
+    if (files.length > 5) {
+        alert('You can upload a maximum of 5 images.');
+        this.value = '';
+        preview.innerHTML = '<div class="col-12 text-danger">Please select up to 5 images only.</div>';
+        return;
+    }
+    
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.size > 5 * 1024 * 1024) {
+            alert(`Image "${file.name}" exceeds 5MB limit.`);
+            this.value = '';
+            preview.innerHTML = '<div class="col-12 text-danger">One or more images exceed 5MB limit.</div>';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const col = document.createElement('div');
+            col.className = 'col-4 col-md-3 mb-3';
+            col.innerHTML = `
+                <div class="position-relative">
+                    <img src="${e.target.result}" class="img-fluid rounded border" style="height: 120px; width: 100%; object-fit: cover;">
+                    <span class="badge bg-dark position-absolute top-0 end-0 m-1">${i + 1}</span>
+                    <div class="text-center small mt-1 text-truncate">${file.name}</div>
+                </div>
+            `;
+            preview.appendChild(col);
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Form submission
+document.getElementById('replacementForm').addEventListener('submit', function(e) {
+    const images = document.getElementById('id_images');
+    if (images.files.length === 0) {
+        e.preventDefault();
+        alert('Please upload at least one image showing the issue.');
+        return false;
+    }
+    
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+});
+</script>
+{% endblock %}
