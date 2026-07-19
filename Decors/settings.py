@@ -13,7 +13,7 @@ SECRET_KEY = "django-insecure-5$6z69*l21(4l@ct61zp&l_n2rn7%@f4-+4tho10hu_s2tgdue
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -26,6 +26,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "Ecom",
+    "offline_sales",
+     'sslserver',
 ]
 
 MIDDLEWARE = [
@@ -132,3 +134,13 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 LOGIN_URL = 'Ecom:login'
 LOGIN_REDIRECT_URL = 'Ecom:home'
 LOGOUT_REDIRECT_URL = 'Ecom:home'
+
+SECURE_SSL_REDIRECT = False  # Set to False for development
+SESSION_COOKIE_SECURE = False  # Set to False for development
+CSRF_COOKIE_SECURE = False  # Set to False for development
+SECURE_HSTS_SECONDS = 0  # Disable HSTS for development
+
+if DEBUG:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False

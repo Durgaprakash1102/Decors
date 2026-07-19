@@ -1,0 +1,42 @@
+<!-- templates/offline_sales/admin/customer_delete.html -->
+
+{% load static %}
+
+{% block title %}Delete Customer{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Delete Customer</h5>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to delete the following customer?</p>
+                    <div class="alert alert-warning">
+                        <p><strong>Name:</strong> {{ customer.full_name }}</p>
+                        <p><strong>Phone:</strong> {{ customer.phone }}</p>
+                        <p><strong>Email:</strong> {{ customer.email|default:"Not provided" }}</p>
+                        <p><strong>Total Orders:</strong> {{ customer.total_orders }}</p>
+                        <p><strong>Total Purchases:</strong> ₹{{ customer.total_purchases|floatformat:2 }}</p>
+                    </div>
+                    <p class="text-danger"><strong>Warning:</strong> This action cannot be undone. The customer will be deactivated.</p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'offline_sales:customer_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete Customer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

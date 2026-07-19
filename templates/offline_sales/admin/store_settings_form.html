@@ -1,0 +1,139 @@
+<!-- templates/offline_sales/admin/store_settings_form.html -->
+
+{% load static %}
+
+{% block title %}{{ action }} Store Settings{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'offline_sales:store_settings_list' %}">Store Settings</a></li>
+            <li class="breadcrumb-item active">{{ action }} Settings</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-cog"></i> {{ action }} Store Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label class="form-label">Store Name <span class="text-danger">*</span></label>
+                                    {{ form.store_name }}
+                                    {% if form.store_name.errors %}
+                                    <div class="text-danger">{{ form.store_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Store Logo</label>
+                                    {{ form.store_logo }}
+                                    {% if store_settings.store_logo %}
+                                        <div class="mt-2">
+                                            <img src="{{ store_settings.store_logo.url }}" height="60" alt="Logo">
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Store Address <span class="text-danger">*</span></label>
+                            {{ form.store_address }}
+                            {% if form.store_address.errors %}
+                            <div class="text-danger">{{ form.store_address.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Phone <span class="text-danger">*</span></label>
+                                    {{ form.store_phone }}
+                                    {% if form.store_phone.errors %}
+                                    <div class="text-danger">{{ form.store_phone.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Email <span class="text-danger">*</span></label>
+                                    {{ form.store_email }}
+                                    {% if form.store_email.errors %}
+                                    <div class="text-danger">{{ form.store_email.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Website</label>
+                                    {{ form.store_website }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">GST Number</label>
+                                    {{ form.gst_number }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">PAN Number</label>
+                                    {{ form.pan_number }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Invoice Prefix</label>
+                                    {{ form.invoice_prefix }}
+                                    <small class="text-muted">e.g., INV-</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Next Invoice Number</label>
+                            {{ form.invoice_start_number }}
+                            <small class="text-muted">Current: {{ store_settings.invoice_start_number|default:"1001" }}</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Terms & Conditions</label>
+                            {{ form.terms_conditions }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Footer Text</label>
+                            {{ form.footer_text }}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'offline_sales:store_settings_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

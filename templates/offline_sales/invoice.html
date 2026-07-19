@@ -1,0 +1,286 @@
+<!-- templates/offline_sales/invoice.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice #{{ order.invoice_number }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #333;
+            padding: 20px;
+        }
+        .invoice-box {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            background: #fff;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .store-info h2 {
+            margin: 0;
+            color: #007bff;
+        }
+        .store-info p {
+            margin: 2px 0;
+            color: #666;
+            font-size: 11px;
+        }
+        .invoice-title {
+            text-align: right;
+        }
+        .invoice-title h3 {
+            margin: 0;
+            color: #333;
+        }
+        .invoice-title p {
+            margin: 2px 0;
+            color: #666;
+            font-size: 11px;
+        }
+        .customer-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .customer-info h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        .customer-info p {
+            margin: 2px 0;
+            color: #666;
+            font-size: 11px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table th {
+            background: #007bff;
+            color: #fff;
+            padding: 10px;
+            text-align: left;
+            font-size: 11px;
+        }
+        table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #ddd;
+            font-size: 11px;
+        }
+        table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .totals {
+            float: right;
+            width: 300px;
+            margin-top: 10px;
+        }
+        .totals .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 12px;
+        }
+        .totals .row.total {
+            font-weight: bold;
+            font-size: 16px;
+            border-top: 2px solid #007bff;
+            padding-top: 10px;
+            margin-top: 5px;
+        }
+        .totals .row.discount {
+            color: #28a745;
+        }
+        .payment-info {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            font-size: 11px;
+            color: #666;
+        }
+        .footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+        }
+        .thank-you {
+            text-align: center;
+            font-size: 14px;
+            color: #007bff;
+            margin-top: 15px;
+        }
+        @media print {
+            body { padding: 0; }
+            .invoice-box { border: none; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-box" data-order-id="{{ order.id }}">
+        <!-- Header -->
+        <div class="header">
+            <div class="store-info">
+                {% if store.store_logo %}
+                    <img src="{{ store.store_logo.url }}" height="60" alt="{{ store.store_name }}">
+                {% endif %}
+                <h2>{{ store.store_name }}</h2>
+                <p>{{ store.store_address|linebreaksbr }}</p>
+                <p>Phone: {{ store.store_phone }} | Email: {{ store.store_email }}</p>
+                {% if store.gst_number %}
+                    <p>GST: {{ store.gst_number }}</p>
+                {% endif %}
+                {% if store.pan_number %}
+                    <p>PAN: {{ store.pan_number }}</p>
+                {% endif %}
+            </div>
+            <div class="invoice-title">
+                <h3>INVOICE</h3>
+                <p>Invoice #: <strong>{{ order.invoice_number }}</strong></p>
+                <p>Date: {{ order.created_at|date:"d M, Y" }}</p>
+                <p>Order #: {{ order.order_number }}</p>
+            </div>
+        </div>
+
+        <!-- Customer Info -->
+        <div class="customer-info">
+            <div>
+                <h4>Bill To:</h4>
+                <p><strong>{{ order.customer_name }}</strong></p>
+                {% if order.customer_phone %}
+                    <p>Phone: {{ order.customer_phone }}</p>
+                {% endif %}
+                {% if order.customer_email %}
+                    <p>Email: {{ order.customer_email }}</p>
+                {% endif %}
+                {% if order.customer_address %}
+                    <p>{{ order.customer_address|linebreaksbr }}</p>
+                {% endif %}
+            </div>
+            <div style="text-align: right;">
+                <p><strong>Payment Method:</strong> {{ order.get_payment_method_display }}</p>
+                <p><strong>Payment Status:</strong> <span style="color: #28a745;">{{ order.get_payment_status_display }}</span></p>
+                {% if order.payment_reference %}
+                    <p><strong>Reference:</strong> {{ order.payment_reference }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 40%;">Item</th>
+                    <th style="width: 15%;">Quantity</th>
+                    <th style="width: 15%;">Price</th>
+                    <th style="width: 15%;">Discount</th>
+                    <th style="width: 15%;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>
+                        {{ item.product_name }}
+                        {% if item.sku %}
+                            <br><small style="color: #999;">SKU: {{ item.sku }}</small>
+                        {% endif %}
+                        {% if item.barcode_text %}
+                            <br><small style="color: #999;">Barcode: {{ item.barcode_text }}</small>
+                        {% endif %}
+                    </td>
+                    <td>{{ item.quantity }}</td>
+                    <td>₹{{ item.original_price|floatformat:2 }}</td>
+                    <td>
+                        {% if item.discount > 0 %}
+                            <span style="color: #28a745;">₹{{ item.discount|floatformat:2 }}</span>
+                        {% else %}
+                            <span style="color: #999;">-</span>
+                        {% endif %}
+                    </td>
+                    <td><strong>₹{{ item.total|floatformat:2 }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Totals -->
+        <div class="totals">
+            <div class="row">
+                <span>Subtotal:</span>
+                <span>₹{{ subtotal|floatformat:2 }}</span>
+            </div>
+            {% if order.product_discount_total > 0 %}
+            <div class="row discount">
+                <span>Product Discount:</span>
+                <span>-₹{{ order.product_discount_total|floatformat:2 }}</span>
+            </div>
+            {% endif %}
+            {% if order.offer_discount > 0 %}
+            <div class="row discount">
+                <span>Offer Discount:</span>
+                <span>-₹{{ order.offer_discount|floatformat:2 }}</span>
+            </div>
+            {% endif %}
+            {% if order.coupon_discount > 0 %}
+            <div class="row discount">
+                <span>Coupon Discount:</span>
+                <span>-₹{{ order.coupon_discount|floatformat:2 }}</span>
+            </div>
+            {% endif %}
+            <div class="row total">
+                <span>Grand Total:</span>
+                <span>₹{{ total|floatformat:2 }}</span>
+            </div>
+        </div>
+
+        <div style="clear: both;"></div>
+
+        <!-- Payment Info -->
+        <div class="payment-info">
+            <p><strong>Amount Paid:</strong> ₹{{ order.total_amount|floatformat:2 }}</p>
+            {% if order.paid_at %}
+                <p><strong>Paid On:</strong> {{ order.paid_at|date:"d M, Y H:i" }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Terms & Conditions -->
+        {% if store.terms_conditions %}
+        <div style="margin-top: 15px; font-size: 11px; color: #666; border-top: 1px solid #ddd; padding-top: 10px;">
+            <strong>Terms & Conditions:</strong>
+            <p>{{ store.terms_conditions|linebreaksbr }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="footer">
+            {% if store.footer_text %}
+                <p>{{ store.footer_text }}</p>
+            {% endif %}
+            <p>Thank you for your business!</p>
+        </div>
+
+        <div class="thank-you">
+            <strong>Thank you for your purchase!</strong>
+        </div>
+    </div>
+</body>
+</html>

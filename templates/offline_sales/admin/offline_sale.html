@@ -1,0 +1,2453 @@
+<!-- templates/offline_sales/admin/offline_sale.html -->
+
+{% load static %}
+
+{% block title %}Offline Sale{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ============================================
+       GLOBAL STYLES
+    ============================================ */
+    .offline-sale-container {
+        background: #f0f2f5;
+        min-height: 100vh;
+        padding: 24px;
+        font-family: system-ui, -apple-system, sans-serif;
+    }
+    
+    .offline-sale-container .card {
+        border: none;
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        background: #ffffff;
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+    
+    .offline-sale-container .card-header {
+        padding: 16px 20px;
+        font-weight: 600;
+        font-size: 1.05rem;
+        border: none;
+        display: flex;
+        align-items: center;
+    }
+    
+    .offline-sale-container .card-body {
+        padding: 24px;
+    }
+
+    /* ============================================
+       HEADER
+    ============================================ */
+    .sale-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+    
+    .sale-header h2 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #2d3436;
+        margin: 0;
+    }
+    
+    .sale-header h2 i {
+        background: linear-gradient(135deg, #0984e3, #6c5ce7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-right: 8px;
+    }
+    
+    .sale-header .badge-store {
+        background: #ffffff;
+        color: #0984e3;
+        border: 1px solid rgba(9, 132, 227, 0.2);
+        padding: 8px 20px;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .btn-clear-cart {
+        background: #fff5f5;
+        color: #ff6b6b;
+        border: 1px solid rgba(255, 107, 107, 0.2);
+        padding: 8px 20px;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.25s ease;
+    }
+    
+    .btn-clear-cart:hover {
+        background: #ff6b6b;
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.2);
+    }
+
+    /* ============================================
+       SCANNER STYLES
+    ============================================ */
+    .scanner-card .card-header {
+        background: linear-gradient(135deg, #0984e3, #6c5ce7);
+        color: #ffffff;
+    }
+    
+    #scanner-container {
+        position: relative;
+        background: #0f111a;
+        border-radius: 12px;
+        overflow: hidden;
+        min-height: 400px;
+        max-height: 65vh;
+        width: 100%;
+        margin-bottom: 20px;
+        display: none;
+        box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+    }
+    
+    #scanner-container video {
+        width: 100%;
+        height: 100%;
+        min-height: 400px;
+        object-fit: cover;
+    }
+    
+    #scanner-container canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .scanner-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 75%;
+        max-width: 360px;
+        height: 55%;
+        max-height: 300px;
+        border: 2px solid rgba(0, 255, 136, 0.3);
+        border-radius: 16px;
+        pointer-events: none;
+        z-index: 5;
+    }
+    
+    .scanner-corner {
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        border-color: #00ff88;
+        border-style: solid;
+        border-width: 0;
+        z-index: 6;
+        filter: drop-shadow(0 0 4px #00ff88);
+    }
+    .scanner-corner.tl { top: -2px; left: -2px; border-top-width: 4px; border-left-width: 4px; border-radius: 8px 0 0 0; }
+    .scanner-corner.tr { top: -2px; right: -2px; border-top-width: 4px; border-right-width: 4px; border-radius: 0 8px 0 0; }
+    .scanner-corner.bl { bottom: -2px; left: -2px; border-bottom-width: 4px; border-left-width: 4px; border-radius: 0 0 0 8px; }
+    .scanner-corner.br { bottom: -2px; right: -2px; border-bottom-width: 4px; border-right-width: 4px; border-radius: 0 0 8px 0; }
+    
+    .scanner-line {
+        position: absolute;
+        top: 0;
+        left: 5%;
+        width: 90%;
+        height: 3px;
+        background: linear-gradient(to right, transparent, #00ff88, transparent);
+        z-index: 7;
+        box-shadow: 0 0 8px #00ff88;
+        animation: scanLine 2.2s ease-in-out infinite;
+    }
+    
+    @keyframes scanLine {
+        0% { top: 8%; opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { top: 92%; opacity: 0; }
+    }
+    
+    .scanner-status-badge {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(15, 17, 26, 0.85);
+        color: #ffffff;
+        padding: 6px 20px;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        z-index: 10;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .scanner-status-badge .fa-circle {
+        color: #ff4757;
+        animation: pulse 1.2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.9); }
+    }
+
+    /* ============================================
+       SCANNER CONTROLS
+    ============================================ */
+    .scanner-controls {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .scanner-controls .btn {
+        flex: 1;
+        min-width: 120px;
+        border-radius: 30px;
+        padding: 10px 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: none;
+        transition: all 0.2s ease;
+    }
+    
+    .scanner-controls .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    
+    .btn-scanner-start {
+        background: linear-gradient(135deg, #00b894, #00cec9);
+        color: #ffffff;
+    }
+    .btn-scanner-stop {
+        background: linear-gradient(135deg, #ff7675, #d63031);
+        color: #ffffff;
+    }
+    .btn-scanner-external {
+        background: #e0e0e0;
+        color: #2d3436;
+    }
+    
+    .camera-selector select {
+        border-radius: 8px;
+        border: 1.5px solid #dfe6e9;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+        width: 100%;
+        background-color: #ffffff;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+    
+    .camera-selector select:focus {
+        border-color: #0984e3;
+        box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.15);
+        outline: none;
+    }
+
+    /* ============================================
+       ZOOM CONTROLS
+    ============================================ */
+    .zoom-controls {
+        position: absolute;
+        right: 20px;
+        bottom: 85px;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .zoom-controls button {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 1px solid rgba(255,255,255,0.15);
+        background: rgba(15, 17, 26, 0.75);
+        color: #ffffff;
+        font-size: 1.25rem;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        transition: all 0.2s;
+    }
+    
+    .zoom-controls button:hover {
+        background: rgba(15, 17, 26, 0.9);
+        transform: scale(1.05);
+    }
+    
+    .zoom-indicator {
+        position: absolute;
+        right: 20px;
+        bottom: 140px;
+        z-index: 10;
+        background: rgba(15, 17, 26, 0.8);
+        color: #ffffff;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,0.1);
+        display: none;
+    }
+    
+    .zoom-indicator.show { display: block; }
+
+    /* ============================================
+       GALLERY SCAN
+    ============================================ */
+    .gallery-scan-container {
+        border: 2px dashed #b2bec3;
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        background: #f8f9fa;
+        margin-top: 16px;
+    }
+    
+    .gallery-scan-container:hover {
+        border-color: #0984e3;
+        background: #edf7ff;
+    }
+    
+    .gallery-scan-container i {
+        font-size: 2.25rem;
+        color: #636e72;
+        margin-bottom: 8px;
+    }
+    
+    .gallery-scan-container p {
+        margin: 0;
+        color: #636e72;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .gallery-preview {
+        max-width: 100%;
+        max-height: 140px;
+        margin-top: 12px;
+        border-radius: 8px;
+        display: none;
+        border: 2px solid #00b894;
+    }
+    
+    .gallery-preview.active { display: block; }
+
+    /* ============================================
+       MANUAL INPUT
+    ============================================ */
+    .manual-input-group .input-group {
+        border-radius: 8px;
+        overflow: hidden;
+        margin-top: 8px;
+    }
+    
+    .manual-input-group .input-group input.form-control {
+        border: 1.5px solid #dfe6e9;
+        padding: 12px 18px;
+        font-size: 0.95rem;
+    }
+    
+    .manual-input-group .input-group input.form-control:focus {
+        border-color: #0984e3;
+        box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.15);
+    }
+    
+    .manual-input-group .input-group .btn {
+        padding: 12px 24px;
+        font-weight: 600;
+    }
+
+    /* ============================================
+       PRODUCT SEARCH
+    ============================================ */
+    .search-card .card-header {
+        background: linear-gradient(135deg, #636e72, #2d3436);
+        color: #ffffff;
+    }
+    
+    .search-card .input-group {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .search-card .input-group input {
+        border: 1.5px solid #dfe6e9;
+        padding: 12px 18px;
+    }
+    
+    .search-card .input-group input:focus {
+        border-color: #0984e3;
+        box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.15);
+    }
+    
+    #productResults {
+        max-height: 380px;
+        overflow-y: auto;
+        margin-top: 12px;
+        padding-right: 4px;
+    }
+    
+    #productResults::-webkit-scrollbar {
+        width: 6px;
+    }
+    #productResults::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+    
+    .product-search-result {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px;
+        border-bottom: 1px solid #f1f2f6;
+        transition: background 0.2s ease;
+        border-radius: 8px;
+    }
+    
+    .product-search-result:hover {
+        background: #f8f9fa;
+    }
+    
+    .product-search-result img {
+        width: 54px;
+        height: 54px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #dfe6e9;
+        background: #f8f9fa;
+    }
+    
+    .product-search-result .product-info {
+        flex: 1;
+    }
+    
+    .product-search-result .product-info .name {
+        font-weight: 600;
+        color: #2d3436;
+        font-size: 0.95rem;
+        margin-bottom: 2px;
+    }
+    
+    .product-search-result .product-info .sku {
+        font-size: 0.8rem;
+        color: #636e72;
+    }
+    
+    .product-search-result .product-info .price {
+        color: #00b894;
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+    
+    .product-search-result .btn-add {
+        background: #e1f5fe;
+        color: #0288d1;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        transition: all 0.2s;
+    }
+    
+    .product-search-result .btn-add:hover {
+        background: #0288d1;
+        color: #ffffff;
+    }
+
+    /* ============================================
+       CUSTOMER SECTION
+    ============================================ */
+    .customer-card .card-header {
+        background: linear-gradient(135deg, #00b894, #00cec9);
+        color: #ffffff;
+    }
+    
+    .customer-search .form-control {
+        border-radius: 8px;
+        border: 1.5px solid #dfe6e9;
+        padding: 12px 18px;
+    }
+    
+    .customer-search .form-control:focus {
+        border-color: #00b894;
+        box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.15);
+    }
+    
+    .customer-search .dropdown-menu {
+        max-height: 280px;
+        overflow-y: auto;
+        width: 100%;
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        padding: 6px 0;
+        margin-top: 8px;
+    }
+    
+    .customer-search .dropdown-item {
+        padding: 12px 20px;
+        border-bottom: 1px solid #f8f9fa;
+        cursor: pointer;
+    }
+    
+    .customer-search .dropdown-item:hover {
+        background: #f8f9fa;
+    }
+    
+    .customer-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-left: 8px;
+    }
+    
+    .customer-badge.offline { background: #e6fffa; color: #00a389; }
+    .customer-badge.online { background: #ebf8ff; color: #2b6cb0; }
+    
+    .selected-customer {
+        margin-top: 12px;
+        padding: 16px;
+        background: #e6fffa;
+        border-radius: 10px;
+        border-left: 4px solid #00b894;
+        display: none;
+    }
+    
+    .selected-customer.show {
+        display: block;
+        animation: slideIn 0.25s ease;
+    }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .btn-new-customer {
+        background: #ffffff;
+        color: #6c5ce7;
+        border: 1px solid rgba(108, 92, 231, 0.3);
+        border-radius: 30px;
+        padding: 8px 20px;
+        margin-top: 14px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        transition: all 0.2s;
+    }
+    
+    .btn-new-customer:hover {
+        background: #6c5ce7;
+        color: #ffffff;
+    }
+
+    /* ============================================
+       CART SECTION
+    ============================================ */
+    .cart-card .card-header {
+        background: linear-gradient(135deg, #fdcb6e, #f39c12);
+        color: #2d3436;
+    }
+    
+    .cart-card .badge-cart-count {
+        background: rgba(0, 0, 0, 0.1);
+        color: #2d3436;
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+    
+    #cartItems {
+        max-height: 380px;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+    
+    #cartItems::-webkit-scrollbar {
+        width: 6px;
+    }
+    #cartItems::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+    
+    .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 0;
+        border-bottom: 1px solid #f1f2f6;
+        gap: 16px;
+    }
+    
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+    
+    .cart-item .item-info {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .cart-item .item-info img {
+        width: 54px;
+        height: 54px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #dfe6e9;
+        flex-shrink: 0;
+    }
+    
+    .cart-item .item-info .details .name {
+        font-weight: 600;
+        color: #2d3436;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .cart-item .item-info .details .sku {
+        font-size: 0.8rem;
+        color: #636e72;
+    }
+    
+    .cart-item .item-info .details .price-info .original {
+        color: #b2bec3;
+        text-decoration: line-through;
+        margin-right: 6px;
+        font-size: 0.85rem;
+    }
+    
+    .cart-item .item-info .details .price-info .final {
+        color: #00b894;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+    
+    .cart-item .item-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+    
+    .quantity-control {
+        display: flex;
+        align-items: center;
+        background: #f1f2f6;
+        border-radius: 30px;
+        padding: 3px;
+    }
+    
+    .quantity-control button {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: none;
+        background: #ffffff;
+        color: #2d3436;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+    }
+    
+    .quantity-control button:hover {
+        background: #0984e3;
+        color: #ffffff;
+    }
+    
+    .quantity-control input {
+        width: 36px;
+        text-align: center;
+        border: none;
+        background: transparent;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+    
+    .quantity-control input:focus {
+        outline: none;
+    }
+    
+    .cart-item .item-total {
+        font-weight: 700;
+        color: #2d3436;
+        min-width: 75px;
+        text-align: right;
+        font-size: 0.95rem;
+    }
+    
+    .btn-remove-item {
+        background: transparent;
+        border: none;
+        color: #ff7675;
+        font-size: 1.15rem;
+        cursor: pointer;
+        padding: 4px;
+        transition: transform 0.2s;
+    }
+    
+    .btn-remove-item:hover {
+        transform: scale(1.15);
+        color: #d63031;
+    }
+    
+    .cart-empty {
+        text-align: center;
+        padding: 48px 24px;
+        color: #636e72;
+    }
+    
+    .cart-empty i {
+        font-size: 3.5rem;
+        margin-bottom: 12px;
+        display: block;
+        opacity: 0.3;
+    }
+
+    /* ============================================
+       ORDER SUMMARY
+    ============================================ */
+    .summary-card .card-header {
+        background: linear-gradient(135deg, #0984e3, #6c5ce7);
+        color: #ffffff;
+    }
+    
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        font-size: 0.95rem;
+        color: #636e72;
+    }
+    
+    .total-row .value {
+        font-weight: 600;
+        color: #2d3436;
+    }
+    
+    .total-row .value.discount {
+        color: #00b894;
+    }
+    
+    .grand-total {
+        display: flex;
+        justify-content: space-between;
+        padding: 16px 0;
+        font-size: 1.35rem;
+        font-weight: 800;
+        border-top: 2px dashed #dfe6e9;
+        margin-top: 12px;
+    }
+    
+    .grand-total .value {
+        color: #0984e3;
+    }
+    
+    .btn-complete-sale {
+        background: linear-gradient(135deg, #00b894, #00cec9);
+        color: #ffffff;
+        border: none;
+        padding: 16px;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 1.05rem;
+        width: 100%;
+        transition: all 0.25s ease;
+        margin-top: 12px;
+        box-shadow: 0 4px 14px rgba(0, 184, 148, 0.25);
+    }
+    
+    .btn-complete-sale:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
+    }
+    
+    .btn-complete-sale:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* ============================================
+       CUSTOM TOAST NOTIFICATIONS (No Bootstrap dependency)
+    ============================================ */
+    .toast-container-custom {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        pointer-events: none;
+    }
+    
+    .toast-custom {
+        min-width: 320px;
+        max-width: 450px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        overflow: hidden;
+        animation: slideRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        pointer-events: auto;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    @keyframes slideRight {
+        from { opacity: 0; transform: translateX(60px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .toast-custom .toast-header {
+        padding: 14px 18px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .toast-custom .toast-header.success { background: #00b894; color: #ffffff; }
+    .toast-custom .toast-header.error { background: #ff6b6b; color: #ffffff; }
+    .toast-custom .toast-header.warning { background: #fdcb6e; color: #2d3436; }
+    .toast-custom .toast-header.info { background: #0984e3; color: #ffffff; }
+    
+    .toast-custom .toast-header i {
+        font-size: 1.1rem;
+    }
+    
+    .toast-custom .toast-close {
+        margin-left: auto;
+        background: transparent;
+        border: none;
+        font-size: 1.2rem;
+        color: rgba(255,255,255,0.7);
+        cursor: pointer;
+        padding: 0 5px;
+        transition: color 0.2s;
+    }
+    
+    .toast-custom .toast-close:hover {
+        color: #ffffff;
+    }
+    
+    .toast-custom .toast-body {
+        padding: 14px 18px;
+        color: #2d3436;
+        font-size: 0.9rem;
+        font-weight: 500;
+        line-height: 1.5;
+    }
+
+    /* ============================================
+       SCAN SUCCESS ANIMATION
+    ============================================ */
+    .scan-success { animation: scanFlash 0.4s ease; }
+    @keyframes scanFlash {
+        0%, 100% { background: #0f111a; }
+        50% { background: rgba(0, 184, 148, 0.4); }
+    }
+
+    /* ============================================
+       RESPONSIVE
+    ============================================ */
+    @media (max-width: 991px) {
+        .offline-sale-container { padding: 16px; }
+        .sale-header h2 { font-size: 1.5rem; }
+    }
+    
+    @media (max-width: 768px) {
+        .sale-header { flex-direction: column; align-items: stretch; text-align: center; }
+        .sale-header .d-flex { justify-content: center; }
+        .scanner-controls .btn { min-width: 80px; font-size: 0.8rem; padding: 8px 12px; }
+        .cart-item { flex-wrap: wrap; }
+        .cart-item .item-actions { width: 100%; justify-content: flex-end; }
+        #scanner-container { min-height: 300px; }
+        #scanner-container video { min-height: 300px; }
+        .scanner-overlay { width: 80%; height: 50%; }
+        .toast-custom { min-width: 250px; max-width: 90vw; }
+    }
+    
+    @media (max-width: 576px) {
+        .scanner-controls { flex-direction: column; }
+        .scanner-controls .btn { width: 100%; }
+        .cart-item .item-info img { width: 40px; height: 40px; }
+        .cart-item .item-info .details .name { font-size: 0.85rem; }
+        .quantity-control input { width: 28px; }
+        .quantity-control button { width: 24px; height: 24px; font-size: 0.8rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="offline-sale-container">
+    
+    <!-- ============================================
+    HEADER
+    ============================================ -->
+    <div class="sale-header">
+        <h2><i class="fas fa-store"></i> Offline Sale</h2>
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <span class="badge-store"><i class="fas fa-building"></i> {{ store_settings.store_name }}</span>
+            <button class="btn-clear-cart" onclick="clearCart()">
+                <i class="fas fa-trash-alt"></i> Clear Cart
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        
+        <!-- ============================================
+        LEFT COLUMN - Scanner & Search
+        ============================================ -->
+        <div class="col-lg-5">
+            
+            <!-- Barcode Scanner Card -->
+            <div class="card scanner-card shadow-sm mb-4">
+                <div class="card-header">
+                    <i class="fas fa-qrcode me-2"></i> Barcode Scanner
+                </div>
+                <div class="card-body">
+                    
+                    <!-- Camera Scanner -->
+                    <div id="scanner-container">
+                        <video id="scanner-video" autoplay playsinline></video>
+                        <canvas id="scanner-canvas"></canvas>
+                        <div class="scanner-overlay">
+                            <div class="scanner-corner tl"></div>
+                            <div class="scanner-corner tr"></div>
+                            <div class="scanner-corner bl"></div>
+                            <div class="scanner-corner br"></div>
+                        </div>
+                        <div class="scanner-status-badge" id="scanStatus">
+                            <i class="fas fa-circle me-1"></i> Scanning...
+                        </div>
+                        <div class="zoom-indicator" id="zoomIndicator">Zoom: 1.0x</div>
+                        <div class="zoom-controls">
+                            <button onclick="zoomCamera('in')" title="Zoom In">+</button>
+                            <button onclick="zoomCamera('out')" title="Zoom Out">−</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Scanner Controls -->
+                    <div class="scanner-controls mb-3">
+                        <button class="btn btn-scanner-start" onclick="startScanner()" id="startScannerBtn">
+                            <i class="fas fa-camera"></i> Start Camera
+                        </button>
+                        <button class="btn btn-scanner-stop" onclick="stopScanner()" id="stopScannerBtn" style="display: none;">
+                            <i class="fas fa-stop"></i> Stop Camera
+                        </button>
+                        <button class="btn btn-scanner-external" onclick="toggleExternalScanner()" id="externalScannerBtn">
+                            <i class="fas fa-bluetooth-b"></i> External Scanner
+                        </button>
+                    </div>
+                    
+                    <!-- Camera Selector -->
+                    <div class="camera-selector mb-3">
+                        <label class="form-label small text-muted">Select Camera:</label>
+                        <select id="cameraSelect" class="form-select" onchange="switchCamera(this.value)">
+                            <option value="default">Default Camera</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Gallery Scan -->
+                    <div class="gallery-scan-container mb-3" onclick="document.getElementById('galleryInput').click()">
+                        <i class="fas fa-images"></i>
+                        <p>Click to select image from gallery</p>
+                        <input type="file" id="galleryInput" accept="image/*">
+                        <img id="galleryPreview" class="gallery-preview" alt="Preview">
+                    </div>
+                    <div id="galleryScanResult" class="scan-result"></div>
+                    
+                    <!-- Manual Input -->
+                    <div class="manual-input-group mb-3">
+                        <label class="form-label fw-bold small text-muted">Or enter barcode manually:</label>
+                        <div class="input-group">
+                            <input type="text" id="barcodeInput" class="form-control" 
+                                   placeholder="Enter barcode number" 
+                                   onkeypress="if(event.key==='Enter') scanAndAddToCart(document.getElementById('barcodeInput').value)"
+                                   autofocus>
+                            <button class="btn btn-primary" onclick="scanAndAddToCart(document.getElementById('barcodeInput').value)">
+                                <i class="fas fa-search"></i> Find & Add
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Scan Result -->
+                    <div id="scanResult" class="scan-result"></div>
+                    
+                    <!-- Scanner Status -->
+                    <div class="mt-2">
+                        <span class="badge bg-secondary" id="scannerStatusBadge"><i class="fas fa-check-circle"></i> Scanner ready</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Product Search Card -->
+            <div class="card search-card shadow-sm">
+                <div class="card-header">
+                    <i class="fas fa-search me-2"></i> Search Products
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <input type="text" id="productSearch" class="form-control" placeholder="Search by name, SKU, or barcode...">
+                        <button class="btn btn-secondary" onclick="searchProducts()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div id="productResults"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ============================================
+        RIGHT COLUMN - Customer, Cart, Summary
+        ============================================ -->
+        <div class="col-lg-7">
+            
+            <!-- Customer Card -->
+            <div class="card customer-card shadow-sm mb-4">
+                <div class="card-header">
+                    <i class="fas fa-user me-2"></i> Customer
+                </div>
+                <div class="card-body">
+                    <div class="customer-search">
+                        <input type="text" id="customerSearch" class="form-control" 
+                               placeholder="Search customer by name, phone, or email..."
+                               onkeyup="searchCustomer(this.value)">
+                        <div class="dropdown-menu w-100" id="customerDropdown"></div>
+                    </div>
+                    <div class="selected-customer" id="selectedCustomer"></div>
+                    <button class="btn-new-customer" data-bs-toggle="modal" data-bs-target="#newCustomerModal">
+                        <i class="fas fa-plus"></i> New Customer
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Cart Card -->
+            <div class="card cart-card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-shopping-cart me-2"></i> Cart</span>
+                    <span class="badge-cart-count" id="cartCount">{{ cart_count }}</span>
+                </div>
+                <div class="card-body" id="cartItems">
+                    {% if cart_items %}
+                        {% for item in cart_items %}
+                        <div class="cart-item" data-index="{{ forloop.counter0 }}">
+                            <div class="item-info">
+                                {% if item.image %}
+                                <img src="{{ item.image }}" alt="{{ item.name }}">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 8px;">
+                                    <i class="fas fa-box text-muted"></i>
+                                </div>
+                                {% endif %}
+                                <div class="details">
+                                    <div class="name" title="{{ item.name }}">{{ item.name }}</div>
+                                    <div class="sku">SKU: {{ item.sku }}</div>
+                                    <div class="price-info">
+                                        {% if item.original_price > item.price %}
+                                        <span class="original">₹{{ item.original_price|floatformat:2 }}</span>
+                                        <span class="final">₹{{ item.price|floatformat:2 }}</span>
+                                        {% else %}
+                                        <span class="final">₹{{ item.price|floatformat:2 }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item-actions">
+                                <div class="quantity-control">
+                                    <button onclick="updateQuantity({{ forloop.counter0 }}, -1)">−</button>
+                                    <input type="number" value="{{ item.quantity }}" min="1" max="{{ item.stock }}"
+                                           onchange="updateQuantity({{ forloop.counter0 }}, 0, this.value)">
+                                    <button onclick="updateQuantity({{ forloop.counter0 }}, 1)">+</button>
+                                </div>
+                                <span class="item-total">₹{{ item.total|floatformat:2 }}</span>
+                                <button class="btn-remove-item" onclick="removeItem({{ forloop.counter0 }})" title="Remove">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            {% if item.discount > 0 %}
+                            <div class="w-100 text-success small mt-1">Saved: ₹{{ item.discount|floatformat:2 }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="cart-empty">
+                            <i class="fas fa-shopping-cart"></i>
+                            <p>Cart is empty. Scan or search products to add.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Order Summary Card -->
+            <div class="card summary-card shadow-sm">
+                <div class="card-header">
+                    <i class="fas fa-calculator me-2"></i> Order Summary
+                </div>
+                <div class="card-body" id="cartTotals">
+                    <div class="total-row">
+                        <span class="label">Subtotal</span>
+                        <span class="value">₹{{ subtotal|floatformat:2 }}</span>
+                    </div>
+                    {% if total_product_discount > 0 %}
+                    <div class="total-row">
+                        <span class="label">Product Discount</span>
+                        <span class="value discount">-₹{{ total_product_discount|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+                    {% if total_offer_discount > 0 %}
+                    <div class="total-row">
+                        <span class="label">Offer Discount</span>
+                        <span class="value discount">-₹{{ total_offer_discount|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="grand-total">
+                        <span class="label">Grand Total</span>
+                        <span class="value" id="grandTotal">₹{{ grand_total|floatformat:2 }}</span>
+                    </div>
+                    <button class="btn-complete-sale" onclick="processPayment()" {% if not cart_items %}disabled{% endif %}>
+                        <i class="fas fa-credit-card me-2"></i> Complete Sale
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Toast Container (No Bootstrap dependency) -->
+<div class="toast-container-custom" id="toastContainer"></div>
+
+<!-- ============================================
+MODALS
+============================================ -->
+
+<!-- New Customer Modal -->
+<div class="modal fade" id="newCustomerModal" tabindex="-1" aria-labelledby="newCustomerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="newCustomerModalLabel"><i class="fas fa-user-plus"></i> New Customer</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newCustomerForm">
+                    <!-- CSRF Token -->
+                    {% csrf_token %}
+                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <label class="form-label">First Name <span class="text-danger">*</span></label>
+                                <input type="text" id="cf_first_name" class="form-control" 
+                                       placeholder="Enter first name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" id="cf_last_name" class="form-control" 
+                                       placeholder="Enter last name">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Phone <span class="text-danger">*</span></label>
+                        <input type="tel" id="cf_phone" class="form-control" 
+                               placeholder="Enter phone number" required>
+                        <small class="text-muted">Enter 10-digit phone number</small>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="cf_email" class="form-control" 
+                               placeholder="Enter email address">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Address</label>
+                        <textarea id="cf_address" class="form-control" rows="2" 
+                                  placeholder="Enter address"></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Notes</label>
+                        <textarea id="cf_notes" class="form-control" rows="2" 
+                                  placeholder="Add notes..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="createCustomer()">
+                    <i class="fas fa-save"></i> Save Customer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="paymentModalLabel"><i class="fas fa-credit-card"></i> Complete Payment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="paymentForm">
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method *</label>
+                        <select id="pm_payment_method" class="form-control" required>
+                            <option value="cash">Cash</option>
+                            <option value="card">Card</option>
+                            <option value="upi">UPI</option>
+                            <option value="online">Online</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Amount Received *</label>
+                        <input type="number" id="pm_amount_received" class="form-control" step="0.01" 
+                               value="{{ grand_total|floatformat:2 }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Change</label>
+                        <input type="text" id="pm_change" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Reference (Optional)</label>
+                        <input type="text" id="pm_reference" class="form-control" placeholder="Transaction ID, Card Number, etc.">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="completePayment()">
+                    <i class="fas fa-check"></i> Pay Now
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Invoice Modal -->
+<div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="invoiceModalLabel"><i class="fas fa-file-invoice"></i> Invoice</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="invoiceContent"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="printInvoice()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+                <button type="button" class="btn btn-success" onclick="downloadInvoice()">
+                    <i class="fas fa-download"></i> Download PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================
+SCRIPTS
+============================================ -->
+
+<!-- QuaggaJS for barcode scanning -->
+<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.2/dist/quagga.min.js"></script>
+
+<!-- Bootstrap JS for modals (if not already in base template) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// ============================================
+// CUSTOM TOAST NOTIFICATIONS (No Bootstrap dependency)
+// ============================================
+
+function showToast(message, title = 'Notification', type = 'info') {
+    const container = document.getElementById('toastContainer');
+    
+    // Remove existing toasts if too many
+    if (container.children.length > 5) {
+        container.firstChild.remove();
+    }
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast-custom';
+    
+    const iconMap = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+    
+    const colorMap = {
+        success: '#00b894',
+        error: '#ff6b6b',
+        warning: '#fdcb6e',
+        info: '#0984e3'
+    };
+    
+    toast.innerHTML = `
+        <div class="toast-header ${type}">
+            <i class="fas ${iconMap[type] || 'fa-info-circle'}"></i>
+            <span>${title}</span>
+            <button class="toast-close" onclick="this.closest('.toast-custom').remove()">×</button>
+        </div>
+        <div class="toast-body">${message}</div>
+    `;
+    
+    container.appendChild(toast);
+    
+    // Auto remove after 4 seconds
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(50px)';
+            toast.style.transition = 'all 0.3s ease';
+            setTimeout(() => {
+                if (toast.parentNode) toast.remove();
+            }, 300);
+        }
+    }, 4000);
+}
+
+// ============================================
+// GALLERY IMAGE SCAN
+// ============================================
+
+document.getElementById('galleryInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const preview = document.getElementById('galleryPreview');
+    preview.src = URL.createObjectURL(file);
+    preview.classList.add('active');
+    
+    processImageForBarcode(file);
+});
+
+function processImageForBarcode(file) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const imageData = event.target.result;
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.min(img.width, 800);
+            canvas.height = Math.min(img.height, 800);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const imageDataUrl = canvas.toDataURL('image/png');
+            detectBarcodeFromImage(imageDataUrl);
+        };
+        img.src = imageData;
+    };
+    reader.readAsDataURL(file);
+}
+
+function detectBarcodeFromImage(imageData) {
+    try {
+        Quagga.decodeSingle({
+            src: imageData,
+            numOfWorkers: 1,
+            inputStream: {
+                size: 800,
+                type: 'ImageStream'
+            },
+            decoder: {
+                readers: ['code_128_reader', 'ean_reader', 'ean_8_reader', 'code_39_reader', 'upc_reader']
+            }
+        }, function(result) {
+            if (result && result.codeResult) {
+                const barcode = result.codeResult.code;
+                document.getElementById('barcodeInput').value = barcode;
+                scanAndAddToCart(barcode);
+                
+                document.getElementById('galleryScanResult').innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> 
+                        Barcode detected: <strong>${barcode}</strong>
+                    </div>
+                `;
+                setTimeout(() => {
+                    document.getElementById('galleryScanResult').innerHTML = '';
+                }, 3000);
+            } else {
+                document.getElementById('galleryScanResult').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        No barcode found in the image.
+                    </div>
+                `;
+            }
+        });
+    } catch (error) {
+        document.getElementById('galleryScanResult').innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> 
+                Error: ${error.message}
+            </div>
+        `;
+    }
+}
+
+// ============================================
+// LOAD CAMERAS
+// ============================================
+
+function loadCameras() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        return;
+    }
+    
+    navigator.mediaDevices.enumerateDevices()
+        .then(devices => {
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            const select = document.getElementById('cameraSelect');
+            
+            select.innerHTML = '<option value="default">Default Camera</option>';
+            
+            videoDevices.forEach((device, index) => {
+                const option = document.createElement('option');
+                option.value = device.deviceId;
+                option.textContent = device.label || `Camera ${index + 1}`;
+                select.appendChild(option);
+            });
+            
+            if (videoDevices.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No camera found';
+                option.disabled = true;
+                select.appendChild(option);
+            }
+        })
+        .catch(err => {
+            console.error('Error loading cameras:', err);
+        });
+}
+
+function switchCamera(deviceId) {
+    if (scannerRunning) {
+        showToast('Camera switched. Restarting scanner...', 'Info', 'info');
+        stopScanner();
+        setTimeout(() => {
+            startScannerWithDevice(deviceId);
+        }, 1000);
+    }
+}
+
+// ============================================
+// BARCODE SCANNING WITH CAMERA
+// ============================================
+
+let scannerRunning = false;
+let scannerType = 'manual';
+let lastScannedBarcode = '';
+let scanTimeout = null;
+let quaggaInitialized = false;
+let quaggaInstance = null;
+let cameraStream = null;
+
+function startScanner() {
+    const selectedDevice = document.getElementById('cameraSelect').value;
+    startScannerWithDevice(selectedDevice);
+}
+
+function startScannerWithDevice(deviceId) {
+    const container = document.getElementById('scanner-container');
+    
+    if (scannerRunning) {
+        stopScanner();
+        return;
+    }
+    
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast('Camera not supported in this browser.', 'Error', 'error');
+        return;
+    }
+    
+    container.style.display = 'block';
+    document.getElementById('startScannerBtn').style.display = 'none';
+    document.getElementById('stopScannerBtn').style.display = 'inline-block';
+    document.getElementById('scannerStatusBadge').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing...';
+    document.getElementById('scannerStatusBadge').className = 'badge bg-warning text-dark';
+    document.getElementById('zoomIndicator').classList.add('show');
+    
+    const video = document.getElementById('scanner-video');
+    video.setAttribute('data-zoom', '1.0');
+    video.style.transform = 'scale(1)';
+    document.getElementById('zoomIndicator').textContent = 'Zoom: 1.0x';
+    
+    if (quaggaInstance) {
+        try { Quagga.stop(); } catch(e) {}
+        try { Quagga.offDetected(); } catch(e) {}
+    }
+    
+    let constraints = {
+        facingMode: "environment",
+        width: { min: 640, ideal: 1280, max: 1920 },
+        height: { min: 480, ideal: 720, max: 1080 },
+        aspectRatio: { min: 1, max: 2 }
+    };
+    
+    if (deviceId && deviceId !== 'default') {
+        constraints.deviceId = { exact: deviceId };
+    }
+    
+    navigator.mediaDevices.getUserMedia({ video: constraints })
+        .then(stream => {
+            cameraStream = stream;
+            stream.getTracks().forEach(track => track.stop());
+            initializeQuaggaWithConstraints(constraints);
+        })
+        .catch(err => {
+            console.error('Camera permission error:', err);
+            
+            let fallbackConstraints = {
+                facingMode: "user",
+                width: 640,
+                height: 480
+            };
+            
+            navigator.mediaDevices.getUserMedia({ video: fallbackConstraints })
+                .then(stream => {
+                    cameraStream = stream;
+                    stream.getTracks().forEach(track => track.stop());
+                    initializeQuaggaWithConstraints(fallbackConstraints);
+                })
+                .catch(err2 => {
+                    console.error('Front camera also failed:', err2);
+                    showToast('Camera access denied. Please allow camera permissions.', 'Error', 'error');
+                    stopScanner();
+                });
+        });
+}
+
+function initializeQuaggaWithConstraints(constraints) {
+    const container = document.getElementById('scanner-container');
+    
+    document.getElementById('scannerStatusBadge').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting camera...';
+    document.getElementById('scannerStatusBadge').className = 'badge bg-warning text-dark';
+    
+    Quagga.init({
+        inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: container,
+            constraints: constraints
+        },
+        locator: {
+            patchSize: "large",
+            halfSample: false,
+            minQuality: 0.03,
+            minArea: 0.005,
+            maxArea: 0.8,
+            threshold: 0.4,
+        },
+        numOfWorkers: 4,
+        decoder: {
+            readers: [
+                "code_128_reader",
+                "ean_reader",
+                "ean_8_reader",
+                "code_39_reader",
+                "upc_reader",
+                "upc_e_reader"
+            ]
+        },
+        locate: true
+    }, function(err) {
+        if (err) {
+            console.error("Quagga init error:", err);
+            try {
+                Quagga.init({
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: container,
+                        constraints: {
+                            facingMode: "environment",
+                            width: 640,
+                            height: 480
+                        }
+                    },
+                    decoder: {
+                        readers: ["code_128_reader", "ean_reader"]
+                    }
+                }, function(err2) {
+                    if (err2) {
+                        showToast('Failed to start camera. Please check permissions.', 'Error', 'error');
+                        stopScanner();
+                        return;
+                    }
+                    quaggaInitialized = true;
+                    quaggaInstance = Quagga;
+                    startQuagga();
+                });
+            } catch(e2) {
+                showToast('Failed to start camera. Please check permissions.', 'Error', 'error');
+                stopScanner();
+            }
+            return;
+        }
+        quaggaInitialized = true;
+        quaggaInstance = Quagga;
+        startQuagga();
+    });
+}
+
+function startQuagga() {
+    Quagga.start();
+    scannerRunning = true;
+    scannerType = 'camera';
+    
+    const statusBadge = document.getElementById('scanStatus');
+    if (statusBadge) {
+        statusBadge.innerHTML = '<i class="fas fa-circle me-1"></i> Scanning...';
+    }
+    
+    document.getElementById('scannerStatusBadge').innerHTML = '<i class="fas fa-camera"></i> Scanning...';
+    document.getElementById('scannerStatusBadge').className = 'badge bg-success';
+    
+    const container = document.getElementById('scanner-container');
+    const existingLine = container.querySelector('.scanner-line');
+    if (!existingLine) {
+        const line = document.createElement('div');
+        line.className = 'scanner-line';
+        container.appendChild(line);
+    }
+    
+    Quagga.offDetected();
+    Quagga.onDetected(function(result) {
+        if (result && result.codeResult && result.codeResult.code) {
+            const barcode = result.codeResult.code;
+            processScannedBarcode(barcode);
+        }
+    });
+}
+
+function stopScanner() {
+    if (cameraStream) {
+        try {
+            cameraStream.getTracks().forEach(track => track.stop());
+        } catch(e) {}
+        cameraStream = null;
+    }
+    
+    if (scannerRunning) {
+        try {
+            Quagga.stop();
+        } catch(e) {}
+        scannerRunning = false;
+        scannerType = 'manual';
+    }
+    
+    const container = document.getElementById('scanner-container');
+    container.style.display = 'none';
+    
+    const line = container.querySelector('.scanner-line');
+    if (line) line.remove();
+    document.getElementById('zoomIndicator').classList.remove('show');
+    
+    document.getElementById('startScannerBtn').style.display = 'inline-block';
+    document.getElementById('stopScannerBtn').style.display = 'none';
+    document.getElementById('scannerStatusBadge').innerHTML = '<i class="fas fa-check-circle"></i> Camera stopped';
+    document.getElementById('scannerStatusBadge').className = 'badge bg-secondary';
+}
+
+function processScannedBarcode(barcode) {
+    if (lastScannedBarcode === barcode) {
+        return;
+    }
+    lastScannedBarcode = barcode;
+    clearTimeout(scanTimeout);
+    scanTimeout = setTimeout(() => {
+        lastScannedBarcode = '';
+    }, 2000);
+    
+    const container = document.getElementById('scanner-container');
+    container.classList.add('scan-success');
+    setTimeout(() => {
+        container.classList.remove('scan-success');
+    }, 400);
+    
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.frequency.value = 880;
+        oscillator.type = 'sine';
+        gainNode.gain.value = 0.2;
+        oscillator.start();
+        setTimeout(() => oscillator.stop(), 120);
+    } catch(e) {}
+    
+    if (navigator.vibrate) {
+        navigator.vibrate(80);
+    }
+    
+    document.getElementById('barcodeInput').value = barcode;
+    scanAndAddToCart(barcode);
+}
+
+// ============================================
+// ZOOM CONTROLS
+// ============================================
+
+function zoomCamera(direction) {
+    const video = document.getElementById('scanner-video');
+    if (!video) return;
+    
+    let currentZoom = parseFloat(video.getAttribute('data-zoom')) || 1.0;
+    
+    if (direction === 'in') {
+        currentZoom = Math.min(currentZoom + 0.2, 3.0);
+    } else {
+        currentZoom = Math.max(currentZoom - 0.2, 1.0);
+    }
+    
+    video.setAttribute('data-zoom', currentZoom);
+    video.style.transform = `scale(${currentZoom})`;
+    video.style.transformOrigin = 'center center';
+    
+    document.getElementById('zoomIndicator').textContent = `Zoom: ${currentZoom.toFixed(1)}x`;
+}
+
+function toggleExternalScanner() {
+    if (scannerType === 'external') {
+        scannerType = 'manual';
+        document.getElementById('externalScannerBtn').innerHTML = '<i class="fas fa-bluetooth-b"></i> External Scanner';
+        document.getElementById('externalScannerBtn').className = 'btn btn-scanner-external';
+        document.getElementById('scannerStatusBadge').innerHTML = '<i class="fas fa-check-circle"></i> External disconnected';
+        document.getElementById('scannerStatusBadge').className = 'badge bg-secondary';
+        showToast('External scanner disconnected', 'Scanner', 'info');
+        return;
+    }
+    
+    if (scannerRunning) {
+        stopScanner();
+    }
+    
+    scannerType = 'external';
+    document.getElementById('externalScannerBtn').innerHTML = '<i class="fas fa-bluetooth-b"></i> Disconnect';
+    document.getElementById('externalScannerBtn').className = 'btn btn-scanner-external';
+    document.getElementById('scannerStatusBadge').innerHTML = '<i class="fas fa-bluetooth-b"></i> External ready';
+    document.getElementById('scannerStatusBadge').className = 'badge bg-success';
+    document.getElementById('barcodeInput').focus();
+    
+    showToast('External scanner activated.', 'Scanner', 'info');
+}
+
+// ============================================
+// SCAN AND AUTO-ADD TO CART
+// ============================================
+
+function scanAndAddToCart(barcode) {
+    if (!barcode || !barcode.trim()) {
+        showToast('Please enter a barcode number', 'Error', 'error');
+        return;
+    }
+    
+    barcode = barcode.trim();
+    showLoading('Searching product...');
+    
+    fetch('/offline/scan-barcode/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({ barcode_text: barcode })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            addToCart(data.product);
+            
+            document.getElementById('scanResult').innerHTML = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>${data.product.name}</strong> added to cart!
+                </div>
+            `;
+            setTimeout(() => {
+                document.getElementById('scanResult').innerHTML = '';
+            }, 3000);
+            
+            document.getElementById('barcodeInput').value = '';
+            if (scannerType === 'external') {
+                document.getElementById('barcodeInput').focus();
+            }
+            
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        } else {
+            document.getElementById('scanResult').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    ${data.error || 'Product not found'}
+                </div>
+            `;
+            showToast(data.error || 'Product not found', 'Error', 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showToast('Error: ' + error, 'Error', 'error');
+    });
+}
+
+// ============================================
+// PRODUCT SEARCH
+// ============================================
+
+function searchProducts() {
+    const query = document.getElementById('productSearch').value.trim();
+    if (!query) {
+        document.getElementById('productResults').innerHTML = '';
+        return;
+    }
+    
+    fetch(`/offline/sale/search/?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            const results = document.getElementById('productResults');
+            results.innerHTML = '';
+            
+            if (data.results.length === 0) {
+                results.innerHTML = '<div class="text-center text-muted py-3">No products found</div>';
+                return;
+            }
+            
+            data.results.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'product-search-result';
+                div.innerHTML = `
+                    <img src="${item.image || '/static/images/no-image.png'}" alt="${item.name}">
+                    <div class="product-info">
+                        <div class="name">${item.name}</div>
+                        <div class="sku">SKU: ${item.sku}</div>
+                        <div class="price">₹${item.price}</div>
+                        ${item.barcode_text ? `<div class="sku">Barcode: ${item.barcode_text}</div>` : ''}
+                    </div>
+                    <button class="btn-add" onclick="addProductDirect('${item.id}', '${item.type}')">
+                        <i class="fas fa-plus"></i> Add
+                    </button>
+                `;
+                results.appendChild(div);
+            });
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+        });
+}
+
+function addProductDirect(id, type) {
+    const data = {
+        product_id: type === 'product' ? id : null,
+        variant_id: type === 'variant' ? id : null,
+        quantity: 1
+    };
+    
+    showLoading('Adding to cart...');
+    
+    fetch('/offline/sale/add-product/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            showToast(data.message, 'Added', 'success');
+            setTimeout(() => location.reload(), 500);
+        } else {
+            showToast(data.error || 'Failed to add product', 'Error', 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showToast('Error: ' + error, 'Error', 'error');
+    });
+}
+
+function addToCart(product) {
+    const data = {
+        product_id: product.type === 'product' ? product.id : null,
+        variant_id: product.type === 'variant' ? product.id : null,
+        quantity: 1,
+        barcode_text: product.barcode_text || null
+    };
+    
+    fetch('/offline/sale/add-product/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.message, 'Added to Cart', 'success');
+        } else {
+            showToast(data.error || 'Failed to add product', 'Error', 'error');
+        }
+    })
+    .catch(error => {
+        showToast('Error: ' + error, 'Error', 'error');
+    });
+}
+
+// ============================================
+// CART OPERATIONS
+// ============================================
+
+function removeItem(index) {
+    if (!confirm('Remove this item from cart?')) return;
+    
+    fetch('/offline/sale/remove-product/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({ index: index })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || 'Failed to remove item');
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error);
+    });
+}
+
+function updateQuantity(index, change, value) {
+    let quantity;
+    if (value !== undefined) {
+        quantity = parseInt(value);
+    } else {
+        const current = document.querySelector(`.cart-item[data-index="${index}"] .quantity-control input`);
+        if (current) {
+            quantity = parseInt(current.value) + change;
+        } else {
+            return;
+        }
+    }
+    
+    if (quantity <= 0) {
+        removeItem(index);
+        return;
+    }
+    
+    fetch('/offline/sale/update-quantity/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({ index: index, quantity: quantity })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || 'Failed to update quantity');
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error);
+    });
+}
+
+function clearCart() {
+    if (!confirm('Clear entire cart?')) return;
+    
+    fetch('/offline/sale/clear-cart/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || 'Failed to clear cart');
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error);
+    });
+}
+
+// ============================================
+// CUSTOMER SEARCH
+// ============================================
+
+let selectedCustomer = null;
+let selectedCustomerType = null;
+
+function searchCustomer(query) {
+    const dropdown = document.getElementById('customerDropdown');
+    if (!query || query.length < 2) {
+        dropdown.classList.remove('show');
+        return;
+    }
+    
+    fetch(`/offline/customers/search/?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            dropdown.innerHTML = '';
+            if (data.customers.length === 0) {
+                dropdown.innerHTML = '<div class="dropdown-item text-muted">No customers found</div>';
+                dropdown.classList.add('show');
+                return;
+            }
+            
+            data.customers.forEach(customer => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.innerHTML = `
+                    <div>
+                        <strong>${customer.name}</strong>
+                        <span class="customer-badge ${customer.type}">${customer.type}</span>
+                    </div>
+                    <div class="small text-muted">${customer.phone || customer.email}</div>
+                `;
+                item.onclick = function() {
+                    selectCustomer(customer);
+                };
+                dropdown.appendChild(item);
+            });
+            dropdown.classList.add('show');
+        })
+        .catch(error => {
+            console.error('Customer search error:', error);
+        });
+}
+
+function selectCustomer(customer) {
+    selectedCustomer = customer;
+    selectedCustomerType = customer.type;
+    
+    document.getElementById('customerDropdown').classList.remove('show');
+    const container = document.getElementById('selectedCustomer');
+    container.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <span class="customer-name"><i class="fas fa-check-circle text-success"></i> ${customer.name}</span>
+                <span class="customer-badge ${customer.type}">${customer.type}</span>
+                <div class="customer-detail">${customer.phone || customer.email}</div>
+            </div>
+            <button class="btn btn-sm btn-outline-danger" onclick="clearCustomer()">
+                <i class="fas fa-times"></i> Change
+            </button>
+        </div>
+    `;
+    container.classList.add('show');
+    document.getElementById('customerSearch').value = customer.name;
+}
+
+function clearCustomer() {
+    selectedCustomer = null;
+    selectedCustomerType = null;
+    document.getElementById('selectedCustomer').classList.remove('show');
+    document.getElementById('selectedCustomer').innerHTML = '';
+    document.getElementById('customerSearch').value = '';
+}
+
+// ============================================
+// CUSTOMER CREATION (FULLY FIXED)
+// ============================================
+
+function createCustomer() {
+    // Get form values
+    const first_name = document.getElementById('cf_first_name').value.trim();
+    const last_name = document.getElementById('cf_last_name').value.trim();
+    const phone = document.getElementById('cf_phone').value.trim();
+    const email = document.getElementById('cf_email').value.trim();
+    const address = document.getElementById('cf_address').value.trim();
+    const notes = document.getElementById('cf_notes')?.value.trim() || '';
+    
+    // Validate
+    if (!first_name) {
+        showToast('Please enter First Name', 'Error', 'error');
+        document.getElementById('cf_first_name').focus();
+        return;
+    }
+    
+    if (!phone) {
+        showToast('Please enter Phone number', 'Error', 'error');
+        document.getElementById('cf_phone').focus();
+        return;
+    }
+    
+    // Validate phone number (only digits)
+    const phoneDigits = phone.replace(/\D/g, '');
+    if (phoneDigits.length < 10) {
+        showToast('Phone number must be at least 10 digits', 'Error', 'error');
+        return;
+    }
+    
+    const data = {
+        first_name: first_name,
+        last_name: last_name,
+        phone: phoneDigits,
+        email: email,
+        address: address,
+        notes: notes
+    };
+    
+    // Show loading state
+    const saveBtn = document.querySelector('#newCustomerModal .btn-success');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    
+    // Get CSRF token
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+        showToast('Security token missing. Please refresh the page.', 'Error', 'error');
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalText;
+        return;
+    }
+    
+    const url = '/offline/customers/create/';
+    
+    console.log('Sending data:', data);
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify(data),
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        
+        // Check if response is OK
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error('Error response:', text);
+                try {
+                    const errorData = JSON.parse(text);
+                    throw new Error(errorData.error || `Server error: ${response.status}`);
+                } catch (e) {
+                    throw new Error(`Server error: ${response.status}. Please try again.`);
+                }
+            });
+        }
+        
+        // Check content type
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            return response.text().then(text => {
+                console.error('Non-JSON response:', text);
+                throw new Error('Server returned invalid response. Please try again.');
+            });
+        }
+        
+        return response.json();
+    })
+    .then(data => {
+        // Reset button
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalText;
+        
+        if (data.success) {
+            // Select the customer
+            selectCustomer(data.customer);
+            
+            // Close modal
+            const modalEl = document.getElementById('newCustomerModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+            
+            showToast('Customer created successfully!', 'Success', 'success');
+        } else {
+            showToast(data.error || 'Failed to create customer', 'Error', 'error');
+        }
+    })
+    .catch(error => {
+        // Reset button
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalText;
+        
+        console.error('Error:', error);
+        showToast(error.message || 'Error creating customer. Please try again.', 'Error', 'error');
+    });
+}
+
+// ============================================
+// PAYMENT PROCESSING
+// ============================================
+
+function processPayment() {
+    if (!selectedCustomer) {
+        showToast('Please select a customer first', 'Error', 'error');
+        return;
+    }
+    
+    const grandTotal = parseFloat(document.getElementById('grandTotal').textContent.replace('₹', ''));
+    document.getElementById('pm_amount_received').value = grandTotal.toFixed(2);
+    document.getElementById('pm_change').value = '₹0.00';
+    
+    const modalEl = document.getElementById('paymentModal');
+    let modalInstance = bootstrap.Modal.getInstance(modalEl);
+    if (!modalInstance) {
+        modalInstance = new bootstrap.Modal(modalEl);
+    }
+    modalInstance.show();
+}
+
+document.getElementById('pm_amount_received').addEventListener('input', function() {
+    const total = parseFloat(document.getElementById('grandTotal').textContent.replace('₹', ''));
+    const received = parseFloat(this.value) || 0;
+    const change = received - total;
+    document.getElementById('pm_change').value = change >= 0 ? `₹${change.toFixed(2)}` : 'Insufficient';
+});
+
+function completePayment() {
+    const formData = new FormData();
+    formData.append('payment_method', document.getElementById('pm_payment_method').value);
+    formData.append('payment_reference', document.getElementById('pm_reference').value);
+    formData.append('amount_received', document.getElementById('pm_amount_received').value);
+    formData.append('customer_id', selectedCustomer.id);
+    formData.append('customer_type', selectedCustomerType);
+    
+    const total = parseFloat(document.getElementById('grandTotal').textContent.replace('₹', ''));
+    const received = parseFloat(document.getElementById('pm_amount_received').value);
+    
+    if (received < total) {
+        showToast('Amount received is less than total amount', 'Error', 'error');
+        return;
+    }
+    
+    showLoading('Processing payment...');
+    
+    fetch('/offline/sale/complete/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            const paymentModalEl = document.getElementById('paymentModal');
+            const paymentModalInstance = bootstrap.Modal.getInstance(paymentModalEl);
+            if (paymentModalInstance) paymentModalInstance.hide();
+            
+            document.getElementById('invoiceContent').innerHTML = data.invoice_html;
+            
+            const invoiceModalEl = document.getElementById('invoiceModal');
+            let invoiceModalInstance = bootstrap.Modal.getInstance(invoiceModalEl);
+            if (!invoiceModalInstance) {
+                invoiceModalInstance = new bootstrap.Modal(invoiceModalEl);
+            }
+            invoiceModalInstance.show();
+            
+            showToast('Payment completed successfully!', 'Success', 'success');
+        } else {
+            showToast(data.error || 'Payment failed', 'Error', 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showToast('Error: ' + error, 'Error', 'error');
+    });
+}
+
+// ============================================
+// INVOICE FUNCTIONS
+// ============================================
+
+function printInvoice() {
+    const content = document.getElementById('invoiceContent');
+    const win = window.open('', '_blank');
+    win.document.write(`
+        <html>
+        <head>
+            <title>Invoice</title>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+            <style>
+                body { padding: 20px; }
+                @media print {
+                    body { padding: 0; }
+                    .no-print { display: none; }
+                }
+            </style>
+        </head>
+        <body>
+            ${content.innerHTML}
+            <div class="text-center no-print mt-4">
+                <button class="btn btn-primary" onclick="window.print()">Print</button>
+                <button class="btn btn-secondary" onclick="window.close()">Close</button>
+            </div>
+        </body>
+        </html>
+    `);
+    win.document.close();
+}
+
+function downloadInvoice() {
+    const orderId = document.querySelector('#invoiceContent [data-order-id]')?.dataset?.orderId;
+    if (orderId) {
+        window.location.href = `/offline/invoice/download/${orderId}/`;
+    } else {
+        showToast('Invoice not available for download', 'Error', 'error');
+    }
+}
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+function getCSRFToken() {
+    // Try multiple ways to get CSRF token
+    let token = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    
+    if (!token) {
+        token = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
+    }
+    
+    if (!token) {
+        token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    }
+    
+    // If not found, try to get from cookie
+    if (!token) {
+        const cookieValue = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrftoken='));
+        if (cookieValue) {
+            token = cookieValue.split('=')[1];
+        }
+    }
+    
+    return token;
+}
+
+function showLoading(message) {
+    const loader = document.getElementById('loader');
+    if (loader) loader.remove();
+    
+    const newLoader = document.createElement('div');
+    newLoader.id = 'loader';
+    newLoader.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); display: flex; align-items: center;
+        justify-content: center; z-index: 99999; color: white; font-size: 1.1rem;
+    `;
+    newLoader.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-light" role="status" style="width: 40px; height: 40px;"></div>
+            <div class="mt-3">${message}</div>
+        </div>
+    `;
+    document.body.appendChild(newLoader);
+}
+
+function hideLoading() {
+    const loader = document.getElementById('loader');
+    if (loader) loader.remove();
+}
+
+// ============================================
+// KEYBOARD SHORTCUTS
+// ============================================
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'F1') { e.preventDefault(); startScanner(); }
+    if (e.key === 'F2') { e.preventDefault(); toggleExternalScanner(); }
+    if (e.key === 'Escape' && scannerRunning) { stopScanner(); }
+    if (e.key === '=' || e.key === '+') {
+        if (scannerRunning) { e.preventDefault(); zoomCamera('in'); }
+    }
+    if (e.key === '-') {
+        if (scannerRunning) { e.preventDefault(); zoomCamera('out'); }
+    }
+});
+
+document.getElementById('productSearch').addEventListener('input', function() {
+    clearTimeout(this._timer);
+    this._timer = setTimeout(() => searchProducts(), 400);
+});
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.customer-search')) {
+        document.getElementById('customerDropdown').classList.remove('show');
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('barcodeInput').focus();
+    loadCameras();
+});
+</script>
+{% endblock %}

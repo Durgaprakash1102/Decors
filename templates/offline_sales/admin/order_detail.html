@@ -1,0 +1,200 @@
+<!-- templates/offline_sales/admin/order_detail.html -->
+
+{% load static %}
+
+{% block title %}Order #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'offline_sales:orders_list' %}">Orders</a></li>
+            <li class="breadcrumb-item active">Order #{{ order.order_number }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Order Details -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Order Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Order Number:</strong> {{ order.order_number }}</p>
+                            <p><strong>Invoice Number:</strong> {{ order.invoice_number|default:"-" }}</p>
+                            <p><strong>Date:</strong> {{ order.created_at|date:"F d, Y H:i" }}</p>
+                            <p><strong>Status:</strong> 
+                                <span class="badge bg-{% if order.status == 'completed' %}success{% elif order.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Customer:</strong> {{ order.customer_name }}</p>
+                            <p><strong>Phone:</strong> {{ order.customer_phone }}</p>
+                            <p><strong>Email:</strong> {{ order.customer_email|default:"-" }}</p>
+                            <p><strong>Address:</strong></p>
+                            <p class="text-muted small">{{ order.customer_address|linebreaks|default:"No address provided" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <h6>Payment Details</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p><strong>Method:</strong> {{ order.get_payment_method_display }}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Status:</strong> 
+                                    <span class="badge bg-{% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'pending' %}warning{% else %}danger{% endif %}">
+                                        {{ order.get_payment_status_display }}
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Reference:</strong> {{ order.payment_reference|default:"-" }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Items -->
+                    <div class="mt-4">
+                        <h6>Items</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>SKU</th>
+                                        <th>Qty</th>
+                                        <th>Price</th>
+                                        <th>Discount</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in items %}
+                                    <tr>
+                                        <td>
+                                            {{ item.product_name }}
+                                            {% if item.barcode_text %}
+                                                <br><small class="text-muted">Barcode: {{ item.barcode_text }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ item.sku }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>₹{{ item.original_price|floatformat:2 }}</td>
+                                        <td>
+                                            {% if item.discount > 0 %}
+                                                ₹{{ item.discount|floatformat:2 }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td><strong>₹{{ item.total|floatformat:2 }}</strong></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="5" class="text-end"><strong>Subtotal:</strong></td>
+                                        <td>₹{{ order.subtotal|floatformat:2 }}</td>
+                                    </tr>
+                                    {% if order.product_discount_total > 0 %}
+                                    <tr>
+                                        <td colspan="5" class="text-end text-success"><strong>Product Discount:</strong></td>
+                                        <td class="text-success">-₹{{ order.product_discount_total|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if order.offer_discount > 0 %}
+                                    <tr>
+                                        <td colspan="5" class="text-end text-success"><strong>Offer Discount:</strong></td>
+                                        <td class="text-success">-₹{{ order.offer_discount|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    <tr class="table-active">
+                                        <td colspan="5" class="text-end"><strong>Grand Total:</strong></td>
+                                        <td><strong>₹{{ order.total_amount|floatformat:2 }}</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    {% if order.created_by %}
+                    <div class="mt-3">
+                        <p><strong>Created By:</strong> {{ order.created_by.get_full_name|default:order.created_by.email }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Quick Actions -->
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'offline_sales:download_invoice' order.id %}" class="btn btn-success" target="_blank">
+                            <i class="fas fa-download"></i> Download Invoice PDF
+                        </a>
+                        {% if order.offline_customer %}
+                            <a href="{% url 'offline_sales:customer_edit' order.offline_customer.id %}" class="btn btn-secondary">
+                                <i class="fas fa-user"></i> View Customer
+                            </a>
+                        {% elif order.customer %}
+                            <!-- If it's an online user, maybe link to admin or profile -->
+                            <a href="#" class="btn btn-secondary" onclick="alert('This is an online user. View in admin panel.')">
+                                <i class="fas fa-user"></i> Online User ({{ order.customer.email }})
+                            </a>
+                        {% else %}
+                            <a href="#" class="btn btn-secondary disabled">
+                                <i class="fas fa-user"></i> No Customer Found
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'offline_sales:offline_sale' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> New Sale
+                        </a>
+                        <a href="{% url 'offline_sales:orders_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Timeline -->
+            <div class="card shadow mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Order Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success"></i>
+                            Order Placed - {{ order.created_at|date:"F d, Y H:i" }}
+                        </li>
+                        {% if order.paid_at %}
+                        <li class="mb-2">
+                            <i class="fas fa-credit-card text-primary"></i>
+                            Payment Received - {{ order.paid_at|date:"F d, Y H:i" }}
+                        </li>
+                        {% endif %}
+                        {% if order.status == 'completed' %}
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success"></i>
+                            Completed - {{ order.updated_at|date:"F d, Y H:i" }}
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

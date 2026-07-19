@@ -1,0 +1,148 @@
+<!-- templates/offline_sales/admin/store_settings_list.html -->
+
+{% load static %}
+
+{% block title %}Store Settings{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Store Settings</h2>
+        <div>
+            <a href="{% url 'offline_sales:store_settings_edit' %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit Settings
+            </a>
+        </div>
+    </div>
+
+    {% if store_settings %}
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Store Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Store Name</strong>
+                        </div>
+                        <div class="col-md-9">{{ store_settings.store_name }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Store Logo</strong>
+                        </div>
+                        <div class="col-md-9">
+                            {% if store_settings.store_logo %}
+                                <img src="{{ store_settings.store_logo.url }}" height="80" alt="Logo">
+                            {% else %}
+                                <span class="text-muted">No logo uploaded</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Address</strong>
+                        </div>
+                        <div class="col-md-9">{{ store_settings.store_address|linebreaks }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Phone</strong>
+                        </div>
+                        <div class="col-md-9">{{ store_settings.store_phone }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Email</strong>
+                        </div>
+                        <div class="col-md-9">{{ store_settings.store_email }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Website</strong>
+                        </div>
+                        <div class="col-md-9">
+                            {% if store_settings.store_website %}
+                                <a href="{{ store_settings.store_website }}" target="_blank">{{ store_settings.store_website }}</a>
+                            {% else %}
+                                <span class="text-muted">Not set</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>GST Number</strong>
+                        </div>
+                        <div class="col-md-9">{{ store_settings.gst_number|default:"Not set" }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>PAN Number</strong>
+                        </div>
+                        <div class="col-md-9">{{ store_settings.pan_number|default:"Not set" }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Invoice Prefix</strong>
+                        </div>
+                        <div class="col-md-9">{{ store_settings.invoice_prefix }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Next Invoice Number</strong>
+                        </div>
+                        <div class="col-md-9">{{ store_settings.invoice_start_number }}</div>
+                    </div>
+                    {% if store_settings.terms_conditions %}
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Terms & Conditions</strong>
+                        </div>
+                        <div class="col-md-9">{{ store_settings.terms_conditions|linebreaks }}</div>
+                    </div>
+                    {% endif %}
+                    {% if store_settings.footer_text %}
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Footer Text</strong>
+                        </div>
+                        <div class="col-md-9">{{ store_settings.footer_text|linebreaks }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'offline_sales:store_settings_edit' %}" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Edit Settings
+                        </a>
+                        <a href="{% url 'offline_sales:barcode_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-qrcode"></i> Manage Barcodes
+                        </a>
+                        <a href="{% url 'offline_sales:offline_sale' %}" class="btn btn-success">
+                            <i class="fas fa-shopping-cart"></i> Start Sale
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        No store settings found. Please configure your store settings first.
+        <a href="{% url 'offline_sales:store_settings_edit' %}" class="btn btn-primary mt-2">
+            <i class="fas fa-plus"></i> Configure Store
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
