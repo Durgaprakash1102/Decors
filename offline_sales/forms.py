@@ -53,6 +53,8 @@ class OfflineCustomerForm(forms.ModelForm):
                 raise forms.ValidationError('Phone number must be at least 10 digits')
         return phone
 
+# offline_sales/forms.py - Ensure Decimal handling
+
 class OfflineSalePaymentForm(forms.Form):
     PAYMENT_METHODS = [
         ('cash', 'Cash'),

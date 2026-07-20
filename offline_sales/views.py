@@ -387,6 +387,8 @@ def product_search_view(request):
 # OFFLINE SALE VIEWS
 # ============================================
 
+# offline_sales/views.py - Update cart calculation
+
 @staff_member_required
 def offline_sale_view(request):
     """Main offline sale page"""
@@ -397,35 +399,38 @@ def offline_sale_view(request):
     
     cart = request.session.get('offline_cart', [])
     
-    subtotal = 0
-    total_discount = 0
-    total_offer_discount = 0
-    total_product_discount = 0
-    grand_total = 0
+    subtotal = Decimal('0')
+    total_discount = Decimal('0')
+    total_offer_discount = Decimal('0')
+    total_product_discount = Decimal('0')
+    grand_total = Decimal('0')
     
     cart_items = []
     for item in cart:
-        item_total = float(item.get('price', 0)) * int(item.get('quantity', 1))
-        discount = float(item.get('discount', 0))
-        offer_discount = float(item.get('offer_discount', 0))
-        product_discount = float(item.get('product_discount', 0))
+        price = Decimal(str(item.get('price', 0)))
+        original_price = Decimal(str(item.get('original_price', 0)))
+        quantity = Decimal(str(item.get('quantity', 1)))
+        discount = Decimal(str(item.get('discount', 0)))
+        offer_discount = Decimal(str(item.get('offer_discount', 0)))
+        product_discount = Decimal(str(item.get('product_discount', 0)))
         
-        subtotal += float(item.get('original_price', 0)) * int(item.get('quantity', 1))
-        total_product_discount += product_discount
-        total_offer_discount += offer_discount
-        total_discount += discount
+        item_total = price * quantity
+        product_discount_total += product_discount * quantity
+        offer_discount_total += offer_discount * quantity
+        total_discount += discount * quantity
+        subtotal += original_price * quantity
         
         cart_items.append({
             'id': item.get('id'),
             'name': item.get('name'),
             'sku': item.get('sku'),
-            'price': float(item.get('price', 0)),
-            'original_price': float(item.get('original_price', 0)),
-            'quantity': int(item.get('quantity', 1)),
-            'total': item_total,
-            'discount': discount,
-            'offer_discount': offer_discount,
-            'product_discount': product_discount,
+            'price': float(price),
+            'original_price': float(original_price),
+            'quantity': int(quantity),
+            'total': float(item_total),
+            'discount': float(discount * quantity),
+            'offer_discount': float(offer_discount * quantity),
+            'product_discount': float(product_discount * quantity),
             'image': item.get('image'),
             'type': item.get('type', 'product'),
             'stock': item.get('stock', 0),
@@ -441,17 +446,15 @@ def offline_sale_view(request):
     context = {
         'store_settings': store_settings,
         'cart_items': cart_items,
-        'subtotal': subtotal,
-        'total_discount': total_discount,
-        'total_product_discount': total_product_discount,
-        'total_offer_discount': total_offer_discount,
-        'grand_total': grand_total,
+        'subtotal': float(subtotal),
+        'total_discount': float(total_discount),
+        'total_product_discount': float(total_product_discount),
+        'total_offer_discount': float(total_offer_discount),
+        'grand_total': float(grand_total),
         'cart_count': len(cart_items),
         'recent_customers': recent_customers,
     }
     return render(request, 'offline_sales/admin/offline_sale.html', context)
-
-
 @csrf_exempt
 @staff_member_required
 def offline_sale_add_product(request):
@@ -964,6 +967,10 @@ def order_detail_view(request, order_id):
 # OFFLINE ORDER COMPLETION
 # ============================================
 
+# offline_sales/views.py - Complete fixed offline_sale_complete
+
+from decimal import Decimal
+
 @csrf_exempt
 @staff_member_required
 def offline_sale_complete(request):
@@ -1004,19 +1011,24 @@ def offline_sale_complete(request):
                 customer_phone = offline_customer.phone
                 customer_address = offline_customer.address
             
-            subtotal = 0
-            product_discount_total = 0
-            offer_discount_total = 0
-            total_amount = 0
+            # Calculate totals - Use Decimal for all calculations
+            subtotal = Decimal('0')
+            product_discount_total = Decimal('0')
+            offer_discount_total = Decimal('0')
+            total_amount = Decimal('0')
             
             for item in cart:
-                item_total = float(item.get('price', 0)) * int(item.get('quantity', 1))
-                product_discount = float(item.get('product_discount', 0)) * int(item.get('quantity', 1))
-                offer_discount = float(item.get('offer_discount', 0)) * int(item.get('quantity', 1))
+                # Convert all values to Decimal
+                price = Decimal(str(item.get('price', 0)))
+                original_price = Decimal(str(item.get('original_price', 0)))
+                quantity = Decimal(str(item.get('quantity', 1)))
+                product_discount = Decimal(str(item.get('product_discount', 0)))
+                offer_discount = Decimal(str(item.get('offer_discount', 0)))
                 
-                subtotal += float(item.get('original_price', 0)) * int(item.get('quantity', 1))
-                product_discount_total += product_discount
-                offer_discount_total += offer_discount
+                item_total = price * quantity
+                product_discount_total += product_discount * quantity
+                offer_discount_total += offer_discount * quantity
+                subtotal += original_price * quantity
                 total_amount += item_total
             
             store_settings = StoreSettings.objects.first()
@@ -1032,7 +1044,7 @@ def offline_sale_complete(request):
                     subtotal=subtotal,
                     product_discount_total=product_discount_total,
                     offer_discount=offer_discount_total,
-                    coupon_discount=0,
+                    coupon_discount=Decimal('0'),
                     total_amount=total_amount,
                     payment_method=form.cleaned_data['payment_method'],
                     payment_status='paid',
@@ -1107,6 +1119,7 @@ def offline_sale_complete(request):
                             created_by=request.user
                         )
                     
+                    # Convert all values to Decimal for storage
                     OfflineOrderItem.objects.create(
                         order=order,
                         product=product,
@@ -1115,10 +1128,10 @@ def offline_sale_complete(request):
                         sku=item.get('sku', ''),
                         barcode_text=item.get('barcode_text', ''),
                         quantity=quantity,
-                        original_price=float(item.get('original_price', 0)),
-                        final_price=float(item.get('price', 0)),
-                        total=float(item.get('price', 0)) * quantity,
-                        discount=float(item.get('discount', 0)) * quantity
+                        original_price=Decimal(str(item.get('original_price', 0))),
+                        final_price=Decimal(str(item.get('price', 0))),
+                        total=Decimal(str(item.get('price', 0))) * quantity,
+                        discount=Decimal(str(item.get('discount', 0))) * quantity
                     )
                 
                 if offline_customer:
@@ -1148,10 +1161,10 @@ def offline_sale_complete(request):
         except ValidationError as e:
             return JsonResponse({'success': False, 'error': str(e)})
         except Exception as e:
+            logger.error(f"Order completion error: {str(e)}")
             return JsonResponse({'success': False, 'error': str(e)})
     
     return JsonResponse({'success': False, 'error': 'Invalid request'})
-
 
 # ============================================
 # INVOICE VIEWS
