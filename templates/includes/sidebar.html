@@ -700,7 +700,26 @@
         <i class="fa-solid fa-box"></i>
         <span class="nav-text">Incoming Orders</span>
     </a>
-
+    <a href="{% url 'Ecom:orders' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
+        <i class="fa-solid fa-box"></i>
+        <span class="nav-text">All Orders</span>
+    </a>
+    <a href="{% url 'Ecom:admin_replacement_requests' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'admin_replacement_requests' %}active{% endif %}">
+        <i class="fa-solid fa-box"></i>
+        <span class="nav-text">Replacement Requests</span>
+    </a>
+    <a href="{% url 'Ecom:admin_return_requests' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'admin_return_requests' %}active{% endif %}">
+        <i class="fa-solid fa-box"></i>
+        <span class="nav-text">Return Requests</span>
+    </a>
+    <a href="{% url 'Ecom:admin_cancellation_requests' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'admin_cancellation_requests' %}active{% endif %}">
+        <i class="fa-solid fa-box"></i>
+        <span class="nav-text">Cancellation Requests</span>
+    </a>
     <a href="{% url 'Ecom:product_list' %}"
        class="nav-item {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
         <i class="fa-solid fa-box-open"></i>
