@@ -27,7 +27,7 @@ urlpatterns = [
     path('profile/update/', views.update_profile_view, name='update_profile'),
     
     # Address URLs
-    path('address/add/', views.add_address_view, name='add_address'),
+    path('address/add/', views.add_address_view, name='add_address_view'),
     path('address/edit/<int:address_id>/', views.edit_address_view, name='edit_address'),
     path('address/delete/<int:address_id>/', views.delete_address_view, name='delete_address'),
     path('address/set-default/<int:address_id>/', views.set_default_address_view, name='set_default_address'),
