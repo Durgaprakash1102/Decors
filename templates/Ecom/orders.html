@@ -1,28 +1,52 @@
-{% extends base_template %}
+
 {% load static %}
 
 {% block title %}My Orders - MyStore{% endblock %}
 
 {% block content %}
 <div class="container py-4">
-    <h2 class="mb-4"><i class="fas fa-box text-primary"></i> My Orders</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-box text-primary"></i> My Orders</h2>
+        <div>
+            <span class="badge bg-primary p-2">Total: {{ total_orders }}</span>
+            <span class="badge bg-info p-2">Online: {{ online_count }}</span>
+            <span class="badge bg-warning text-dark p-2">Offline: {{ offline_count }}</span>
+        </div>
+    </div>
     
     {% if orders %}
         <div class="row">
-            {% for order in orders %}
+            {% for order_data in orders %}
                 <div class="col-12 mb-3">
                     <div class="card shadow-sm">
                         <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap">
                             <div>
-                                <strong>Order #{{ order.order_number }}</strong>
-                                <span class="ms-3 text-muted">{{ order.created_at|date:"M d, Y H:i" }}</span>
+                                <strong>
+                                    {% if order_data.type == 'online' %}
+                                        <i class="fas fa-shopping-cart text-primary"></i>
+                                    {% else %}
+                                        <i class="fas fa-store text-warning"></i>
+                                    {% endif %}
+                                    Order #{{ order_data.order_number }}
+                                </strong>
+                                {% if order_data.type == 'offline' and order_data.invoice_number %}
+                                    <span class="ms-2 text-muted small">Invoice: {{ order_data.invoice_number }}</span>
+                                {% endif %}
+                                <span class="ms-3 text-muted">{{ order_data.created_at|date:"M d, Y H:i" }}</span>
                             </div>
                             <div>
-                                <span class="badge bg-{% if order.status == 'delivered' %}success{% elif order.status == 'processing' %}warning{% elif order.status == 'cancelled' or order.status == 'failed' %}danger{% else %}secondary{% endif %}">
-                                    {{ order.get_status_display }}
+                                {% if order_data.type == 'offline' %}
+                                    <span class="badge bg-warning text-dark me-1">Offline</span>
+                                {% endif %}
+                                <span class="badge bg-{% if order_data.status == 'delivered' or order_data.status == 'completed' %}success{% elif order_data.status == 'processing' %}warning{% elif order_data.status == 'cancelled' or order_data.status == 'failed' %}danger{% else %}secondary{% endif %}">
+                                    {% if order_data.type == 'offline' %}
+                                        {{ order_data.status|title }}
+                                    {% else %}
+                                        {{ order_data.order.get_status_display }}
+                                    {% endif %}
                                 </span>
-                                <span class="badge bg-{% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'pending' %}warning{% elif order.payment_status == 'refunded' %}info{% else %}danger{% endif %} ms-1">
-                                    {{ order.get_payment_status_display }}
+                                <span class="badge bg-{% if order_data.payment_status == 'paid' %}success{% elif order_data.payment_status == 'pending' %}warning{% elif order_data.payment_status == 'refunded' %}info{% else %}danger{% endif %} ms-1">
+                                    {{ order_data.payment_status|title }}
                                 </span>
                             </div>
                         </div>
@@ -30,33 +54,46 @@
                             <div class="row">
                                 <div class="col-md-8">
                                     <div class="row">
-                                        {% for item in order.items.all|slice:":3" %}
+                                        {% for item in order_data.items|slice:":3" %}
                                             <div class="col-md-4 col-6 mb-2">
                                                 <div class="d-flex align-items-center">
                                                     {% if item.product and item.product.main_image %}
                                                         <img src="{{ item.product.main_image }}" width="40" height="40" style="object-fit:cover;border-radius:4px;" class="me-2">
                                                     {% else %}
-                                                        <div class="bg-light me-2" style="width:40px;height:40px;border-radius:4px;"></div>
+                                                        <div class="bg-light me-2 d-flex align-items-center justify-content-center" style="width:40px;height:40px;border-radius:4px;">
+                                                            <i class="fas fa-box text-muted"></i>
+                                                        </div>
                                                     {% endif %}
                                                     <div>
-                                                        <div class="small">{{ item.product_name|truncatechars:15 }}</div>
+                                                        <div class="small">
+                                                            {% if order_data.type == 'offline' %}
+                                                                {{ item.product_name|truncatechars:15 }}
+                                                            {% else %}
+                                                                {{ item.product_name|truncatechars:15 }}
+                                                            {% endif %}
+                                                        </div>
                                                         <div class="small text-muted">×{{ item.quantity }}</div>
                                                     </div>
                                                 </div>
                                             </div>
                                         {% endfor %}
-                                        {% if order.items.count > 3 %}
+                                        {% if order_data.items|length > 3 %}
                                             <div class="col-md-4 col-6 mb-2">
                                                 <div class="d-flex align-items-center h-100">
-                                                    <span class="text-muted small">+{{ order.items.count|add:"-3" }} more items</span>
+                                                    <span class="text-muted small">+{{ order_data.items|length|add:"-3" }} more items</span>
                                                 </div>
                                             </div>
                                         {% endif %}
                                     </div>
                                 </div>
                                 <div class="col-md-4 text-md-end">
-                                    <div><strong>Total: ₹{{ order.total_amount|floatformat:2 }}</strong></div>
-                                    <a href="{% url 'Ecom:order_detail' order.id %}" class="btn btn-outline-primary btn-sm mt-2">
+                                    <div><strong>Total: ₹{{ order_data.total_amount|floatformat:2 }}</strong></div>
+                                    <div class="mt-1">
+                                        {% if order_data.type == 'offline' %}
+                                            <span class="badge bg-secondary">Offline Purchase</span>
+                                        {% endif %}
+                                    </div>
+                                    <a href="{% url 'Ecom:order_detail' order_data.order.id %}" class="btn btn-outline-primary btn-sm mt-2">
                                         <i class="fas fa-eye"></i> View Details
                                     </a>
                                 </div>

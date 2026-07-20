@@ -21,20 +21,29 @@
         </div>
     </div>
 
-    <!-- Return/Replacement Window Alert -->
-    {% if order.status == 'delivered' and not is_admin_view %}
-        <div class="alert {% if order.return_window_remaining > 0 %}alert-info{% else %}alert-danger{% endif %} mb-4">
+    <!-- Order Type Alert -->
+    <div class="alert {% if is_offline %}alert-warning{% else %}alert-info{% endif %} mb-4">
+        <i class="fas {% if is_offline %}fa-store{% else %}fa-shopping-cart{% endif %}"></i>
+        <strong>{{ order_type_display }}</strong>
+        {% if is_offline and order.invoice_number %}
+            <span class="ms-2">| Invoice: <strong>{{ order.invoice_number }}</strong></span>
+        {% endif %}
+    </div>
+
+    <!-- Return/Replacement Window Alert (Only for Online Orders) -->
+    {% if not is_offline and order.status == 'delivered' and not is_admin_view %}
+        <div class="alert {% if return_window_days > 0 %}alert-info{% else %}alert-danger{% endif %} mb-4">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <i class="fas fa-clock"></i>
-                    {% if order.return_window_remaining > 0 %}
-                        <strong>{{ order.return_window_remaining }}</strong> day{{ order.return_window_remaining|pluralize }} remaining for return/replacement
+                    {% if return_window_days > 0 %}
+                        <strong>{{ return_window_days }}</strong> day{{ return_window_days|pluralize }} remaining for return/replacement
                     {% else %}
                         <strong>Return/Replacement window has expired</strong> (7 days from delivery)
                     {% endif %}
                 </div>
                 <div>
-                    {% if order.return_window_remaining > 0 %}
+                    {% if return_window_days > 0 %}
                         <span class="badge bg-success">Active</span>
                     {% else %}
                         <span class="badge bg-danger">Expired</span>
@@ -55,8 +64,12 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
                         <span>Status:</span>
-                        <span class="badge bg-{% if order.status == 'delivered' %}success{% elif order.status == 'processing' %}warning{% elif order.status == 'cancelled' or order.status == 'failed' %}danger{% else %}secondary{% endif %} p-2">
-                            {{ order.get_status_display }}
+                        <span class="badge bg-{% if order.status == 'delivered' or order.status == 'completed' %}success{% elif order.status == 'processing' %}warning{% elif order.status == 'cancelled' or order.status == 'failed' %}danger{% else %}secondary{% endif %} p-2">
+                            {% if is_offline %}
+                                {{ order.get_status_display }}
+                            {% else %}
+                                {{ order.get_status_display }}
+                            {% endif %}
                         </span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
@@ -75,6 +88,12 @@
                         <span>{{ order.delivery_date|date:"M d, Y" }}</span>
                     </div>
                     {% endif %}
+                    {% if is_offline and order.invoice_number %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Invoice:</span>
+                        <span>{{ order.invoice_number }}</span>
+                    </div>
+                    {% endif %}
                     {% if order.tracking_number %}
                     <div class="d-flex justify-content-between mb-2">
                         <span>Tracking:</span>
@@ -87,9 +106,15 @@
                         </span>
                     </div>
                     {% endif %}
+                    
+                    {% if is_offline %}
+                    <div class="mt-2 pt-2 border-top">
+                        <span class="badge bg-warning text-dark">Offline Purchase</span>
+                    </div>
+                    {% endif %}
 
-                    <!-- Discounts Applied -->
-                    {% if order.total_discount > 0 %}
+                    <!-- Discounts Applied (Only for Online Orders) -->
+                    {% if not is_offline and order.total_discount > 0 %}
                     <div class="mt-3 pt-3 border-top">
                         <h6>Discounts Applied</h6>
                         <div class="small">
@@ -119,13 +144,13 @@
                     </div>
                     {% endif %}
 
-                    {% if order.coupon %}
+                    {% if not is_offline and order.coupon %}
                         <div class="mt-2">
                             <span class="badge bg-info">Coupon: {{ order.coupon.code }}</span>
                         </div>
                     {% endif %}
                     
-                    {% if order.offer %}
+                    {% if not is_offline and order.offer %}
                         <div class="mt-2">
                             <span class="badge bg-warning">Offer: {{ order.offer.name }}</span>
                         </div>
@@ -134,14 +159,23 @@
                     {% if is_admin_view %}
                         <div class="mt-2 pt-2 border-top">
                             <span>Customer:</span>
-                            <span>{{ order.user.full_name }} <br><small class="text-muted">{{ order.user.email }}</small></span>
+                            <span>
+                                {% if is_offline %}
+                                    {{ order.customer_name }} 
+                                    {% if order.customer_phone %}
+                                        <br><small class="text-muted">{{ order.customer_phone }}</small>
+                                    {% endif %}
+                                {% else %}
+                                    {{ order.user.full_name }} <br><small class="text-muted">{{ order.user.email }}</small>
+                                {% endif %}
+                            </span>
                         </div>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- Customer Actions -->
-            {% if not is_admin_view %}
+            <!-- Customer Actions (Only for Online Orders) -->
+            {% if not is_offline and not is_admin_view %}
             <div class="card shadow-sm mb-3">
                 <div class="card-header bg-white">
                     <h5 class="mb-0"><i class="fas fa-actions"></i> Order Actions</h5>
@@ -169,8 +203,8 @@
                     {% if order.can_request_return %}
                         <a href="{% url 'Ecom:request_return' order.id %}" class="btn btn-warning w-100 mb-2">
                             <i class="fas fa-undo"></i> Request Return
-                            {% if order.return_window_remaining > 0 %}
-                                <span class="badge bg-dark ms-1">{{ order.return_window_remaining }}d</span>
+                            {% if return_window_days > 0 %}
+                                <span class="badge bg-dark ms-1">{{ return_window_days }}d</span>
                             {% endif %}
                         </a>
                     {% elif order.return_requested %}
@@ -189,8 +223,8 @@
                     {% if order.can_request_replacement %}
                         <a href="{% url 'Ecom:request_replacement' order.id %}" class="btn btn-primary w-100 mb-2">
                             <i class="fas fa-exchange-alt"></i> Request Replacement
-                            {% if order.return_window_remaining > 0 %}
-                                <span class="badge bg-dark ms-1">{{ order.return_window_remaining }}d</span>
+                            {% if return_window_days > 0 %}
+                                <span class="badge bg-dark ms-1">{{ return_window_days }}d</span>
                             {% endif %}
                         </a>
                     {% elif order.replacement_requested %}
@@ -240,34 +274,40 @@
                 </div>
                 <div class="card-body">
                     <div class="list-group">
-                        {% if order.cancellation_requested %}
-                            <a href="{% url 'Ecom:admin_cancellation_detail' order.id %}" class="list-group-item list-group-item-action">
-                                <i class="fas fa-times-circle text-danger"></i> Manage Cancellation
-                                <span class="badge bg-warning float-end">Pending</span>
+                        {% if not is_offline %}
+                            {% if order.cancellation_requested %}
+                                <a href="{% url 'Ecom:admin_cancellation_detail' order.id %}" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-times-circle text-danger"></i> Manage Cancellation
+                                    <span class="badge bg-warning float-end">Pending</span>
+                                </a>
+                            {% endif %}
+                            {% if order.return_requested %}
+                                <a href="{% url 'Ecom:admin_return_detail' order.id %}" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-undo text-warning"></i> Manage Return
+                                    <span class="badge bg-{% if order.return_completed %}success{% elif order.return_items_received %}info{% elif order.return_approved %}warning{% elif order.return_rejected %}danger{% else %}secondary{% endif %} float-end">
+                                        {{ order.return_status_display }}
+                                    </span>
+                                </a>
+                            {% endif %}
+                            {% if order.replacement_requested %}
+                                <a href="{% url 'Ecom:admin_replacement_detail' order.id %}" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-exchange-alt text-primary"></i> Manage Replacement
+                                    <span class="badge bg-{% if order.replacement_completed %}success{% elif order.replacement_approved %}warning{% elif order.replacement_rejected %}danger{% else %}secondary{% endif %} float-end">
+                                        {{ order.replacement_status_display }}
+                                    </span>
+                                </a>
+                            {% endif %}
+                            <a href="{% url 'Ecom:admin_order_detail' order.id %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-edit text-primary"></i> Full Admin View
+                            </a>
+                            <a href="{% url 'Ecom:admin_order_update' order.id %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-pen text-success"></i> Update Order Status
+                            </a>
+                        {% else %}
+                            <a href="{% url 'offline_sales:order_detail' order.id %}" class="list-group-item list-group-item-action">
+                                <i class="fas fa-store text-warning"></i> View Offline Order
                             </a>
                         {% endif %}
-                        {% if order.return_requested %}
-                            <a href="{% url 'Ecom:admin_return_detail' order.id %}" class="list-group-item list-group-item-action">
-                                <i class="fas fa-undo text-warning"></i> Manage Return
-                                <span class="badge bg-{% if order.return_completed %}success{% elif order.return_items_received %}info{% elif order.return_approved %}warning{% elif order.return_rejected %}danger{% else %}secondary{% endif %} float-end">
-                                    {{ order.return_status_display }}
-                                </span>
-                            </a>
-                        {% endif %}
-                        {% if order.replacement_requested %}
-                            <a href="{% url 'Ecom:admin_replacement_detail' order.id %}" class="list-group-item list-group-item-action">
-                                <i class="fas fa-exchange-alt text-primary"></i> Manage Replacement
-                                <span class="badge bg-{% if order.replacement_completed %}success{% elif order.replacement_approved %}warning{% elif order.replacement_rejected %}danger{% else %}secondary{% endif %} float-end">
-                                    {{ order.replacement_status_display }}
-                                </span>
-                            </a>
-                        {% endif %}
-                        <a href="{% url 'Ecom:admin_order_detail' order.id %}" class="list-group-item list-group-item-action">
-                            <i class="fas fa-edit text-primary"></i> Full Admin View
-                        </a>
-                        <a href="{% url 'Ecom:admin_order_update' order.id %}" class="list-group-item list-group-item-action">
-                            <i class="fas fa-pen text-success"></i> Update Order Status
-                        </a>
                     </div>
                 </div>
             </div>
@@ -317,7 +357,7 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Order Items</h5>
-                    <span class="badge bg-secondary">{{ order.items.count }} items</span>
+                    <span class="badge bg-secondary">{{ items|length }} items</span>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -333,7 +373,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for item in order.items.all %}
+                                {% for item in items %}
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
@@ -349,11 +389,14 @@
                                                     {% if item.variant %}
                                                         <br><small class="text-muted">{{ item.variant.name|default:item.variant.sku }}</small>
                                                     {% endif %}
-                                                    {% if item.offer_name %}
+                                                    {% if not is_offline and item.offer_name %}
                                                         <br><small class="badge bg-warning">{{ item.offer_name }}</small>
                                                     {% endif %}
                                                     {% if item.is_returned %}
                                                         <br><span class="badge bg-info">Returned</span>
+                                                    {% endif %}
+                                                    {% if is_offline and item.barcode_text %}
+                                                        <br><small class="text-muted">Barcode: {{ item.barcode_text }}</small>
                                                     {% endif %}
                                                 </div>
                                             </div>
@@ -372,7 +415,7 @@
                                             {% if item.product_discount > 0 or item.offer_discount > 0 %}
                                                 <span class="text-success">
                                                     ₹{{ item.product_discount|add:item.offer_discount|floatformat:2 }}
-                                                    {% if item.offer %}
+                                                    {% if not is_offline and item.offer %}
                                                         <br><small>({{ item.offer.name }})</small>
                                                     {% endif %}
                                                 </span>
@@ -389,19 +432,19 @@
                                     <td colspan="5" class="text-end"><strong>Subtotal:</strong></td>
                                     <td><strong>₹{{ order.subtotal|floatformat:2 }}</strong></td>
                                 </tr>
-                                {% if order.product_discount_total > 0 %}
+                                {% if not is_offline and order.product_discount_total > 0 %}
                                 <tr>
                                     <td colspan="5" class="text-end text-success"><strong>Product Discount:</strong></td>
                                     <td class="text-success">-₹{{ order.product_discount_total|floatformat:2 }}</td>
                                 </tr>
                                 {% endif %}
-                                {% if order.offer_discount > 0 %}
+                                {% if not is_offline and order.offer_discount > 0 %}
                                 <tr>
                                     <td colspan="5" class="text-end text-success"><strong>Offer Discount:</strong></td>
                                     <td class="text-success">-₹{{ order.offer_discount|floatformat:2 }}</td>
                                 </tr>
                                 {% endif %}
-                                {% if order.coupon_discount > 0 %}
+                                {% if not is_offline and order.coupon_discount > 0 %}
                                 <tr>
                                     <td colspan="5" class="text-end text-success"><strong>Coupon Discount:</strong></td>
                                     <td class="text-success">-₹{{ order.coupon_discount|floatformat:2 }}</td>
@@ -429,6 +472,9 @@
                             <div class="timeline-content">
                                 <h6 class="mb-0">Order Placed</h6>
                                 <small class="text-muted">{{ order.created_at|date:"F d, Y H:i" }}</small>
+                                {% if is_offline %}
+                                    <br><small class="text-muted">(Offline Purchase)</small>
+                                {% endif %}
                             </div>
                         </div>
 
@@ -455,7 +501,7 @@
                         </div>
                         {% endif %}
 
-                        {% if order.status == 'delivered' %}
+                        {% if order.status == 'delivered' or order.status == 'completed' %}
                         <div class="timeline-item">
                             <div class="timeline-marker bg-success"></div>
                             <div class="timeline-content">
@@ -475,7 +521,7 @@
                         </div>
                         {% endif %}
 
-                        {% if order.return_approved %}
+                        {% if not is_offline and order.return_approved %}
                         <div class="timeline-item">
                             <div class="timeline-marker bg-success"></div>
                             <div class="timeline-content">
@@ -485,7 +531,7 @@
                         </div>
                         {% endif %}
 
-                        {% if order.return_items_received %}
+                        {% if not is_offline and order.return_items_received %}
                         <div class="timeline-item">
                             <div class="timeline-marker bg-info"></div>
                             <div class="timeline-content">
@@ -506,7 +552,7 @@
                         </div>
                         {% endif %}
 
-                        {% if order.replacement_completed %}
+                        {% if not is_offline and order.replacement_completed %}
                         <div class="timeline-item">
                             <div class="timeline-marker bg-success"></div>
                             <div class="timeline-content">
@@ -542,6 +588,11 @@
                     <hr>
                     <h6><i class="fas fa-sticky-note text-primary"></i> Order Notes</h6>
                     <p class="text-muted small">{{ order.notes }}</p>
+                    {% endif %}
+                    {% if is_offline and order.payment_method %}
+                    <hr>
+                    <h6><i class="fas fa-credit-card text-primary"></i> Payment Method</h6>
+                    <p class="text-muted small">{{ order.get_payment_method_display }}</p>
                     {% endif %}
                 </div>
             </div>

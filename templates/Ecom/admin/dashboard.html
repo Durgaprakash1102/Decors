@@ -1,3 +1,5 @@
+<!-- dashboard.html - Complete Updated Template with Custom Range Fix -->
+
 {% extends 'includes/sidebar.html' %}
 {% load static %}
 
@@ -31,6 +33,8 @@
     .stats-card.purple { border-color: #6f42c1; }
     .stats-card.pink { border-color: #d63384; }
     .stats-card.teal { border-color: #20c997; }
+    .stats-card.orange { border-color: #fd7e14; }
+    .stats-card.cyan { border-color: #0dcaf0; }
     
     .filter-bar {
         background: #f8f9fa;
@@ -104,6 +108,11 @@
     .status-badge.paid { background: #d4edda; color: #155724; }
     .status-badge.refunded { background: #f8d7da; color: #721c24; }
     .status-badge.failed { background: #f8d7da; color: #721c24; }
+    .status-badge.completed { background: #d4edda; color: #155724; }
+    .status-badge.cash { background: #d4edda; color: #155724; }
+    .status-badge.card { background: #cce5ff; color: #004085; }
+    .status-badge.online { background: #d1ecf1; color: #0c5460; }
+    .status-badge.upi { background: #e8daef; color: #6c3483; }
     
     .rating-stars {
         color: #ffc107;
@@ -130,6 +139,59 @@
         overflow: hidden;
     }
     
+    .section-divider {
+        border-top: 2px solid #e9ecef;
+        margin: 30px 0;
+        padding-top: 10px;
+    }
+    .section-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-bottom: 20px;
+    }
+    .section-title i {
+        margin-right: 10px;
+    }
+    
+    .online-badge { background: #0d6efd; color: white; padding: 2px 10px; border-radius: 12px; font-size: 11px; }
+    .offline-badge { background: #fd7e14; color: white; padding: 2px 10px; border-radius: 12px; font-size: 11px; }
+    
+    .filter-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .custom-range-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: white;
+        padding: 4px 10px;
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+    }
+    .custom-range-wrapper .input-group-text {
+        background: transparent;
+        border: none;
+        padding: 0 5px;
+    }
+    .custom-range-wrapper .form-control {
+        border: none;
+        padding: 4px 8px;
+        min-width: 140px;
+        font-size: 13px;
+    }
+    .custom-range-wrapper .form-control:focus {
+        box-shadow: none;
+    }
+    .custom-range-wrapper .range-arrow {
+        color: #6c757d;
+        font-weight: bold;
+        padding: 0 5px;
+    }
+    
     @media (max-width: 768px) {
         .filter-bar .filter-row {
             flex-direction: column;
@@ -143,6 +205,13 @@
         .stats-card .value { font-size: 22px; }
         .top-item { flex-wrap: wrap; }
         .top-item .details { width: 100%; text-align: left; padding-left: 30px; }
+        .custom-range-wrapper {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .custom-range-wrapper .form-control {
+            min-width: 120px;
+        }
     }
 </style>
 {% endblock %}
@@ -151,25 +220,30 @@
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <h2><i class="fas fa-tachometer-alt text-primary"></i> Admin Dashboard</h2>
-        <span class="badge bg-primary fs-6">Welcome, {{ user.full_name }}</span>
+        <div>
+            <span class="badge bg-primary fs-6 me-2">Welcome, {{ user.full_name }}</span>
+            {% if store_settings %}
+                <span class="badge bg-secondary fs-6">{{ store_settings.store_name }}</span>
+            {% endif %}
+        </div>
     </div>
 
     <!-- ============================================ -->
-    <!-- FILTER BAR                                   -->
+    <!-- FILTER BAR - WITH CUSTOM RANGE FIX          -->
     <!-- ============================================ -->
     <div class="filter-bar">
         <form method="GET" id="dashboardFilterForm" class="filter-row">
             <div class="d-flex flex-wrap gap-2 align-items-center">
-                <label class="fw-bold me-2">Filter:</label>
+                <label class="filter-label me-2"><i class="fas fa-filter"></i> Filter:</label>
                 
-                <select name="filter_type" class="form-select form-select-sm" onchange="toggleFilterFields()" style="width:150px;">
-                    <option value="month" {% if filter_type == 'month' %}selected{% endif %}>Monthly</option>
-                    <option value="date" {% if filter_type == 'date' %}selected{% endif %}>Specific Date</option>
-                    <option value="custom" {% if filter_type == 'custom' %}selected{% endif %}>Custom Range</option>
+                <select name="filter_type" class="form-select form-select-sm" onchange="toggleFilterFields(); this.form.submit();" style="width:150px;">
+                    <option value="month" {% if filter_type == 'month' %}selected{% endif %}>📅 Monthly</option>
+                    <option value="date" {% if filter_type == 'date' %}selected{% endif %}>📌 Specific Date</option>
+                    <option value="custom" {% if filter_type == 'custom' %}selected{% endif %}>📆 Custom Range</option>
                 </select>
                 
                 <!-- Month Filter -->
-                <select name="selected_month" class="form-select form-select-sm month-field" style="width:170px; {% if filter_type != 'month' %}display:none;{% endif %}">
+                <select name="selected_month" class="form-select form-select-sm month-field" style="width:180px; {% if filter_type != 'month' %}display:none;{% endif %}" onchange="this.form.submit()">
                     {% for month in month_options %}
                         <option value="{{ month.value }}" {% if month.selected %}selected{% endif %}>{{ month.label }}</option>
                     {% endfor %}
@@ -177,51 +251,75 @@
                 
                 <!-- Date Filter -->
                 <input type="date" name="selected_date" class="form-control form-control-sm date-field" 
-                       value="{{ selected_date }}" style="width:170px; {% if filter_type != 'date' %}display:none;{% endif %}">
+                       value="{{ selected_date }}" style="width:180px; {% if filter_type != 'date' %}display:none;{% endif %}"
+                       onchange="this.form.submit()">
                 
-                <!-- Custom Range -->
-                <input type="date" name="date_from" class="form-control form-control-sm custom-field" 
-                       value="{{ date_from }}" placeholder="From" style="width:150px; {% if filter_type != 'custom' %}display:none;{% endif %}">
-                <span class="custom-field" style="{% if filter_type != 'custom' %}display:none;{% endif %}">to</span>
-                <input type="date" name="date_to" class="form-control form-control-sm custom-field" 
-                       value="{{ date_to }}" placeholder="To" style="width:150px; {% if filter_type != 'custom' %}display:none;{% endif %}">
+                <!-- Custom Range - FIXED -->
+                <div class="custom-field" style="{% if filter_type != 'custom' %}display:none;{% endif %}">
+                    <div class="custom-range-wrapper">
+                        <span class="input-group-text">
+                            <i class="fas fa-calendar-alt text-primary"></i>
+                        </span>
+                        <input type="date" name="date_from" class="form-control form-control-sm" 
+                               value="{{ date_from }}" placeholder="From Date"
+                               onchange="this.form.submit()">
+                        <span class="range-arrow">→</span>
+                        <input type="date" name="date_to" class="form-control form-control-sm" 
+                               value="{{ date_to }}" placeholder="To Date"
+                               onchange="this.form.submit()">
+                        {% if date_from or date_to %}
+                            <a href="?filter_type=custom" class="btn btn-sm btn-outline-danger ms-1" title="Clear range">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
                 
-                <button type="submit" class="btn btn-sm btn-primary">
-                    <i class="fas fa-search"></i> Apply
-                </button>
+                <!-- Noscript fallback -->
+                <noscript>
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="fas fa-search"></i> Apply
+                    </button>
+                </noscript>
                 
-                {% if filter_type != 'month' or selected_month %}
-                    <a href="?filter_type=month" class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-times"></i> Reset
-                    </a>
-                {% endif %}
+                <a href="?filter_type=month" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-undo"></i> Reset
+                </a>
             </div>
         </form>
     </div>
 
     <!-- ============================================ -->
-    <!-- STATS CARDS - ROW 1                         -->
+    <!-- STATS CARDS - ROW 1 - COMBINED              -->
     <!-- ============================================ -->
     <div class="row mb-4">
         <div class="col-md-3 col-6 mb-3">
             <div class="stats-card primary">
                 <div class="label">Total Orders</div>
                 <div class="value">{{ total_orders|default:0 }}</div>
-                <div class="sub-text"><i class="fas fa-chart-line"></i> {{ monthly_summary|length }} months data</div>
+                <div class="sub-text">
+                    <span class="online-badge">Online: {{ total_online_orders|default:0 }}</span>
+                    <span class="offline-badge ms-1">Offline: {{ total_offline_orders|default:0 }}</span>
+                </div>
             </div>
         </div>
         <div class="col-md-3 col-6 mb-3">
             <div class="stats-card success">
                 <div class="label">Total Revenue</div>
                 <div class="value">₹{{ total_revenue|floatformat:2 }}</div>
-                <div class="sub-text"><i class="fas fa-shopping-cart"></i> Avg: ₹{{ avg_order_value|floatformat:2 }}</div>
+                <div class="sub-text">
+                    <span class="online-badge">Online: ₹{{ total_online_revenue|floatformat:2 }}</span>
+                    <span class="offline-badge ms-1">Offline: ₹{{ total_offline_revenue|floatformat:2 }}</span>
+                </div>
             </div>
         </div>
         <div class="col-md-3 col-6 mb-3">
             <div class="stats-card info">
-                <div class="label">Total Users</div>
-                <div class="value">{{ total_users|default:0 }}</div>
-                <div class="sub-text"><i class="fas fa-user-plus"></i> {{ new_users_last_30_days|default:0 }} new this month</div>
+                <div class="label">Total Customers</div>
+                <div class="value">{{ total_customers|default:0 }}</div>
+                <div class="sub-text">
+                    <i class="fas fa-user-plus"></i> {{ new_users_last_30_days|default:0 }} new in period
+                </div>
             </div>
         </div>
         <div class="col-md-3 col-6 mb-3">
@@ -237,145 +335,216 @@
     </div>
 
     <!-- ============================================ -->
-    <!-- STATS CARDS - ROW 2                         -->
+    <!-- STATS CARDS - ROW 2 - OFFLINE SPECIFIC      -->
     <!-- ============================================ -->
     <div class="row mb-4">
         <div class="col-md-3 col-6 mb-3">
-            <div class="stats-card secondary">
-                <div class="label">Active Users</div>
-                <div class="value">{{ active_users_last_30_days|default:0 }}</div>
-                <div class="sub-text"><i class="fas fa-user-slash text-muted"></i> {{ inactive_users|default:0 }} inactive</div>
+            <div class="stats-card orange">
+                <div class="label">Offline Customers</div>
+                <div class="value">{{ total_offline_customers|default:0 }}</div>
+                <div class="sub-text"><i class="fas fa-user-slash text-muted"></i> {{ inactive_offline_customers|default:0 }} inactive</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="stats-card teal">
+                <div class="label">Offline Revenue</div>
+                <div class="value">₹{{ total_offline_revenue|floatformat:2 }}</div>
+                <div class="sub-text"><i class="fas fa-shopping-bag"></i> {{ total_offline_orders|default:0 }} orders</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="stats-card cyan">
+                <div class="label">Barcodes</div>
+                <div class="value">{{ total_barcodes|default:0 }}</div>
+                <div class="sub-text">
+                    <i class="fas fa-box"></i> {{ product_barcodes|default:0 }} products
+                    <span class="ms-2"><i class="fas fa-cubes"></i> {{ variant_barcodes|default:0 }} variants</span>
+                </div>
             </div>
         </div>
         <div class="col-md-3 col-6 mb-3">
             <div class="stats-card purple">
-                <div class="label">Avg Rating</div>
-                <div class="value">
-                    {% if avg_rating > 0 %}
-                        {{ avg_rating|floatformat:1 }} <span class="rating-stars">★</span>
-                    {% else %}
-                        N/A
-                    {% endif %}
-                </div>
-                <div class="sub-text"><i class="fas fa-percent"></i> {{ satisfaction_score|floatformat:0 }}% satisfaction</div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 mb-3">
-            <div class="stats-card pink">
-                <div class="label">Total Products</div>
-                <div class="value">{{ total_products|default:0 }}</div>
+                <div class="label">Avg Order Value</div>
+                <div class="value">₹{{ avg_order_value|floatformat:2 }}</div>
                 <div class="sub-text">
-                    <i class="fas fa-star text-warning"></i> {{ featured_products|default:0 }} featured
-                    <span class="ms-2"><i class="fas fa-trophy text-warning"></i> {{ best_seller_products|default:0 }} best sellers</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 mb-3">
-            <div class="stats-card danger">
-                <div class="label">Low Stock</div>
-                <div class="value">{{ low_stock_count|default:0 }}</div>
-                <div class="sub-text">
-                    <i class="fas fa-times-circle"></i> {{ out_of_stock_count|default:0 }} out of stock
+                    <span class="online-badge">Online: ₹{{ avg_online_order_value|floatformat:2 }}</span>
+                    <span class="offline-badge ms-1">Offline: ₹{{ avg_offline_order_value|floatformat:2 }}</span>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- ============================================ -->
-    <!-- ORDER STATUS & PAYMENT BREAKDOWN             -->
+    <!-- ORDER STATUS BREAKDOWN                       -->
     <!-- ============================================ -->
     <div class="row mb-4">
         <div class="col-md-6">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-pie text-primary"></i> Order Status</h5>
+                    <h5 class="mb-0"><i class="fas fa-chart-pie text-primary"></i> Online Order Status</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-4">
                             <div class="d-flex justify-content-between">
                                 <span>Pending</span>
-                                <span class="fw-bold">{{ status_counts.pending|default:0 }}</span>
+                                <span class="fw-bold">{{ online_status_counts.pending|default:0 }}</span>
                             </div>
                             <div class="progress mb-2" style="height:8px;">
-                                <div class="progress-bar bg-warning" style="width: {% widthratio status_counts.pending total_orders 100 %}%;"></div>
+                                <div class="progress-bar bg-warning" style="width: {% widthratio online_status_counts.pending total_online_orders 100 %}%;"></div>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="d-flex justify-content-between">
                                 <span>Processing</span>
-                                <span class="fw-bold">{{ status_counts.processing|default:0 }}</span>
+                                <span class="fw-bold">{{ online_status_counts.processing|default:0 }}</span>
                             </div>
                             <div class="progress mb-2" style="height:8px;">
-                                <div class="progress-bar bg-info" style="width: {% widthratio status_counts.processing total_orders 100 %}%;"></div>
+                                <div class="progress-bar bg-info" style="width: {% widthratio online_status_counts.processing total_online_orders 100 %}%;"></div>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="d-flex justify-content-between">
                                 <span>Shipped</span>
-                                <span class="fw-bold">{{ status_counts.shipped|default:0 }}</span>
+                                <span class="fw-bold">{{ online_status_counts.shipped|default:0 }}</span>
                             </div>
                             <div class="progress mb-2" style="height:8px;">
-                                <div class="progress-bar bg-primary" style="width: {% widthratio status_counts.shipped total_orders 100 %}%;"></div>
+                                <div class="progress-bar bg-primary" style="width: {% widthratio online_status_counts.shipped total_online_orders 100 %}%;"></div>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="d-flex justify-content-between">
                                 <span>Delivered</span>
-                                <span class="fw-bold">{{ status_counts.delivered|default:0 }}</span>
+                                <span class="fw-bold">{{ online_status_counts.delivered|default:0 }}</span>
                             </div>
                             <div class="progress mb-2" style="height:8px;">
-                                <div class="progress-bar bg-success" style="width: {% widthratio status_counts.delivered total_orders 100 %}%;"></div>
+                                <div class="progress-bar bg-success" style="width: {% widthratio online_status_counts.delivered total_online_orders 100 %}%;"></div>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="d-flex justify-content-between">
                                 <span>Cancelled</span>
-                                <span class="fw-bold">{{ status_counts.cancelled|default:0 }}</span>
+                                <span class="fw-bold">{{ online_status_counts.cancelled|default:0 }}</span>
                             </div>
                             <div class="progress mb-2" style="height:8px;">
-                                <div class="progress-bar bg-danger" style="width: {% widthratio status_counts.cancelled total_orders 100 %}%;"></div>
+                                <div class="progress-bar bg-danger" style="width: {% widthratio online_status_counts.cancelled total_online_orders 100 %}%;"></div>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="d-flex justify-content-between">
                                 <span>Failed</span>
-                                <span class="fw-bold">{{ status_counts.failed|default:0 }}</span>
+                                <span class="fw-bold">{{ online_status_counts.failed|default:0 }}</span>
                             </div>
                             <div class="progress mb-2" style="height:8px;">
-                                <div class="progress-bar bg-secondary" style="width: {% widthratio status_counts.failed total_orders 100 %}%;"></div>
+                                <div class="progress-bar bg-secondary" style="width: {% widthratio online_status_counts.failed total_online_orders 100 %}%;"></div>
                             </div>
                         </div>
                     </div>
                     <div class="mt-3">
-                        <div class="d-flex justify-content-between">
-                            <span><i class="fas fa-check-circle text-success"></i> Paid</span>
-                            <span>{{ payment_counts.paid|default:0 }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span><i class="fas fa-clock text-warning"></i> Pending Payment</span>
-                            <span>{{ payment_counts.pending|default:0 }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span><i class="fas fa-undo text-info"></i> Refunded</span>
-                            <span>{{ payment_counts.refunded|default:0 }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span><i class="fas fa-times-circle text-danger"></i> Failed Payment</span>
-                            <span>{{ payment_counts.failed|default:0 }}</span>
+                        <h6>Payment Status</h6>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="d-flex justify-content-between">
+                                    <span><i class="fas fa-check-circle text-success"></i> Paid</span>
+                                    <span>{{ online_payment_counts.paid|default:0 }}</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex justify-content-between">
+                                    <span><i class="fas fa-clock text-warning"></i> Pending</span>
+                                    <span>{{ online_payment_counts.pending|default:0 }}</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex justify-content-between">
+                                    <span><i class="fas fa-undo text-info"></i> Refunded</span>
+                                    <span>{{ online_payment_counts.refunded|default:0 }}</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex justify-content-between">
+                                    <span><i class="fas fa-times-circle text-danger"></i> Failed</span>
+                                    <span>{{ online_payment_counts.failed|default:0 }}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- ============================================ -->
-        <!-- ORDER VALUE DISTRIBUTION                     -->
-        <!-- ============================================ -->
         <div class="col-md-6">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-bar text-success"></i> Order Value Distribution</h5>
+                    <h5 class="mb-0"><i class="fas fa-store text-warning"></i> Offline Order Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>Pending</span>
+                                <span class="fw-bold">{{ offline_status_counts.pending|default:0 }}</span>
+                            </div>
+                            <div class="progress mb-2" style="height:8px;">
+                                <div class="progress-bar bg-warning" style="width: {% widthratio offline_status_counts.pending total_offline_orders 100 %}%;"></div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>Processing</span>
+                                <span class="fw-bold">{{ offline_status_counts.processing|default:0 }}</span>
+                            </div>
+                            <div class="progress mb-2" style="height:8px;">
+                                <div class="progress-bar bg-info" style="width: {% widthratio offline_status_counts.processing total_offline_orders 100 %}%;"></div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>Completed</span>
+                                <span class="fw-bold">{{ offline_status_counts.completed|default:0 }}</span>
+                            </div>
+                            <div class="progress mb-2" style="height:8px;">
+                                <div class="progress-bar bg-success" style="width: {% widthratio offline_status_counts.completed total_offline_orders 100 %}%;"></div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>Cancelled</span>
+                                <span class="fw-bold">{{ offline_status_counts.cancelled|default:0 }}</span>
+                            </div>
+                            <div class="progress mb-2" style="height:8px;">
+                                <div class="progress-bar bg-danger" style="width: {% widthratio offline_status_counts.cancelled total_offline_orders 100 %}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h6>Payment Methods</h6>
+                        <div class="row">
+                            {% for method in offline_payment_methods %}
+                            <div class="col-6">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-capitalize"><i class="fas fa-{% if method.payment_method == 'cash' %}money-bill{% elif method.payment_method == 'card' %}credit-card{% elif method.payment_method == 'upi' %}mobile-alt{% else %}globe{% endif %}"></i> {{ method.payment_method }}</span>
+                                    <span class="fw-bold">{{ method.count }}</span>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="col-12 text-muted text-center">No offline payments recorded</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- ORDER VALUE DISTRIBUTION                     -->
+    <!-- ============================================ -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar text-success"></i> Online Order Value Distribution</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -385,7 +554,7 @@
                                 <span class="fw-bold">{{ order_value_ranges.0_500|default:0 }}</span>
                             </div>
                             <div class="progress mb-2" style="height:8px;">
-                                <div class="progress-bar bg-secondary" style="width: {% widthratio order_value_ranges.0_500 total_orders 100 %}%;"></div>
+                                <div class="progress-bar bg-secondary" style="width: {% widthratio order_value_ranges.0_500 total_online_orders 100 %}%;"></div>
                             </div>
                         </div>
                         <div class="col-6">
@@ -394,7 +563,7 @@
                                 <span class="fw-bold">{{ order_value_ranges.501_1000|default:0 }}</span>
                             </div>
                             <div class="progress mb-2" style="height:8px;">
-                                <div class="progress-bar bg-info" style="width: {% widthratio order_value_ranges.501_1000 total_orders 100 %}%;"></div>
+                                <div class="progress-bar bg-info" style="width: {% widthratio order_value_ranges.501_1000 total_online_orders 100 %}%;"></div>
                             </div>
                         </div>
                         <div class="col-6">
@@ -403,7 +572,7 @@
                                 <span class="fw-bold">{{ order_value_ranges.1001_5000|default:0 }}</span>
                             </div>
                             <div class="progress mb-2" style="height:8px;">
-                                <div class="progress-bar bg-primary" style="width: {% widthratio order_value_ranges.1001_5000 total_orders 100 %}%;"></div>
+                                <div class="progress-bar bg-primary" style="width: {% widthratio order_value_ranges.1001_5000 total_online_orders 100 %}%;"></div>
                             </div>
                         </div>
                         <div class="col-6">
@@ -412,7 +581,7 @@
                                 <span class="fw-bold">{{ order_value_ranges.5001_10000|default:0 }}</span>
                             </div>
                             <div class="progress mb-2" style="height:8px;">
-                                <div class="progress-bar bg-warning" style="width: {% widthratio order_value_ranges.5001_10000 total_orders 100 %}%;"></div>
+                                <div class="progress-bar bg-warning" style="width: {% widthratio order_value_ranges.5001_10000 total_online_orders 100 %}%;"></div>
                             </div>
                         </div>
                         <div class="col-6">
@@ -421,7 +590,7 @@
                                 <span class="fw-bold">{{ order_value_ranges.10000_plus|default:0 }}</span>
                             </div>
                             <div class="progress mb-2" style="height:8px;">
-                                <div class="progress-bar bg-success" style="width: {% widthratio order_value_ranges.10000_plus total_orders 100 %}%;"></div>
+                                <div class="progress-bar bg-success" style="width: {% widthratio order_value_ranges.10000_plus total_online_orders 100 %}%;"></div>
                             </div>
                         </div>
                         <div class="col-6">
@@ -438,23 +607,89 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-store text-warning"></i> Offline Order Value Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>₹0 - ₹500</span>
+                                <span class="fw-bold">{{ offline_order_value_ranges.0_500|default:0 }}</span>
+                            </div>
+                            <div class="progress mb-2" style="height:8px;">
+                                <div class="progress-bar bg-secondary" style="width: {% widthratio offline_order_value_ranges.0_500 total_offline_orders 100 %}%;"></div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>₹501 - ₹1,000</span>
+                                <span class="fw-bold">{{ offline_order_value_ranges.501_1000|default:0 }}</span>
+                            </div>
+                            <div class="progress mb-2" style="height:8px;">
+                                <div class="progress-bar bg-info" style="width: {% widthratio offline_order_value_ranges.501_1000 total_offline_orders 100 %}%;"></div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>₹1,001 - ₹5,000</span>
+                                <span class="fw-bold">{{ offline_order_value_ranges.1001_5000|default:0 }}</span>
+                            </div>
+                            <div class="progress mb-2" style="height:8px;">
+                                <div class="progress-bar bg-primary" style="width: {% widthratio offline_order_value_ranges.1001_5000 total_offline_orders 100 %}%;"></div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>₹5,001 - ₹10,000</span>
+                                <span class="fw-bold">{{ offline_order_value_ranges.5001_10000|default:0 }}</span>
+                            </div>
+                            <div class="progress mb-2" style="height:8px;">
+                                <div class="progress-bar bg-warning" style="width: {% widthratio offline_order_value_ranges.5001_10000 total_offline_orders 100 %}%;"></div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>₹10,000+</span>
+                                <span class="fw-bold">{{ offline_order_value_ranges.10000_plus|default:0 }}</span>
+                            </div>
+                            <div class="progress mb-2" style="height:8px;">
+                                <div class="progress-bar bg-success" style="width: {% widthratio offline_order_value_ranges.10000_plus total_offline_orders 100 %}%;"></div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between mt-3">
+                                <span><i class="fas fa-users"></i> Repeat Customers</span>
+                                <span class="fw-bold text-success">{{ offline_repeat_customers|default:0 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span><i class="fas fa-user"></i> One-Time Customers</span>
+                                <span class="fw-bold text-secondary">{{ offline_one_time_customers|default:0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- ============================================ -->
-    <!-- REVENUE & ORDER CHARTS                       -->
+    <!-- COMBINED REVENUE CHART                       -->
     <!-- ============================================ -->
     <div class="row mb-4">
         <div class="col-lg-8">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-line text-success"></i> Revenue & Orders Trend</h5>
+                    <h5 class="mb-0"><i class="fas fa-chart-line text-success"></i> Revenue Trend - Online vs Offline</h5>
                 </div>
                 <div class="card-body">
-                    <div style="height: 250px; position: relative;">
-                        <canvas id="revenueChart"></canvas>
+                    <div style="height: 280px; position: relative;">
+                        <canvas id="combinedRevenueChart"></canvas>
                     </div>
                     <div class="mt-2 text-center">
-                        <small class="text-muted">Last {{ revenue_over_time|length }} months</small>
+                        <small class="text-muted">Last {{ combined_revenue_over_time|length }} months</small>
                     </div>
                 </div>
             </div>
@@ -469,8 +704,198 @@
                         <canvas id="hourlyChart"></canvas>
                     </div>
                     <div class="mt-2 text-center">
-                        <small class="text-muted">Sales by hour of day</small>
+                        <small class="text-muted">Online sales by hour</small>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- OFFLINE REVENUE CHART                        -->
+    <!-- ============================================ -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-store text-warning"></i> Offline Revenue Trend</h5>
+                </div>
+                <div class="card-body">
+                    <div style="height: 200px; position: relative;">
+                        <canvas id="offlineRevenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-users text-info"></i> Offline Customer Growth</h5>
+                </div>
+                <div class="card-body">
+                    <div style="height: 200px; position: relative;">
+                        <canvas id="offlineCustomerChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- OFFLINE CUSTOMER ANALYTICS                   -->
+    <!-- ============================================ -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-trophy text-warning"></i> Top Offline Customers (by Revenue)</h5>
+                </div>
+                <div class="card-body">
+                    {% if offline_customer_revenue %}
+                        {% for customer in offline_customer_revenue %}
+                            <div class="top-item">
+                                <span class="rank">#{{ forloop.counter }}</span>
+                                <span class="name">{{ customer.full_name|truncatechars:20 }}</span>
+                                <div class="details">
+                                    <div>{{ customer.order_count }} orders</div>
+                                    <div class="text-success">₹{{ customer.total_spent|floatformat:2 }}</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">No offline customer data available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-shopping-cart text-primary"></i> Top Offline Customers (by Orders)</h5>
+                </div>
+                <div class="card-body">
+                    {% if offline_customer_order_counts %}
+                        {% for customer in offline_customer_order_counts %}
+                            <div class="top-item">
+                                <span class="rank">#{{ forloop.counter }}</span>
+                                <span class="name">{{ customer.full_name|truncatechars:20 }}</span>
+                                <div class="details">
+                                    <div>{{ customer.order_count }} orders</div>
+                                    <div class="text-primary">₹{{ customer.total_spent|floatformat:2 }}</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">No offline customer data available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- OFFLINE TOP PRODUCTS                         -->
+    <!-- ============================================ -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-trophy text-warning"></i> Offline Top Selling Products</h5>
+                    <span class="text-muted small">By Quantity</span>
+                </div>
+                <div class="card-body">
+                    {% if offline_top_products %}
+                        {% for product in offline_top_products %}
+                            <div class="top-item">
+                                <span class="rank">#{{ forloop.counter }}</span>
+                                <span class="name">{{ product.product_name|truncatechars:25 }}</span>
+                                <div class="details">
+                                    <div>{{ product.total_quantity }} sold</div>
+                                    <div class="text-success">₹{{ product.total_revenue|floatformat:2 }}</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">No offline sales data available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-trophy text-success"></i> Offline Top Products (by Revenue)</h5>
+                    <span class="text-muted small">By Revenue</span>
+                </div>
+                <div class="card-body">
+                    {% if offline_top_products_by_revenue %}
+                        {% for product in offline_top_products_by_revenue %}
+                            <div class="top-item">
+                                <span class="rank">#{{ forloop.counter }}</span>
+                                <span class="name">{{ product.product_name|truncatechars:25 }}</span>
+                                <div class="details">
+                                    <div>₹{{ product.total_revenue|floatformat:2 }}</div>
+                                    <div class="text-muted">{{ product.total_quantity }} units</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">No offline sales data available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- ONLINE TOP PRODUCTS                          -->
+    <!-- ============================================ -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-trophy text-primary"></i> Online Top Selling Products</h5>
+                    <span class="text-muted small">By Quantity</span>
+                </div>
+                <div class="card-body">
+                    {% if online_top_products %}
+                        {% for product in online_top_products %}
+                            <div class="top-item">
+                                <span class="rank">#{{ forloop.counter }}</span>
+                                <span class="name">{{ product.product_name|truncatechars:25 }}</span>
+                                <div class="details">
+                                    <div>{{ product.total_quantity }} sold</div>
+                                    <div class="text-success">₹{{ product.total_revenue|floatformat:2 }}</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">No online sales data available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-trophy text-success"></i> Online Top Products (by Revenue)</h5>
+                    <span class="text-muted small">By Revenue</span>
+                </div>
+                <div class="card-body">
+                    {% if online_top_products_by_revenue %}
+                        {% for product in online_top_products_by_revenue %}
+                            <div class="top-item">
+                                <span class="rank">#{{ forloop.counter }}</span>
+                                <span class="name">{{ product.product_name|truncatechars:25 }}</span>
+                                <div class="details">
+                                    <div>₹{{ product.total_revenue|floatformat:2 }}</div>
+                                    <div class="text-muted">{{ product.total_quantity }} units</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">No online sales data available.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -507,8 +932,8 @@
                         </div>
                         <div class="col-6">
                             <div class="stats-card warning" style="border-left-color: #ffc107; padding:10px 15px;">
-                                <div class="label">New Users (30d)</div>
-                                <div class="value" style="font-size:22px;">{{ new_users_last_30_days|default:0 }}</div>
+                                <div class="label">Superusers</div>
+                                <div class="value" style="font-size:22px;">{{ total_superusers|default:0 }}</div>
                             </div>
                         </div>
                     </div>
@@ -529,6 +954,10 @@
                                     {% if not forloop.last %}|{% endif %}
                                 {% endfor %}
                             </span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span><i class="fas fa-calendar-alt text-info"></i> New Users in Period</span>
+                            <span class="fw-bold">{{ new_users_last_30_days|default:0 }}</span>
                         </div>
                     </div>
                 </div>
@@ -558,73 +987,6 @@
                         {% endfor %}
                     {% else %}
                         <p class="text-muted text-center py-3">No user data available.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ============================================ -->
-    <!-- TOP PRODUCTS & CATEGORY PERFORMANCE           -->
-    <!-- ============================================ -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-trophy text-warning"></i> Top Selling Products</h5>
-                    <span class="text-muted small">By Quantity</span>
-                </div>
-                <div class="card-body">
-                    {% if top_products %}
-                        {% for product in top_products %}
-                            <div class="top-item">
-                                <span class="rank">#{{ forloop.counter }}</span>
-                                <span class="name">{{ product.product_name|truncatechars:25 }}</span>
-                                <div class="details">
-                                    <div>{{ product.total_quantity }} sold</div>
-                                    <div class="text-success">₹{{ product.total_revenue|floatformat:2 }}</div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="text-muted text-center py-3">No sales data available.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-tags text-primary"></i> Category Performance</h5>
-                    <span class="text-muted small">By Revenue</span>
-                </div>
-                <div class="card-body">
-                    {% if category_performance %}
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Category</th>
-                                        <th>Orders</th>
-                                        <th>Units</th>
-                                        <th>Revenue</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for cat in category_performance %}
-                                        <tr>
-                                            <td>{{ cat.product__category__name|default:"Uncategorized" }}</td>
-                                            <td>{{ cat.order_count|default:0 }}</td>
-                                            <td>{{ cat.total_quantity|default:0 }}</td>
-                                            <td>₹{{ cat.total_revenue|floatformat:2 }}</td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <p class="text-muted text-center py-3">No category data available.</p>
                     {% endif %}
                 </div>
             </div>
@@ -856,53 +1218,132 @@
     </div>
 
     <!-- ============================================ -->
-    <!-- RECENT ORDERS                                 -->
+    <!-- MONTHLY SUMMARY                              -->
     <!-- ============================================ -->
-    <div class="row">
+    <div class="row mb-4">
         <div class="col-12">
             <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt text-primary"></i> Monthly Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Online Orders</th>
+                                    <th>Online Revenue</th>
+                                    <th>Offline Orders</th>
+                                    <th>Offline Revenue</th>
+                                    <th>Total Orders</th>
+                                    <th>Total Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for summary in combined_monthly_summary %}
+                                    <tr>
+                                        <td>{{ summary.month|date:"M Y" }}</td>
+                                        <td>{{ summary.online_orders|default:0 }}</td>
+                                        <td>₹{{ summary.online_revenue|floatformat:2 }}</td>
+                                        <td>{{ summary.offline_orders|default:0 }}</td>
+                                        <td>₹{{ summary.offline_revenue|floatformat:2 }}</td>
+                                        <td><strong>{{ summary.online_orders|add:summary.offline_orders }}</strong></td>
+                                        <td><strong>₹{{ summary.online_revenue|add:summary.offline_revenue|floatformat:2 }}</strong></td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted">No data available</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- RECENT ORDERS                                -->
+    <!-- ============================================ -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-clock text-primary"></i> Recent Orders</h5>
+                    <h5 class="mb-0"><i class="fas fa-clock text-primary"></i> Recent Online Orders</h5>
                     <a href="{% url 'Ecom:admin_order_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
                 </div>
                 <div class="card-body">
-                    {% if recent_orders %}
+                    {% if recent_online_orders %}
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-hover table-sm">
                                 <thead>
                                     <tr>
                                         <th>Order #</th>
                                         <th>Customer</th>
                                         <th>Amount</th>
                                         <th>Status</th>
-                                        <th>Payment</th>
-                                        <th>Date</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for order in recent_orders %}
+                                    {% for order in recent_online_orders %}
                                         <tr>
                                             <td><a href="{% url 'Ecom:admin_order_detail' order.id %}">#{{ order.order_number }}</a></td>
-                                            <td>{{ order.user.full_name|truncatechars:20 }}</td>
+                                            <td>{{ order.user.full_name|truncatechars:15 }}</td>
                                             <td>₹{{ order.total_amount|floatformat:2 }}</td>
                                             <td>
                                                 <span class="status-badge {{ order.status }}">
                                                     {{ order.get_status_display }}
                                                 </span>
                                             </td>
-                                            <td>
-                                                <span class="status-badge {{ order.payment_status }}">
-                                                    {{ order.get_payment_status_display }}
-                                                </span>
-                                            </td>
-                                            <td><small>{{ order.created_at|date:"M d, Y H:i" }}</small></td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
                         </div>
                     {% else %}
-                        <p class="text-muted text-center py-3">No recent orders.</p>
+                        <p class="text-muted text-center py-3">No recent online orders.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-store text-warning"></i> Recent Offline Orders</h5>
+                    <a href="#" class="btn btn-sm btn-outline-warning">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_offline_orders %}
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Customer</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in recent_offline_orders %}
+                                        <tr>
+                                            <td>#{{ order.order_number }}</td>
+                                            <td>{{ order.customer_name|truncatechars:15 }}</td>
+                                            <td>₹{{ order.total_amount|floatformat:2 }}</td>
+                                            <td>
+                                                <span class="status-badge {{ order.status }}">
+                                                    {{ order.get_status_display }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-3">No recent offline orders.</p>
                     {% endif %}
                 </div>
             </div>
@@ -916,208 +1357,361 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // ============================================
-    // TOGGLE FILTER FIELDS
+    // TOGGLE FILTER FIELDS - FIXED
     // ============================================
     function toggleFilterFields() {
         const filterType = document.querySelector('select[name="filter_type"]').value;
         
+        // Month field
         document.querySelectorAll('.month-field').forEach(el => {
             el.style.display = filterType === 'month' ? 'inline-block' : 'none';
         });
+        
+        // Date field
         document.querySelectorAll('.date-field').forEach(el => {
             el.style.display = filterType === 'date' ? 'inline-block' : 'none';
         });
+        
+        // Custom range - show the entire container
         document.querySelectorAll('.custom-field').forEach(el => {
-            el.style.display = filterType === 'custom' ? 'inline-block' : 'none';
+            el.style.display = filterType === 'custom' ? 'block' : 'none';
         });
     }
-    // Call on page load
-    document.addEventListener('DOMContentLoaded', toggleFilterFields);
-
+    
     // ============================================
-    // REVENUE CHART
+    // AUTO-SUBMIT ON CHANGE
     // ============================================
     document.addEventListener('DOMContentLoaded', function() {
-        // Revenue Chart
-        const revenueCtx = document.getElementById('revenueChart');
-        if (revenueCtx) {
-            const revenueData = {{ revenue_over_time|safe }};
+        toggleFilterFields();
+        
+        // Auto-submit when any filter field changes
+        const form = document.getElementById('dashboardFilterForm');
+        const inputs = form.querySelectorAll('select, input');
+        inputs.forEach(input => {
+            input.addEventListener('change', function() {
+                form.submit();
+            });
+        });
+        
+        // Also submit when custom range inputs change
+        const customInputs = form.querySelectorAll('.custom-field input');
+        customInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                form.submit();
+            });
+        });
+    });
+
+    // ============================================
+    // COMBINED REVENUE CHART
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const combinedData = {{ combined_revenue_over_time|safe }};
+        const combinedCtx = document.getElementById('combinedRevenueChart');
+        
+        if (combinedCtx && combinedData.length > 0) {
+            const months = combinedData.map(item => {
+                const date = new Date(item.month);
+                return date.toLocaleString('default', { month: 'short', year: 'numeric' });
+            });
             
-            if (revenueData.length === 0) {
-                revenueCtx.parentElement.innerHTML = '<p class="text-muted text-center py-4">No revenue data available</p>';
-            } else {
-                const months = revenueData.map(item => {
-                    const date = new Date(item.month);
-                    return date.toLocaleString('default', { month: 'short', year: 'numeric' });
-                });
-                
-                const revenues = revenueData.map(item => parseFloat(item.total));
-                const orderCounts = revenueData.map(item => item.count);
-                
-                new Chart(revenueCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: months,
-                        datasets: [
-                            {
-                                label: 'Revenue (₹)',
-                                data: revenues,
-                                backgroundColor: 'rgba(40, 167, 69, 0.6)',
-                                borderColor: 'rgba(40, 167, 69, 1)',
-                                borderWidth: 2,
-                                borderRadius: 4,
-                                order: 1,
-                            },
-                            {
-                                label: 'Orders',
-                                data: orderCounts,
-                                type: 'line',
-                                backgroundColor: 'rgba(13, 110, 253, 0.2)',
-                                borderColor: 'rgba(13, 110, 253, 1)',
-                                borderWidth: 2,
-                                pointBackgroundColor: 'rgba(13, 110, 253, 1)',
-                                pointRadius: 4,
-                                fill: false,
-                                tension: 0.3,
-                                order: 0,
-                                yAxisID: 'y1',
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: { font: { size: 11 }, boxWidth: 12 }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        if (context.dataset.label.includes('Revenue')) {
-                                            return 'Revenue: ₹' + context.parsed.y.toFixed(2);
-                                        }
-                                        return 'Orders: ' + context.parsed.y;
+            const onlineRevenues = combinedData.map(item => parseFloat(item.online_revenue || 0));
+            const offlineRevenues = combinedData.map(item => parseFloat(item.offline_revenue || 0));
+            const onlineOrders = combinedData.map(item => item.online_orders || 0);
+            const offlineOrders = combinedData.map(item => item.offline_orders || 0);
+            
+            new Chart(combinedCtx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Online Revenue (₹)',
+                            data: onlineRevenues,
+                            backgroundColor: 'rgba(13, 110, 253, 0.6)',
+                            borderColor: 'rgba(13, 110, 253, 1)',
+                            borderWidth: 2,
+                            borderRadius: 4,
+                            order: 1,
+                        },
+                        {
+                            label: 'Offline Revenue (₹)',
+                            data: offlineRevenues,
+                            backgroundColor: 'rgba(253, 126, 20, 0.6)',
+                            borderColor: 'rgba(253, 126, 20, 1)',
+                            borderWidth: 2,
+                            borderRadius: 4,
+                            order: 1,
+                        },
+                        {
+                            label: 'Online Orders',
+                            data: onlineOrders,
+                            type: 'line',
+                            borderColor: 'rgba(13, 110, 253, 0.8)',
+                            borderWidth: 2,
+                            pointBackgroundColor: 'rgba(13, 110, 253, 1)',
+                            pointRadius: 4,
+                            fill: false,
+                            tension: 0.3,
+                            order: 0,
+                            yAxisID: 'y1',
+                        },
+                        {
+                            label: 'Offline Orders',
+                            data: offlineOrders,
+                            type: 'line',
+                            borderColor: 'rgba(253, 126, 20, 0.8)',
+                            borderWidth: 2,
+                            pointBackgroundColor: 'rgba(253, 126, 20, 1)',
+                            pointRadius: 4,
+                            fill: false,
+                            tension: 0.3,
+                            order: 0,
+                            yAxisID: 'y1',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { font: { size: 10 }, boxWidth: 12 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.dataset.label.includes('Revenue')) {
+                                        return context.dataset.label + ': ₹' + context.parsed.y.toFixed(2);
                                     }
+                                    return context.dataset.label + ': ' + context.parsed.y;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString();
                                 }
                             }
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return '₹' + value.toLocaleString();
-                                    }
-                                }
-                            },
-                            y1: {
-                                position: 'right',
-                                beginAtZero: true,
-                                grid: { drawOnChartArea: false },
-                                ticks: {
-                                    callback: function(value) {
-                                        return value;
-                                    }
+                        y1: {
+                            position: 'right',
+                            beginAtZero: true,
+                            grid: { drawOnChartArea: false },
+                            ticks: {
+                                callback: function(value) {
+                                    return value;
                                 }
                             }
                         }
                     }
-                });
-            }
+                }
+            });
+        } else if (combinedCtx) {
+            combinedCtx.parentElement.innerHTML = '<p class="text-muted text-center py-4">No combined revenue data available</p>';
         }
 
         // ============================================
-        // HOURLY CHART
+        // OFFLINE REVENUE CHART
         // ============================================
-        const hourlyCtx = document.getElementById('hourlyChart');
-        if (hourlyCtx) {
-            const hourlyData = {{ hourly_sales|safe }};
+        const offlineRevenueData = {{ offline_revenue_over_time|safe }};
+        const offlineRevenueCtx = document.getElementById('offlineRevenueChart');
+        
+        if (offlineRevenueCtx && offlineRevenueData.length > 0) {
+            const months = offlineRevenueData.map(item => {
+                const date = new Date(item.month);
+                return date.toLocaleString('default', { month: 'short' });
+            });
             
-            if (hourlyData.length === 0 || hourlyData.every(item => item.count === 0)) {
-                hourlyCtx.parentElement.innerHTML = '<p class="text-muted text-center py-4">No hourly sales data available for today</p>';
-            } else {
-                const hours = hourlyData.map(item => item.hour + ':00');
-                const counts = hourlyData.map(item => item.count);
-                const revenues = hourlyData.map(item => parseFloat(item.total));
-                
-                new Chart(hourlyCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: hours,
-                        datasets: [
-                            {
-                                label: 'Orders',
-                                data: counts,
-                                backgroundColor: 'rgba(13, 110, 253, 0.6)',
-                                borderColor: 'rgba(13, 110, 253, 1)',
-                                borderWidth: 1,
-                                borderRadius: 2,
-                                order: 1,
-                            },
-                            {
-                                label: 'Revenue (₹)',
-                                data: revenues,
-                                type: 'line',
-                                backgroundColor: 'rgba(40, 167, 69, 0.2)',
-                                borderColor: 'rgba(40, 167, 69, 1)',
-                                borderWidth: 2,
-                                pointBackgroundColor: 'rgba(40, 167, 69, 1)',
-                                pointRadius: 3,
-                                fill: false,
-                                tension: 0.3,
-                                order: 0,
-                                yAxisID: 'y1',
-                            }
-                        ]
+            const revenues = offlineRevenueData.map(item => parseFloat(item.total));
+            const counts = offlineRevenueData.map(item => item.count);
+            
+            new Chart(offlineRevenueCtx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Offline Revenue (₹)',
+                            data: revenues,
+                            backgroundColor: 'rgba(253, 126, 20, 0.6)',
+                            borderColor: 'rgba(253, 126, 20, 1)',
+                            borderWidth: 2,
+                            borderRadius: 4,
+                        },
+                        {
+                            label: 'Orders',
+                            data: counts,
+                            type: 'line',
+                            borderColor: 'rgba(13, 110, 253, 0.8)',
+                            borderWidth: 2,
+                            pointBackgroundColor: 'rgba(13, 110, 253, 1)',
+                            pointRadius: 3,
+                            fill: false,
+                            tension: 0.3,
+                            yAxisID: 'y1',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { font: { size: 10 }, boxWidth: 12 }
+                        }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: { font: { size: 10 }, boxWidth: 10 }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        if (context.dataset.label.includes('Revenue')) {
-                                            return 'Revenue: ₹' + context.parsed.y.toFixed(2);
-                                        }
-                                        return 'Orders: ' + context.parsed.y;
-                                    }
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString();
                                 }
                             }
                         },
-                        scales: {
-                            x: {
-                                ticks: {
-                                    font: { size: 8 },
-                                    maxTicksLimit: 12,
-                                    maxRotation: 45,
-                                }
-                            },
-                            y: {
-                                beginAtZero: true,
-                                ticks: { font: { size: 9 } }
-                            },
-                            y1: {
-                                position: 'right',
-                                beginAtZero: true,
-                                grid: { drawOnChartArea: false },
-                                ticks: {
-                                    font: { size: 9 },
-                                    callback: function(value) {
-                                        return '₹' + value;
-                                    }
+                        y1: {
+                            position: 'right',
+                            beginAtZero: true,
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // OFFLINE CUSTOMER CHART
+        // ============================================
+        const customerData = {{ offline_customer_trend|safe }};
+        const customerCtx = document.getElementById('offlineCustomerChart');
+        
+        if (customerCtx && customerData.length > 0) {
+            const months = customerData.map(item => {
+                const date = new Date(item.month);
+                return date.toLocaleString('default', { month: 'short' });
+            });
+            
+            const counts = customerData.map(item => item.count);
+            
+            new Chart(customerCtx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'New Offline Customers',
+                        data: counts,
+                        backgroundColor: 'rgba(13, 202, 240, 0.2)',
+                        borderColor: 'rgba(13, 202, 240, 1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: 'rgba(13, 202, 240, 1)',
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.3,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { font: { size: 10 } }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // HOURLY CHART (Online)
+        // ============================================
+        const hourlyData = {{ online_hourly_sales|safe }};
+        const hourlyCtx = document.getElementById('hourlyChart');
+        
+        if (hourlyCtx && hourlyData.length > 0 && hourlyData.some(item => item.count > 0)) {
+            const hours = hourlyData.map(item => item.hour + ':00');
+            const counts = hourlyData.map(item => item.count);
+            const revenues = hourlyData.map(item => parseFloat(item.total));
+            
+            new Chart(hourlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: hours,
+                    datasets: [
+                        {
+                            label: 'Orders',
+                            data: counts,
+                            backgroundColor: 'rgba(13, 110, 253, 0.6)',
+                            borderColor: 'rgba(13, 110, 253, 1)',
+                            borderWidth: 1,
+                            borderRadius: 2,
+                        },
+                        {
+                            label: 'Revenue (₹)',
+                            data: revenues,
+                            type: 'line',
+                            borderColor: 'rgba(40, 167, 69, 1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: 'rgba(40, 167, 69, 1)',
+                            pointRadius: 3,
+                            fill: false,
+                            tension: 0.3,
+                            yAxisID: 'y1',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { font: { size: 9 }, boxWidth: 10 }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                font: { size: 8 },
+                                maxTicksLimit: 12,
+                                maxRotation: 45,
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { font: { size: 9 } }
+                        },
+                        y1: {
+                            position: 'right',
+                            beginAtZero: true,
+                            grid: { drawOnChartArea: false },
+                            ticks: {
+                                font: { size: 9 },
+                                callback: function(value) {
+                                    return '₹' + value;
                                 }
                             }
                         }
                     }
-                });
-            }
+                }
+            });
+        } else if (hourlyCtx) {
+            hourlyCtx.parentElement.innerHTML = '<p class="text-muted text-center py-4">No hourly sales data available for today</p>';
         }
     });
 </script>

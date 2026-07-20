@@ -679,105 +679,310 @@ def admin_dashboard_view(request):
     date_to = request.GET.get('date_to', '')
     
     # ============================================
-    # BASE QUERYSETS
+    # DATE FILTER FUNCTION
     # ============================================
-    # For orders - exclude pending payment orders
-    orders = Order.objects.exclude(payment_status='pending').exclude(status='failed')
-    all_orders = Order.objects.all()
+    def get_date_range():
+        """Get the date range based on filter parameters"""
+        if filter_type == 'month' and selected_month:
+            try:
+                year, month = selected_month.split('-')
+                year, month = int(year), int(month)
+                start_date = datetime(year, month, 1)
+                if month == 12:
+                    end_date = datetime(year + 1, 1, 1)
+                else:
+                    end_date = datetime(year, month + 1, 1)
+                return start_date, end_date
+            except (ValueError, IndexError):
+                return None, None
+        
+        elif filter_type == 'date' and selected_date:
+            try:
+                date_obj = datetime.strptime(selected_date, '%Y-%m-%d')
+                start_date = date_obj
+                end_date = date_obj + timedelta(days=1)
+                return start_date, end_date
+            except ValueError:
+                return None, None
+        
+        elif filter_type == 'custom' and date_from and date_to:
+            try:
+                from_date = datetime.strptime(date_from, '%Y-%m-%d')
+                to_date = datetime.strptime(date_to, '%Y-%m-%d') + timedelta(days=1)
+                return from_date, to_date
+            except ValueError:
+                return None, None
+        
+        return None, None
     
-    # Apply date filters
-    if filter_type == 'month' and selected_month:
-        try:
-            year, month = selected_month.split('-')
-            year, month = int(year), int(month)
-            start_date = datetime(year, month, 1)
-            if month == 12:
-                end_date = datetime(year + 1, 1, 1)
-            else:
-                end_date = datetime(year, month + 1, 1)
-            orders = orders.filter(created_at__gte=start_date, created_at__lt=end_date)
-            all_orders = all_orders.filter(created_at__gte=start_date, created_at__lt=end_date)
-        except (ValueError, IndexError):
-            pass
-    
-    elif filter_type == 'date' and selected_date:
-        try:
-            date_obj = datetime.strptime(selected_date, '%Y-%m-%d')
-            orders = orders.filter(created_at__date=date_obj.date())
-            all_orders = all_orders.filter(created_at__date=date_obj.date())
-        except ValueError:
-            pass
-    
-    elif filter_type == 'custom' and date_from and date_to:
-        try:
-            from_date = datetime.strptime(date_from, '%Y-%m-%d')
-            to_date = datetime.strptime(date_to, '%Y-%m-%d') + timedelta(days=1)
-            orders = orders.filter(created_at__gte=from_date, created_at__lt=to_date)
-            all_orders = all_orders.filter(created_at__gte=from_date, created_at__lt=to_date)
-        except ValueError:
-            pass
+    def apply_date_filter(queryset, date_field='created_at'):
+        """Apply date filters to a queryset"""
+        start_date, end_date = get_date_range()
+        if start_date and end_date:
+            return queryset.filter(**{f'{date_field}__gte': start_date, f'{date_field}__lt': end_date})
+        return queryset
     
     # ============================================
-    # ORDER STATISTICS
+    # BASE QUERYSETS WITH FILTERS APPLIED
     # ============================================
-    total_orders = orders.count()
-    total_revenue = orders.aggregate(total=Sum('total_amount'))['total'] or Decimal('0')
-    avg_order_value = orders.aggregate(avg=Avg('total_amount'))['avg'] or Decimal('0')
+    # Online Orders (excluding pending payments)
+    online_orders = Order.objects.exclude(payment_status='pending').exclude(status='failed')
+    all_online_orders = Order.objects.all()
     
-    # Order status breakdown
-    status_counts = {
-        'pending': all_orders.filter(status='pending').count(),
-        'processing': orders.filter(status='processing').count(),
-        'shipped': orders.filter(status='shipped').count(),
-        'delivered': orders.filter(status='delivered').count(),
-        'cancelled': orders.filter(status='cancelled').count(),
-        'failed': all_orders.filter(status='failed').count(),
+    # Offline Orders
+    offline_orders = OfflineOrder.objects.exclude(payment_status='pending').exclude(status='cancelled')
+    all_offline_orders = OfflineOrder.objects.all()
+    
+    # Apply date filters to all querysets
+    online_orders = apply_date_filter(online_orders)
+    all_online_orders = apply_date_filter(all_online_orders)
+    offline_orders = apply_date_filter(offline_orders)
+    all_offline_orders = apply_date_filter(all_offline_orders)
+    
+    # ============================================
+    # ONLINE ORDER STATISTICS
+    # ============================================
+    total_online_orders = online_orders.count()
+    total_online_revenue = online_orders.aggregate(total=Sum('total_amount'))['total'] or Decimal('0')
+    avg_online_order_value = online_orders.aggregate(avg=Avg('total_amount'))['avg'] or Decimal('0')
+    
+    online_status_counts = {
+        'pending': all_online_orders.filter(status='pending').count(),
+        'processing': online_orders.filter(status='processing').count(),
+        'shipped': online_orders.filter(status='shipped').count(),
+        'delivered': online_orders.filter(status='delivered').count(),
+        'cancelled': online_orders.filter(status='cancelled').count(),
+        'failed': all_online_orders.filter(status='failed').count(),
     }
     
-    # Payment status breakdown
-    payment_counts = {
-        'pending': all_orders.filter(payment_status='pending').count(),
-        'paid': orders.filter(payment_status='paid').count(),
-        'refunded': orders.filter(payment_status='refunded').count(),
-        'failed': all_orders.filter(payment_status='failed').count(),
+    online_payment_counts = {
+        'pending': all_online_orders.filter(payment_status='pending').count(),
+        'paid': online_orders.filter(payment_status='paid').count(),
+        'refunded': online_orders.filter(payment_status='refunded').count(),
+        'failed': all_online_orders.filter(payment_status='failed').count(),
     }
     
     # ============================================
-    # ANALYTICS DASHBOARD
+    # OFFLINE ORDER STATISTICS
     # ============================================
+    total_offline_orders = offline_orders.count()
+    total_offline_revenue = offline_orders.aggregate(total=Sum('total_amount'))['total'] or Decimal('0')
+    avg_offline_order_value = offline_orders.aggregate(avg=Avg('total_amount'))['avg'] or Decimal('0')
     
-    # 1. Revenue Over Time (Monthly)
-    revenue_over_time = Order.objects.exclude(
+    offline_status_counts = {
+        'pending': all_offline_orders.filter(status='pending').count(),
+        'processing': all_offline_orders.filter(status='processing').count(),
+        'completed': offline_orders.filter(status='completed').count(),
+        'cancelled': all_offline_orders.filter(status='cancelled').count(),
+    }
+    
+    offline_payment_counts = {
+        'cash': offline_orders.filter(payment_method='cash', payment_status='paid').count(),
+        'card': offline_orders.filter(payment_method='card', payment_status='paid').count(),
+        'online': offline_orders.filter(payment_method='online', payment_status='paid').count(),
+        'upi': offline_orders.filter(payment_method='upi', payment_status='paid').count(),
+        'pending': all_offline_orders.filter(payment_status='pending').count(),
+        'failed': all_offline_orders.filter(payment_status='failed').count(),
+        'refunded': all_offline_orders.filter(payment_status='refunded').count(),
+    }
+    
+    # ============================================
+    # COMBINED STATISTICS
+    # ============================================
+    total_orders = total_online_orders + total_offline_orders
+    total_revenue = total_online_revenue + total_offline_revenue
+    
+    if total_orders > 0:
+        avg_order_value = total_revenue / total_orders
+    else:
+        avg_order_value = Decimal('0')
+    
+    # ============================================
+    # BARCODE STATISTICS
+    # ============================================
+    total_barcodes = ProductBarcode.objects.count()
+    product_barcodes = ProductBarcode.objects.filter(barcode_type='product').count()
+    variant_barcodes = ProductBarcode.objects.filter(barcode_type='variant').count()
+    
+    # ============================================
+    # OFFLINE CUSTOMER ANALYTICS
+    # ============================================
+    total_offline_customers = OfflineCustomer.objects.filter(is_active=True).count()
+    inactive_offline_customers = OfflineCustomer.objects.filter(is_active=False).count()
+    
+    offline_customer_revenue = OfflineCustomer.objects.filter(
+        is_active=True
+    ).annotate(
+        total_spent=Coalesce(
+            Sum('orders__total_amount'), 
+            Value(Decimal('0.00'), output_field=DecimalField())
+        ),
+        order_count=Count('orders')
+    ).order_by('-total_spent')[:10]
+    
+    offline_customer_order_counts = OfflineCustomer.objects.filter(
+        is_active=True
+    ).annotate(
+        order_count=Count('orders'),
+        total_spent=Coalesce(
+            Sum('orders__total_amount'), 
+            Value(Decimal('0.00'), output_field=DecimalField())
+        )
+    ).filter(order_count__gt=0).order_by('-order_count')[:10]
+    
+    # Offline Customer Registration Trend
+    offline_customer_trend = OfflineCustomer.objects.filter(
+        created_at__gte=datetime.now() - timedelta(days=180)
+    )
+    offline_customer_trend = apply_date_filter(offline_customer_trend)
+    offline_customer_trend = offline_customer_trend.annotate(
+        month=TruncMonth('created_at')
+    ).values('month').annotate(
+        count=Count('id')
+    ).order_by('month')
+    
+    # ============================================
+    # OFFLINE SALES ANALYTICS
+    # ============================================
+    offline_revenue_over_time = OfflineOrder.objects.exclude(
         payment_status='pending'
     ).exclude(
-        status='failed'
-    ).annotate(
+        status='cancelled'
+    )
+    offline_revenue_over_time = apply_date_filter(offline_revenue_over_time)
+    offline_revenue_over_time = offline_revenue_over_time.annotate(
         month=TruncMonth('created_at')
     ).values('month').annotate(
         total=Sum('total_amount'),
         count=Count('id')
     ).order_by('month')[:12]
     
-    # 2. Daily Revenue (Current Month)
-    daily_revenue = Order.objects.exclude(
+    # Combined Revenue Over Time
+    combined_revenue_over_time = []
+    
+    online_monthly = Order.objects.exclude(
         payment_status='pending'
     ).exclude(
         status='failed'
+    )
+    online_monthly = apply_date_filter(online_monthly)
+    online_monthly = online_monthly.annotate(
+        month=TruncMonth('created_at')
+    ).values('month').annotate(
+        online_revenue=Sum('total_amount'),
+        online_orders=Count('id')
+    ).order_by('month')[:12]
+    
+    offline_monthly = OfflineOrder.objects.exclude(
+        payment_status='pending'
+    ).exclude(
+        status='cancelled'
+    )
+    offline_monthly = apply_date_filter(offline_monthly)
+    offline_monthly = offline_monthly.annotate(
+        month=TruncMonth('created_at')
+    ).values('month').annotate(
+        offline_revenue=Sum('total_amount'),
+        offline_orders=Count('id')
+    ).order_by('month')[:12]
+    
+    combined_dict = {}
+    for item in online_monthly:
+        month_key = item['month'].strftime('%Y-%m') if item['month'] else None
+        if month_key:
+            combined_dict[month_key] = {
+                'month': item['month'],
+                'online_revenue': item['online_revenue'] or 0,
+                'online_orders': item['online_orders'] or 0,
+                'offline_revenue': 0,
+                'offline_orders': 0
+            }
+    
+    for item in offline_monthly:
+        month_key = item['month'].strftime('%Y-%m') if item['month'] else None
+        if month_key:
+            if month_key in combined_dict:
+                combined_dict[month_key]['offline_revenue'] = item['offline_revenue'] or 0
+                combined_dict[month_key]['offline_orders'] = item['offline_orders'] or 0
+            else:
+                combined_dict[month_key] = {
+                    'month': item['month'],
+                    'online_revenue': 0,
+                    'online_orders': 0,
+                    'offline_revenue': item['offline_revenue'] or 0,
+                    'offline_orders': item['offline_orders'] or 0
+                }
+    
+    combined_revenue_over_time = sorted(combined_dict.values(), key=lambda x: x['month'])[:12]
+    
+    offline_payment_methods = OfflineOrder.objects.filter(
+        payment_status='paid'
+    )
+    offline_payment_methods = apply_date_filter(offline_payment_methods)
+    offline_payment_methods = offline_payment_methods.values('payment_method').annotate(
+        count=Count('id'),
+        total=Sum('total_amount')
+    ).order_by('-total')
+    
+    offline_daily_revenue = OfflineOrder.objects.exclude(
+        payment_status='pending'
+    ).exclude(
+        status='cancelled'
     ).filter(
         created_at__month=datetime.now().month,
         created_at__year=datetime.now().year
-    ).annotate(
+    )
+    offline_daily_revenue = apply_date_filter(offline_daily_revenue)
+    offline_daily_revenue = offline_daily_revenue.annotate(
         day=TruncDay('created_at')
     ).values('day').annotate(
         total=Sum('total_amount'),
         count=Count('id')
     ).order_by('day')
     
-    # 3. Hourly Sales Distribution (SQLite Compatible)
-    hourly_sales = []
+    # ============================================
+    # STORE SETTINGS
+    # ============================================
     try:
-        # For SQLite, we need to use raw SQL or filter differently
-        # Get today's orders and group by hour in Python
+        store_settings = StoreSettings.objects.first()
+    except:
+        store_settings = None
+    
+    # ============================================
+    # ANALYTICS DASHBOARD - Online
+    # ============================================
+    online_revenue_over_time = Order.objects.exclude(
+        payment_status='pending'
+    ).exclude(
+        status='failed'
+    )
+    online_revenue_over_time = apply_date_filter(online_revenue_over_time)
+    online_revenue_over_time = online_revenue_over_time.annotate(
+        month=TruncMonth('created_at')
+    ).values('month').annotate(
+        total=Sum('total_amount'),
+        count=Count('id')
+    ).order_by('month')[:12]
+    
+    online_daily_revenue = Order.objects.exclude(
+        payment_status='pending'
+    ).exclude(
+        status='failed'
+    ).filter(
+        created_at__month=datetime.now().month,
+        created_at__year=datetime.now().year
+    )
+    online_daily_revenue = apply_date_filter(online_daily_revenue)
+    online_daily_revenue = online_daily_revenue.annotate(
+        day=TruncDay('created_at')
+    ).values('day').annotate(
+        total=Sum('total_amount'),
+        count=Count('id')
+    ).order_by('day')
+    
+    # Hourly Sales Distribution - Online
+    online_hourly_sales = []
+    try:
         today_orders = Order.objects.exclude(
             payment_status='pending'
         ).exclude(
@@ -785,6 +990,7 @@ def admin_dashboard_view(request):
         ).filter(
             created_at__date=datetime.now().date()
         )
+        today_orders = apply_date_filter(today_orders)
         
         hourly_counts = {}
         hourly_revenues = {}
@@ -794,17 +1000,17 @@ def admin_dashboard_view(request):
             hourly_revenues[hour] = hourly_revenues.get(hour, 0) + float(order.total_amount)
         
         for hour in range(24):
-            hourly_sales.append({
+            online_hourly_sales.append({
                 'hour': hour,
                 'count': hourly_counts.get(hour, 0),
                 'total': hourly_revenues.get(hour, 0)
             })
     except Exception:
-        hourly_sales = []
+        online_hourly_sales = []
     
-    # 4. Top Selling Products (by quantity)
-    top_products = OrderItem.objects.filter(
-        order__in=orders
+    # Top Selling Products - Online
+    online_top_products = OrderItem.objects.filter(
+        order__in=online_orders
     ).values(
         'product_id', 'product_name'
     ).annotate(
@@ -812,9 +1018,8 @@ def admin_dashboard_view(request):
         total_revenue=Sum('total')
     ).order_by('-total_quantity')[:10]
     
-    # 5. Top Selling Products (by revenue)
-    top_products_by_revenue = OrderItem.objects.filter(
-        order__in=orders
+    online_top_products_by_revenue = OrderItem.objects.filter(
+        order__in=online_orders
     ).values(
         'product_id', 'product_name'
     ).annotate(
@@ -822,9 +1027,8 @@ def admin_dashboard_view(request):
         total_revenue=Sum('total')
     ).order_by('-total_revenue')[:10]
     
-    # 6. Category Performance
-    category_performance = OrderItem.objects.filter(
-        order__in=orders,
+    online_category_performance = OrderItem.objects.filter(
+        order__in=online_orders,
         product__category__isnull=False
     ).values(
         'product__category__name'
@@ -834,35 +1038,42 @@ def admin_dashboard_view(request):
         order_count=Count('order', distinct=True)
     ).order_by('-total_revenue')[:10]
     
-    # 7. Monthly Orders Summary
-    monthly_summary = Order.objects.exclude(
-        payment_status='pending'
-    ).exclude(
-        status='failed'
+    # ============================================
+    # OFFLINE TOP PRODUCTS
+    # ============================================
+    offline_top_products = OfflineOrderItem.objects.filter(
+        order__in=offline_orders
+    ).values(
+        'product_id', 'product_name'
     ).annotate(
-        month=TruncMonth('created_at')
-    ).values('month').annotate(
-        total_orders=Count('id'),
-        total_revenue=Sum('total_amount'),
-        avg_order_value=Avg('total_amount')
-    ).order_by('-month')[:12]
+        total_quantity=Sum('quantity'),
+        total_revenue=Sum('total')
+    ).order_by('-total_quantity')[:10]
+    
+    offline_top_products_by_revenue = OfflineOrderItem.objects.filter(
+        order__in=offline_orders
+    ).values(
+        'product_id', 'product_name'
+    ).annotate(
+        total_quantity=Sum('quantity'),
+        total_revenue=Sum('total')
+    ).order_by('-total_revenue')[:10]
     
     # ============================================
-    # USER ANALYTICS
+    # USER ANALYTICS - Only Customer and Superuser
     # ============================================
+    total_customers = User.objects.filter(Q(role='customer') | Q(is_superuser=True)).count()
+    total_admins = User.objects.filter(is_staff=True, is_superuser=False).count()
+    total_superusers = User.objects.filter(is_superuser=True).count()
+    total_users = User.objects.filter(Q(role='customer') | Q(is_superuser=True)).count()
     
-    total_customers = User.objects.filter(role='customer').count()
-    total_admins = User.objects.filter(role='admin').count()
-    total_users = User.objects.count()
+    new_users_queryset = User.objects.filter(Q(role='customer') | Q(is_superuser=True))
+    new_users_queryset = apply_date_filter(new_users_queryset)
+    new_users_last_30_days = new_users_queryset.count()
     
-    new_users_last_30_days = User.objects.filter(
-        created_at__gte=datetime.now() - timedelta(days=30)
-    ).count()
-    
-    # Most Active Users
     most_active_users = User.objects.filter(
-        role='customer',
-        orders__in=orders
+        Q(role='customer') | Q(is_superuser=True),
+        orders__in=online_orders
     ).annotate(
         order_count=Count('orders'),
         total_spent=Sum('orders__total_amount'),
@@ -871,9 +1082,8 @@ def admin_dashboard_view(request):
         order_count__gt=0
     ).order_by('-order_count')[:10]
     
-    # Top Users by Orders
     top_users_by_orders = User.objects.filter(
-        role='customer'
+        Q(role='customer') | Q(is_superuser=True)
     ).annotate(
         order_count=Count('orders'),
         total_spent=Sum('orders__total_amount'),
@@ -882,9 +1092,8 @@ def admin_dashboard_view(request):
         order_count__gt=0
     ).order_by('-order_count')[:10]
     
-    # Top Users by Revenue
     top_users_by_revenue = User.objects.filter(
-        role='customer'
+        Q(role='customer') | Q(is_superuser=True)
     ).annotate(
         order_count=Count('orders'),
         total_spent=Sum('orders__total_amount')
@@ -892,78 +1101,154 @@ def admin_dashboard_view(request):
         total_spent__gt=0
     ).order_by('-total_spent')[:10]
     
-    # User Registration Trend
     user_registration_trend = User.objects.filter(
+        Q(role='customer') | Q(is_superuser=True),
         created_at__gte=datetime.now() - timedelta(days=180)
-    ).annotate(
+    )
+    user_registration_trend = apply_date_filter(user_registration_trend)
+    user_registration_trend = user_registration_trend.annotate(
         month=TruncMonth('created_at')
     ).values('month').annotate(
         count=Count('id')
     ).order_by('month')
     
-    # User Roles Distribution
-    user_roles = User.objects.values('role').annotate(
+    user_roles = User.objects.filter(
+        Q(role='customer') | Q(is_superuser=True)
+    ).values('role').annotate(
         count=Count('id')
     )
     
-    # Active Users
-    active_users_last_30_days = User.objects.filter(
+    active_users_queryset = User.objects.filter(
+        Q(role='customer') | Q(is_superuser=True),
         last_login__gte=datetime.now() - timedelta(days=30)
-    ).count()
+    )
+    active_users_last_30_days = active_users_queryset.count()
     
-    # Inactive Users
     inactive_users = User.objects.filter(
+        Q(role='customer') | Q(is_superuser=True),
         Q(last_login__lt=datetime.now() - timedelta(days=90)) | 
         Q(last_login__isnull=True)
     ).count()
     
     # ============================================
-    # REVIEW ANALYTICS
+    # REVIEW ANALYTICS - FIXED
     # ============================================
+    # Get filtered product IDs from online orders
+    filtered_product_ids = OrderItem.objects.filter(
+        order__in=online_orders
+    ).values_list('product_id', flat=True).distinct()
     
-    total_reviews = ProductReview.objects.count()
-    approved_reviews = ProductReview.objects.filter(is_approved=True).count()
-    pending_reviews = ProductReview.objects.filter(is_approved=False).count()
-    verified_reviews = ProductReview.objects.filter(is_verified_purchase=True).count()
-    
-    avg_rating = ProductReview.objects.filter(is_approved=True).aggregate(
-        avg=Avg('rating')
-    )['avg'] or 0
-    
-    rating_distribution = {
-        1: ProductReview.objects.filter(rating=1, is_approved=True).count(),
-        2: ProductReview.objects.filter(rating=2, is_approved=True).count(),
-        3: ProductReview.objects.filter(rating=3, is_approved=True).count(),
-        4: ProductReview.objects.filter(rating=4, is_approved=True).count(),
-        5: ProductReview.objects.filter(rating=5, is_approved=True).count(),
-    }
-    
-    most_reviewed_products = Product.objects.annotate(
-        review_count=Count('reviews', filter=Q(reviews__is_approved=True)),
-        avg_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True))
-    ).filter(
-        review_count__gt=0
-    ).order_by('-review_count')[:10]
-    
-    highest_rated_products = Product.objects.annotate(
-        review_count=Count('reviews', filter=Q(reviews__is_approved=True)),
-        avg_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True))
-    ).filter(
-        review_count__gt=2
-    ).order_by('-avg_rating')[:10]
-    
-    review_trend = ProductReview.objects.filter(
-        created_at__gte=datetime.now() - timedelta(days=180)
-    ).annotate(
-        month=TruncMonth('created_at')
-    ).values('month').annotate(
-        count=Count('id'),
-        avg_rating=Avg('rating')
-    ).order_by('month')
-    
-    recent_reviews = ProductReview.objects.select_related(
-        'product', 'user'
-    ).order_by('-created_at')[:10]
+    # Use filtered product IDs if available, otherwise use all
+    if filtered_product_ids:
+        total_reviews = ProductReview.objects.filter(product_id__in=filtered_product_ids).count()
+        approved_reviews = ProductReview.objects.filter(
+            product_id__in=filtered_product_ids, 
+            is_approved=True
+        ).count()
+        pending_reviews = ProductReview.objects.filter(
+            product_id__in=filtered_product_ids, 
+            is_approved=False
+        ).count()
+        verified_reviews = ProductReview.objects.filter(
+            product_id__in=filtered_product_ids, 
+            is_verified_purchase=True
+        ).count()
+        
+        avg_rating = ProductReview.objects.filter(
+            product_id__in=filtered_product_ids,
+            is_approved=True
+        ).aggregate(
+            avg=Avg('rating')
+        )['avg'] or 0
+        
+        rating_distribution = {
+            1: ProductReview.objects.filter(product_id__in=filtered_product_ids, rating=1, is_approved=True).count(),
+            2: ProductReview.objects.filter(product_id__in=filtered_product_ids, rating=2, is_approved=True).count(),
+            3: ProductReview.objects.filter(product_id__in=filtered_product_ids, rating=3, is_approved=True).count(),
+            4: ProductReview.objects.filter(product_id__in=filtered_product_ids, rating=4, is_approved=True).count(),
+            5: ProductReview.objects.filter(product_id__in=filtered_product_ids, rating=5, is_approved=True).count(),
+        }
+        
+        most_reviewed_products = Product.objects.filter(
+            id__in=filtered_product_ids,
+            reviews__is_approved=True
+        ).annotate(
+            review_count=Count('reviews', filter=Q(reviews__is_approved=True)),
+            avg_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True))
+        ).filter(
+            review_count__gt=0
+        ).order_by('-review_count')[:10]
+        
+        highest_rated_products = Product.objects.filter(
+            id__in=filtered_product_ids,
+            reviews__is_approved=True
+        ).annotate(
+            review_count=Count('reviews', filter=Q(reviews__is_approved=True)),
+            avg_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True))
+        ).filter(
+            review_count__gt=2
+        ).order_by('-avg_rating')[:10]
+        
+        review_trend = ProductReview.objects.filter(
+            product_id__in=filtered_product_ids,
+            created_at__gte=datetime.now() - timedelta(days=180)
+        ).annotate(
+            month=TruncMonth('created_at')
+        ).values('month').annotate(
+            count=Count('id'),
+            avg_rating=Avg('rating')
+        ).order_by('month')
+        
+        recent_reviews = ProductReview.objects.filter(
+            product_id__in=filtered_product_ids
+        ).select_related(
+            'product', 'user'
+        ).order_by('-created_at')[:10]
+    else:
+        # Fallback to all reviews
+        total_reviews = ProductReview.objects.count()
+        approved_reviews = ProductReview.objects.filter(is_approved=True).count()
+        pending_reviews = ProductReview.objects.filter(is_approved=False).count()
+        verified_reviews = ProductReview.objects.filter(is_verified_purchase=True).count()
+        
+        avg_rating = ProductReview.objects.filter(is_approved=True).aggregate(
+            avg=Avg('rating')
+        )['avg'] or 0
+        
+        rating_distribution = {
+            1: ProductReview.objects.filter(rating=1, is_approved=True).count(),
+            2: ProductReview.objects.filter(rating=2, is_approved=True).count(),
+            3: ProductReview.objects.filter(rating=3, is_approved=True).count(),
+            4: ProductReview.objects.filter(rating=4, is_approved=True).count(),
+            5: ProductReview.objects.filter(rating=5, is_approved=True).count(),
+        }
+        
+        most_reviewed_products = Product.objects.annotate(
+            review_count=Count('reviews', filter=Q(reviews__is_approved=True)),
+            avg_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True))
+        ).filter(
+            review_count__gt=0
+        ).order_by('-review_count')[:10]
+        
+        highest_rated_products = Product.objects.annotate(
+            review_count=Count('reviews', filter=Q(reviews__is_approved=True)),
+            avg_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True))
+        ).filter(
+            review_count__gt=2
+        ).order_by('-avg_rating')[:10]
+        
+        review_trend = ProductReview.objects.filter(
+            created_at__gte=datetime.now() - timedelta(days=180)
+        ).annotate(
+            month=TruncMonth('created_at')
+        ).values('month').annotate(
+            count=Count('id'),
+            avg_rating=Avg('rating')
+        ).order_by('month')
+        
+        recent_reviews = ProductReview.objects.select_related(
+            'product', 'user'
+        ).order_by('-created_at')[:10]
     
     if total_reviews > 0:
         approval_rate = (approved_reviews / total_reviews) * 100
@@ -978,7 +1263,6 @@ def admin_dashboard_view(request):
     # ============================================
     # PRODUCT STATISTICS
     # ============================================
-    
     total_products = Product.objects.filter(is_active=True).count()
     total_products_inactive = Product.objects.filter(is_active=False).count()
     featured_products = Product.objects.filter(is_active=True, is_featured=True).count()
@@ -991,7 +1275,6 @@ def admin_dashboard_view(request):
     ).order_by('stock_quantity')[:10]
     
     low_stock_count = low_stock_products.count()
-    
     out_of_stock_count = Product.objects.filter(
         is_active=True,
         stock_quantity=0
@@ -1004,34 +1287,24 @@ def admin_dashboard_view(request):
     # ============================================
     # ORDER ANALYTICS
     # ============================================
-    
-    # Best Day for Orders (SQLite Compatible)
-    best_day = None
-    try:
-        # Get all orders and calculate day of week in Python
-        all_orders_list = orders.values('created_at')
-        day_counts = {}
-        day_revenues = {}
-        for order in all_orders_list:
-            day = order['created_at'].weekday()  # 0=Monday, 6=Sunday
-            day_counts[day] = day_counts.get(day, 0) + 1
-        
-        if day_counts:
-            best_day_index = max(day_counts, key=day_counts.get)
-            best_day = {'weekday': str(best_day_index)}
-    except Exception:
-        best_day = None
-    
     order_value_ranges = {
-    '0_500': orders.filter(total_amount__lt=500).count(),
-    '501_1000': orders.filter(total_amount__gte=500, total_amount__lt=1000).count(),
-    '1001_5000': orders.filter(total_amount__gte=1000, total_amount__lt=5000).count(),
-    '5001_10000': orders.filter(total_amount__gte=5000, total_amount__lt=10000).count(),
-    '10000_plus': orders.filter(total_amount__gte=10000).count(),
+        '0_500': online_orders.filter(total_amount__lt=500).count(),
+        '501_1000': online_orders.filter(total_amount__gte=500, total_amount__lt=1000).count(),
+        '1001_5000': online_orders.filter(total_amount__gte=1000, total_amount__lt=5000).count(),
+        '5001_10000': online_orders.filter(total_amount__gte=5000, total_amount__lt=10000).count(),
+        '10000_plus': online_orders.filter(total_amount__gte=10000).count(),
+    }
+    
+    offline_order_value_ranges = {
+        '0_500': offline_orders.filter(total_amount__lt=500).count(),
+        '501_1000': offline_orders.filter(total_amount__gte=500, total_amount__lt=1000).count(),
+        '1001_5000': offline_orders.filter(total_amount__gte=1000, total_amount__lt=5000).count(),
+        '5001_10000': offline_orders.filter(total_amount__gte=5000, total_amount__lt=10000).count(),
+        '10000_plus': offline_orders.filter(total_amount__gte=10000).count(),
     }
     
     repeat_customers = User.objects.filter(
-        orders__in=orders
+        orders__in=online_orders
     ).annotate(
         order_count=Count('orders')
     ).filter(
@@ -1039,7 +1312,23 @@ def admin_dashboard_view(request):
     ).count()
     
     one_time_customers = User.objects.filter(
-        orders__in=orders
+        orders__in=online_orders
+    ).annotate(
+        order_count=Count('orders')
+    ).filter(
+        order_count=1
+    ).count()
+    
+    offline_repeat_customers = OfflineCustomer.objects.filter(
+        orders__in=offline_orders
+    ).annotate(
+        order_count=Count('orders')
+    ).filter(
+        order_count__gt=1
+    ).count()
+    
+    offline_one_time_customers = OfflineCustomer.objects.filter(
+        orders__in=offline_orders
     ).annotate(
         order_count=Count('orders')
     ).filter(
@@ -1049,9 +1338,9 @@ def admin_dashboard_view(request):
     # ============================================
     # CUSTOMER LIFETIME VALUE
     # ============================================
-    
     customer_ltv = User.objects.filter(
-        role='customer',
+        Q(role='customer') | Q(is_superuser=True),
+        orders__in=online_orders,
         orders__payment_status='paid'
     ).distinct().annotate(
         total_spent=Sum('orders__total_amount'),
@@ -1059,10 +1348,23 @@ def admin_dashboard_view(request):
         avg_order_value=Avg('orders__total_amount')
     ).order_by('-total_spent')[:10]
     
+    offline_customer_ltv = OfflineCustomer.objects.filter(
+        orders__in=offline_orders,
+        orders__payment_status='paid'
+    ).distinct().annotate(
+        total_spent=Coalesce(
+            Sum('orders__total_amount'), 
+            Value(Decimal('0.00'), output_field=DecimalField())
+        ),
+        order_count=Count('orders'),
+        avg_order_value=Avg('orders__total_amount')
+    ).order_by('-total_spent')[:10]
+    
     # ============================================
     # RECENT ORDERS
     # ============================================
-    recent_orders = orders.order_by('-created_at')[:10]
+    recent_online_orders = online_orders.order_by('-created_at')[:10]
+    recent_offline_orders = offline_orders.order_by('-created_at')[:10]
     
     # ============================================
     # MONTH OPTIONS FOR FILTER
@@ -1076,31 +1378,133 @@ def admin_dashboard_view(request):
             'selected': selected_month == month_date.strftime('%Y-%m')
         })
     
+    # ============================================
+    # COMBINED ORDER SUMMARY
+    # ============================================
+    combined_monthly_summary = []
+    
+    online_monthly_summary = Order.objects.exclude(
+        payment_status='pending'
+    ).exclude(
+        status='failed'
+    )
+    online_monthly_summary = apply_date_filter(online_monthly_summary)
+    online_monthly_summary = online_monthly_summary.annotate(
+        month=TruncMonth('created_at')
+    ).values('month').annotate(
+        online_orders=Count('id'),
+        online_revenue=Sum('total_amount')
+    ).order_by('-month')[:12]
+    
+    offline_monthly_summary = OfflineOrder.objects.exclude(
+        payment_status='pending'
+    ).exclude(
+        status='cancelled'
+    )
+    offline_monthly_summary = apply_date_filter(offline_monthly_summary)
+    offline_monthly_summary = offline_monthly_summary.annotate(
+        month=TruncMonth('created_at')
+    ).values('month').annotate(
+        offline_orders=Count('id'),
+        offline_revenue=Sum('total_amount')
+    ).order_by('-month')[:12]
+    
+    combined_dict_month = {}
+    for item in online_monthly_summary:
+        month_key = item['month'].strftime('%Y-%m') if item['month'] else None
+        if month_key:
+            combined_dict_month[month_key] = {
+                'month': item['month'],
+                'online_orders': item['online_orders'] or 0,
+                'online_revenue': item['online_revenue'] or 0,
+                'offline_orders': 0,
+                'offline_revenue': 0
+            }
+    
+    for item in offline_monthly_summary:
+        month_key = item['month'].strftime('%Y-%m') if item['month'] else None
+        if month_key:
+            if month_key in combined_dict_month:
+                combined_dict_month[month_key]['offline_orders'] = item['offline_orders'] or 0
+                combined_dict_month[month_key]['offline_revenue'] = item['offline_revenue'] or 0
+            else:
+                combined_dict_month[month_key] = {
+                    'month': item['month'],
+                    'online_orders': 0,
+                    'online_revenue': 0,
+                    'offline_orders': item['offline_orders'] or 0,
+                    'offline_revenue': item['offline_revenue'] or 0
+                }
+    
+    combined_monthly_summary = sorted(combined_dict_month.values(), key=lambda x: x['month'], reverse=True)[:12]
+    
+    # ============================================
+    # CONTEXT
+    # ============================================
     context = {
-        # Order Stats
+        # Combined Stats
         'total_orders': total_orders,
         'total_revenue': total_revenue,
         'avg_order_value': avg_order_value,
-        'status_counts': status_counts,
-        'payment_counts': payment_counts,
+        
+        # Online Order Stats
+        'total_online_orders': total_online_orders,
+        'total_online_revenue': total_online_revenue,
+        'avg_online_order_value': avg_online_order_value,
+        'online_status_counts': online_status_counts,
+        'online_payment_counts': online_payment_counts,
         'order_value_ranges': order_value_ranges,
         'repeat_customers': repeat_customers,
         'one_time_customers': one_time_customers,
+        'online_hourly_sales': online_hourly_sales,
+        'online_top_products': online_top_products,
+        'online_top_products_by_revenue': online_top_products_by_revenue,
+        'online_category_performance': online_category_performance,
+        'online_revenue_over_time': online_revenue_over_time,
+        'online_daily_revenue': online_daily_revenue,
+        'recent_online_orders': recent_online_orders,
         
-        # Analytics
-        'revenue_over_time': revenue_over_time,
-        'daily_revenue': daily_revenue,
-        'hourly_sales': hourly_sales,
-        'top_products': top_products,
-        'top_products_by_revenue': top_products_by_revenue,
-        'category_performance': category_performance,
-        'monthly_summary': monthly_summary,
-        'best_day': best_day,
+        # Offline Order Stats
+        'total_offline_orders': total_offline_orders,
+        'total_offline_revenue': total_offline_revenue,
+        'avg_offline_order_value': avg_offline_order_value,
+        'offline_status_counts': offline_status_counts,
+        'offline_payment_counts': offline_payment_counts,
+        'offline_order_value_ranges': offline_order_value_ranges,
+        'offline_repeat_customers': offline_repeat_customers,
+        'offline_one_time_customers': offline_one_time_customers,
+        'offline_top_products': offline_top_products,
+        'offline_top_products_by_revenue': offline_top_products_by_revenue,
+        'offline_revenue_over_time': offline_revenue_over_time,
+        'offline_daily_revenue': offline_daily_revenue,
+        'offline_payment_methods': offline_payment_methods,
+        'recent_offline_orders': recent_offline_orders,
+        
+        # Combined Analytics
+        'combined_revenue_over_time': combined_revenue_over_time,
+        'combined_monthly_summary': combined_monthly_summary,
+        
+        # Barcode Stats
+        'total_barcodes': total_barcodes,
+        'product_barcodes': product_barcodes,
+        'variant_barcodes': variant_barcodes,
+        
+        # Offline Customer Analytics
+        'total_offline_customers': total_offline_customers,
+        'inactive_offline_customers': inactive_offline_customers,
+        'offline_customer_revenue': offline_customer_revenue,
+        'offline_customer_order_counts': offline_customer_order_counts,
+        'offline_customer_trend': offline_customer_trend,
+        'offline_customer_ltv': offline_customer_ltv,
+        
+        # Store Settings
+        'store_settings': store_settings,
         
         # User Analytics
         'total_users': total_users,
         'total_customers': total_customers,
         'total_admins': total_admins,
+        'total_superusers': total_superusers,
         'new_users_last_30_days': new_users_last_30_days,
         'active_users_last_30_days': active_users_last_30_days,
         'inactive_users': inactive_users,
@@ -1136,9 +1540,6 @@ def admin_dashboard_view(request):
         'out_of_stock_count': out_of_stock_count,
         'category_counts': category_counts,
         
-        # Recent
-        'recent_orders': recent_orders,
-        
         # Filter values
         'filter_type': filter_type,
         'selected_month': selected_month,
@@ -1147,6 +1548,7 @@ def admin_dashboard_view(request):
         'date_to': date_to,
         'month_options': month_options,
     }
+    
     return render(request, 'Ecom/admin/dashboard.html', context)
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -3792,58 +4194,200 @@ def order_success_view(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'Ecom/order_success.html', {'order': order})
 
-
+# views.py - Updated orders_view
+from offline_sales.models import *
 @login_required
 def orders_view(request):
-    """View orders - Admin sees all, Customers see only their orders"""
+    """
+    View orders - Shows both Online and Offline orders
+    - Admin/Superuser: Sees all orders (online + offline)
+    - Customer: Sees their own orders (online + offline)
+    """
     if request.user.is_admin or request.user.is_superuser:
-        orders = Order.objects.all().order_by('-created_at')
+        # Get online orders
+        online_orders = Order.objects.all().order_by('-created_at')
+        
+        # Get offline orders
+        offline_orders = OfflineOrder.objects.all().order_by('-created_at')
     else:
-        orders = Order.objects.filter(user=request.user).order_by('-created_at')
+        # Customer - get their online orders
+        online_orders = Order.objects.filter(user=request.user).order_by('-created_at')
+        
+        # Customer - get their offline orders (where customer is the online user or offline customer matches)
+        # Check if user has offline orders linked to their online account
+        offline_orders = OfflineOrder.objects.filter(
+            customer=request.user
+        ).order_by('-created_at')
+        
+        # Also check if user has offline orders linked via offline_customer
+        # This handles the case where a customer was created as offline first
+        offline_customer = OfflineCustomer.objects.filter(
+            email=request.user.email,
+            is_active=True
+        ).first()
+        
+        if offline_customer:
+            offline_orders = offline_orders | OfflineOrder.objects.filter(
+                offline_customer=offline_customer
+            ).order_by('-created_at')
+        
+        # Remove duplicates
+        offline_orders = offline_orders.distinct()
     
-    return render(request, 'Ecom/orders.html', {'orders': orders})
+    # Combine orders with type indicator
+    combined_orders = []
+    
+    # Add online orders
+    for order in online_orders:
+        combined_orders.append({
+            'order': order,
+            'type': 'online',
+            'order_number': order.order_number,
+            'created_at': order.created_at,
+            'total_amount': order.total_amount,
+            'status': order.status,
+            'payment_status': order.payment_status,
+            'items': order.items.all(),
+            'type_display': 'Online'
+        })
+    
+    # Add offline orders
+    for order in offline_orders:
+        # Check if order already exists (avoid duplicates)
+        existing = False
+        for existing_order in combined_orders:
+            if existing_order['order_number'] == order.order_number:
+                existing = True
+                break
+        
+        if not existing:
+            combined_orders.append({
+                'order': order,
+                'type': 'offline',
+                'order_number': order.order_number,
+                'created_at': order.created_at,
+                'total_amount': order.total_amount,
+                'status': order.status,
+                'payment_status': order.payment_status,
+                'items': order.items.all(),
+                'type_display': 'Offline',
+                'invoice_number': order.invoice_number,
+            })
+    
+    # Sort combined orders by created_at (newest first)
+    combined_orders.sort(key=lambda x: x['created_at'], reverse=True)
+    
+    # Get counts
+    total_orders = len(combined_orders)
+    online_count = sum(1 for o in combined_orders if o['type'] == 'online')
+    offline_count = sum(1 for o in combined_orders if o['type'] == 'offline')
+    
+    context = {
+        'orders': combined_orders,
+        'total_orders': total_orders,
+        'online_count': online_count,
+        'offline_count': offline_count,
+        'is_admin': request.user.is_admin or request.user.is_superuser,
+    }
+    return render(request, 'Ecom/orders.html', context)
 
 
-# views.py - Update your existing order_detail_view
+# views.py - Updated order_detail_view
 
 @login_required
 def order_detail_view(request, order_id):
-    """Order detail view with cancellation/return/replacement actions"""
-    if request.user.is_admin or request.user.is_superuser:
-        order = get_object_or_404(Order, id=order_id)
-        is_admin = True
+    """
+    Order detail view with cancellation/return/replacement actions
+    Handles both Online and Offline orders
+    """
+    # Try to find online order first
+    online_order = None
+    offline_order = None
+    order = None
+    is_admin = request.user.is_admin or request.user.is_superuser
+    is_offline = False
+    
+    # Check if it's an offline order (starts with OFF)
+    try:
+        offline_order = get_object_or_404(OfflineOrder, id=order_id)
+        if not is_admin:
+            # Check if user owns this offline order
+            if offline_order.customer and offline_order.customer.id != request.user.id:
+                # Check if offline customer matches user's email
+                offline_customer = OfflineCustomer.objects.filter(
+                    email=request.user.email,
+                    id=offline_order.offline_customer.id
+                ).exists()
+                if not offline_customer:
+                    messages.error(request, 'You do not have permission to view this order.')
+                    return redirect('Ecom:orders')
+        order = offline_order
+        is_offline = True
+    except (OfflineOrder.DoesNotExist, ValueError):
+        pass
+    
+    # If not offline, try online order
+    if not order:
+        try:
+            if is_admin:
+                online_order = get_object_or_404(Order, id=order_id)
+            else:
+                online_order = get_object_or_404(Order, id=order_id, user=request.user)
+            order = online_order
+            is_offline = False
+        except (Order.DoesNotExist, ValueError):
+            messages.error(request, 'Order not found.')
+            return redirect('Ecom:orders')
+    
+    # Get items and transactions based on order type
+    if is_offline:
+        items = order.items.all() if hasattr(order, 'items') else []
+        transactions = order.transactions.all() if hasattr(order, 'transactions') else []
     else:
-        order = get_object_or_404(Order, id=order_id, user=request.user)
-        is_admin = False
+        items = order.items.all()
+        transactions = order.transactions.all()
     
-    items = order.items.all()
-    transactions = order.transactions.all()
+    # Check actions availability (only for online orders)
+    can_cancel = False
+    can_request_return = False
+    can_request_replacement = False
+    cancellation_requested = False
+    return_requested = False
+    replacement_requested = False
+    return_window_days = 0
+    return_status_display = 'N/A'
+    replacement_status_display = 'N/A'
+    refund_status_display = 'N/A'
     
-    # Check actions availability
-    can_cancel = order.can_cancel
-    can_request_return = order.can_request_return
-    can_request_replacement = order.can_request_replacement
-    
-    # Check if actions already requested
-    cancellation_requested = order.cancellation_requested
-    return_requested = order.return_requested
-    replacement_requested = order.replacement_requested
+    if not is_offline:
+        can_cancel = order.can_cancel
+        can_request_return = order.can_request_return
+        can_request_replacement = order.can_request_replacement
+        cancellation_requested = order.cancellation_requested
+        return_requested = order.return_requested
+        replacement_requested = order.replacement_requested
+        return_window_days = order.return_window_remaining
+        return_status_display = order.return_status_display
+        replacement_status_display = order.replacement_status_display
+        refund_status_display = order.refund_status_display
     
     context = {
         'order': order,
         'items': items,
         'transactions': transactions,
-        'is_admin': is_admin,
+        'is_admin_view': is_admin,
+        'is_offline': is_offline,
         'can_cancel': can_cancel,
         'can_request_return': can_request_return,
         'can_request_replacement': can_request_replacement,
         'cancellation_requested': cancellation_requested,
         'return_requested': return_requested,
         'replacement_requested': replacement_requested,
-        'return_window_days': order.return_window_remaining,
-        'return_status_display': order.return_status_display,
-        'replacement_status_display': order.replacement_status_display,
-        'refund_status_display': order.refund_status_display,
+        'return_window_days': return_window_days,
+        'return_status_display': return_status_display,
+        'replacement_status_display': replacement_status_display,
+        'refund_status_display': refund_status_display,
+        'order_type_display': 'Offline Order' if is_offline else 'Online Order',
     }
     return render(request, 'Ecom/order_detail.html', context)
 
