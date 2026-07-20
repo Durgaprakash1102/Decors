@@ -701,30 +701,34 @@
         <span class="nav-text">Incoming Orders</span>
     </a>
     <a href="{% url 'Ecom:orders' %}"
-       class="nav-item {% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
-        <i class="fa-solid fa-box"></i>
-        <span class="nav-text">All Orders</span>
-    </a>
-    <a href="{% url 'Ecom:admin_replacement_requests' %}"
-       class="nav-item {% if request.resolver_match.url_name == 'admin_replacement_requests' %}active{% endif %}">
-        <i class="fa-solid fa-box"></i>
-        <span class="nav-text">Replacement Requests</span>
-    </a>
-    <a href="{% url 'Ecom:admin_return_requests' %}"
-       class="nav-item {% if request.resolver_match.url_name == 'admin_return_requests' %}active{% endif %}">
-        <i class="fa-solid fa-box"></i>
-        <span class="nav-text">Return Requests</span>
-    </a>
-    <a href="{% url 'Ecom:admin_cancellation_requests' %}"
-       class="nav-item {% if request.resolver_match.url_name == 'admin_cancellation_requests' %}active{% endif %}">
-        <i class="fa-solid fa-box"></i>
-        <span class="nav-text">Cancellation Requests</span>
-    </a>
-    <a href="{% url 'Ecom:product_list' %}"
-       class="nav-item {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
-        <i class="fa-solid fa-box-open"></i>
-        <span class="nav-text">Products</span>
-    </a>
+   class="nav-item {% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
+    <i class="fa-solid fa-cart-shopping"></i>
+    <span class="nav-text">All Orders</span>
+</a>
+
+<a href="{% url 'Ecom:admin_replacement_requests' %}"
+   class="nav-item {% if request.resolver_match.url_name == 'admin_replacement_requests' %}active{% endif %}">
+    <i class="fa-solid fa-right-left"></i>
+    <span class="nav-text">Replacement Requests</span>
+</a>
+
+<a href="{% url 'Ecom:admin_return_requests' %}"
+   class="nav-item {% if request.resolver_match.url_name == 'admin_return_requests' %}active{% endif %}">
+    <i class="fa-solid fa-rotate-left"></i>
+    <span class="nav-text">Return Requests</span>
+</a>
+
+<a href="{% url 'Ecom:admin_cancellation_requests' %}"
+   class="nav-item {% if request.resolver_match.url_name == 'admin_cancellation_requests' %}active{% endif %}">
+    <i class="fa-solid fa-ban"></i>
+    <span class="nav-text">Cancellation Requests</span>
+</a>
+
+<a href="{% url 'Ecom:product_list' %}"
+   class="nav-item {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
+    <i class="fa-solid fa-box-open"></i>
+    <span class="nav-text">Products</span>
+</a>
 
     <a href="{% url 'Ecom:inventory_log' %}"
        class="nav-item {% if request.resolver_match.url_name == 'inventory_log' %}active{% endif %}">
@@ -799,33 +803,34 @@
     <div class="nav-section-label">Offline Order Management</div>
 
     <a href="{% url 'offline_sales:store_settings_list' %}"
-       class="nav-item {% if request.resolver_match.url_name == 'store_settings_list' %}active{% endif %}">
-        <i class="fa-solid fa-gear"></i>
-        <span class="nav-text">Store Settings</span>
-    </a>
+   class="nav-item {% if request.resolver_match.url_name == 'store_settings_list' %}active{% endif %}">
+    <i class="fa-solid fa-store"></i>
+    <span class="nav-text">Store Settings</span>
+</a>
 
-    <a href="{% url 'offline_sales:barcode_list' %}"
-       class="nav-item {% if request.resolver_match.url_name == 'barcode_list' %}active{% endif %}">
-        <i class="fa-regular fa-address-card"></i>
-        <span class="nav-text">Barcodes</span>
-    </a>
-     <a href="{% url 'offline_sales:offline_sale' %}"
-       class="nav-item {% if request.resolver_match.url_name == 'offline_sale' %}active{% endif %}">
-        <i class="fa-regular fa-address-card"></i>
-        <span class="nav-text">Offline Sale</span>
-    </a>
+<a href="{% url 'offline_sales:barcode_list' %}"
+   class="nav-item {% if request.resolver_match.url_name == 'barcode_list' %}active{% endif %}">
+    <i class="fa-solid fa-barcode"></i>
+    <span class="nav-text">Barcodes</span>
+</a>
 
-     <a href="{% url 'offline_sales:customer_list' %}"
-       class="nav-item {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}">
-        <i class="fa-regular fa-address-card"></i>
-        <span class="nav-text">Offline Customers</span>
-    </a>
+<a href="{% url 'offline_sales:offline_sale' %}"
+   class="nav-item {% if request.resolver_match.url_name == 'offline_sale' %}active{% endif %}">
+    <i class="fa-solid fa-cash-register"></i>
+    <span class="nav-text">Offline Sale</span>
+</a>
 
-    <a href="{% url 'offline_sales:orders_list' %}"
-       class="nav-item {% if request.resolver_match.url_name == 'orders_list' %}active{% endif %}">
-        <i class="fa-regular fa-address-card"></i>
-        <span class="nav-text">Offline Orders</span>
-    </a>
+<a href="{% url 'offline_sales:customer_list' %}"
+   class="nav-item {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}">
+    <i class="fa-solid fa-users"></i>
+    <span class="nav-text">Offline Customers</span>
+</a>
+
+<a href="{% url 'offline_sales:orders_list' %}"
+   class="nav-item {% if request.resolver_match.url_name == 'orders_list' %}active{% endif %}">
+    <i class="fa-solid fa-file-invoice"></i>
+    <span class="nav-text">Offline Orders</span>
+</a>
 
 </nav>
 
