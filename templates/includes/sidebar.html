@@ -777,18 +777,35 @@
         <span class="divider-line"></span>
     </div>
 
-    <div class="nav-section-label">Settings</div>
+    <div class="nav-section-label">Offline Order Management</div>
 
-    <a href="#"
-       class="nav-item {% if request.resolver_match.url_name == 'general_settings' %}active{% endif %}">
+    <a href="{% url 'offline_sales:store_settings_list' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'store_settings_list' %}active{% endif %}">
         <i class="fa-solid fa-gear"></i>
-        <span class="nav-text">General Settings</span>
+        <span class="nav-text">Store Settings</span>
     </a>
 
-    <a href="{% url 'Ecom:profile' %}"
-       class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+    <a href="{% url 'offline_sales:barcode_list' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'barcode_list' %}active{% endif %}">
         <i class="fa-regular fa-address-card"></i>
-        <span class="nav-text">Profile</span>
+        <span class="nav-text">Barcodes</span>
+    </a>
+     <a href="{% url 'offline_sales:offline_sale' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'offline_sale' %}active{% endif %}">
+        <i class="fa-regular fa-address-card"></i>
+        <span class="nav-text">Offline Sale</span>
+    </a>
+
+     <a href="{% url 'offline_sales:customer_list' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}">
+        <i class="fa-regular fa-address-card"></i>
+        <span class="nav-text">Offline Customers</span>
+    </a>
+
+    <a href="{% url 'offline_sales:orders_list' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'orders_list' %}active{% endif %}">
+        <i class="fa-regular fa-address-card"></i>
+        <span class="nav-text">Offline Orders</span>
     </a>
 
 </nav>
