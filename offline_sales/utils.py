@@ -1,5 +1,5 @@
 # offline_sales/utils.py - Fixed barcode generation
-
+from django.db import models
 import uuid
 import os
 import logging
