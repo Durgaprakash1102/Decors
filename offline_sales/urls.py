@@ -31,6 +31,8 @@ urlpatterns = [
     
     # Customer Management
      path('customers/', views.customer_list_view, name='customer_list'),
+    path('customer/create/', views.customer_create_view, name='customers_create'),
+    path('customer/edit/<int:customer_id>/', views.customer_edit_view, name='customers_edit'),
     path('customers/create/', views.offline_customer_create, name='customer_create'),
     path('customers/edit/<int:customer_id>/', views.customer_edit_view, name='customer_edit'),
     path('customers/delete/<int:customer_id>/', views.customer_delete_view, name='customer_delete'),

@@ -9,7 +9,7 @@
         <h2>Customers</h2>
         <div>
             <span class="badge bg-primary p-2">Total: {{ total_customers }}</span>
-            <a href="{% url 'offline_sales:customer_create' %}" class="btn btn-success">
+            <a href="{% url 'offline_sales:customers_create' %}" class="btn btn-success">
                 <i class="fas fa-plus"></i> Add Customer
             </a>
         </div>
@@ -59,10 +59,10 @@
                             <td>
                                 <div class="btn-group" role="group">
                                     <a href="{% url 'offline_sales:customer_edit' customer.id %}" class="btn btn-sm btn-primary" title="Edit">
-                                        <i class="fas fa-edit"></i>
+                                        <i class="fas fa-edit">Edit</i>
                                     </a>
                                     <a href="{% url 'offline_sales:customer_delete' customer.id %}" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this customer?')">
-                                        <i class="fas fa-trash"></i>
+                                        <i class="fas fa-trash">Delete</i>
                                     </a>
                                 </div>
                             </td>
