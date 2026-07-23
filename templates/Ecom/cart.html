@@ -1,395 +1,1441 @@
-
+{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Shopping Cart - MyStore{% endblock %}
+{% block title %}Shopping Cart - ShubhDecor{% endblock %}
 
-{% block extra_css %}
+{% block content %}
+
 <style>
-    .cart-item {
-        transition: all 0.3s ease;
+    /* ============================================ */
+    /* CART PAGE - CLEAN PROFESSIONAL DESIGN       */
+    /* ============================================ */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
-    .cart-item:hover {
-        background: #f8f9fa;
+
+    .cart-page {
+        background: #f8f6f4;
+        min-height: 100vh;
+        padding: 20px 0 50px;
     }
-    .price-breakdown {
+
+    .cart-container {
+        max-width: 1360px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* ============================================ */
+    /* HEADER - CLEAN                              */
+    /* ============================================ */
+    .cart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 28px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #e8e3df;
+    }
+
+    .cart-header .left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .cart-header .left .icon-box {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: #5c121f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 18px;
+        box-shadow: 0 4px 16px rgba(92,18,31,0.08);
+        position: relative;
+    }
+
+    .cart-header .left .icon-box .badge-dot {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 18px;
+        height: 18px;
+        background: #f4b400;
+        border-radius: 50%;
+        font-family: 'Inter', sans-serif;
+        font-size: 9px;
+        font-weight: 700;
+        color: #1a1a2e;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #fff;
+    }
+
+    .cart-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 26px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin: 0;
+    }
+
+    .cart-header h1 span {
+        color: #5c121f;
+    }
+
+    .cart-header .count-pill {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        color: #5c121f;
+        font-weight: 500;
+        background: rgba(92,18,31,0.06);
+        padding: 4px 16px;
+        border-radius: 30px;
+    }
+
+    .cart-header .count-pill strong {
+        font-weight: 700;
+    }
+
+    /* ============================================ */
+    /* CART GRID                                   */
+    /* ============================================ */
+    .cart-grid {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    /* ============================================ */
+    /* LEFT SECTION - CART ITEMS                   */
+    /* ============================================ */
+    .cart-items-card {
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid #eeebe8;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+    }
+
+    .cart-items-card .card-header {
+        padding: 16px 20px;
+        background: #5c121f;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .cart-items-card .card-header h5 {
+        font-family: 'Inter', sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: #ffffff;
+        margin: 0;
         display: flex;
         align-items: center;
         gap: 8px;
-        flex-wrap: wrap;
-        margin-top: 4px;
     }
-    .price-breakdown .original {
-        color: #6c757d;
-        text-decoration: line-through;
-        font-size: 14px;
-    }
-    .price-breakdown .discounted {
-        color: #28a745;
-        font-weight: 700;
+
+    .cart-items-card .card-header h5 i {
+        color: #f4b400;
         font-size: 16px;
     }
-    .price-breakdown .offer-tag {
-        background: #ff6b6b;
-        color: white;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 600;
-    }
-    .price-breakdown .offer-tag i {
-        margin-right: 3px;
-    }
-    .price-breakdown .product-discount-tag {
-        background: #dc3545;
-        color: white;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 600;
-    }
-    .price-breakdown .product-discount-tag i {
-        margin-right: 3px;
-    }
-    .price-breakdown .best-discount-tag {
-        background: #28a745;
-        color: white;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 600;
-    }
-    .price-breakdown .best-discount-tag i {
-        margin-right: 3px;
-    }
-    .price-breakdown .savings-text {
+
+    .cart-items-card .card-header .item-count {
+        font-family: 'Inter', sans-serif;
         font-size: 13px;
+        color: rgba(255,255,255,0.6);
+        background: rgba(255,255,255,0.08);
+        padding: 2px 14px;
+        border-radius: 20px;
+    }
+
+    /* ============================================ */
+    /* CART ITEM - CLEAN DESIGN                    */
+    /* ============================================ */
+    .cart-item {
+        display: flex;
+        align-items: center;
+        padding: 14px 20px;
+        border-bottom: 1px solid #f0edeb;
+        transition: all 0.3s ease;
+        gap: 16px;
+    }
+
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+
+    .cart-item:hover {
+        background: #faf8f7;
+    }
+
+    /* ============================================ */
+    /* ITEM IMAGE                                  */
+    /* ============================================ */
+    .cart-item .item-image {
+        flex: 0 0 72px;
+        width: 72px;
+        height: 72px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #f5f0ed;
+        flex-shrink: 0;
+        border: 1px solid #f0edeb;
+    }
+
+    .cart-item .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .cart-item:hover .item-image img {
+        transform: scale(1.04);
+    }
+
+    .cart-item .item-image .no-image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #ddd;
+        font-size: 20px;
+    }
+
+    /* ============================================ */
+    /* ITEM DETAILS                                */
+    /* ============================================ */
+    .cart-item .item-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .cart-item .item-details .item-name {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
         font-weight: 600;
+        color: #1a1a2e;
+        text-decoration: none;
+        transition: all 0.3s;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .cart-item .item-details .item-name:hover {
+        color: #5c121f;
+    }
+
+    .cart-item .item-details .item-sku {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        color: #bbb;
+        display: inline-block;
+        margin-bottom: 4px;
+    }
+
+    /* ============================================ */
+    /* PRICE BREAKDOWN - CLEAN                     */
+    /* ============================================ */
+    .cart-item .item-details .price-breakdown {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .cart-item .item-details .price-breakdown .original {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        color: #ccc;
+        text-decoration: line-through;
+    }
+
+    .cart-item .item-details .price-breakdown .current {
+        font-family: 'Inter', sans-serif;
+        font-size: 17px;
+        font-weight: 700;
+        color: #5c121f;
+    }
+
+    .cart-item .item-details .price-breakdown .tag {
+        font-size: 8px;
+        padding: 1px 10px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-family: 'Inter', sans-serif;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+
+    .tag.offer { background: #ff6b6b; color: #fff; }
+    .tag.discount { background: #dc3545; color: #fff; }
+    .tag.best-deal { background: #28a745; color: #fff; }
+
+    .cart-item .item-details .price-breakdown .savings-text {
+        font-family: 'Inter', sans-serif;
+        font-size: 11px;
         color: #28a745;
+        font-weight: 600;
     }
-    .price-breakdown .no-discount {
-        font-size: 13px;
-        color: #6c757d;
+
+    .cart-item .item-details .price-breakdown .no-discount {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        color: #ccc;
     }
-    .offer-banner {
-        background: linear-gradient(135deg, #fff3cd, #ffe69b);
-        border: 1px solid #ffc107;
+
+    /* ============================================ */
+    /* QUANTITY CONTROLS                           */
+    /* ============================================ */
+    .cart-item .item-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+
+    .cart-item .item-actions .qty-group {
+        display: flex;
+        align-items: center;
+        border: 1.5px solid #f0edeb;
         border-radius: 8px;
-        padding: 12px 16px;
-        margin-bottom: 15px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .cart-item .item-actions .qty-group button {
+        width: 30px;
+        height: 30px;
+        border: none;
+        background: transparent;
+        color: #1a1a2e;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .cart-item .item-actions .qty-group button:hover {
+        background: #5c121f;
+        color: #fff;
+    }
+
+    .cart-item .item-actions .qty-group input {
+        width: 36px;
+        height: 30px;
+        border: none;
+        border-left: 1.5px solid #f0edeb;
+        border-right: 1.5px solid #f0edeb;
+        text-align: center;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: #1a1a2e;
+        background: transparent;
+        outline: none;
+        padding: 0;
+    }
+
+    .cart-item .item-actions .qty-group input:focus {
+        background: #faf8f7;
+    }
+
+    .cart-item .item-actions .btn-remove {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: none;
+        background: transparent;
+        color: #dc3545;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+    }
+
+    .cart-item .item-actions .btn-remove:hover {
+        background: #dc3545;
+        color: #fff;
+        transform: scale(1.05);
+    }
+
+    /* ============================================ */
+    /* ITEM TOTAL                                  */
+    /* ============================================ */
+    .cart-item .item-total {
+        text-align: right;
+        flex-shrink: 0;
+        min-width: 80px;
+    }
+
+    .cart-item .item-total .total-price {
+        font-family: 'Inter', sans-serif;
+        font-size: 17px;
+        font-weight: 700;
+        color: #5c121f;
+        display: block;
+    }
+
+    .cart-item .item-total .total-savings {
+        font-family: 'Inter', sans-serif;
+        font-size: 11px;
+        color: #28a745;
+        font-weight: 600;
+    }
+
+    /* ============================================ */
+    /* CART FOOTER - PROFESSIONAL CARDS            */
+    /* ============================================ */
+    .cart-footer {
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
+
+    .footer-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #eeebe8;
+        padding: 18px 16px;
+        text-align: center;
+        transition: all 0.4s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        position: relative;
+    }
+
+    .footer-card:hover {
+        transform: translateY(-4px);
+        border-color: #5c121f;
+        box-shadow: 0 8px 30px rgba(92,18,31,0.04);
+    }
+
+    .footer-card .card-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: #5c121f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+        color: #fff;
+        font-size: 18px;
+        transition: all 0.3s;
+    }
+
+    .footer-card:hover .card-icon {
+        background: #7a1a2b;
+        transform: scale(1.05);
+    }
+
+    .footer-card .card-title {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-bottom: 3px;
+    }
+
+    .footer-card .card-desc {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        color: #999;
+        line-height: 1.5;
+    }
+
+    .footer-card .card-desc .highlight {
+        color: #5c121f;
+        font-weight: 600;
+    }
+
+    /* ============================================ */
+    /* EMPTY CART                                  */
+    /* ============================================ */
+    .empty-cart {
+        text-align: center;
+        padding: 80px 20px;
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid #eeebe8;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+    }
+
+    .empty-cart .empty-icon {
+        font-size: 52px;
+        color: #e0d6d0;
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .empty-cart h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 26px;
+        color: #1a1a2e;
+        margin-bottom: 4px;
+    }
+
+    .empty-cart p {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        color: #bbb;
+        max-width: 360px;
+        margin: 0 auto 20px;
+    }
+
+    .empty-cart .btn-shop {
+        background: #5c121f;
+        color: #fff;
+        border: none;
+        padding: 10px 32px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+        box-shadow: 0 4px 16px rgba(92,18,31,0.06);
+    }
+
+    .empty-cart .btn-shop:hover {
+        background: #7a1a2b;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(92,18,31,0.1);
+    }
+
+    /* ============================================ */
+    /* ORDER SUMMARY - RIGHT SIDE                  */
+    /* ============================================ */
+    .order-summary {
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid #eeebe8;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+        position: sticky;
+        top: 20px;
+    }
+
+    .order-summary .card-header {
+        padding: 16px 20px;
+        background: #faf8f7;
+        border-bottom: 1px solid #eeebe8;
+    }
+
+    .order-summary .card-header h5 {
+        font-family: 'Inter', sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin: 0;
+    }
+
+    .order-summary .card-body {
+        padding: 20px;
+    }
+
+    .offer-banner {
+        background: #fff9f5;
+        border: 1px solid #fde8e0;
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-bottom: 16px;
         display: flex;
         align-items: center;
         gap: 10px;
     }
+
     .offer-banner i {
-        color: #856404;
-        font-size: 20px;
+        font-size: 18px;
+        color: #ff6b6b;
     }
+
     .offer-banner .offer-text {
-        font-weight: 600;
-        color: #856404;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: #c62828;
     }
+
+    .offer-banner .offer-text strong {
+        color: #5c121f;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 0;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        color: #444;
+    }
+
+    .summary-row .label {
+        color: #999;
+    }
+
+    .summary-row .value {
+        font-weight: 500;
+        color: #1a1a2e;
+    }
+
+    .summary-row .value.discount {
+        color: #28a745;
+    }
+
+    .summary-row.total {
+        padding-top: 12px;
+        border-top: 2px solid #f0edeb;
+        margin-top: 4px;
+    }
+
+    .summary-row.total .label {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1a1a2e;
+    }
+
+    .summary-row.total .value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #5c121f;
+    }
+
+    .summary-savings {
+        text-align: center;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        color: #28a745;
+        font-weight: 600;
+        padding: 8px 0 2px 0;
+    }
+
+    /* ============================================ */
+    /* COUPON SECTION                              */
+    /* ============================================ */
+    .coupon-section {
+        margin: 12px 0 16px;
+    }
+
+    .coupon-section .coupon-input {
+        display: flex;
+        gap: 8px;
+    }
+
+    .coupon-section .coupon-input input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1.5px solid #f0edeb;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        outline: none;
+        transition: all 0.3s;
+        background: #faf8f7;
+    }
+
+    .coupon-section .coupon-input input:focus {
+        border-color: #5c121f;
+        background: #fff;
+    }
+
+    .coupon-section .coupon-input .btn-apply {
+        padding: 8px 20px;
+        border: none;
+        border-radius: 8px;
+        background: #5c121f;
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .coupon-section .coupon-input .btn-apply:hover {
+        background: #7a1a2b;
+        transform: translateY(-2px);
+    }
+
+    .coupon-section .applied-coupon {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #e8f5e9;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        color: #2e7d32;
+        font-weight: 500;
+    }
+
+    .coupon-section .applied-coupon .remove-coupon {
+        color: #dc3545;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    /* ============================================ */
+    /* BUTTONS                                     */
+    /* ============================================ */
+    .btn-checkout {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        background: #5c121f;
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.4s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        box-shadow: 0 4px 16px rgba(92,18,31,0.06);
+    }
+
+    .btn-checkout:hover {
+        background: #7a1a2b;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(92,18,31,0.1);
+        color: #fff;
+    }
+
+    .btn-checkout i {
+        margin-right: 6px;
+    }
+
+    .btn-continue {
+        width: 100%;
+        padding: 10px;
+        border: 1.5px solid #f0edeb;
+        border-radius: 10px;
+        background: transparent;
+        color: #999;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        margin-top: 8px;
+    }
+
+    .btn-continue:hover {
+        border-color: #5c121f;
+        color: #5c121f;
+    }
+
+    /* ============================================ */
+    /* TOAST                                       */
+    /* ============================================ */
     .toast-container {
         position: fixed;
         top: 20px;
         right: 20px;
         z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
     }
+
     .toast {
         padding: 12px 20px;
         border-radius: 10px;
-        color: white;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
         font-weight: 500;
-        margin-bottom: 10px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-        animation: slideInRight 0.5s ease;
-        min-width: 250px;
+        color: #fff;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        animation: slideIn 0.4s ease;
         display: flex;
         align-items: center;
         gap: 10px;
+        min-width: 220px;
     }
+
     .toast.success { background: #28a745; }
     .toast.error { background: #dc3545; }
     .toast.info { background: #17a2b8; }
     .toast.warning { background: #ffc107; color: #1a1a2e; }
+
     .toast .toast-close {
         margin-left: auto;
         cursor: pointer;
-        opacity: 0.8;
-        font-size: 18px;
+        opacity: 0.5;
+        font-size: 16px;
+        transition: all 0.3s;
+        background: none;
+        border: none;
+        color: inherit;
+        padding: 0 4px;
     }
+
     .toast .toast-close:hover { opacity: 1; }
-    @keyframes slideInRight {
-        from { transform: translateX(100px); opacity: 0; }
+
+    @keyframes slideIn {
+        from { transform: translateX(60px); opacity: 0; }
         to { transform: translateX(0); opacity: 1; }
     }
-    @media (max-width: 768px) {
-        .cart-item {
-            flex-wrap: wrap;
+
+    /* ============================================ */
+    /* RESPONSIVE                                  */
+    /* ============================================ */
+    @media (max-width: 1200px) {
+        .cart-grid {
+            grid-template-columns: 1.4fr 1fr;
+            gap: 20px;
         }
-        .price-breakdown {
-            flex-wrap: wrap;
-        }
-        .toast {
-            min-width: 200px;
-            font-size: 14px;
-            padding: 10px 16px;
+        .cart-footer {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
         }
     }
-    @media (max-width: 480px) {
-        .cart-item .d-flex.align-items-center {
+
+    @media (max-width: 992px) {
+        .cart-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        .order-summary {
+            position: static;
+        }
+        .cart-item {
             flex-wrap: wrap;
-            gap: 8px;
+            padding: 12px 16px;
         }
-        .cart-item .ms-3.text-end {
-            text-align: left !important;
-            margin-left: 0 !important;
+        .cart-item .item-total {
+            text-align: left;
+            min-width: auto;
             width: 100%;
+            padding-left: 88px;
         }
-        .price-breakdown .original {
+        .cart-header h1 {
+            font-size: 24px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .cart-container {
+            padding: 0 16px;
+        }
+        .cart-item {
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px 14px;
+        }
+        .cart-item .item-image {
+            flex: 0 0 56px;
+            width: 56px;
+            height: 56px;
+        }
+        .cart-item .item-details .item-name {
+            font-size: 13px;
+        }
+        .cart-item .item-details .price-breakdown .current {
+            font-size: 16px;
+        }
+        .cart-item .item-actions .qty-group button {
+            width: 26px;
+            height: 26px;
             font-size: 12px;
         }
-        .price-breakdown .discounted {
+        .cart-item .item-actions .qty-group input {
+            width: 30px;
+            height: 26px;
+            font-size: 12px;
+        }
+        .cart-item .item-actions .btn-remove {
+            width: 26px;
+            height: 26px;
+            font-size: 12px;
+        }
+        .cart-item .item-total {
+            padding-left: 0;
+            text-align: left;
+            width: 100%;
+        }
+        .cart-item .item-total .total-price {
+            font-size: 16px;
+        }
+        .cart-items-card .card-header {
+            padding: 12px 14px;
+        }
+        .cart-items-card .card-header h5 {
             font-size: 14px;
         }
-        .price-breakdown .offer-tag,
-        .price-breakdown .product-discount-tag,
-        .price-breakdown .best-discount-tag {
+        .cart-items-card .card-header .item-count {
+            font-size: 12px;
+            padding: 2px 12px;
+        }
+        .cart-footer {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .footer-card {
+            padding: 14px 12px;
+        }
+        .footer-card .card-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+        }
+        .footer-card .card-title {
+            font-size: 13px;
+        }
+        .footer-card .card-desc {
+            font-size: 11px;
+        }
+        .order-summary .card-header {
+            padding: 12px 14px;
+        }
+        .order-summary .card-body {
+            padding: 14px;
+        }
+        .cart-header h1 {
+            font-size: 20px;
+        }
+        .cart-header .left .icon-box {
+            width: 38px;
+            height: 38px;
+            font-size: 15px;
+        }
+        .cart-header .count-pill {
+            font-size: 12px;
+            padding: 3px 14px;
+        }
+        .offer-banner {
+            padding: 8px 12px;
+        }
+        .offer-banner .offer-text {
+            font-size: 12px;
+        }
+        .summary-row {
+            font-size: 13px;
+        }
+        .summary-row.total .label {
+            font-size: 15px;
+        }
+        .summary-row.total .value {
+            font-size: 18px;
+        }
+        .btn-checkout {
+            font-size: 15px;
+            padding: 10px;
+        }
+        .btn-continue {
+            font-size: 13px;
+            padding: 8px;
+        }
+        .coupon-section .coupon-input input {
+            font-size: 12px;
+            padding: 6px 10px;
+        }
+        .coupon-section .coupon-input .btn-apply {
+            font-size: 12px;
+            padding: 6px 14px;
+        }
+        .empty-cart {
+            padding: 40px 16px;
+        }
+        .empty-cart h3 {
+            font-size: 22px;
+        }
+        .empty-cart .empty-icon {
+            font-size: 40px;
+        }
+        .empty-cart .btn-shop {
+            font-size: 13px;
+            padding: 10px 28px;
+        }
+        .toast-container {
+            top: 16px;
+            right: 16px;
+            left: 16px;
+        }
+        .toast {
+            font-size: 12px;
+            padding: 10px 16px;
+            min-width: auto;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .cart-item {
+            padding: 8px 12px;
+            gap: 8px;
+        }
+        .cart-item .item-image {
+            flex: 0 0 48px;
+            width: 48px;
+            height: 48px;
+        }
+        .cart-item .item-details .item-name {
+            font-size: 12px;
+        }
+        .cart-item .item-details .price-breakdown .current {
+            font-size: 15px;
+        }
+        .cart-item .item-details .price-breakdown .original {
+            font-size: 12px;
+        }
+        .cart-item .item-details .price-breakdown .tag {
+            font-size: 7px;
+            padding: 1px 8px;
+        }
+        .cart-item .item-details .price-breakdown .savings-text {
+            font-size: 10px;
+        }
+        .cart-item .item-actions .qty-group {
+            border-radius: 6px;
+        }
+        .cart-item .item-actions .qty-group button {
+            width: 22px;
+            height: 22px;
+            font-size: 11px;
+        }
+        .cart-item .item-actions .qty-group input {
+            width: 26px;
+            height: 22px;
+            font-size: 11px;
+        }
+        .cart-item .item-actions .btn-remove {
+            width: 22px;
+            height: 22px;
+            font-size: 11px;
+        }
+        .cart-item .item-total .total-price {
+            font-size: 15px;
+        }
+        .cart-footer {
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .footer-card {
+            padding: 12px 10px;
+        }
+        .footer-card .card-icon {
+            width: 36px;
+            height: 36px;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .footer-card .card-title {
+            font-size: 12px;
+        }
+        .footer-card .card-desc {
+            font-size: 10px;
+        }
+        .cart-items-card .card-header {
+            padding: 10px 12px;
+        }
+        .cart-items-card .card-header h5 {
+            font-size: 13px;
+        }
+        .cart-items-card .card-header .item-count {
+            font-size: 11px;
+            padding: 2px 10px;
+        }
+        .order-summary .card-header {
+            padding: 10px 12px;
+        }
+        .order-summary .card-body {
+            padding: 12px;
+        }
+        .cart-header h1 {
+            font-size: 18px;
+        }
+        .cart-header .left .icon-box {
+            width: 34px;
+            height: 34px;
+            font-size: 13px;
+        }
+        .cart-header .left .icon-box .badge-dot {
+            width: 16px;
+            height: 16px;
+            font-size: 8px;
+        }
+        .cart-header .count-pill {
+            font-size: 11px;
+            padding: 2px 12px;
+        }
+        .summary-row {
+            font-size: 12px;
+        }
+        .summary-row.total .label {
+            font-size: 14px;
+        }
+        .summary-row.total .value {
+            font-size: 16px;
+        }
+        .btn-checkout {
+            font-size: 14px;
+            padding: 10px;
+        }
+        .btn-continue {
+            font-size: 12px;
+            padding: 6px;
+        }
+        .coupon-section .coupon-input {
+            flex-direction: column;
+        }
+        .coupon-section .coupon-input .btn-apply {
+            width: 100%;
+        }
+        .empty-cart h3 {
+            font-size: 20px;
+        }
+        .empty-cart .empty-icon {
+            font-size: 36px;
+        }
+        .empty-cart .btn-shop {
+            font-size: 13px;
+            padding: 8px 24px;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .cart-footer {
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+        .footer-card {
+            padding: 10px 8px;
+        }
+        .footer-card .card-icon {
+            width: 30px;
+            height: 30px;
+            font-size: 12px;
+        }
+        .footer-card .card-title {
+            font-size: 11px;
+        }
+        .footer-card .card-desc {
             font-size: 9px;
-            padding: 1px 6px;
+        }
+        .cart-item {
+            padding: 6px 10px;
+        }
+        .cart-item .item-image {
+            flex: 0 0 40px;
+            width: 40px;
+            height: 40px;
+        }
+        .cart-item .item-details .item-name {
+            font-size: 11px;
+        }
+        .cart-item .item-details .price-breakdown .current {
+            font-size: 14px;
+        }
+        .cart-item .item-actions .qty-group button {
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
+        }
+        .cart-item .item-actions .qty-group input {
+            width: 22px;
+            height: 20px;
+            font-size: 10px;
+        }
+        .cart-item .item-actions .btn-remove {
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
+        }
+        .cart-header h1 {
+            font-size: 16px;
+        }
+        .cart-header .left .icon-box {
+            width: 30px;
+            height: 30px;
+            font-size: 12px;
+        }
+        .cart-header .count-pill {
+            font-size: 10px;
+            padding: 2px 10px;
         }
     }
 </style>
-{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
+<!-- ============================================ -->
+<!-- CART PAGE - CLEAN PROFESSIONAL               -->
+<!-- ============================================ -->
+<div class="cart-page">
+    <div class="cart-container">
 
-    <h2 class="mb-4"><i class="fas fa-shopping-cart text-primary"></i> Shopping Cart</h2>
-    
-    {% if items_data %}
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0">Cart Items ({{ total_items }})</h5>
+        <!-- Toast Container -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- ===== HEADER ===== -->
+        <div class="cart-header">
+            <div class="left">
+                <div class="icon-box">
+                    <i class="fas fa-shopping-cart"></i>
+                    {% if total_items > 0 %}
+                        <span class="badge-dot">{{ total_items }}</span>
+                    {% endif %}
+                </div>
+                <h1>Cart <span>.</span></h1>
+            </div>
+            <span class="count-pill"><strong>{{ total_items }}</strong> items</span>
+        </div>
+
+        <!-- ===== CART CONTENT ===== -->
+        {% if items_data %}
+        <div class="cart-grid">
+
+            <!-- LEFT: Cart Items -->
+            <div>
+                <div class="cart-items-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-shopping-bag"></i> Shopping Cart</h5>
+                        <span class="item-count">{{ total_items }} items</span>
                     </div>
                     <div class="card-body">
                         {% for data in items_data %}
-                        <div class="cart-item d-flex align-items-center py-3 border-bottom" id="cart-item-{{ data.item.id }}">
-                            <!-- Product Image -->
-                            <div class="me-3" style="width:80px;height:80px;overflow:hidden;border-radius:8px;flex-shrink:0;">
+                        <div class="cart-item" id="cart-item-{{ data.item.id }}">
+                            <!-- Image -->
+                            <div class="item-image">
                                 {% if data.item.main_image %}
-                                    <img src="{{ data.item.main_image }}" class="w-100 h-100" style="object-fit:cover;">
+                                    <img src="{{ data.item.main_image }}" alt="{{ data.item.item_name }}" loading="lazy">
                                 {% else %}
-                                    <div class="bg-light w-100 h-100 d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-image fa-2x text-muted"></i>
+                                    <div class="no-image">
+                                        <i class="fas fa-image"></i>
                                     </div>
                                 {% endif %}
                             </div>
-                            
-                            <!-- Product Details -->
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">{{ data.item.item_name }}</h6>
-                                <small class="text-muted">SKU: {{ data.item.item_sku }}</small>
-                                
-                                <!-- ============================================ -->
-                                <!-- PRICE BREAKDOWN - CORRECT DISPLAY           -->
-                                <!-- ============================================ -->
+
+                            <!-- Details -->
+                            <div class="item-details">
+                                <a href="{% url 'Ecom:product_detail' data.item.product_id %}" class="item-name">
+                                    {{ data.item.item_name }}
+                                </a>
+                                <span class="item-sku">SKU: {{ data.item.item_sku }}</span>
+
                                 <div class="price-breakdown">
-                                    <!-- Original Price -->
                                     <span class="original">₹{{ data.original_price|floatformat:2 }}</span>
-                                    
-                                    <!-- Final Price -->
-                                    <span class="discounted">₹{{ data.final_price|floatformat:2 }}</span>
-                                    
-                                    <!-- ======================================== -->
-                                    <!-- DISPLAY THE APPLIED DISCOUNT (BEST ONE) -->
-                                    <!-- ======================================== -->
+                                    <span class="current">₹{{ data.final_price|floatformat:2 }}</span>
+
                                     {% if data.has_offer %}
-                                        <!-- Offer Applied (Priority) -->
-                                        <span class="offer-tag">
-                                            <i class="fas fa-gift"></i> {{ data.offer_name }}
-                                        </span>
-                                        <span class="savings-text">
-                                            Save ₹{{ data.offer_discount|floatformat:2 }}
-                                        </span>
+                                        <span class="tag offer"><i class="fas fa-gift"></i> Offer</span>
+                                        <span class="savings-text">Save ₹{{ data.offer_discount|floatformat:2 }}</span>
                                     {% elif data.has_product_discount %}
-                                        <!-- Product Discount Applied (Only if no offer) -->
-                                        <span class="product-discount-tag">
-                                            <i class="fas fa-tags"></i> Product Discount
-                                        </span>
-                                        <span class="savings-text">
-                                            Save ₹{{ data.product_discount_amount|floatformat:2 }}
-                                        </span>
+                                        <span class="tag discount"><i class="fas fa-tags"></i> Discount</span>
+                                        <span class="savings-text">Save ₹{{ data.product_discount_amount|floatformat:2 }}</span>
                                     {% else %}
-                                        <!-- No Discount -->
-                                        <span class="no-discount">No discount applied</span>
+                                        <span class="no-discount">No discount</span>
                                     {% endif %}
-                                    
-                                    <!-- Show Best Deal tag if both existed (but offer was better) -->
+
                                     {% if data.has_product_discount and data.has_offer %}
-                                        <span class="best-discount-tag">
-                                            <i class="fas fa-crown"></i> Best Deal
-                                        </span>
+                                        <span class="tag best-deal"><i class="fas fa-crown"></i> Best Deal</span>
                                     {% endif %}
                                 </div>
-                                <!-- ============================================ -->
-                                <!-- END PRICE BREAKDOWN                        -->
-                                <!-- ============================================ -->
                             </div>
-                            
-                            <!-- Quantity & Actions -->
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="input-group" style="width:120px;">
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="updateQuantity({{ data.item.id }}, -1)">-</button>
-                                    <input type="number" class="form-control form-control-sm text-center" value="{{ data.item.quantity }}" min="1" max="{{ data.item.stock_available }}" id="qty-{{ data.item.id }}" onchange="updateQuantity({{ data.item.id }}, 0)">
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="updateQuantity({{ data.item.id }}, 1)">+</button>
+
+                            <!-- Actions -->
+                            <div class="item-actions">
+                                <div class="qty-group">
+                                    <button onclick="updateQuantity({{ data.item.id }}, -1)">−</button>
+                                    <input type="number" id="qty-{{ data.item.id }}" value="{{ data.item.quantity }}" min="1" max="{{ data.item.stock_available }}" onchange="updateQuantity({{ data.item.id }}, 0)">
+                                    <button onclick="updateQuantity({{ data.item.id }}, 1)">+</button>
                                 </div>
-                                <button class="btn btn-danger btn-sm" onclick="removeItem({{ data.item.id }})" title="Remove item">
-                                    <i class="fas fa-trash"></i>
+                                <button class="btn-remove" onclick="removeItem({{ data.item.id }})" title="Remove">
+                                    <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
-                            
-                            <!-- Item Total -->
-                            <div class="ms-3 text-end" style="min-width:80px;">
-                                <strong>₹{{ data.item_total|floatformat:2 }}</strong>
-                                {% if data.has_offer %}
-                                    <br><small class="text-success">Save ₹{{ data.offer_discount|floatformat:2 }}</small>
-                                {% elif data.has_product_discount %}
-                                    <br><small class="text-success">Save ₹{{ data.product_discount_amount|floatformat:2 }}</small>
+
+                            <!-- Total -->
+                            <div class="item-total">
+                                <span class="total-price">₹{{ data.item_total|floatformat:2 }}</span>
+                                {% if data.has_offer or data.has_product_discount %}
+                                    <span class="total-savings">Save ₹{{ data.offer_discount|default:data.product_discount_amount|floatformat:2 }}</span>
                                 {% endif %}
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
-            </div>
-            
-            <!-- Cart Summary -->
-            <div class="col-lg-4">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0">Order Summary</h5>
+
+                <!-- ===== CART FOOTER - NEAT PROFESSIONAL CARDS ===== -->
+                <div class="cart-footer">
+                    <div class="footer-card">
+                        <div class="card-icon">
+                            <i class="fas fa-sliders-h"></i>
+                        </div>
+                        <div class="card-title">Flexible Quantity</div>
+                        <div class="card-desc">Adjust quantities <span class="highlight">anytime</span></div>
                     </div>
-                    <div class="card-body">
-                        <!-- Total Savings Banner -->
-                        {% with total_savings=total_product_discount_savings|add:total_offer_savings %}
-                            {% if total_savings > 0 %}
-                                <div class="offer-banner">
-                                    <i class="fas fa-gift"></i>
-                                    <span class="offer-text">
-                                        🎉 You saved <strong>₹{{ total_savings|floatformat:2 }}</strong> today!
-                                    </span>
-                                </div>
-                            {% endif %}
-                        {% endwith %}
-                        
-                        <!-- Price Breakdown -->
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Subtotal</span>
-                            <span>₹{{ subtotal_without_offers|floatformat:2 }}</span>
+                    <div class="footer-card">
+                        <div class="card-icon">
+                            <i class="fas fa-heart"></i>
                         </div>
-                        
-                        <!-- Product Discounts (Only if applied) -->
-                        {% if total_product_discount_savings > 0 %}
-                        <div class="d-flex justify-content-between mb-2 text-success">
-                            <span><i class="fas fa-tags"></i> Product Discount</span>
-                            <span>-₹{{ total_product_discount_savings|floatformat:2 }}</span>
+                        <div class="card-title">Save for Later</div>
+                        <div class="card-desc">Move to <span class="highlight">wishlist</span> anytime</div>
+                    </div>
+                    <div class="footer-card">
+                        <div class="card-icon">
+                            <i class="fas fa-gem"></i>
                         </div>
+                        <div class="card-title">Price Match</div>
+                        <div class="card-desc">Best <span class="highlight">price</span> guaranteed</div>
+                    </div>
+                    <div class="footer-card">
+                        <div class="card-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="card-title">Premium Quality</div>
+                        <div class="card-desc"><span class="highlight">Premium</span> products curated</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Order Summary -->
+            <div class="order-summary">
+                <div class="card-header">
+                    <h5>Order Summary</h5>
+                </div>
+                <div class="card-body">
+
+                    <!-- Savings Banner -->
+                    {% with total_savings=total_product_discount_savings|add:total_offer_savings %}
+                        {% if total_savings > 0 %}
+                            <div class="offer-banner">
+                                <i class="fas fa-gift"></i>
+                                <span class="offer-text">You saved <strong>₹{{ total_savings|floatformat:2 }}</strong> today!</span>
+                            </div>
                         {% endif %}
-                        
-                        <!-- Offer Savings (Only if applied) -->
-                        {% if total_offer_savings > 0 %}
-                        <div class="d-flex justify-content-between mb-2 text-success">
-                            <span><i class="fas fa-gift"></i> Offer Savings</span>
-                            <span>-₹{{ total_offer_savings|floatformat:2 }}</span>
-                        </div>
+                    {% endwith %}
+
+                    <!-- Subtotal -->
+                    <div class="summary-row">
+                        <span class="label">Subtotal</span>
+                        <span class="value">₹{{ subtotal_without_offers|floatformat:2 }}</span>
+                    </div>
+
+                    <!-- Product Discount -->
+                    {% if total_product_discount_savings > 0 %}
+                    <div class="summary-row">
+                        <span class="label"><i class="fas fa-tags" style="color:#28a745;"></i> Product Discount</span>
+                        <span class="value discount">-₹{{ total_product_discount_savings|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Offer Savings -->
+                    {% if total_offer_savings > 0 %}
+                    <div class="summary-row">
+                        <span class="label"><i class="fas fa-gift" style="color:#28a745;"></i> Offer Savings</span>
+                        <span class="value discount">-₹{{ total_offer_savings|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- After Discounts -->
+                    <div class="summary-row" style="font-weight:600;padding-top:4px;">
+                        <span class="label">Subtotal after discounts</span>
+                        <span class="value">₹{{ subtotal_with_offers|floatformat:2 }}</span>
+                    </div>
+
+                    <!-- Coupon -->
+                    {% if coupon_discount > 0 %}
+                    <div class="summary-row">
+                        <span class="label"><i class="fas fa-ticket-alt" style="color:#28a745;"></i> Coupon Discount</span>
+                        <span class="value discount">-₹{{ coupon_discount|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Total -->
+                    <div class="summary-row total">
+                        <span class="label">Total</span>
+                        <span class="value">₹{{ total|floatformat:2 }}</span>
+                    </div>
+
+                    <!-- Total Savings -->
+                    {% with total_actual_savings=total_product_discount_savings|add:total_offer_savings|add:coupon_discount %}
+                        {% if total_actual_savings > 0 %}
+                            <div class="summary-savings">
+                                <i class="fas fa-wallet"></i> You saved ₹{{ total_actual_savings|floatformat:2 }} today!
+                            </div>
                         {% endif %}
-                        
-                        <div class="d-flex justify-content-between mb-2 fw-bold">
-                            <span>Subtotal after discounts</span>
-                            <span>₹{{ subtotal_with_offers|floatformat:2 }}</span>
-                        </div>
-                        
-                        <!-- Coupon Discount -->
-                        {% if coupon_discount > 0 %}
-                        <div class="d-flex justify-content-between mb-2 text-success">
-                            <span><i class="fas fa-ticket-alt"></i> Coupon Discount</span>
-                            <span>-₹{{ coupon_discount|floatformat:2 }}</span>
-                        </div>
-                        {% endif %}
-                        
-                        <hr>
-                        <div class="d-flex justify-content-between mb-3">
-                            <span class="h5">Total</span>
-                            <span class="h5 text-success">₹{{ total|floatformat:2 }}</span>
-                        </div>
-                        
-                        <!-- Total Savings Summary -->
-                        {% with total_actual_savings=total_product_discount_savings|add:total_offer_savings|add:coupon_discount %}
-                            {% if total_actual_savings > 0 %}
-                                <div class="text-success text-center mb-2">
-                                    <small>You saved ₹{{ total_actual_savings|floatformat:2 }} today!</small>
-                                </div>
-                            {% endif %}
-                        {% endwith %}
-                        
-                        <!-- Coupon Section -->
+                    {% endwith %}
+
+                    <!-- Coupon Section -->
+                    <div class="coupon-section">
                         {% if cart.coupon %}
-                            <div class="alert alert-success d-flex justify-content-between align-items-center">
+                            <div class="applied-coupon">
                                 <span><i class="fas fa-ticket-alt"></i> {{ cart.coupon.code }}</span>
-                                <a href="{% url 'Ecom:remove_coupon' %}" class="text-danger" onclick="return confirm('Remove coupon?')">
+                                <a href="{% url 'Ecom:remove_coupon' %}" class="remove-coupon" onclick="return confirm('Remove coupon?')">
                                     <i class="fas fa-times"></i>
                                 </a>
                             </div>
                         {% else %}
-                            <form method="POST" action="{% url 'Ecom:apply_coupon' %}" class="mb-3">
+                            <form method="POST" action="{% url 'Ecom:apply_coupon' %}" class="coupon-input">
                                 {% csrf_token %}
-                                <div class="input-group">
-                                    {{ coupon_form.code }}
-                                    <button class="btn btn-primary" type="submit">Apply</button>
-                                </div>
+                                <input type="text" name="code" placeholder="Enter coupon code" required>
+                                <button type="submit" class="btn-apply">Apply</button>
                             </form>
                         {% endif %}
-                        
-                        <!-- Action Buttons -->
-                        <a href="{% url 'Ecom:checkout' %}" class="btn btn-primary w-100 btn-lg">
-                            <i class="fas fa-lock"></i> Proceed to Checkout
-                        </a>
-                        <a href="{% url 'Ecom:shop' %}" class="btn btn-outline-secondary w-100 mt-2">
-                            <i class="fas fa-arrow-left"></i> Continue Shopping
-                        </a>
                     </div>
+
+                    <!-- Checkout Buttons -->
+                    <a href="{% url 'Ecom:checkout' %}" class="btn-checkout">
+                        <i class="fas fa-lock"></i> Proceed to Checkout
+                    </a>
+                    <a href="{% url 'Ecom:shop' %}" class="btn-continue">
+                        <i class="fas fa-arrow-left"></i> Continue Shopping
+                    </a>
                 </div>
             </div>
+
         </div>
-    {% else %}
-        <div class="text-center py-5">
-            <i class="fas fa-shopping-cart fa-4x text-muted"></i>
-            <h4 class="mt-3">Your cart is empty</h4>
-            <p class="text-muted">Start shopping and add items to your cart</p>
-            <a href="{% url 'Ecom:shop' %}" class="btn btn-primary">
+        {% else %}
+        <!-- Empty Cart -->
+        <div class="empty-cart">
+            <span class="empty-icon"><i class="fas fa-shopping-cart"></i></span>
+            <h3>Your cart is empty</h3>
+            <p>Start adding items to your cart and create your dream collection</p>
+            <a href="{% url 'Ecom:shop' %}" class="btn-shop">
                 <i class="fas fa-store"></i> Start Shopping
             </a>
         </div>
-    {% endif %}
+        {% endif %}
+
+    </div>
 </div>
 
 <!-- ============================================ -->
 <!-- JAVASCRIPT                                  -->
 <!-- ============================================ -->
 <script>
-    // ============================================
-    // CSRF TOKEN HELPER
-    // ============================================
     function getCookie(name) {
-        let cookieValue = null;
+        var cookieValue = null;
         if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
@@ -399,56 +1445,49 @@
         return cookieValue;
     }
 
-    // ============================================
-    // TOAST NOTIFICATION
-    // ============================================
-    function showToast(message, type = 'success') {
-        const container = document.getElementById('toastContainer');
+    function showToast(message, type) {
+        type = type || 'success';
+        var container = document.getElementById('toastContainer');
         if (!container) return;
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        const icons = {
+        var toast = document.createElement('div');
+        toast.className = 'toast ' + type;
+        var icons = {
             success: 'fa-check-circle',
             error: 'fa-exclamation-circle',
             info: 'fa-info-circle',
             warning: 'fa-exclamation-triangle'
         };
-        toast.innerHTML = `
-            <i class="fas ${icons[type] || icons.info}"></i>
-            <span>${message}</span>
-            <span class="toast-close" onclick="this.parentElement.remove()">&times;</span>
-        `;
+        toast.innerHTML = '<i class="fas ' + (icons[type] || icons.info) + '"></i><span>' + message + '</span><button class="toast-close" onclick="this.parentElement.remove()">&times;</button>';
         container.appendChild(toast);
-        setTimeout(() => {
+        setTimeout(function() {
             if (toast.parentElement) {
                 toast.style.opacity = '0';
                 toast.style.transition = 'opacity 0.3s';
-                setTimeout(() => toast.remove(), 300);
+                setTimeout(function() {
+                    if (toast.parentElement) toast.remove();
+                }, 300);
             }
         }, 5000);
     }
 
-    // ============================================
-    // UPDATE QUANTITY
-    // ============================================
     function updateQuantity(itemId, change) {
-        const input = document.getElementById('qty-' + itemId);
-        let quantity = parseInt(input.value) || 1;
-        
+        var input = document.getElementById('qty-' + itemId);
+        var quantity = parseInt(input.value) || 1;
+
         if (change !== 0) {
             quantity = Math.max(1, quantity + change);
         } else {
             quantity = Math.max(1, parseInt(input.value) || 1);
         }
-        
-        const maxStock = parseInt(input.getAttribute('max'));
+
+        var maxStock = parseInt(input.getAttribute('max'));
         if (quantity > maxStock) {
             showToast('Only ' + maxStock + ' items available', 'error');
             return;
         }
-        
+
         input.disabled = true;
-        
+
         fetch('{% url "Ecom:update_cart_item" %}', {
             method: 'POST',
             headers: {
@@ -460,8 +1499,8 @@
                 quantity: quantity
             })
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
             if (data.success) {
                 location.reload();
             } else {
@@ -469,46 +1508,43 @@
                 input.disabled = false;
             }
         })
-        .catch(error => {
+        .catch(function(error) {
             showToast('Network error. Please try again.', 'error');
             input.disabled = false;
         });
     }
 
-    // ============================================
-    // REMOVE ITEM
-    // ============================================
     function removeItem(itemId) {
         if (!confirm('Remove this item from cart?')) return;
-        
-        const button = document.querySelector(`button[onclick="removeItem(${itemId})"]`);
+
+        var button = document.querySelector('button[onclick="removeItem(' + itemId + ')"]');
         if (button) {
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             button.disabled = true;
         }
-        
+
         fetch('{% url "Ecom:remove_from_cart" 0 %}'.replace('0', itemId), {
             method: 'POST',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken'),
             }
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
             if (data.success) {
                 location.reload();
             } else {
                 showToast(data.error || 'Error removing item', 'error');
                 if (button) {
-                    button.innerHTML = '<i class="fas fa-trash"></i>';
+                    button.innerHTML = '<i class="fas fa-trash-alt"></i>';
                     button.disabled = false;
                 }
             }
         })
-        .catch(error => {
+        .catch(function(error) {
             showToast('Network error. Please try again.', 'error');
             if (button) {
-                button.innerHTML = '<i class="fas fa-trash"></i>';
+                button.innerHTML = '<i class="fas fa-trash-alt"></i>';
                 button.disabled = false;
             }
         });

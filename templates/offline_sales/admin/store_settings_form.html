@@ -1,139 +1,1038 @@
 <!-- templates/offline_sales/admin/store_settings_form.html -->
-
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
 {% block title %}{{ action }} Store Settings{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'offline_sales:store_settings_list' %}">Store Settings</a></li>
-            <li class="breadcrumb-item active">{{ action }} Settings</li>
-        </ol>
-    </nav>
 
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-cog"></i> {{ action }} Store Settings</h5>
-                </div>
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="mb-3">
-                                    <label class="form-label">Store Name <span class="text-danger">*</span></label>
-                                    {{ form.store_name }}
-                                    {% if form.store_name.errors %}
-                                    <div class="text-danger">{{ form.store_name.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label class="form-label">Store Logo</label>
-                                    {{ form.store_logo }}
-                                    {% if store_settings.store_logo %}
-                                        <div class="mt-2">
-                                            <img src="{{ store_settings.store_logo.url }}" height="60" alt="Logo">
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
+<style>
+    /* ============================================================
+       ROOT VARIABLES - RICH & VIBRANT THEME
+       ============================================================ */
+    :root {
+        --sf-primary: #5c121f;
+        --sf-primary-light: #8a1a2f;
+        --sf-primary-dark: #3d0c14;
+        --sf-primary-gradient: linear-gradient(135deg, #5c121f 0%, #8a1a2f 100%);
+        --sf-gold: #c9a84c;
+        --sf-gold-light: #f5edd6;
+        --sf-gold-gradient: linear-gradient(135deg, #c9a84c, #f0d68a);
+        --sf-bg: #f5f0eb;
+        --sf-white: #ffffff;
+        --sf-border: #e8e2dc;
+        --sf-border-light: #f0ebe6;
+        --sf-text: #1a1410;
+        --sf-text-light: #6b5e56;
+        --sf-text-muted: #a89990;
+        --sf-shadow: 0 4px 24px rgba(92,18,31,0.06);
+        --sf-shadow-lg: 0 12px 48px rgba(92,18,31,0.08);
+        --sf-radius: 16px;
+        --sf-radius-sm: 12px;
+        --sf-radius-xs: 8px;
+        --sf-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        --sf-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --sf-left-bg: #faf7f5;
+        --sf-right-bg: #ffffff;
+        --sf-header-bg: linear-gradient(135deg, #5c121f 0%, #7a1a2f 50%, #8a1a2f 100%);
+    }
 
-                        <div class="mb-3">
-                            <label class="form-label">Store Address <span class="text-danger">*</span></label>
-                            {{ form.store_address }}
-                            {% if form.store_address.errors %}
-                            <div class="text-danger">{{ form.store_address.errors }}</div>
-                            {% endif %}
-                        </div>
+    /* ============================================================
+       WRAPPER
+       ============================================================ */
+    .sf-wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px 24px 40px 24px;
+        background: var(--sf-bg);
+        min-height: 100vh;
+        width: 100%;
+        box-sizing: border-box;
+    }
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Phone <span class="text-danger">*</span></label>
-                                    {{ form.store_phone }}
-                                    {% if form.store_phone.errors %}
-                                    <div class="text-danger">{{ form.store_phone.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Email <span class="text-danger">*</span></label>
-                                    {{ form.store_email }}
-                                    {% if form.store_email.errors %}
-                                    <div class="text-danger">{{ form.store_email.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
+    /* ============================================================
+       PAGE HEADER - RICH & ELEGANT
+       ============================================================ */
+    .sf-page-header {
+        background: var(--sf-header-bg);
+        padding: 28px 36px;
+        border-radius: var(--sf-radius) var(--sf-radius) 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 0;
+    }
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Website</label>
-                                    {{ form.store_website }}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">GST Number</label>
-                                    {{ form.gst_number }}
-                                </div>
-                            </div>
-                        </div>
+    .sf-page-header::before {
+        content: '';
+        position: absolute;
+        top: -80px;
+        right: -80px;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">PAN Number</label>
-                                    {{ form.pan_number }}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Invoice Prefix</label>
-                                    {{ form.invoice_prefix }}
-                                    <small class="text-muted">e.g., INV-</small>
-                                </div>
-                            </div>
-                        </div>
+    .sf-page-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--sf-gold-gradient);
+        opacity: 0.6;
+    }
 
-                        <div class="mb-3">
-                            <label class="form-label">Next Invoice Number</label>
-                            {{ form.invoice_start_number }}
-                            <small class="text-muted">Current: {{ store_settings.invoice_start_number|default:"1001" }}</small>
-                        </div>
+    .sf-page-header .title-group {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        position: relative;
+        z-index: 1;
+    }
 
-                        <div class="mb-3">
-                            <label class="form-label">Terms & Conditions</label>
-                            {{ form.terms_conditions }}
-                        </div>
+    .sf-page-header .title-group .icon-wrap {
+        width: 52px;
+        height: 52px;
+        background: rgba(255,255,255,0.1);
+        border-radius: var(--sf-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--sf-white);
+        font-size: 22px;
+        border: 1px solid rgba(255,255,255,0.08);
+        backdrop-filter: blur(4px);
+        flex-shrink: 0;
+        transition: var(--sf-transition);
+    }
 
-                        <div class="mb-3">
-                            <label class="form-label">Footer Text</label>
-                            {{ form.footer_text }}
-                        </div>
+    .sf-page-header .title-group .icon-wrap:hover {
+        background: rgba(255,255,255,0.15);
+        transform: rotate(-5deg) scale(1.05);
+    }
 
-                        <div class="d-flex justify-content-between">
-                            <a href="{% url 'offline_sales:store_settings_list' %}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Save Settings
-                            </button>
-                        </div>
-                    </form>
-                </div>
+    .sf-page-header .title-group h1 {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--sf-white);
+        font-family: var(--sf-font);
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .sf-page-header .title-group h1 span {
+        background: var(--sf-gold-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+    }
+
+    .sf-page-header .title-group p {
+        font-size: 13px;
+        color: rgba(255,255,255,0.5);
+        font-family: var(--sf-font);
+        margin: 2px 0 0 0;
+        letter-spacing: 0.2px;
+    }
+
+    .sf-page-header .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 22px;
+        border-radius: 50px;
+        font-size: 13px;
+        font-weight: 600;
+        background: rgba(15,123,74,0.15);
+        color: #4ade80;
+        border: 1px solid rgba(74,222,128,0.15);
+        font-family: var(--sf-font);
+        backdrop-filter: blur(4px);
+        position: relative;
+        z-index: 1;
+    }
+
+    .sf-page-header .status-badge .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #4ade80;
+        animation: sfPulse 2s ease-in-out infinite;
+        display: inline-block;
+    }
+
+    @keyframes sfPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.3; transform: scale(0.6); }
+    }
+
+    /* ============================================================
+       MAIN CARD - ELEVATED
+       ============================================================ */
+    .sf-card {
+        background: var(--sf-white);
+        border-radius: 0 0 var(--sf-radius) var(--sf-radius);
+        border: 1px solid var(--sf-border);
+        border-top: none;
+        box-shadow: var(--sf-shadow-lg);
+        overflow: hidden;
+        transition: var(--sf-transition);
+    }
+
+    .sf-card:hover {
+        box-shadow: 0 16px 56px rgba(92,18,31,0.1);
+    }
+
+    /* ============================================================
+       CARD BODY - TWO SIDED LAYOUT
+       ============================================================ */
+    .sf-card-body {
+        padding: 0;
+        background: var(--sf-white);
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    /* left column — subtle warm background */
+    .sf-col-left {
+        flex: 0 0 50%;
+        max-width: 50%;
+        background: var(--sf-left-bg);
+        padding: 32px 30px 32px 36px;
+        border-right: 1px solid var(--sf-border);
+        box-sizing: border-box;
+        min-height: 100%;
+    }
+
+    /* right column — white background */
+    .sf-col-right {
+        flex: 0 0 50%;
+        max-width: 50%;
+        background: var(--sf-right-bg);
+        padding: 32px 36px 32px 30px;
+        box-sizing: border-box;
+        min-height: 100%;
+    }
+
+    /* ============================================================
+       FORM GROUP
+       ============================================================ */
+    .sf-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 22px;
+    }
+
+    .sf-form-group:last-child {
+        margin-bottom: 0;
+    }
+
+    /* ============================================================
+       LABELS - RICH & CLEAR
+       ============================================================ */
+    .sf-form-group .label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--sf-text);
+        font-family: var(--sf-font);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        letter-spacing: 0.4px;
+        margin-bottom: 2px;
+        text-transform: uppercase;
+        font-size: 11px;
+    }
+
+    .sf-form-group .label .required {
+        color: #dc3545;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .sf-form-group .label .hint {
+        font-weight: 400;
+        color: var(--sf-text-muted);
+        font-size: 10px;
+        opacity: 0.6;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    .sf-form-group .label .label-icon {
+        color: var(--sf-primary);
+        font-size: 14px;
+        opacity: 0.5;
+        width: 18px;
+        text-align: center;
+        transition: var(--sf-transition);
+    }
+
+    .sf-form-group:hover .label .label-icon {
+        opacity: 0.9;
+        color: var(--sf-gold);
+    }
+
+    /* ============================================================
+       INPUT FIELDS - ELEVATED
+       ============================================================ */
+    .sf-form-group input,
+    .sf-form-group select,
+    .sf-form-group textarea {
+        width: 100%;
+        padding: 13px 18px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--sf-text);
+        background: #ffffff;
+        border: 1.5px solid var(--sf-border);
+        border-radius: var(--sf-radius-xs);
+        outline: none;
+        transition: all .3s ease;
+        box-sizing: border-box;
+        font-family: var(--sf-font);
+        line-height: 1.5;
+    }
+
+    .sf-form-group input:hover,
+    .sf-form-group select:hover,
+    .sf-form-group textarea:hover {
+        border-color: var(--sf-primary-light);
+        background: #fcfaf8;
+        box-shadow: 0 2px 8px rgba(92,18,31,0.04);
+    }
+
+    .sf-form-group input:focus,
+    .sf-form-group select:focus,
+    .sf-form-group textarea:focus {
+        border-color: var(--sf-primary);
+        box-shadow: 0 0 0 4px rgba(92,18,31,0.08);
+        background: #ffffff;
+    }
+
+    .sf-form-group textarea {
+        min-height: 80px;
+        resize: vertical;
+        line-height: 1.7;
+    }
+
+    .sf-form-group select {
+        appearance: none;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%23888'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        padding-right: 40px;
+    }
+
+    .sf-form-group input::placeholder,
+    .sf-form-group textarea::placeholder {
+        color: var(--sf-text-muted);
+        font-size: 13px;
+        font-weight: 400;
+        opacity: 0.6;
+    }
+
+    /* ============================================================
+       FILE INPUT - ENHANCED
+       ============================================================ */
+    input[type="file"] {
+        width: 100%;
+        padding: 13px 18px;
+        border: 2px dashed var(--sf-border);
+        border-radius: var(--sf-radius-xs);
+        background: #faf8f6;
+        cursor: pointer;
+        transition: .3s;
+        font-family: var(--sf-font);
+        font-size: 13px;
+        color: var(--sf-text);
+        box-sizing: border-box;
+    }
+
+    input[type="file"]:hover {
+        border-color: var(--sf-primary);
+        background: #fcf9f7;
+        box-shadow: 0 2px 12px rgba(92,18,31,0.04);
+    }
+
+    input[type="file"]:focus {
+        border-color: var(--sf-primary);
+        box-shadow: 0 0 0 4px rgba(92,18,31,0.08);
+        outline: none;
+    }
+
+    /* ============================================================
+       LOGO PREVIEW - ELEGANT
+       ============================================================ */
+    .sf-logo-preview {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 18px;
+        background: #faf8f6;
+        border-radius: var(--sf-radius-xs);
+        border: 1.5px solid var(--sf-border);
+        margin-top: 4px;
+        flex-wrap: wrap;
+        transition: var(--sf-transition);
+    }
+
+    .sf-logo-preview:hover {
+        border-color: var(--sf-primary);
+        background: #fcf9f7;
+        box-shadow: 0 2px 12px rgba(92,18,31,0.04);
+    }
+
+    .sf-logo-preview img {
+        max-height: 44px;
+        border-radius: 6px;
+        border: 1px solid var(--sf-border);
+        padding: 3px;
+        background: var(--sf-white);
+        transition: var(--sf-transition);
+    }
+
+    .sf-logo-preview img:hover {
+        transform: scale(1.04);
+        border-color: var(--sf-primary);
+        box-shadow: 0 2px 12px rgba(92,18,31,0.08);
+    }
+
+    .sf-logo-preview .info {
+        font-size: 12px;
+        color: var(--sf-text-muted);
+        font-family: var(--sf-font);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .sf-logo-preview .info strong {
+        color: var(--sf-primary);
+        font-weight: 600;
+    }
+
+    .sf-logo-preview .info .badge {
+        display: inline-block;
+        background: var(--sf-gold-gradient);
+        color: var(--sf-white);
+        padding: 2px 12px;
+        border-radius: 50px;
+        font-size: 8px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(201,168,76,0.2);
+    }
+
+    /* ============================================================
+       ERROR & HELP TEXT
+       ============================================================ */
+    .sf-error-text {
+        font-size: 12px;
+        color: #dc3545;
+        font-family: var(--sf-font);
+        margin-top: 3px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 0;
+        font-weight: 500;
+    }
+
+    .sf-error-text::before {
+        content: '⚠';
+        font-size: 12px;
+    }
+
+    .sf-help-text {
+        font-size: 11px;
+        color: var(--sf-text-muted);
+        font-family: var(--sf-font);
+        margin-top: 3px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        opacity: 0.7;
+        transition: var(--sf-transition);
+    }
+
+    .sf-help-text:hover {
+        opacity: 1;
+    }
+
+    .sf-help-text strong {
+        color: var(--sf-primary);
+        font-weight: 600;
+    }
+
+    .sf-help-text i {
+        font-size: 10px;
+        opacity: 0.5;
+    }
+
+    /* ============================================================
+       FORM ACTIONS - ELEVATED
+       ============================================================ */
+    .sf-form-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 14px;
+        padding: 24px 36px 32px 36px;
+        border-top: 1px solid var(--sf-border);
+        flex-wrap: wrap;
+        width: 100%;
+        background: var(--sf-white);
+        border-radius: 0 0 var(--sf-radius) var(--sf-radius);
+        position: relative;
+    }
+
+    .sf-form-actions::before {
+        content: '';
+        position: absolute;
+        top: -1.5px;
+        left: 0;
+        width: 100px;
+        height: 2px;
+        background: var(--sf-gold-gradient);
+        border-radius: 2px;
+    }
+
+    .sf-btn {
+        padding: 12px 32px;
+        border-radius: var(--sf-radius-xs);
+        font-size: 14px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: var(--sf-transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        font-family: var(--sf-font);
+        letter-spacing: 0.3px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sf-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+        transition: var(--sf-transition);
+    }
+
+    .sf-btn:hover::before {
+        left: 100%;
+    }
+
+    .sf-btn-secondary {
+        background: transparent;
+        color: var(--sf-text-light);
+        border: 1.5px solid var(--sf-border);
+    }
+
+    .sf-btn-secondary:hover {
+        background: var(--sf-bg);
+        border-color: var(--sf-primary);
+        color: var(--sf-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(92,18,31,0.06);
+    }
+
+    .sf-btn-primary {
+        background: var(--sf-primary-gradient);
+        color: var(--sf-white);
+        box-shadow: 0 4px 20px rgba(92,18,31,0.25);
+    }
+
+    .sf-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(92,18,31,0.35);
+    }
+
+    .sf-btn-primary:active {
+        transform: translateY(-1px);
+    }
+
+    /* ============================================================
+       RESPONSIVE - PERFECT
+       ============================================================ */
+
+    @media (max-width: 1024px) {
+        .sf-page-header {
+            padding: 24px 28px;
+        }
+        .sf-page-header .title-group h1 {
+            font-size: 22px;
+        }
+        .sf-col-left {
+            padding: 28px 24px 28px 30px;
+        }
+        .sf-col-right {
+            padding: 28px 30px 28px 24px;
+        }
+        .sf-form-actions {
+            padding: 20px 30px 28px 30px;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .sf-col-left {
+            padding: 24px 20px 24px 24px;
+        }
+        .sf-col-right {
+            padding: 24px 24px 24px 20px;
+        }
+        .sf-page-header .title-group h1 {
+            font-size: 20px;
+        }
+        .sf-page-header .title-group .icon-wrap {
+            width: 44px;
+            height: 44px;
+            font-size: 18px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .sf-wrap {
+            padding: 12px 14px 24px 14px;
+        }
+
+        .sf-page-header {
+            padding: 20px 22px;
+            flex-direction: column;
+            align-items: flex-start;
+            border-radius: var(--sf-radius) var(--sf-radius) 0 0;
+        }
+        .sf-page-header .title-group h1 {
+            font-size: 18px;
+        }
+        .sf-page-header .title-group p {
+            font-size: 12px;
+        }
+        .sf-page-header .title-group .icon-wrap {
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+        }
+        .sf-page-header .status-badge {
+            font-size: 11px;
+            padding: 5px 16px;
+            align-self: flex-start;
+        }
+
+        .sf-card {
+            border-radius: 0 0 var(--sf-radius) var(--sf-radius);
+        }
+
+        .sf-card-body {
+            flex-direction: column;
+        }
+
+        .sf-col-left {
+            flex: 0 0 100%;
+            max-width: 100%;
+            border-right: none;
+            border-bottom: 1px solid var(--sf-border);
+            padding: 20px 24px;
+        }
+
+        .sf-col-right {
+            flex: 0 0 100%;
+            max-width: 100%;
+            padding: 20px 24px;
+        }
+
+        .sf-form-actions {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 16px 24px 24px 24px;
+        }
+        .sf-form-actions .sf-btn {
+            justify-content: center;
+            width: 100%;
+        }
+
+        .sf-form-group {
+            margin-bottom: 16px;
+        }
+        .sf-form-group input,
+        .sf-form-group select,
+        .sf-form-group textarea {
+            padding: 10px 14px;
+            font-size: 13px;
+        }
+        input[type="file"] {
+            padding: 10px 14px;
+            font-size: 12px;
+        }
+        .sf-form-group .label {
+            font-size: 10px;
+        }
+        .sf-logo-preview {
+            padding: 8px 12px;
+        }
+        .sf-logo-preview img {
+            max-height: 36px;
+        }
+        .sf-logo-preview .info {
+            font-size: 11px;
+        }
+        .sf-help-text {
+            font-size: 10px;
+        }
+        .sf-error-text {
+            font-size: 11px;
+        }
+        .sf-form-actions::before {
+            width: 60px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .sf-wrap {
+            padding: 8px 10px 16px 10px;
+        }
+        .sf-page-header {
+            padding: 16px 18px;
+        }
+        .sf-page-header .title-group h1 {
+            font-size: 16px;
+        }
+        .sf-page-header .title-group p {
+            font-size: 11px;
+        }
+        .sf-page-header .title-group .icon-wrap {
+            width: 36px;
+            height: 36px;
+            font-size: 14px;
+            border-radius: 10px;
+        }
+        .sf-col-left {
+            padding: 16px 18px;
+        }
+        .sf-col-right {
+            padding: 16px 18px;
+        }
+        .sf-form-actions {
+            padding: 12px 18px 20px 18px;
+        }
+        .sf-form-group input,
+        .sf-form-group select,
+        .sf-form-group textarea {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+        input[type="file"] {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        .sf-btn {
+            font-size: 12px;
+            padding: 9px 18px;
+        }
+        .sf-logo-preview img {
+            max-height: 32px;
+        }
+        .sf-logo-preview .info {
+            font-size: 10px;
+        }
+        .sf-form-group .label {
+            font-size: 9px;
+        }
+        .sf-form-group .label .hint {
+            font-size: 9px;
+        }
+        .sf-page-header .status-badge {
+            font-size: 10px;
+            padding: 4px 14px;
+        }
+        .sf-help-text {
+            font-size: 9px;
+        }
+        .sf-error-text {
+            font-size: 10px;
+        }
+        .sf-form-actions::before {
+            width: 40px;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .sf-page-header .title-group h1 {
+            font-size: 14px;
+        }
+        .sf-page-header .title-group .icon-wrap {
+            width: 30px;
+            height: 30px;
+            font-size: 12px;
+        }
+        .sf-page-header .title-group p {
+            font-size: 10px;
+        }
+        .sf-col-left {
+            padding: 12px 14px;
+        }
+        .sf-col-right {
+            padding: 12px 14px;
+        }
+        .sf-form-actions {
+            padding: 10px 14px 16px 14px;
+        }
+        .sf-form-group input,
+        .sf-form-group select,
+        .sf-form-group textarea {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+        input[type="file"] {
+            padding: 6px 10px;
+            font-size: 11px;
+        }
+        .sf-btn {
+            font-size: 11px;
+            padding: 7px 14px;
+        }
+        .sf-logo-preview img {
+            max-height: 28px;
+        }
+        .sf-logo-preview .info {
+            font-size: 9px;
+        }
+        .sf-form-group .label {
+            font-size: 9px;
+        }
+        .sf-page-header .status-badge {
+            font-size: 9px;
+            padding: 3px 12px;
+        }
+        .sf-help-text {
+            font-size: 9px;
+        }
+        .sf-error-text {
+            font-size: 9px;
+        }
+        .sf-form-actions::before {
+            width: 30px;
+        }
+    }
+</style>
+
+<!-- ============================================================
+   HTML STRUCTURE - RICH & VIBRANT DESIGN
+   ============================================================ -->
+<div class="sf-wrap">
+
+    <!-- ===== PAGE HEADER - RICH & ELEGANT ===== -->
+    <div class="sf-page-header">
+        <div class="title-group">
+            <div class="icon-wrap">
+                <i class="fas fa-store-alt"></i>
+            </div>
+            <div>
+                <h1>Store <span>Settings</span></h1>
+                <p><i class="fas fa-sliders-h" style="font-size:11px; opacity:0.6;"></i> Configure your store details &amp; preferences</p>
             </div>
         </div>
+        {% if store_settings %}
+        <span class="status-badge">
+            <span class="dot"></span>
+            <i class="fas fa-check-circle" style="font-size:12px;"></i> Configured
+        </span>
+        {% endif %}
     </div>
+
+    <!-- ===== MAIN CARD ===== -->
+    <div class="sf-card">
+
+        <!-- ===== CARD BODY - TWO COLUMN ===== -->
+        <div class="sf-card-body">
+            <form method="post" enctype="multipart/form-data" style="display: contents; width: 100%;">
+                {% csrf_token %}
+
+                <!-- ===== LEFT COLUMN ===== -->
+                <div class="sf-col-left">
+
+                    <!-- Store Name -->
+                    <div class="sf-form-group">
+                        <div class="label">
+                            <span class="label-icon"><i class="fas fa-store"></i></span>
+                            Store Name <span class="required">*</span>
+                        </div>
+                        {{ form.store_name }}
+                        {% if form.store_name.errors %}
+                        <div class="sf-error-text">{{ form.store_name.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Store Logo -->
+                    <div class="sf-form-group">
+                        <div class="label">
+                            <span class="label-icon"><i class="fas fa-image"></i></span>
+                            Store Logo <span class="hint">(200×200px)</span>
+                        </div>
+                        {{ form.store_logo }}
+                        {% if store_settings.store_logo %}
+                        <div class="sf-logo-preview">
+                            <img src="{{ store_settings.store_logo.url }}" alt="Logo">
+                            <div class="info">
+                                <strong>Current</strong> — upload to replace
+                                <span class="badge">Active</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if form.store_logo.errors %}
+                        <div class="sf-error-text">{{ form.store_logo.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Store Address -->
+                    <div class="sf-form-group">
+                        <div class="label">
+                            <span class="label-icon"><i class="fas fa-map-pin"></i></span>
+                            Store Address <span class="required">*</span>
+                        </div>
+                        {{ form.store_address }}
+                        {% if form.store_address.errors %}
+                        <div class="sf-error-text">{{ form.store_address.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="sf-form-group">
+                        <div class="label">
+                            <span class="label-icon"><i class="fas fa-phone"></i></span>
+                            Phone <span class="required">*</span>
+                        </div>
+                        {{ form.store_phone }}
+                        {% if form.store_phone.errors %}
+                        <div class="sf-error-text">{{ form.store_phone.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Email -->
+                    <div class="sf-form-group">
+                        <div class="label">
+                            <span class="label-icon"><i class="fas fa-envelope"></i></span>
+                            Email <span class="required">*</span>
+                        </div>
+                        {{ form.store_email }}
+                        {% if form.store_email.errors %}
+                        <div class="sf-error-text">{{ form.store_email.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- GST Number -->
+                    <div class="sf-form-group">
+                        <div class="label">
+                            <span class="label-icon"><i class="fas fa-file-invoice"></i></span>
+                            GST Number
+                        </div>
+                        {{ form.gst_number }}
+                        <div class="sf-help-text"><i class="fas fa-info-circle"></i> For tax purposes</div>
+                    </div>
+                </div>
+
+                <!-- ===== RIGHT COLUMN ===== -->
+                <div class="sf-col-right">
+
+                    <!-- Website -->
+                    <div class="sf-form-group">
+                        <div class="label">
+                            <span class="label-icon"><i class="fas fa-globe"></i></span>
+                            Website
+                        </div>
+                        {{ form.store_website }}
+                        <div class="sf-help-text"><i class="fas fa-info-circle"></i> Optional — your store's website URL</div>
+                    </div>
+
+                    <!-- PAN Number -->
+                    <div class="sf-form-group">
+                        <div class="label">
+                            <span class="label-icon"><i class="fas fa-id-card"></i></span>
+                            PAN Number
+                        </div>
+                        {{ form.pan_number }}
+                        <div class="sf-help-text"><i class="fas fa-info-circle"></i> For tax purposes</div>
+                    </div>
+
+                    <!-- Invoice Prefix -->
+                    <div class="sf-form-group">
+                        <div class="label">
+                            <span class="label-icon"><i class="fas fa-tag"></i></span>
+                            Invoice Prefix
+                        </div>
+                        {{ form.invoice_prefix }}
+                        <div class="sf-help-text">e.g., <strong>INV-</strong> or <strong>#</strong></div>
+                    </div>
+
+                    <!-- Next Invoice Number -->
+                    <div class="sf-form-group">
+                        <div class="label">
+                            <span class="label-icon"><i class="fas fa-hashtag"></i></span>
+                            Next Invoice Number
+                        </div>
+                        {{ form.invoice_start_number }}
+                        <div class="sf-help-text">
+                            Current: <strong>{{ store_settings.invoice_start_number|default:"1001" }}</strong>
+                            <span style="opacity:0.3;margin-left:4px;">— auto-increments</span>
+                        </div>
+                    </div>
+
+                    <!-- Terms & Conditions -->
+                    <div class="sf-form-group">
+                        <div class="label">
+                            <span class="label-icon"><i class="fas fa-file-contract"></i></span>
+                            Terms &amp; Conditions
+                        </div>
+                        {{ form.terms_conditions }}
+                        <div class="sf-help-text"><i class="fas fa-info-circle"></i> Appears on invoices and order documents</div>
+                    </div>
+
+                    <!-- Footer Text -->
+                    <div class="sf-form-group">
+                        <div class="label">
+                            <span class="label-icon"><i class="fas fa-quote-right"></i></span>
+                            Footer Text
+                        </div>
+                        {{ form.footer_text }}
+                        <div class="sf-help-text"><i class="fas fa-info-circle"></i> Appears at the bottom of invoices and documents</div>
+                    </div>
+                </div>
+
+                <!-- ===== FORM ACTIONS ===== -->
+                <div class="sf-form-actions">
+                    <a href="{% url 'offline_sales:store_settings_list' %}" class="sf-btn sf-btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="sf-btn sf-btn-primary">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
 </div>
+
 {% endblock %}

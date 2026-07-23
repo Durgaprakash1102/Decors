@@ -957,29 +957,7 @@
             setInterval(updateTimer, 1000);
         }
 
-        // ===== Django Messages to Toast =====
-        {% if messages %}
-            {% for message in messages %}
-                setTimeout(function() {
-                    if (typeof showToast !== 'undefined') {
-                        let type = 'success';
-                        let title = 'Success';
-                        if ('{{ message.tags }}' === 'error') {
-                            type = 'error';
-                            title = 'Error';
-                        } else if ('{{ message.tags }}' === 'warning') {
-                            type = 'warning';
-                            title = 'Warning';
-                        } else if ('{{ message.tags }}' === 'info') {
-                            type = 'info';
-                            title = 'Info';
-                        }
-                        showToast(title, '{{ message }}', type);
-                    }
-                }, 300 + {{ forloop.counter0 }} * 200);
-            {% endfor %}
-        {% endif %}
-
+       
         // ===== Form validation =====
         const form = document.querySelector('.otp-form');
         if (form) {

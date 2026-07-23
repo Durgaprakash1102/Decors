@@ -1,632 +1,1139 @@
 <!-- templates/Ecom/order_detail.html -->
-
+{% extends base_template %}
 {% load static %}
 
 {% block title %}Order #{{ order.order_number }} - MyStore{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>
-            <i class="fas fa-box text-primary"></i> 
-            Order #{{ order.order_number }}
-            {% if is_admin_view %}
-                <span class="badge bg-info ms-2">Admin View</span>
-            {% endif %}
-        </h2>
-        <div>
-            <a href="{% url 'Ecom:orders' %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Orders
-            </a>
-        </div>
-    </div>
+<style>
+:root {
+    --primary: #5c121f;
+    --primary-light: #7a1a2b;
+    --primary-dark: #3d0c14;
+    --secondary: #F4B400;
+    --secondary-light: #f7c948;
+    --bg: #FEF7ED;
+    --white: #ffffff;
+    --border: #ebe7e3;
+    --text: #1d1d1d;
+    --text-light: #6d6d6d;
+    --text-muted: #888888;
+    --success: #2e9d57;
+    --danger: #d64045;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --shadow: 0 10px 28px rgba(0,0,0,0.06);
+    --shadow-hover: 0 18px 40px rgba(92,18,31,0.12);
+    --transition: 0.35s ease;
+    --radius: 14px;
+    --radius-sm: 10px;
+    --radius-xs: 8px;
+}
 
-    <!-- Order Type Alert -->
-    <div class="alert {% if is_offline %}alert-warning{% else %}alert-info{% endif %} mb-4">
-        <i class="fas {% if is_offline %}fa-store{% else %}fa-shopping-cart{% endif %}"></i>
-        <strong>{{ order_type_display }}</strong>
-        {% if is_offline and order.invoice_number %}
-            <span class="ms-2">| Invoice: <strong>{{ order.invoice_number }}</strong></span>
-        {% endif %}
-    </div>
+/* ============================================================
+   MAIN CONTAINER
+   ============================================================ */
+.main-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    width: 100%;
+}
 
-    <!-- Return/Replacement Window Alert (Only for Online Orders) -->
-    {% if not is_offline and order.status == 'delivered' and not is_admin_view %}
-        <div class="alert {% if return_window_days > 0 %}alert-info{% else %}alert-danger{% endif %} mb-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <i class="fas fa-clock"></i>
-                    {% if return_window_days > 0 %}
-                        <strong>{{ return_window_days }}</strong> day{{ return_window_days|pluralize }} remaining for return/replacement
-                    {% else %}
-                        <strong>Return/Replacement window has expired</strong> (7 days from delivery)
-                    {% endif %}
+.page-wrapper {
+    padding: 20px 0 24px 0;
+    min-height: 100%;
+    width: 100%;
+}
+
+/* ============================================================
+   HERO SECTION
+   ============================================================ */
+.hero-section {
+    background: var(--primary);
+    padding: 18px 28px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-left: 6px solid var(--secondary);
+    border-right: 6px solid var(--secondary);
+    box-shadow: 0 8px 32px rgba(92,18,31,0.15);
+}
+
+.hero-section .left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.hero-section .left .icon {
+    width: 46px;
+    height: 46px;
+    background: rgba(244,180,0,0.10);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary);
+    font-size: 20px;
+}
+
+.hero-section .left .text .title {
+    color: var(--white);
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.hero-section .left .text .title .gold {
+    color: var(--secondary);
+}
+
+.hero-section .left .text .sub {
+    color: rgba(255,255,255,0.55);
+    font-size: 13px;
+}
+
+.hero-section .right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.hero-section .right .tag {
+    padding: 5px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.06);
+    color: var(--white);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 30px;
+}
+
+/* ============================================================
+   MAIN SINGLE CARD
+   ============================================================ */
+.main-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.main-card .card-section {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.main-card .card-section:last-child {
+    border-bottom: none;
+}
+
+.section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-title .icon {
+    color: var(--secondary);
+    font-size: 14px;
+}
+
+/* ============================================================
+   STATUS ROW
+   ============================================================ */
+.status-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.status-item .label {
+    color: var(--text-muted);
+}
+
+.status-item .value {
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 12px;
+    border-radius: 30px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.badge-status .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.badge-status.success { background: #d1fae5; color: #065f46; }
+.badge-status.success .dot { background: var(--success); }
+
+.badge-status.warning { background: #fef3c7; color: #92400e; }
+.badge-status.warning .dot { background: var(--warning); animation: blink 1.5s ease-in-out infinite; }
+
+.badge-status.danger { background: #fee2e2; color: #991b1b; }
+.badge-status.danger .dot { background: var(--danger); }
+
+.badge-status.info { background: #dbeafe; color: #1e40af; }
+.badge-status.info .dot { background: var(--info); }
+
+.badge-status.secondary { background: #f3f4f6; color: #374151; }
+.badge-status.secondary .dot { background: #6b7280; }
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+.table-wrap {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.table thead {
+    background: #faf8f6;
+}
+
+.table thead th {
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--border);
+    border-right: 1px solid var(--border);
+}
+
+.table thead th:last-child {
+    border-right: none;
+}
+
+.table tbody td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.table tbody td:last-child {
+    border-right: none;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background: var(--bg);
+}
+
+.table tfoot td {
+    padding: 8px 12px;
+    font-weight: 700;
+    border-top: 2px solid var(--border);
+}
+
+.table tfoot tr {
+    background: var(--bg);
+}
+
+/* ============================================================
+   PRODUCT THUMB
+   ============================================================ */
+.product-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    background: var(--white);
+    flex-shrink: 0;
+}
+
+.product-thumb-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 16px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   ADDRESS GRID
+   ============================================================ */
+.address-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.address-box {
+    background: var(--bg);
+    border-radius: var(--radius-xs);
+    padding: 10px 12px;
+    border-left: 3px solid var(--secondary);
+}
+
+.address-box p {
+    white-space: pre-line;
+    font-size: 13px;
+    color: var(--text-light);
+    margin: 0;
+}
+
+/* ============================================================
+   INTERESTING HORIZONTAL TIMELINE (VERTICAL ON MOBILE)
+   ============================================================ */
+.timeline-horizontal {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+    padding: 10px 0;
+    gap: 0;
+}
+
+.timeline-horizontal::before {
+    content: '';
+    position: absolute;
+    top: 22px;
+    left: 30px;
+    right: 30px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--border) 0%, var(--border) 100%);
+    z-index: 0;
+    border-radius: 2px;
+}
+
+.timeline-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.timeline-step .circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    background: var(--border);
+    color: var(--text-muted);
+    border: 3px solid var(--border);
+    transition: var(--transition);
+    position: relative;
+}
+
+.timeline-step.active .circle {
+    background: var(--success);
+    border-color: var(--success);
+    color: var(--white);
+    box-shadow: 0 0 0 4px rgba(46,157,87,0.15), 0 4px 16px rgba(46,157,87,0.25);
+}
+
+.timeline-step.completed .circle {
+    background: var(--success);
+    border-color: var(--success);
+    color: var(--white);
+}
+
+.timeline-step .label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    font-weight: 500;
+    max-width: 80px;
+}
+
+.timeline-step.active .label {
+    color: var(--text);
+    font-weight: 700;
+}
+
+.timeline-step .sub-label {
+    font-size: 9px;
+    color: var(--text-muted);
+    text-align: center;
+    max-width: 80px;
+}
+
+.timeline-step.active .sub-label {
+    color: var(--text-light);
+}
+
+/* ============================================================
+   ACTIONS SECTION - BEAUTIFULLY DESIGNED
+   ============================================================ */
+.actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: var(--radius-xs);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-action::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: 0.5s;
+}
+
+.btn-action:hover::before {
+    left: 100%;
+}
+
+.btn-action-primary {
+    background: var(--primary);
+    color: var(--white);
+}
+.btn-action-primary:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(92,18,31,0.2);
+    color: var(--white);
+}
+
+.btn-action-success {
+    background: var(--success);
+    color: var(--white);
+}
+.btn-action-success:hover {
+    background: #1e7e3a;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(46,157,87,0.2);
+    color: var(--white);
+}
+
+.btn-action-danger {
+    background: var(--danger);
+    color: var(--white);
+}
+.btn-action-danger:hover {
+    background: #b3363a;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(214,64,69,0.2);
+    color: var(--white);
+}
+
+.btn-action-warning {
+    background: var(--warning);
+    color: var(--white);
+}
+.btn-action-warning:hover {
+    background: #d97706;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(245,158,11,0.2);
+    color: var(--white);
+}
+
+.btn-action-gold {
+    background: var(--secondary);
+    color: var(--primary-dark);
+}
+.btn-action-gold:hover {
+    background: var(--secondary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(244,180,0,0.2);
+    color: var(--primary-dark);
+}
+
+.btn-action-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+}
+.btn-action-outline:hover {
+    background: var(--primary);
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(92,18,31,0.15);
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 18px;
+    background: var(--bg);
+    color: var(--text);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-xs);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    width: 100%;
+}
+
+.btn-back:hover {
+    background: var(--border);
+    transform: translateY(-2px);
+}
+
+/* ============================================================
+   ALERT BOX
+   ============================================================ */
+.alert-box {
+    padding: 10px 14px;
+    border-radius: var(--radius-xs);
+    font-size: 12px;
+    margin: 0;
+}
+
+.alert-box.warning {
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    color: #92400e;
+}
+
+.alert-box.info {
+    background: #dbeafe;
+    border: 1px solid #93c5fd;
+    color: #1e40af;
+}
+
+.alert-box.danger {
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+}
+
+.alert-box.success {
+    background: #d1fae5;
+    border: 1px solid #6ee7b7;
+    color: #065f46;
+}
+
+.alert-box i {
+    margin-right: 6px;
+}
+
+/* ============================================================
+   ADMIN LIST GROUP
+   ============================================================ */
+.admin-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.admin-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    text-decoration: none;
+    color: var(--text);
+    transition: var(--transition);
+    background: var(--white);
+}
+
+.admin-item:hover {
+    background: var(--bg);
+    border-color: var(--secondary);
+    transform: translateX(4px);
+}
+
+.admin-item .left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-item .badge-small {
+    font-size: 8px;
+    padding: 2px 8px;
+    border-radius: 30px;
+    font-weight: 600;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 992px) {
+    .main-container { padding: 0 16px; }
+    .hero-section { padding: 16px 20px; }
+    .hero-section .left .text .title { font-size: 18px; }
+    .hero-section .left .icon { width: 40px; height: 40px; font-size: 18px; }
+    .page-wrapper { padding: 14px 0 18px 0; }
+    .address-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+    .main-container { padding: 0 12px; }
+    .hero-section {
+        padding: 12px 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        border-left: 4px solid var(--secondary);
+        border-right: 4px solid var(--secondary);
+    }
+    .hero-section .left .icon { width: 36px; height: 36px; font-size: 16px; }
+    .hero-section .left .text .title { font-size: 17px; }
+    .hero-section .left .text .sub { font-size: 12px; }
+    .hero-section .right { width: 100%; }
+    .hero-section .right .tag { font-size: 10px; padding: 4px 12px; }
+    .main-card .card-section { padding: 12px 14px; }
+    .section-title { font-size: 12px; }
+    .status-row { gap: 8px 16px; }
+    .status-item { font-size: 12px; }
+    .page-wrapper { padding: 10px 0 14px 0; }
+    .table { font-size: 12px; min-width: 600px; }
+    .table thead th,
+    .table tbody td { padding: 6px 8px; }
+    .product-thumb { width: 32px; height: 32px; }
+    .address-grid { grid-template-columns: 1fr; gap: 12px; }
+    .actions-grid { grid-template-columns: 1fr; }
+    
+    /* Timeline becomes vertical on mobile */
+    .timeline-horizontal {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0;
+        gap: 0;
+    }
+    .timeline-horizontal::before { display: none; }
+    .timeline-step {
+        flex-direction: row;
+        align-items: center;
+        gap: 14px;
+        padding: 10px 0;
+        width: 100%;
+        border-bottom: 1px solid var(--border);
+        position: relative;
+    }
+    .timeline-step:last-child { border-bottom: none; }
+    .timeline-step::before {
+        content: '';
+        position: absolute;
+        left: 17px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--border);
+        z-index: 0;
+    }
+    .timeline-step:last-child::before { display: none; }
+    .timeline-step .circle { width: 30px; height: 30px; font-size: 12px; flex-shrink: 0; position: relative; z-index: 1; }
+    .timeline-step .label { font-size: 12px; text-align: left; max-width: none; flex: 1; }
+    .timeline-step .sub-label { font-size: 10px; text-align: left; max-width: none; display: block; margin-top: 1px; }
+    .timeline-step .info-wrap { display: flex; flex-direction: column; flex: 1; }
+}
+
+@media (max-width: 480px) {
+    .main-container { padding: 0 8px; }
+    .hero-section { padding: 10px 12px; border-left: 3px solid var(--secondary); border-right: 3px solid var(--secondary); }
+    .hero-section .left .icon { width: 30px; height: 30px; font-size: 14px; }
+    .hero-section .left .text .title { font-size: 14px; }
+    .hero-section .left .text .sub { font-size: 11px; }
+    .hero-section .right .tag { font-size: 9px; padding: 3px 10px; }
+    .main-card .card-section { padding: 10px 10px; }
+    .section-title { font-size: 11px; }
+    .status-row { flex-direction: column; gap: 4px; }
+    .status-item { font-size: 12px; }
+    .page-wrapper { padding: 6px 0 10px 0; }
+    .table { font-size: 11px; min-width: 500px; }
+    .table thead th,
+    .table tbody td { padding: 4px 6px; }
+    .product-thumb { width: 28px; height: 28px; }
+    .btn-action { font-size: 12px; padding: 8px 12px; }
+    .badge-status { font-size: 8px; padding: 2px 8px; }
+    .address-box p { font-size: 12px; }
+    .timeline-step .circle { width: 26px; height: 26px; font-size: 10px; }
+    .timeline-step .label { font-size: 11px; }
+    .timeline-step .sub-label { font-size: 9px; }
+    .timeline-step::before { left: 13px; }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-section { animation: fadeUp 0.5s ease both; }
+.main-card { animation: fadeUp 0.4s ease 0.05s both; }
+.timeline-step { animation: fadeUp 0.35s ease both; }
+.timeline-step:nth-child(1) { animation-delay: 0.04s; }
+.timeline-step:nth-child(2) { animation-delay: 0.08s; }
+.timeline-step:nth-child(3) { animation-delay: 0.12s; }
+.timeline-step:nth-child(4) { animation-delay: 0.16s; }
+</style>
+
+<!-- ============================================================
+   MAIN CONTAINER
+   ============================================================ -->
+<div class="main-container">
+    <div class="page-wrapper">
+
+        <!-- ===== HERO SECTION ===== -->
+        <div class="hero-section">
+            <div class="left">
+                <div class="icon">
+                    <i class="fas fa-receipt"></i>
                 </div>
-                <div>
-                    {% if return_window_days > 0 %}
-                        <span class="badge bg-success">Active</span>
-                    {% else %}
-                        <span class="badge bg-danger">Expired</span>
-                    {% endif %}
+                <div class="text">
+                    <div class="title">Order <span class="gold">#{{ order.order_number }}</span></div>
+                    <div class="sub">
+                        {% if is_offline %}
+                            <i class="fas fa-store"></i> Offline Purchase
+                            {% if order.invoice_number %} | Invoice: {{ order.invoice_number }}{% endif %}
+                        {% else %}
+                            <i class="fas fa-shopping-cart"></i> Online Order
+                        {% endif %}
+                        {% if is_admin_view %} | <span style="color: var(--secondary);">Admin View</span>{% endif %}
+                    </div>
                 </div>
             </div>
+            <div class="right">
+                <span class="tag"><i class="fas fa-calendar"></i> {{ order.created_at|date:"M d, Y" }}</span>
+                <span class="tag">
+                    <span class="badge-status {% if order.status == 'delivered' or order.status == 'completed' %}success{% elif order.status == 'processing' %}warning{% elif order.status == 'cancelled' or order.status == 'failed' %}danger{% else %}secondary{% endif %}" style="background:transparent;color:var(--white);padding:0;">
+                        <span class="dot"></span> {{ order.get_status_display }}
+                    </span>
+                </span>
+            </div>
         </div>
-    {% endif %}
 
-    <div class="row">
-        <!-- Left Column - Order Status & Actions -->
-        <div class="col-md-4">
-            <!-- Order Status -->
-            <div class="card shadow-sm mb-3">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">Order Status</h5>
+        <!-- ============================================================
+           SINGLE MAIN CARD
+           ============================================================ -->
+        <div class="main-card">
+
+            <!-- ===== ORDER STATUS ===== -->
+            <div class="card-section">
+                <div class="section-title">
+                    <span class="icon"><i class="fas fa-info-circle"></i></span>
+                    Order Information
                 </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Status:</span>
-                        <span class="badge bg-{% if order.status == 'delivered' or order.status == 'completed' %}success{% elif order.status == 'processing' %}warning{% elif order.status == 'cancelled' or order.status == 'failed' %}danger{% else %}secondary{% endif %} p-2">
-                            {% if is_offline %}
-                                {{ order.get_status_display }}
-                            {% else %}
-                                {{ order.get_status_display }}
-                            {% endif %}
+                <div class="status-row">
+                    <div class="status-item">
+                        <span class="label">Order #</span>
+                        <span class="value">{{ order.order_number }}</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">Status</span>
+                        <span class="value">
+                            <span class="badge-status {% if order.status == 'delivered' or order.status == 'completed' %}success{% elif order.status == 'processing' %}warning{% elif order.status == 'cancelled' or order.status == 'failed' %}danger{% else %}secondary{% endif %}">
+                                <span class="dot"></span> {{ order.get_status_display }}
+                            </span>
                         </span>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Payment Status:</span>
-                        <span class="badge bg-{% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'pending' %}warning{% elif order.payment_status == 'refunded' %}info{% else %}danger{% endif %} p-2">
-                            {{ order.get_payment_status_display }}
+                    <div class="status-item">
+                        <span class="label">Payment</span>
+                        <span class="value">
+                            <span class="badge-status {% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'pending' %}warning{% elif order.payment_status == 'refunded' %}info{% else %}danger{% endif %}">
+                                <span class="dot"></span> {{ order.get_payment_status_display }}
+                            </span>
                         </span>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Order Date:</span>
-                        <span>{{ order.created_at|date:"M d, Y H:i" }}</span>
+                    <div class="status-item">
+                        <span class="label">Order Date</span>
+                        <span class="value">{{ order.created_at|date:"M d, Y H:i" }}</span>
                     </div>
                     {% if order.delivery_date %}
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Delivered:</span>
-                        <span>{{ order.delivery_date|date:"M d, Y" }}</span>
-                    </div>
-                    {% endif %}
-                    {% if is_offline and order.invoice_number %}
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Invoice:</span>
-                        <span>{{ order.invoice_number }}</span>
+                    <div class="status-item">
+                        <span class="label">Delivered</span>
+                        <span class="value">{{ order.delivery_date|date:"M d, Y" }}</span>
                     </div>
                     {% endif %}
                     {% if order.tracking_number %}
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Tracking:</span>
-                        <span>
+                    <div class="status-item">
+                        <span class="label">Tracking</span>
+                        <span class="value">
                             {% if order.tracking_url %}
-                                <a href="{{ order.tracking_url }}" target="_blank">{{ order.tracking_number }}</a>
+                                <a href="{{ order.tracking_url }}" target="_blank" style="color:var(--primary);">{{ order.tracking_number }}</a>
                             {% else %}
                                 {{ order.tracking_number }}
                             {% endif %}
                         </span>
                     </div>
                     {% endif %}
-                    
-                    {% if is_offline %}
-                    <div class="mt-2 pt-2 border-top">
-                        <span class="badge bg-warning text-dark">Offline Purchase</span>
+                    <div class="status-item">
+                        <span class="label">Total</span>
+                        <span class="value" style="font-weight:700;color:var(--primary);font-size:15px;">₹{{ order.total_amount|floatformat:2 }}</span>
                     </div>
-                    {% endif %}
+                </div>
+            </div>
 
-                    <!-- Discounts Applied (Only for Online Orders) -->
-                    {% if not is_offline and order.total_discount > 0 %}
-                    <div class="mt-3 pt-3 border-top">
-                        <h6>Discounts Applied</h6>
-                        <div class="small">
-                            {% if order.product_discount_total > 0 %}
-                                <div class="d-flex justify-content-between">
-                                    <span>Product Discounts:</span>
-                                    <span class="text-success">-₹{{ order.product_discount_total|floatformat:2 }}</span>
-                                </div>
-                            {% endif %}
-                            {% if order.offer_discount > 0 %}
-                                <div class="d-flex justify-content-between">
-                                    <span>Offer Discounts:</span>
-                                    <span class="text-success">-₹{{ order.offer_discount|floatformat:2 }}</span>
-                                </div>
-                            {% endif %}
-                            {% if order.coupon_discount > 0 %}
-                                <div class="d-flex justify-content-between">
-                                    <span>Coupon Discount:</span>
-                                    <span class="text-success">-₹{{ order.coupon_discount|floatformat:2 }}</span>
-                                </div>
-                            {% endif %}
-                            <div class="d-flex justify-content-between fw-bold">
-                                <span>Total Savings:</span>
-                                <span class="text-success">₹{{ order.total_discount|floatformat:2 }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    {% if not is_offline and order.coupon %}
-                        <div class="mt-2">
-                            <span class="badge bg-info">Coupon: {{ order.coupon.code }}</span>
-                        </div>
-                    {% endif %}
-                    
-                    {% if not is_offline and order.offer %}
-                        <div class="mt-2">
-                            <span class="badge bg-warning">Offer: {{ order.offer.name }}</span>
-                        </div>
-                    {% endif %}
-                    
-                    {% if is_admin_view %}
-                        <div class="mt-2 pt-2 border-top">
-                            <span>Customer:</span>
-                            <span>
-                                {% if is_offline %}
-                                    {{ order.customer_name }} 
-                                    {% if order.customer_phone %}
-                                        <br><small class="text-muted">{{ order.customer_phone }}</small>
+            <!-- ===== ORDER ITEMS ===== -->
+            <div class="card-section">
+                <div class="section-title">
+                    <span class="icon"><i class="fas fa-box"></i></span>
+                    Order Items
+                    <span style="margin-left:auto;font-weight:400;font-size:12px;color:var(--text-muted);">{{ items|length }} items</span>
+                </div>
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>SKU</th>
+                                <th style="text-align:center;">Qty</th>
+                                <th style="text-align:right;">Price</th>
+                                <th style="text-align:right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:10px;">
+                                        {% if item.product and item.product.main_image %}
+                                            <img src="{{ item.product.main_image }}" class="product-thumb">
+                                        {% else %}
+                                            <div class="product-thumb-placeholder">
+                                                <i class="fas fa-box"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <div style="font-weight:500;font-size:13px;">{{ item.product_name }}</div>
+                                            {% if item.variant %}
+                                                <div style="font-size:11px;color:var(--text-muted);">{{ item.variant.name|default:item.variant.sku }}</div>
+                                            {% endif %}
+                                            {% if not is_offline and item.offer_name %}
+                                                <span class="badge-status warning" style="font-size:8px;padding:1px 8px;">{{ item.offer_name }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><code style="font-size:11px;background:var(--bg);padding:2px 6px;border-radius:4px;">{{ item.sku }}</code></td>
+                                <td style="text-align:center;">{{ item.quantity }}</td>
+                                <td style="text-align:right;">
+                                    {% if item.original_price > item.final_price %}
+                                        <span style="text-decoration:line-through;color:var(--text-muted);font-size:11px;">₹{{ item.original_price|floatformat:2 }}</span>
+                                        <br><strong>₹{{ item.final_price|floatformat:2 }}</strong>
+                                    {% else %}
+                                        <strong>₹{{ item.original_price|floatformat:2 }}</strong>
                                     {% endif %}
-                                {% else %}
-                                    {{ order.user.full_name }} <br><small class="text-muted">{{ order.user.email }}</small>
-                                {% endif %}
-                            </span>
-                        </div>
-                    {% endif %}
+                                </td>
+                                <td style="text-align:right;font-weight:600;color:var(--primary);">₹{{ item.total|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" style="text-align:right;"><strong>Subtotal</strong></td>
+                                <td style="text-align:right;">₹{{ order.subtotal|floatformat:2 }}</td>
+                            </tr>
+                            {% if not is_offline and order.product_discount_total > 0 %}
+                            <tr>
+                                <td colspan="4" style="text-align:right;color:var(--success);"><strong>Product Discount</strong></td>
+                                <td style="text-align:right;color:var(--success);">-₹{{ order.product_discount_total|floatformat:2 }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if not is_offline and order.offer_discount > 0 %}
+                            <tr>
+                                <td colspan="4" style="text-align:right;color:var(--success);"><strong>Offer Discount</strong></td>
+                                <td style="text-align:right;color:var(--success);">-₹{{ order.offer_discount|floatformat:2 }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if not is_offline and order.coupon_discount > 0 %}
+                            <tr>
+                                <td colspan="4" style="text-align:right;color:var(--success);"><strong>Coupon Discount</strong></td>
+                                <td style="text-align:right;color:var(--success);">-₹{{ order.coupon_discount|floatformat:2 }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr style="background:var(--bg);border-top:2px solid var(--border);">
+                                <td colspan="4" style="text-align:right;font-weight:700;font-size:14px;"><strong>Grand Total</strong></td>
+                                <td style="text-align:right;font-weight:700;color:var(--primary);font-size:16px;">₹{{ order.total_amount|floatformat:2 }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
 
-            <!-- Customer Actions (Only for Online Orders) -->
-            {% if not is_offline and not is_admin_view %}
-            <div class="card shadow-sm mb-3">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-actions"></i> Order Actions</h5>
+            <!-- ===== TIMELINE ===== -->
+            <div class="card-section">
+                <div class="section-title">
+                    <span class="icon"><i class="fas fa-route"></i></span>
+                    Order Journey
                 </div>
-                <div class="card-body">
-                    <!-- Cancellation -->
+                <div class="timeline-horizontal">
+                    <div class="timeline-step completed">
+                        <div class="circle"><i class="fas fa-check"></i></div>
+                        <div class="info-wrap">
+                            <span class="label">Placed</span>
+                            <span class="sub-label">{{ order.created_at|date:"M d" }}</span>
+                        </div>
+                    </div>
+                    <div class="timeline-step {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}active{% endif %}">
+                        <div class="circle">{% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}<i class="fas fa-spinner fa-pulse"></i>{% endif %}</div>
+                        <div class="info-wrap">
+                            <span class="label">Processing</span>
+                            <span class="sub-label">{% if order.status == 'processing' %}In Progress{% else %}Done{% endif %}</span>
+                        </div>
+                    </div>
+                    <div class="timeline-step {% if order.status == 'shipped' or order.status == 'delivered' %}active{% endif %}">
+                        <div class="circle">{% if order.status == 'shipped' %}<i class="fas fa-truck"></i>{% elif order.status == 'delivered' %}<i class="fas fa-check"></i>{% endif %}</div>
+                        <div class="info-wrap">
+                            <span class="label">Shipped</span>
+                            <span class="sub-label">{% if order.status == 'shipped' %}On way{% elif order.status == 'delivered' %}Delivered{% else %}Pending{% endif %}</span>
+                        </div>
+                    </div>
+                    <div class="timeline-step {% if order.status == 'delivered' %}active{% endif %}">
+                        <div class="circle">{% if order.status == 'delivered' %}<i class="fas fa-check-circle"></i>{% endif %}</div>
+                        <div class="info-wrap">
+                            <span class="label">Delivered</span>
+                            <span class="sub-label">{% if order.status == 'delivered' %}{{ order.delivery_date|date:"M d" }}{% else %}Pending{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ADDRESSES ===== -->
+            <div class="card-section">
+                <div class="section-title">
+                    <span class="icon"><i class="fas fa-map-marker-alt"></i></span>
+                    Shipping &amp; Billing
+                </div>
+                <div class="address-grid">
+                    <div>
+                        <h6 style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
+                            <i class="fas fa-truck" style="color:var(--secondary);"></i> Shipping
+                        </h6>
+                        <div class="address-box">
+                            <p>{{ order.shipping_address }}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h6 style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
+                            <i class="fas fa-file-invoice" style="color:var(--secondary);"></i> Billing
+                        </h6>
+                        <div class="address-box">
+                            <p>{{ order.billing_address }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% if order.notes %}
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+                    <h6 style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
+                        <i class="fas fa-sticky-note" style="color:var(--secondary);"></i> Notes
+                    </h6>
+                    <div class="address-box" style="border-left-color:var(--info);">
+                        <p>{{ order.notes }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- ============================================================
+               ACTIONS SECTION - BEAUTIFULLY DESIGNED
+               ============================================================ -->
+            <div class="card-section">
+                <div class="section-title">
+                    <span class="icon"><i class="fas fa-bolt"></i></span>
+                    Actions
+                </div>
+                
+                {% if not is_offline and not is_admin_view %}
+                <div class="actions-grid">
                     {% if order.can_cancel %}
-                        <a href="{% url 'Ecom:cancel_order' order.id %}" class="btn btn-danger w-100 mb-2">
-                            <i class="fas fa-times-circle"></i> Cancel Order
-                        </a>
+                    <a href="{% url 'Ecom:cancel_order' order.id %}" class="btn-action btn-action-danger">
+                        <i class="fas fa-times-circle"></i> Cancel Order
+                    </a>
                     {% elif order.cancellation_requested %}
-                        <div class="alert alert-warning mb-2">
-                            <i class="fas fa-clock"></i> Cancellation requested on<br>
-                            <small>{{ order.cancellation_requested_at|date:"M d, Y H:i" }}</small>
-                            <div class="mt-1 small text-muted">Waiting for admin approval</div>
-                        </div>
+                    <div class="alert-box warning" style="grid-column:1/-1;">
+                        <i class="fas fa-clock"></i> Cancellation requested on {{ order.cancellation_requested_at|date:"M d, Y H:i" }}
+                    </div>
                     {% elif order.status == 'cancelled' %}
-                        <div class="alert alert-danger mb-2">
-                            <i class="fas fa-check-circle"></i> Order cancelled on<br>
-                            <small>{{ order.cancelled_at|date:"M d, Y H:i" }}</small>
-                        </div>
+                    <div class="alert-box danger" style="grid-column:1/-1;">
+                        <i class="fas fa-check-circle"></i> Cancelled on {{ order.cancelled_at|date:"M d, Y H:i" }}
+                    </div>
                     {% endif %}
 
-                    <!-- Return -->
                     {% if order.can_request_return %}
-                        <a href="{% url 'Ecom:request_return' order.id %}" class="btn btn-warning w-100 mb-2">
-                            <i class="fas fa-undo"></i> Request Return
-                            {% if return_window_days > 0 %}
-                                <span class="badge bg-dark ms-1">{{ return_window_days }}d</span>
-                            {% endif %}
-                        </a>
+                    <a href="{% url 'Ecom:request_return' order.id %}" class="btn-action btn-action-warning">
+                        <i class="fas fa-undo"></i> Request Return
+                        {% if return_window_days > 0 %}
+                            <span style="background:rgba(0,0,0,0.1);padding:1px 8px;border-radius:30px;font-size:10px;margin-left:4px;">{{ return_window_days }}d</span>
+                        {% endif %}
+                    </a>
                     {% elif order.return_requested %}
-                        <div class="alert alert-info mb-2">
-                            <i class="fas fa-clock"></i> Return requested on<br>
-                            <small>{{ order.return_requested_at|date:"M d, Y H:i" }}</small>
-                            <div class="mt-1">
-                                <span class="badge bg-{% if order.return_completed %}success{% elif order.return_items_received %}info{% elif order.return_approved %}warning{% elif order.return_rejected %}danger{% else %}secondary{% endif %}">
-                                    {{ order.return_status_display }}
-                                </span>
-                            </div>
-                        </div>
+                    <div class="alert-box info" style="grid-column:1/-1;">
+                        <i class="fas fa-clock"></i> Return requested on {{ order.return_requested_at|date:"M d, Y" }}
+                        <br><small>Status: <span class="badge-status {% if order.return_completed %}success{% elif order.return_items_received %}info{% elif order.return_approved %}warning{% elif order.return_rejected %}danger{% else %}secondary{% endif %}" style="margin-top:3px;">
+                            <span class="dot"></span> {{ order.return_status_display }}
+                        </span></small>
+                    </div>
                     {% endif %}
 
-                    <!-- Replacement -->
                     {% if order.can_request_replacement %}
-                        <a href="{% url 'Ecom:request_replacement' order.id %}" class="btn btn-primary w-100 mb-2">
-                            <i class="fas fa-exchange-alt"></i> Request Replacement
-                            {% if return_window_days > 0 %}
-                                <span class="badge bg-dark ms-1">{{ return_window_days }}d</span>
-                            {% endif %}
-                        </a>
+                    <a href="{% url 'Ecom:request_replacement' order.id %}" class="btn-action btn-action-primary">
+                        <i class="fas fa-exchange-alt"></i> Request Replacement
+                        {% if return_window_days > 0 %}
+                            <span style="background:rgba(0,0,0,0.1);padding:1px 8px;border-radius:30px;font-size:10px;margin-left:4px;">{{ return_window_days }}d</span>
+                        {% endif %}
+                    </a>
                     {% elif order.replacement_requested %}
-                        <div class="alert alert-info mb-2">
-                            <i class="fas fa-clock"></i> Replacement requested on<br>
-                            <small>{{ order.replacement_requested_at|date:"M d, Y H:i" }}</small>
-                            <div class="mt-1">
-                                <span class="badge bg-{% if order.replacement_completed %}success{% elif order.replacement_approved %}warning{% elif order.replacement_rejected %}danger{% else %}secondary{% endif %}">
-                                    {{ order.replacement_status_display }}
-                                </span>
-                            </div>
-                            {% if order.replacement_order %}
-                                <div class="mt-1 small">
-                                    Replacement Order: 
-                                    <a href="{% url 'Ecom:order_detail' order.replacement_order.id %}">
-                                        #{{ order.replacement_order.order_number }}
-                                    </a>
-                                </div>
-                            {% endif %}
-                        </div>
+                    <div class="alert-box info" style="grid-column:1/-1;">
+                        <i class="fas fa-clock"></i> Replacement requested on {{ order.replacement_requested_at|date:"M d, Y" }}
+                        <br><small>Status: <span class="badge-status {% if order.replacement_completed %}success{% elif order.replacement_approved %}warning{% elif order.replacement_rejected %}danger{% else %}secondary{% endif %}" style="margin-top:3px;">
+                            <span class="dot"></span> {{ order.replacement_status_display }}
+                        </span>
+                        {% if order.replacement_order %}
+                        <br><small>Replacement: <a href="{% url 'Ecom:order_detail' order.replacement_order.id %}" style="color:var(--primary);font-weight:600;">#{{ order.replacement_order.order_number }}</a></small>
+                        {% endif %}
+                    </div>
                     {% endif %}
 
-                    <!-- Refund Status -->
                     {% if order.refund_requested %}
-                        <div class="alert alert-info mb-0">
-                            <i class="fas fa-hand-holding-usd"></i> Refund Status: 
-                            <span class="badge bg-{% if order.refund_completed %}success{% elif order.refund_approved %}warning{% else %}secondary{% endif %}">
-                                {{ order.refund_status_display }}
-                            </span>
-                            {% if order.refund_completed %}
-                                <br><small>Completed on {{ order.refund_completed_at|date:"M d, Y" }}</small>
-                            {% endif %}
-                            {% if order.refund_method == 'manual' %}
-                                <br><small class="text-muted">Method: Manual Bank Transfer</small>
-                            {% endif %}
-                        </div>
+                    <div class="alert-box info" style="grid-column:1/-1;">
+                        <i class="fas fa-hand-holding-usd"></i> Refund Status: 
+                        <span class="badge-status {% if order.refund_completed %}success{% elif order.refund_approved %}warning{% else %}secondary{% endif %}" style="margin-left:4px;">
+                            <span class="dot"></span> {{ order.refund_status_display }}
+                        </span>
+                        {% if order.refund_completed %}
+                        <br><small>Completed on {{ order.refund_completed_at|date:"M d, Y" }}</small>
+                        {% endif %}
+                    </div>
                     {% endif %}
-                </div>
-            </div>
-            {% endif %}
 
-            <!-- Admin Actions -->
-            {% if is_admin_view %}
-            <div class="card shadow-sm mb-3">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-tools"></i> Admin Actions</h5>
+                    <!-- Back button takes full width -->
+                    <a href="{% url 'Ecom:orders' %}" class="btn-back" style="grid-column:1/-1;">
+                        <i class="fas fa-arrow-left"></i> Back to Orders
+                    </a>
                 </div>
-                <div class="card-body">
-                    <div class="list-group">
-                        {% if not is_offline %}
+                {% endif %}
+
+                <!-- ===== ADMIN ACTIONS ===== -->
+                {% if is_admin_view %}
+                <div>
+                    {% if not is_offline %}
+                        <div class="admin-list">
                             {% if order.cancellation_requested %}
-                                <a href="{% url 'Ecom:admin_cancellation_detail' order.id %}" class="list-group-item list-group-item-action">
-                                    <i class="fas fa-times-circle text-danger"></i> Manage Cancellation
-                                    <span class="badge bg-warning float-end">Pending</span>
-                                </a>
+                            <a href="{% url 'Ecom:admin_cancellation_detail' order.id %}" class="admin-item">
+                                <span class="left"><i class="fas fa-times-circle" style="color:var(--danger);"></i> Manage Cancellation</span>
+                                <span class="badge-small" style="background:#fef3c7;color:#92400e;">Pending</span>
+                            </a>
                             {% endif %}
                             {% if order.return_requested %}
-                                <a href="{% url 'Ecom:admin_return_detail' order.id %}" class="list-group-item list-group-item-action">
-                                    <i class="fas fa-undo text-warning"></i> Manage Return
-                                    <span class="badge bg-{% if order.return_completed %}success{% elif order.return_items_received %}info{% elif order.return_approved %}warning{% elif order.return_rejected %}danger{% else %}secondary{% endif %} float-end">
-                                        {{ order.return_status_display }}
-                                    </span>
-                                </a>
+                            <a href="{% url 'Ecom:admin_return_detail' order.id %}" class="admin-item">
+                                <span class="left"><i class="fas fa-undo" style="color:var(--warning);"></i> Manage Return</span>
+                                <span class="badge-status {% if order.return_completed %}success{% elif order.return_items_received %}info{% elif order.return_approved %}warning{% elif order.return_rejected %}danger{% else %}secondary{% endif %}" style="font-size:8px;padding:2px 8px;">
+                                    <span class="dot"></span> {{ order.return_status_display }}
+                                </span>
+                            </a>
                             {% endif %}
                             {% if order.replacement_requested %}
-                                <a href="{% url 'Ecom:admin_replacement_detail' order.id %}" class="list-group-item list-group-item-action">
-                                    <i class="fas fa-exchange-alt text-primary"></i> Manage Replacement
-                                    <span class="badge bg-{% if order.replacement_completed %}success{% elif order.replacement_approved %}warning{% elif order.replacement_rejected %}danger{% else %}secondary{% endif %} float-end">
-                                        {{ order.replacement_status_display }}
-                                    </span>
-                                </a>
+                            <a href="{% url 'Ecom:admin_replacement_detail' order.id %}" class="admin-item">
+                                <span class="left"><i class="fas fa-exchange-alt" style="color:var(--primary);"></i> Manage Replacement</span>
+                                <span class="badge-status {% if order.replacement_completed %}success{% elif order.replacement_approved %}warning{% elif order.replacement_rejected %}danger{% else %}secondary{% endif %}" style="font-size:8px;padding:2px 8px;">
+                                    <span class="dot"></span> {{ order.replacement_status_display }}
+                                </span>
+                            </a>
                             {% endif %}
-                            <a href="{% url 'Ecom:admin_order_detail' order.id %}" class="list-group-item list-group-item-action">
-                                <i class="fas fa-edit text-primary"></i> Full Admin View
+                            <a href="{% url 'Ecom:admin_order_detail' order.id %}" class="admin-item">
+                                <span class="left"><i class="fas fa-edit" style="color:var(--primary);"></i> Full Admin View</span>
+                                <i class="fas fa-chevron-right" style="color:var(--text-muted);font-size:12px;"></i>
                             </a>
-                            <a href="{% url 'Ecom:admin_order_update' order.id %}" class="list-group-item list-group-item-action">
-                                <i class="fas fa-pen text-success"></i> Update Order Status
+                            <a href="{% url 'Ecom:admin_order_update' order.id %}" class="admin-item" style="border-bottom:none;">
+                                <span class="left"><i class="fas fa-pen" style="color:var(--success);"></i> Update Order Status</span>
+                                <i class="fas fa-chevron-right" style="color:var(--text-muted);font-size:12px;"></i>
                             </a>
-                        {% else %}
-                            <a href="{% url 'offline_sales:order_detail' order.id %}" class="list-group-item list-group-item-action">
-                                <i class="fas fa-store text-warning"></i> View Offline Order
+                        </div>
+                    {% else %}
+                        <div class="admin-list">
+                            <a href="{% url 'offline_sales:order_detail' order.id %}" class="admin-item" style="border-bottom:none;">
+                                <span class="left"><i class="fas fa-store" style="color:var(--warning);"></i> View Offline Order</span>
+                                <i class="fas fa-chevron-right" style="color:var(--text-muted);font-size:12px;"></i>
                             </a>
-                        {% endif %}
-                    </div>
+                        </div>
+                    {% endif %}
+                    
+                    <a href="{% url 'Ecom:orders' %}" class="btn-back" style="margin-top:10px;">
+                        <i class="fas fa-arrow-left"></i> Back to Orders
+                    </a>
                 </div>
-            </div>
-            {% endif %}
+                {% endif %}
 
-            <!-- Transactions -->
-            {% if transactions %}
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-history"></i> Transactions</h5>
-                </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        {% for transaction in transactions %}
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between">
-                                    <span>
-                                        {% if transaction.transaction_type == 'payment' %}
-                                            <i class="fas fa-credit-card text-primary"></i>
-                                        {% else %}
-                                            <i class="fas fa-undo text-warning"></i>
-                                        {% endif %}
-                                        {{ transaction.get_transaction_type_display }}
-                                    </span>
-                                    <span>
-                                        ₹{{ transaction.amount|floatformat:2 }}
-                                        <span class="badge bg-{% if transaction.status == 'success' %}success{% elif transaction.status == 'pending' %}warning{% elif transaction.status == 'refunded' %}info{% else %}danger{% endif %}">
-                                            {{ transaction.get_status_display }}
-                                        </span>
-                                    </span>
-                                </div>
-                                <div class="small text-muted">{{ transaction.created_at|date:"M d, Y H:i" }}</div>
-                                {% if transaction.notes %}
-                                    <div class="small text-muted mt-1">{{ transaction.notes }}</div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
+                <!-- If no actions show, just show back button -->
+                {% if is_offline and not is_admin_view %}
+                <a href="{% url 'Ecom:orders' %}" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Back to Orders
+                </a>
+                {% endif %}
+
             </div>
-            {% endif %}
+
         </div>
 
-        <!-- Right Column - Order Items & Address -->
-        <div class="col-md-8">
-            <!-- Order Items -->
-            <div class="card shadow-sm">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Order Items</h5>
-                    <span class="badge bg-secondary">{{ items|length }} items</span>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Product</th>
-                                    <th>SKU</th>
-                                    <th>Qty</th>
-                                    <th>Price</th>
-                                    <th>Discount</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in items %}
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                {% if item.product and item.product.main_image %}
-                                                    <img src="{{ item.product.main_image }}" class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;">
-                                                {% else %}
-                                                    <div class="bg-light me-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                                        <i class="fas fa-box text-muted"></i>
-                                                    </div>
-                                                {% endif %}
-                                                <div>
-                                                    {{ item.product_name }}
-                                                    {% if item.variant %}
-                                                        <br><small class="text-muted">{{ item.variant.name|default:item.variant.sku }}</small>
-                                                    {% endif %}
-                                                    {% if not is_offline and item.offer_name %}
-                                                        <br><small class="badge bg-warning">{{ item.offer_name }}</small>
-                                                    {% endif %}
-                                                    {% if item.is_returned %}
-                                                        <br><span class="badge bg-info">Returned</span>
-                                                    {% endif %}
-                                                    {% if is_offline and item.barcode_text %}
-                                                        <br><small class="text-muted">Barcode: {{ item.barcode_text }}</small>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td><code>{{ item.sku }}</code></td>
-                                        <td>{{ item.quantity }}</td>
-                                        <td>
-                                            {% if item.original_price > item.final_price %}
-                                                <span class="text-muted text-decoration-line-through">₹{{ item.original_price|floatformat:2 }}</span>
-                                                <br><strong>₹{{ item.final_price|floatformat:2 }}</strong>
-                                            {% else %}
-                                                <strong>₹{{ item.original_price|floatformat:2 }}</strong>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if item.product_discount > 0 or item.offer_discount > 0 %}
-                                                <span class="text-success">
-                                                    ₹{{ item.product_discount|add:item.offer_discount|floatformat:2 }}
-                                                    {% if not is_offline and item.offer %}
-                                                        <br><small>({{ item.offer.name }})</small>
-                                                    {% endif %}
-                                                </span>
-                                            {% else %}
-                                                <span class="text-muted">-</span>
-                                            {% endif %}
-                                        </td>
-                                        <td><strong>₹{{ item.total|floatformat:2 }}</strong></td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                            <tfoot class="table-light">
-                                <tr>
-                                    <td colspan="5" class="text-end"><strong>Subtotal:</strong></td>
-                                    <td><strong>₹{{ order.subtotal|floatformat:2 }}</strong></td>
-                                </tr>
-                                {% if not is_offline and order.product_discount_total > 0 %}
-                                <tr>
-                                    <td colspan="5" class="text-end text-success"><strong>Product Discount:</strong></td>
-                                    <td class="text-success">-₹{{ order.product_discount_total|floatformat:2 }}</td>
-                                </tr>
-                                {% endif %}
-                                {% if not is_offline and order.offer_discount > 0 %}
-                                <tr>
-                                    <td colspan="5" class="text-end text-success"><strong>Offer Discount:</strong></td>
-                                    <td class="text-success">-₹{{ order.offer_discount|floatformat:2 }}</td>
-                                </tr>
-                                {% endif %}
-                                {% if not is_offline and order.coupon_discount > 0 %}
-                                <tr>
-                                    <td colspan="5" class="text-end text-success"><strong>Coupon Discount:</strong></td>
-                                    <td class="text-success">-₹{{ order.coupon_discount|floatformat:2 }}</td>
-                                </tr>
-                                {% endif %}
-                                <tr class="fw-bold">
-                                    <td colspan="5" class="text-end"><strong>Total:</strong></td>
-                                    <td><strong>₹{{ order.total_amount|floatformat:2 }}</strong></td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Order Timeline -->
-            <div class="card shadow-sm mt-3">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-timeline"></i> Order Timeline</h5>
-                </div>
-                <div class="card-body">
-                    <div class="timeline">
-                        <div class="timeline-item">
-                            <div class="timeline-marker bg-success"></div>
-                            <div class="timeline-content">
-                                <h6 class="mb-0">Order Placed</h6>
-                                <small class="text-muted">{{ order.created_at|date:"F d, Y H:i" }}</small>
-                                {% if is_offline %}
-                                    <br><small class="text-muted">(Offline Purchase)</small>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}
-                        <div class="timeline-item">
-                            <div class="timeline-marker bg-warning"></div>
-                            <div class="timeline-content">
-                                <h6 class="mb-0">Order Processing</h6>
-                                <small class="text-muted">{{ order.updated_at|date:"F d, Y H:i" }}</small>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if order.status == 'shipped' or order.status == 'delivered' %}
-                        <div class="timeline-item">
-                            <div class="timeline-marker bg-info"></div>
-                            <div class="timeline-content">
-                                <h6 class="mb-0">Order Shipped</h6>
-                                <small class="text-muted">{{ order.updated_at|date:"F d, Y H:i" }}</small>
-                                {% if order.tracking_number %}
-                                    <br><small>Tracking: {{ order.tracking_number }}</small>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if order.status == 'delivered' or order.status == 'completed' %}
-                        <div class="timeline-item">
-                            <div class="timeline-marker bg-success"></div>
-                            <div class="timeline-content">
-                                <h6 class="mb-0">Order Delivered</h6>
-                                <small class="text-muted">{{ order.delivery_date|date:"F d, Y H:i" }}</small>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if order.cancelled_at %}
-                        <div class="timeline-item">
-                            <div class="timeline-marker bg-danger"></div>
-                            <div class="timeline-content">
-                                <h6 class="mb-0">Order Cancelled</h6>
-                                <small class="text-muted">{{ order.cancelled_at|date:"F d, Y H:i" }}</small>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if not is_offline and order.return_approved %}
-                        <div class="timeline-item">
-                            <div class="timeline-marker bg-success"></div>
-                            <div class="timeline-content">
-                                <h6 class="mb-0">Return Approved</h6>
-                                <small class="text-muted">{{ order.return_approved_at|date:"F d, Y H:i" }}</small>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if not is_offline and order.return_items_received %}
-                        <div class="timeline-item">
-                            <div class="timeline-marker bg-info"></div>
-                            <div class="timeline-content">
-                                <h6 class="mb-0">Return Items Received</h6>
-                                <small class="text-muted">{{ order.return_items_received_at|date:"F d, Y H:i" }}</small>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if order.refund_completed %}
-                        <div class="timeline-item">
-                            <div class="timeline-marker bg-success"></div>
-                            <div class="timeline-content">
-                                <h6 class="mb-0">Refund Completed</h6>
-                                <small class="text-muted">{{ order.refund_completed_at|date:"F d, Y H:i" }}</small>
-                                <br><small>Amount: ₹{{ order.refund_amount|default:order.total_amount|floatformat:2 }}</small>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if not is_offline and order.replacement_completed %}
-                        <div class="timeline-item">
-                            <div class="timeline-marker bg-success"></div>
-                            <div class="timeline-content">
-                                <h6 class="mb-0">Replacement Completed</h6>
-                                <small class="text-muted">{{ order.replacement_completed_at|date:"F d, Y H:i" }}</small>
-                                {% if order.replacement_order %}
-                                    <br><small>Replacement Order: #{{ order.replacement_order.order_number }}</small>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Addresses -->
-            <div class="card shadow-sm mt-3">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">Shipping & Billing</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6><i class="fas fa-truck text-primary"></i> Shipping Address</h6>
-                            <p class="text-muted small" style="white-space:pre-line;">{{ order.shipping_address }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <h6><i class="fas fa-file-invoice text-primary"></i> Billing Address</h6>
-                            <p class="text-muted small" style="white-space:pre-line;">{{ order.billing_address }}</p>
-                        </div>
-                    </div>
-                    {% if order.notes %}
-                    <hr>
-                    <h6><i class="fas fa-sticky-note text-primary"></i> Order Notes</h6>
-                    <p class="text-muted small">{{ order.notes }}</p>
-                    {% endif %}
-                    {% if is_offline and order.payment_method %}
-                    <hr>
-                    <h6><i class="fas fa-credit-card text-primary"></i> Payment Method</h6>
-                    <p class="text-muted small">{{ order.get_payment_method_display }}</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
     </div>
 </div>
-
-<style>
-.timeline {
-    position: relative;
-    padding-left: 30px;
-}
-.timeline-item {
-    position: relative;
-    padding-bottom: 20px;
-    border-left: 2px solid #e9ecef;
-    padding-left: 20px;
-}
-.timeline-item:last-child {
-    border-left: none;
-    padding-bottom: 0;
-}
-.timeline-marker {
-    position: absolute;
-    left: -8px;
-    top: 0;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    border: 2px solid #fff;
-}
-.timeline-content {
-    padding-left: 5px;
-}
-</style>
-
 {% endblock %}

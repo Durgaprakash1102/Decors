@@ -1,85 +1,1134 @@
-
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
-{% block title %}{{ action }} Customer{% endblock %}
+{% block title %}{{ action }} Customer - MyStore{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'offline_sales:customer_list' %}">Customers</a></li>
-            <li class="breadcrumb-item active">{{ action }} Customer</li>
-        </ol>
-    </nav>
 
-    <div class="row">
-        <div class="col-md-6 mx-auto">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-user"></i> {{ action }} Customer</h5>
-                </div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">First Name <span class="text-danger">*</span></label>
-                                    {{ form.first_name }}
-                                    {% if form.first_name.errors %}
-                                    <div class="text-danger">{{ form.first_name.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Last Name</label>
-                                    {{ form.last_name }}
-                                </div>
-                            </div>
-                        </div>
+<style>
+/* =====================================================
+   ROOT VARIABLES
+   ===================================================== */
+:root {
+    --primary: #5c121f;
+    --primary-light: #7a1a2b;
+    --primary-dark: #3d0c14;
+    --primary-gradient: linear-gradient(135deg, #5c121f 0%, #7a1a2b 50%, #8f2035 100%);
+    --secondary: #f4b400;
+    --success: #10b981;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --bg: #f5f3f0;
+    --white: #ffffff;
+    --border: #e5e0db;
+    --border-light: #f0ede8;
+    --text: #1a1a2e;
+    --text-secondary: #4a4a5a;
+    --text-muted: #8a8a9a;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 20px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 40px rgba(92,18,31,0.08);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-xs: 6px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Phone <span class="text-danger">*</span></label>
-                                    {{ form.phone }}
-                                    {% if form.phone.errors %}
-                                    <div class="text-danger">{{ form.phone.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Email</label>
-                                    {{ form.email }}
-                                </div>
-                            </div>
-                        </div>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-                        <div class="mb-3">
-                            <label class="form-label">Address</label>
-                            {{ form.address }}
-                        </div>
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
 
-                        <div class="mb-3">
-                            <label class="form-label">Notes</label>
-                            {{ form.notes }}
-                        </div>
+/* =====================================================
+   PAGE WRAPPER
+   ===================================================== */
+.customer-form-page {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+  
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+}
 
-                        <div class="d-flex justify-content-between">
-                            <a href="{% url 'offline_sales:customer_list' %}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> {{ action }} Customer
-                            </button>
-                        </div>
-                    </form>
+/* =====================================================
+   HEADER
+   ===================================================== */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px 28px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.page-header .left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.page-header .left .icon-box {
+    width: 44px;
+    height: 44px;
+    background: var(--primary-gradient);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 18px;
+    box-shadow: 0 4px 16px rgba(92,18,31,0.2);
+    flex-shrink: 0;
+}
+
+.page-header .left .header-text h1 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+}
+
+.page-header .left .header-text .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.page-header .left .header-text .breadcrumb a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.page-header .left .header-text .breadcrumb a:hover {
+    color: var(--primary);
+}
+
+.page-header .left .header-text .breadcrumb .sep {
+    color: var(--border);
+}
+
+.page-header .left .header-text .breadcrumb .current {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* =====================================================
+   SPLIT LAYOUT - NO GAPS
+   ===================================================== */
+.split-layout {
+    display: flex;
+    flex: 1;
+    background: var(--white);
+    margin: 0;
+    height: auto;
+    min-height: 0;
+}
+
+/* =====================================================
+   LEFT SIDE - IMAGE (CONTENT BASED HEIGHT)
+   ===================================================== */
+.image-side {
+    flex: 0 0 38%;
+    background: var(--primary-gradient);
+    padding: 40px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--white);
+    position: relative;
+    overflow: hidden;
+    height: auto;
+    min-height: 100%;
+}
+
+.image-side::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+    animation: floatBg 8s ease-in-out infinite;
+}
+
+.image-side::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -15%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 50%;
+    animation: floatBg 10s ease-in-out infinite reverse;
+}
+
+@keyframes floatBg {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
+}
+
+.image-side .image-content {
+    position: relative;
+    z-index: 1;
+    max-width: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ===== BIG USER ICON ===== */
+.image-side .big-icon-wrapper {
+    width: 120px;
+    height: 120px;
+    margin: 0 0 16px 0;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid rgba(255,255,255,0.15);
+    position: relative;
+    transition: var(--transition);
+    flex-shrink: 0;
+        margin-bottom: 50px;
+
+}
+
+.image-side .big-icon-wrapper:hover {
+    transform: scale(1.05);
+    background: rgba(255,255,255,0.15);
+}
+
+.image-side .big-icon-wrapper .pulse-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.08);
+    animation: pulseRing 3s ease-in-out infinite;
+}
+
+.image-side .big-icon-wrapper .pulse-ring:nth-child(1) {
+    inset: -10px;
+    animation-delay: 0s;
+}
+
+.image-side .big-icon-wrapper .pulse-ring:nth-child(2) {
+    inset: -22px;
+    animation-delay: 1.2s;
+}
+
+.image-side .big-icon-wrapper .pulse-ring:nth-child(3) {
+    inset: -34px;
+    animation-delay: 2.4s;
+}
+
+@keyframes pulseRing {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.08); opacity: 0.1; }
+}
+
+.image-side .big-icon-wrapper i {
+    font-size: 52px;
+    color: rgba(255,255,255,0.9);
+    z-index: 1;
+}
+
+.image-side h2 {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+}
+
+.image-side h2 .highlight {
+    color: var(--secondary);
+    position: relative;
+}
+
+.image-side h2 .highlight::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--secondary);
+    border-radius: 2px;
+    opacity: 0.3;
+}
+
+.image-side p {
+    font-size: 13px;
+    line-height: 1.7;
+    opacity: 0.85;
+    margin-bottom: 16px;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.image-side .feature-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+}
+
+.image-side .feature-chips .chip {
+    padding: 4px 12px;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    font-size: 10px;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.image-side .feature-chips .chip:hover {
+    background: rgba(255,255,255,0.15);
+    transform: translateY(-2px);
+}
+
+.image-side .feature-chips .chip i {
+    color: var(--secondary);
+    font-size: 10px;
+}
+
+/* =====================================================
+   RIGHT SIDE - FORM (FITS CONTENT)
+   ===================================================== */
+.form-side {
+    flex: 1;
+    padding: 36px 40px 36px 36px;
+    background: var(--white);
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 100%;
+}
+
+.form-side .form-header {
+    margin-bottom: 24px;
+    flex-shrink: 0;
+}
+
+.form-side .form-header h3 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-side .form-header h3 i {
+    color: var(--primary);
+}
+
+.form-side .form-header p {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-top: 2px;
+}
+
+/* =====================================================
+   BEAUTIFUL FORM FIELDS
+   ===================================================== */
+.customer-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.customer-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.customer-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.customer-form .form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.customer-form .form-group label {
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--text-secondary);
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.customer-form .form-group label .required {
+    color: var(--danger);
+    font-size: 14px;
+}
+
+/* ===== BEAUTIFUL INPUT FIELDS ===== */
+.customer-form .form-group .input-wrap {
+    position: relative;
+}
+
+.customer-form .form-group .input-wrap .field-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 15px;
+    transition: var(--transition);
+    z-index: 2;
+}
+
+.customer-form .form-group .input-wrap .field-icon.top {
+    top: 14px;
+    transform: none;
+}
+
+.customer-form .form-group .input-wrap input,
+.customer-form .form-group .input-wrap textarea,
+.customer-form .form-group .input-wrap select {
+    width: 100%;
+    padding: 11px 14px 11px 42px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
+    border-radius: var(--radius-xs);
+    background: var(--bg);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    transition: var(--transition);
+    outline: none;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.customer-form .form-group .input-wrap textarea {
+    min-height: 70px;
+    resize: vertical;
+    padding-top: 12px;
+}
+
+.customer-form .form-group .input-wrap select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 36px;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a8a9a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+/* ===== FOCUS STATE ===== */
+.customer-form .form-group .input-wrap input:focus,
+.customer-form .form-group .input-wrap textarea:focus,
+.customer-form .form-group .input-wrap select:focus {
+    border-color: var(--primary);
+    border-left-color: var(--primary);
+    background: var(--white);
+    box-shadow: inset 0 2px 8px rgba(92,18,31,0.06), 0 0 0 3px rgba(92,18,31,0.04);
+}
+
+.customer-form .form-group .input-wrap input:focus ~ .field-icon,
+.customer-form .form-group .input-wrap textarea:focus ~ .field-icon,
+.customer-form .form-group .input-wrap select:focus ~ .field-icon {
+    color: var(--primary);
+}
+
+.customer-form .form-group .input-wrap input:hover,
+.customer-form .form-group .input-wrap textarea:hover,
+.customer-form .form-group .input-wrap select:hover {
+    border-color: var(--primary-light);
+    background: var(--white);
+}
+
+.customer-form .form-group .input-wrap input::placeholder,
+.customer-form .form-group .input-wrap textarea::placeholder {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.customer-form .form-group .input-wrap.error input,
+.customer-form .form-group .input-wrap.error textarea,
+.customer-form .form-group .input-wrap.error select {
+    border-color: var(--danger);
+    border-left-color: var(--danger);
+    background: rgba(239,68,68,0.02);
+}
+
+.customer-form .form-group .input-wrap.error .field-icon {
+    color: var(--danger);
+}
+
+.customer-form .form-group .error-text {
+    color: var(--danger);
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+/* =====================================================
+   FORM ACTIONS
+   ===================================================== */
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 2px solid var(--border);
+    flex-shrink: 0;
+}
+
+.form-actions .btn {
+    padding: 10px 28px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-family: inherit;
+}
+
+.btn-cancel {
+    background: var(--bg);
+    color: var(--text-secondary);
+    border: 2px solid var(--border);
+}
+
+.btn-cancel:hover {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
+    transform: translateY(-2px);
+}
+
+.btn-submit {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 4px 16px rgba(92,18,31,0.2);
+    flex: 1;
+    justify-content: center;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(92,18,31,0.3);
+}
+
+/* =====================================================
+   RESPONSIVE - NO GAPS, CONTENT BASED HEIGHT
+   ===================================================== */
+
+/* Large Desktop */
+@media (max-width: 1400px) {
+    .image-side {
+        flex: 0 0 36%;
+        padding: 36px 24px;
+    }
+    
+    .form-side {
+        padding: 32px 36px 32px 32px;
+    }
+}
+
+/* Desktop */
+@media (max-width: 1200px) {
+    .image-side {
+        flex: 0 0 35%;
+        padding: 32px 20px;
+    }
+    
+    .image-side .big-icon-wrapper {
+        width: 110px;
+        height: 110px;
+    }
+    
+    .image-side .big-icon-wrapper i {
+        font-size: 46px;
+    }
+    
+    .image-side h2 {
+        font-size: 20px;
+    }
+    
+    .form-side {
+        padding: 28px 32px 28px 28px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .image-side {
+        flex: 0 0 38%;
+        padding: 28px 18px;
+    }
+    
+    .image-side .big-icon-wrapper {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 14px;
+    }
+    
+    .image-side .big-icon-wrapper i {
+        font-size: 42px;
+    }
+    
+    .image-side .big-icon-wrapper .pulse-ring:nth-child(1) {
+        inset: -8px;
+    }
+    .image-side .big-icon-wrapper .pulse-ring:nth-child(2) {
+        inset: -18px;
+    }
+    .image-side .big-icon-wrapper .pulse-ring:nth-child(3) {
+        inset: -28px;
+    }
+    
+    .image-side h2 {
+        font-size: 18px;
+    }
+    
+    .image-side p {
+        font-size: 12px;
+    }
+    
+    .form-side {
+        padding: 24px 24px 24px 20px;
+    }
+    
+    .customer-form .form-row {
+        gap: 16px;
+    }
+}
+
+/* Tablet - Stack Layout */
+@media (max-width: 850px) {
+    .split-layout {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    .image-side {
+        flex: none;
+        padding: 28px 20px;
+        width: 100%;
+        min-height: auto;
+        height: auto;
+    }
+    
+    .image-side .image-content {
+        max-width: 100%;
+    }
+    
+    .image-side .big-icon-wrapper {
+        width: 90px;
+        height: 90px;
+        margin-bottom: 12px;
+    }
+    
+    .image-side .big-icon-wrapper i {
+        font-size: 38px;
+    }
+    
+    .image-side .big-icon-wrapper .pulse-ring:nth-child(1) {
+        inset: -6px;
+    }
+    .image-side .big-icon-wrapper .pulse-ring:nth-child(2) {
+        inset: -14px;
+    }
+    .image-side .big-icon-wrapper .pulse-ring:nth-child(3) {
+        inset: -22px;
+    }
+    
+    .image-side h2 {
+        font-size: 18px;
+    }
+    
+    .image-side p {
+        font-size: 12px;
+        max-width: 100%;
+        padding: 0 16px;
+        margin-bottom: 12px;
+    }
+    
+    .form-side {
+        padding: 20px 20px 24px;
+        height: auto;
+        min-height: auto;
+    }
+    
+    .form-side .form-header {
+        margin-bottom: 18px;
+    }
+    
+    .form-side .form-header h3 {
+        font-size: 17px;
+    }
+    
+    .customer-form .form-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .page-header {
+        padding: 12px 16px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    
+    .page-header .left {
+        gap: 10px;
+    }
+    
+    .page-header .left .icon-box {
+        width: 38px;
+        height: 38px;
+        font-size: 16px;
+    }
+    
+    .page-header .left .header-text h1 {
+        font-size: 17px;
+    }
+    
+    .page-header .left .header-text .breadcrumb {
+        font-size: 11px;
+    }
+    
+    .image-side {
+        padding: 20px 16px;
+        min-height: auto;
+        height: auto;
+    }
+    
+    .image-side .big-icon-wrapper {
+        width: 70px;
+        height: 70px;
+        margin-bottom: 10px;
+    }
+    
+    .image-side .big-icon-wrapper i {
+        font-size: 30px;
+    }
+    
+    .image-side .big-icon-wrapper .pulse-ring:nth-child(1) {
+        inset: -5px;
+    }
+    .image-side .big-icon-wrapper .pulse-ring:nth-child(2) {
+        inset: -12px;
+    }
+    .image-side .big-icon-wrapper .pulse-ring:nth-child(3) {
+        inset: -19px;
+    }
+    
+    .image-side h2 {
+        font-size: 16px;
+    }
+    
+    .image-side p {
+        font-size: 11px;
+        padding: 0 8px;
+        margin-bottom: 10px;
+    }
+    
+    .image-side .feature-chips .chip {
+        font-size: 9px;
+        padding: 3px 10px;
+    }
+    
+    .form-side {
+        padding: 16px 14px 18px;
+        height: auto;
+        min-height: auto;
+    }
+    
+    .form-side .form-header h3 {
+        font-size: 15px;
+    }
+    
+    .form-side .form-header p {
+        font-size: 12px;
+    }
+    
+    .customer-form {
+        gap: 12px;
+    }
+    
+    .customer-form .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .customer-form .form-group.full-width {
+        grid-column: 1;
+    }
+    
+    .customer-form .form-group .input-wrap input,
+    .customer-form .form-group .input-wrap textarea,
+    .customer-form .form-group .input-wrap select {
+        font-size: 13px;
+        padding: 9px 12px 9px 36px;
+    }
+    
+    .customer-form .form-group .input-wrap .field-icon {
+        font-size: 13px;
+        left: 12px;
+    }
+    
+    .customer-form .form-group label {
+        font-size: 11px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 8px;
+        padding-top: 14px;
+    }
+    
+    .form-actions .btn {
+        justify-content: center;
+        width: 100%;
+        font-size: 12px;
+        padding: 8px 20px;
+    }
+}
+
+/* Extra Small */
+@media (max-width: 400px) {
+    .image-side {
+        padding: 16px 12px;
+        min-height: auto;
+        height: auto;
+    }
+    
+    .image-side .big-icon-wrapper {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 8px;
+    }
+    
+    .image-side .big-icon-wrapper i {
+        font-size: 26px;
+    }
+    
+    .image-side .big-icon-wrapper .pulse-ring:nth-child(1) {
+        inset: -4px;
+    }
+    .image-side .big-icon-wrapper .pulse-ring:nth-child(2) {
+        inset: -10px;
+    }
+    .image-side .big-icon-wrapper .pulse-ring:nth-child(3) {
+        inset: -16px;
+    }
+    
+    .image-side h2 {
+        font-size: 14px;
+    }
+    
+    .image-side p {
+        font-size: 10px;
+    }
+    
+    .image-side .feature-chips .chip {
+        font-size: 8px;
+        padding: 2px 8px;
+    }
+    
+    .form-side {
+        padding: 12px 10px 14px;
+        height: auto;
+        min-height: auto;
+    }
+    
+    .customer-form .form-group .input-wrap input,
+    .customer-form .form-group .input-wrap textarea,
+    .customer-form .form-group .input-wrap select {
+        font-size: 12px;
+        padding: 7px 10px 7px 32px;
+    }
+    
+    .customer-form .form-group .input-wrap .field-icon {
+        font-size: 12px;
+        left: 10px;
+    }
+    
+    .form-actions .btn {
+        font-size: 11px;
+        padding: 7px 16px;
+    }
+}
+
+/* =====================================================
+   VERY LARGE SCREENS - NO GAPS
+   ===================================================== */
+@media (min-width: 1600px) {
+    .image-side {
+        flex: 0 0 35%;
+        padding: 48px 36px;
+    }
+    
+    .image-side .big-icon-wrapper {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .image-side .big-icon-wrapper i {
+        font-size: 60px;
+    }
+    
+    .image-side h2 {
+        font-size: 26px;
+    }
+    
+    .image-side p {
+        font-size: 15px;
+        max-width: 350px;
+    }
+    
+    .form-side {
+        padding: 44px 52px 44px 44px;
+    }
+    
+    .form-side .form-header h3 {
+        font-size: 22px;
+    }
+    
+    .customer-form .form-group .input-wrap input,
+    .customer-form .form-group .input-wrap textarea,
+    .customer-form .form-group .input-wrap select {
+        font-size: 15px;
+        padding: 13px 16px 13px 46px;
+    }
+    
+    .customer-form .form-row {
+        gap: 24px;
+    }
+    
+    .customer-form {
+        gap: 20px;
+    }
+}
+
+@media (min-width: 1900px) {
+    .image-side {
+        flex: 0 0 32%;
+        padding: 56px 44px;
+    }
+    
+    .image-side .big-icon-wrapper {
+        width: 160px;
+        height: 160px;
+    }
+    
+    .image-side .big-icon-wrapper i {
+        font-size: 72px;
+    }
+    
+    .form-side {
+        padding: 52px 60px 52px 52px;
+    }
+}
+</style>
+
+<!-- =====================================================
+PAGE CONTENT
+===================================================== -->
+<div class="customer-form-page">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <div class="left">
+            <div class="icon-box">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <div class="header-text">
+                <h1>{{ action }} Customer</h1>
+                <div class="breadcrumb">
+                    <a href="{% url 'offline_sales:customer_list' %}">Customers</a>
+                    <span class="sep">/</span>
+                    <span class="current">{{ action }} Customer</span>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- SPLIT LAYOUT -->
+    <div class="split-layout">
+
+        <!-- LEFT: IMAGE -->
+        <div class="image-side">
+            <div class="image-content">
+                <!-- Big User Icon -->
+                <div class="big-icon-wrapper">
+                    <span class="pulse-ring"></span>
+                    <span class="pulse-ring"></span>
+                    <span class="pulse-ring"></span>
+                    <i class="fas fa-user-circle"></i>
+                </div>
+
+                <h2>
+                    {% if action == 'Add' %}
+                        Welcome New <span class="highlight">Customer</span>
+                    {% else %}
+                        Update <span class="highlight">Customer</span>
+                    {% endif %}
+                </h2>
+
+                <p>
+                    {% if action == 'Add' %}
+                        Add a new customer to your system and start tracking their journey.
+                    {% else %}
+                        Keep your customer information accurate and up-to-date.
+                    {% endif %}
+                </p>
+
+                <!-- Feature Chips -->
+                <div class="feature-chips">
+                    <span class="chip"><i class="fas fa-shopping-bag"></i> Orders</span>
+                    <span class="chip"><i class="fas fa-chart-line"></i> Analytics</span>
+                    <span class="chip"><i class="fas fa-gift"></i> Loyalty</span>
+                    <span class="chip"><i class="fas fa-envelope"></i> Notify</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: FORM -->
+        <div class="form-side">
+            <div class="form-header">
+                <h3>
+                    <i class="fas fa-edit"></i>
+                    {% if action == 'Add' %}Add New Customer{% else %}Edit Customer{% endif %}
+                </h3>
+                <p>Fill in the details below to {{ action|lower }} a customer</p>
+            </div>
+
+            <form method="post" class="customer-form">
+                {% csrf_token %}
+
+                <!-- Row 1: First & Last Name -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First Name <span class="required">*</span></label>
+                        <div class="input-wrap">
+                            <i class="fas fa-user field-icon"></i>
+                            {{ form.first_name }}
+                        </div>
+                        {% if form.first_name.errors %}
+                            <div class="error-text"><i class="fas fa-exclamation-circle"></i> {{ form.first_name.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <div class="input-wrap">
+                            <i class="fas fa-user field-icon"></i>
+                            {{ form.last_name }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Phone & Email -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone Number <span class="required">*</span></label>
+                        <div class="input-wrap">
+                            <i class="fas fa-phone-alt field-icon"></i>
+                            {{ form.phone }}
+                        </div>
+                        {% if form.phone.errors %}
+                            <div class="error-text"><i class="fas fa-exclamation-circle"></i> {{ form.phone.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <div class="input-wrap">
+                            <i class="fas fa-envelope field-icon"></i>
+                            {{ form.email }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 3: Address (Full Width) -->
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label>Address</label>
+                        <div class="input-wrap">
+                            <i class="fas fa-map-marker-alt field-icon top"></i>
+                            {{ form.address }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 4: Notes (Full Width) -->
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label>Notes</label>
+                        <div class="input-wrap">
+                            <i class="fas fa-sticky-note field-icon top"></i>
+                            {{ form.notes }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <a href="{% url 'offline_sales:customer_list' %}" class="btn btn-cancel">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-submit">
+                        <i class="fas fa-save"></i>
+                        {% if action == 'Add' %}Add{% else %}Update{% endif %} Customer
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
 </div>
 {% endblock %}

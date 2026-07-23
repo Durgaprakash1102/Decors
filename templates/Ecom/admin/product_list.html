@@ -942,7 +942,6 @@ PAGE WRAPPER
             </div>
             <h1>
                 Products
-                <span>{{ total_products|default:products|length }}</span>
             </h1>
         </div>
         <div class="actions">
@@ -968,7 +967,7 @@ PAGE WRAPPER
             </div>
             <div class="right">
                 <span class="result-count">
-                    <strong id="resultCount">{{ total_products|default:products|length }}</strong> products
+                    <strong id="resultCount"></strong> products
                 </span>
                 <span class="toggle-btn" id="filterToggle">
                     <i class="fas fa-chevron-up"></i>

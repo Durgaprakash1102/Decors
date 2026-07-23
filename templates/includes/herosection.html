@@ -1,0 +1,869 @@
+<style>
+    /* ============================================ */
+    /* BANNER CAROUSEL - Golden Theme              */
+    /* ============================================ */
+    .banner-carousel {
+        position: relative;
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 40px rgba(92,18,31,0.12);
+        background: var(--text-dark);
+    }
+
+    .banner-carousel .slides-wrapper {
+        position: relative;
+        width: 100%;
+        height: 460px;
+        overflow: hidden;
+    }
+
+    .banner-carousel .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.8s ease, visibility 0.8s ease;
+        z-index: 1;
+    }
+
+    .banner-carousel .slide.active {
+        opacity: 1;
+        visibility: visible;
+        z-index: 2;
+    }
+
+    .banner-carousel .slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .banner-carousel .slide .slide-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, 
+            rgba(30,30,30,0.85) 0%, 
+            rgba(30,30,30,0.50) 40%,
+            rgba(30,30,30,0.20) 70%,
+            rgba(30,30,30,0.05) 100%
+        );
+        z-index: 3;
+    }
+
+    /* ============================================ */
+    /* CONTENT - PERFECT LEFT ALIGNMENT            */
+    /* ============================================ */
+    .banner-carousel .slide .slide-content {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        z-index: 4;
+        padding: 0;
+        padding-left: 120px;
+        max-width: 55%;
+        color: var(--text-white);
+        animation: slideContentIn 0.8s ease forwards;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: center;
+    }
+
+    .banner-carousel .slide:not(.active) .slide-content {
+        animation: none;
+        opacity: 0;
+    }
+
+    @keyframes slideContentIn {
+        0% {
+            opacity: 0;
+            transform: translateY(-50%) translateX(-40px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(-50%) translateX(0);
+        }
+    }
+
+    /* ============================================ */
+    /* BADGE - Golden                              */
+    /* ============================================ */
+    .banner-carousel .slide .slide-badge {
+        display: inline-block;
+        background: rgba(244, 180, 0, 0.12);
+        backdrop-filter: blur(4px);
+        padding: 6px 24px;
+        border-radius: 50px;
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        color: #F4B400;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 16px;
+        border: 1px solid rgba(244, 180, 0, 0.12);
+        align-self: flex-start;
+    }
+
+    .banner-carousel .slide .slide-badge i {
+        margin-right: 6px;
+    }
+
+    /* ============================================ */
+    /* TITLE - Golden + White                      */
+    /* ============================================ */
+    .banner-carousel .slide .slide-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 42px;
+        font-weight: 800;
+        margin-bottom: 14px;
+        line-height: 1.1;
+        text-shadow: 0 2px 20px rgba(0,0,0,0.15);
+        text-align: left;
+        width: 100%;
+    }
+
+    .banner-carousel .slide .slide-title .white-text {
+        color: #ffffff;
+    }
+     
+    .banner-carousel .slide .slide-title .gold-text {
+        color: #F4B400;
+    }
+
+    .banner-carousel .slide .slide-title .primary-text {
+        color: #5c121f;
+    }
+
+    /* ============================================ */
+    /* DESCRIPTION                                 */
+    /* ============================================ */
+    .banner-carousel .slide .slide-desc {
+        font-family: 'Inter', sans-serif;
+        font-size: 18px;
+        color: rgba(255,255,255,0.92);
+        margin-bottom: 28px;
+        line-height: 1.7;
+        max-width: 90%;
+        text-shadow: 0 1px 10px rgba(0,0,0,0.1);
+        font-weight: 300;
+        text-align: left;
+        width: 100%;
+    }
+
+    /* ============================================ */
+    /* BUTTON - Golden Theme - CENTERED            */
+    /* ============================================ */
+    .banner-carousel .slide .slide-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 16px 44px;
+        border-radius: 50px;
+        background: linear-gradient(135deg, #F4B400, #D97706, #F4B400);
+        background-size: 200% 200%;
+        animation: goldShine 3s ease-in-out infinite;
+        color: #1e1e1e;
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 16px;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        box-shadow: 0 4px 30px rgba(244, 180, 0, 0.35);
+        cursor: pointer;
+        border: none;
+        letter-spacing: 0.5px;
+        align-self: flex-start;
+    }
+
+    @keyframes goldShine {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .banner-carousel .slide .slide-btn:hover {
+        transform: translateY(-3px) scale(1.03);
+        box-shadow: 0 8px 45px rgba(244, 180, 0, 0.50);
+        color: #1e1e1e;
+        background: linear-gradient(135deg, #D97706, #F4B400, #D97706);
+        background-size: 200% 200%;
+        animation: goldShine 2s ease-in-out infinite;
+    }
+
+    .banner-carousel .slide .slide-btn i {
+        transition: transform 0.3s ease;
+        font-size: 14px;
+    }
+
+    .banner-carousel .slide .slide-btn:hover i {
+        transform: translateX(6px);
+    }
+
+    /* ============================================ */
+    /* INDICATORS - Golden                         */
+    /* ============================================ */
+    .banner-carousel .indicators {
+        position: absolute;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .banner-carousel .indicators .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.20);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        border: 2px solid transparent;
+        padding: 0;
+    }
+
+    .banner-carousel .indicators .dot.active {
+        background: #F4B400;
+        border-color: rgba(255,255,255,0.20);
+        transform: scale(1.3);
+        box-shadow: 0 0 30px rgba(244, 180, 0, 0.30);
+    }
+
+    .banner-carousel .indicators .dot:hover {
+        background: rgba(255,255,255,0.40);
+    }
+
+    .banner-carousel .indicators .dot.active:hover {
+        background: #F4B400;
+    }
+
+    /* ============================================ */
+    /* NAV ARROWS - Golden                         */
+    /* ============================================ */
+    .banner-carousel .nav-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba(244, 180, 0, 0.08);
+        backdrop-filter: blur(8px);
+        border: 1.5px solid rgba(244, 180, 0, 0.12);
+        color: #F4B400;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .banner-carousel .nav-arrow:hover {
+        background: rgba(244, 180, 0, 0.16);
+        transform: translateY(-50%) scale(1.08);
+        border-color: #F4B400;
+        box-shadow: 0 0 30px rgba(244, 180, 0, 0.12);
+        color: #F4B400;
+    }
+
+    .banner-carousel .nav-arrow.prev {
+        left: 28px;
+    }
+
+    .banner-carousel .nav-arrow.next {
+        right: 28px;
+    }
+
+    /* ============================================ */
+    /* PROGRESS BAR - Golden                       */
+    /* ============================================ */
+    .banner-carousel .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #F4B400, #D97706, #F4B400);
+        background-size: 200% 100%;
+        animation: progressShine 3s ease-in-out infinite;
+        z-index: 10;
+        border-radius: 0 2px 2px 0;
+        transition: width 0.1s linear;
+        width: 0%;
+        box-shadow: 0 0 30px rgba(244, 180, 0, 0.15);
+    }
+
+    @keyframes progressShine {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    /* ============================================ */
+    /* RESPONSIVE - PERFECT ON ALL DEVICES         */
+    /* ============================================ */
+    
+    /* Laptops & Small Desktops (1024px - 1200px) */
+    @media (max-width: 1200px) {
+        .banner-carousel .slides-wrapper {
+            height: 420px;
+        }
+
+        .banner-carousel .slide .slide-content {
+            padding-left: 60px;
+            max-width: 58%;
+        }
+
+        .banner-carousel .slide .slide-title {
+            font-size: 44px;
+        }
+
+        .banner-carousel .slide .slide-desc {
+            font-size: 17px;
+        }
+
+        .banner-carousel .slide .slide-btn {
+            padding: 15px 38px;
+            font-size: 15px;
+        }
+    }
+
+    /* Tablets & Small Laptops (768px - 1024px) */
+    @media (max-width: 1024px) {
+        .banner-carousel .slides-wrapper {
+            height: 380px;
+        }
+
+        .banner-carousel .slide .slide-content {
+            padding-left: 50px;
+            max-width: 62%;
+        }
+
+        .banner-carousel .slide .slide-title {
+            font-size: 38px;
+        }
+
+        .banner-carousel .slide .slide-desc {
+            font-size: 16px;
+            max-width: 95%;
+        }
+
+        .banner-carousel .slide .slide-btn {
+            padding: 14px 36px;
+            font-size: 15px;
+        }
+    }
+
+    /* Tablets (600px - 768px) */
+    @media (max-width: 768px) {
+        .banner-carousel .slides-wrapper {
+            height: 360px;
+        }
+
+        .banner-carousel .slide .slide-content {
+            padding-left: 40px;
+            max-width: 70%;
+        }
+
+        .banner-carousel .slide .slide-title {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .banner-carousel .slide .slide-desc {
+            font-size: 15px;
+            max-width: 100%;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .banner-carousel .slide .slide-btn {
+            padding: 12px 32px;
+            font-size: 14px;
+            gap: 10px;
+        }
+
+        .banner-carousel .slide .slide-badge {
+            font-size: 10px;
+            padding: 4px 16px;
+            margin-bottom: 12px;
+        }
+
+        .banner-carousel .nav-arrow {
+            width: 40px;
+            height: 40px;
+            font-size: 15px;
+        }
+
+        .banner-carousel .nav-arrow.prev {
+            left: 14px;
+        }
+
+        .banner-carousel .nav-arrow.next {
+            right: 14px;
+        }
+
+        .banner-carousel .indicators {
+            bottom: 18px;
+            gap: 10px;
+        }
+
+        .banner-carousel .indicators .dot {
+            width: 10px;
+            height: 10px;
+        }
+    }
+
+    /* Large Phones (480px - 600px) */
+    @media (max-width: 600px) {
+        .banner-carousel .slides-wrapper {
+            height: 320px;
+        }
+
+        .banner-carousel .slide .slide-content {
+            padding-left: 30px;
+            max-width: 80%;
+        }
+
+        .banner-carousel .slide .slide-title {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .banner-carousel .slide .slide-desc {
+            font-size: 14px;
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+
+        .banner-carousel .slide .slide-btn {
+            padding: 11px 28px;
+            font-size: 13px;
+            gap: 8px;
+        }
+
+        .banner-carousel .slide .slide-badge {
+            font-size: 9px;
+            padding: 3px 14px;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .banner-carousel .nav-arrow {
+            width: 36px;
+            height: 36px;
+            font-size: 14px;
+        }
+
+        .banner-carousel .nav-arrow.prev {
+            left: 12px;
+        }
+
+        .banner-carousel .nav-arrow.next {
+            right: 12px;
+        }
+
+        .banner-carousel .indicators {
+            bottom: 16px;
+            gap: 8px;
+        }
+
+        .banner-carousel .indicators .dot {
+            width: 8px;
+            height: 8px;
+        }
+
+        .banner-carousel .progress-bar {
+            height: 3px;
+        }
+    }
+
+    /* Medium Phones (400px - 480px) */
+    @media (max-width: 480px) {
+        .banner-carousel .slides-wrapper {
+            height: 280px;
+        }
+
+        .banner-carousel .slide .slide-content {
+            padding-left: 24px;
+            max-width: 85%;
+        }
+
+        .banner-carousel .slide .slide-title {
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        .banner-carousel .slide .slide-desc {
+            font-size: 13px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .banner-carousel .slide .slide-btn {
+            padding: 10px 24px;
+            font-size: 13px;
+            gap: 8px;
+        }
+
+        .banner-carousel .slide .slide-badge {
+            font-size: 8px;
+            padding: 3px 12px;
+            margin-bottom: 8px;
+        }
+
+        .banner-carousel .nav-arrow {
+            width: 32px;
+            height: 32px;
+            font-size: 12px;
+        }
+
+        .banner-carousel .nav-arrow.prev {
+            left: 10px;
+        }
+
+        .banner-carousel .nav-arrow.next {
+            right: 10px;
+        }
+
+        .banner-carousel .indicators {
+            bottom: 14px;
+            gap: 8px;
+        }
+
+        .banner-carousel .indicators .dot {
+            width: 7px;
+            height: 7px;
+        }
+    }
+
+    /* Small Phones (320px - 400px) */
+    @media (max-width: 400px) {
+        .banner-carousel .slides-wrapper {
+            height: 240px;
+        }
+
+        .banner-carousel .slide .slide-content {
+            padding-left: 18px;
+            max-width: 90%;
+        }
+
+        .banner-carousel .slide .slide-title {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .banner-carousel .slide .slide-desc {
+            font-size: 12px;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .banner-carousel .slide .slide-btn {
+            padding: 8px 20px;
+            font-size: 12px;
+            gap: 6px;
+        }
+
+        .banner-carousel .slide .slide-badge {
+            font-size: 7px;
+            padding: 2px 10px;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .banner-carousel .nav-arrow {
+            width: 28px;
+            height: 28px;
+            font-size: 11px;
+        }
+
+        .banner-carousel .nav-arrow.prev {
+            left: 8px;
+        }
+
+        .banner-carousel .nav-arrow.next {
+            right: 8px;
+        }
+
+        .banner-carousel .indicators {
+            bottom: 12px;
+            gap: 6px;
+        }
+
+        .banner-carousel .indicators .dot {
+            width: 6px;
+            height: 6px;
+        }
+
+        .banner-carousel .progress-bar {
+            height: 2px;
+        }
+    }
+
+    /* Extra Small Phones (below 320px) */
+    @media (max-width: 320px) {
+        .banner-carousel .slides-wrapper {
+            height: 200px;
+        }
+
+        .banner-carousel .slide .slide-content {
+            padding-left: 14px;
+            max-width: 95%;
+        }
+
+        .banner-carousel .slide .slide-title {
+            font-size: 17px;
+        }
+
+        .banner-carousel .slide .slide-desc {
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+
+        .banner-carousel .slide .slide-btn {
+            padding: 6px 16px;
+            font-size: 11px;
+            gap: 4px;
+        }
+
+        .banner-carousel .slide .slide-badge {
+            font-size: 6px;
+            padding: 2px 8px;
+            margin-bottom: 4px;
+        }
+
+        .banner-carousel .nav-arrow {
+            width: 24px;
+            height: 24px;
+            font-size: 10px;
+        }
+
+        .banner-carousel .nav-arrow.prev {
+            left: 6px;
+        }
+
+        .banner-carousel .nav-arrow.next {
+            right: 6px;
+        }
+
+        .banner-carousel .indicators {
+            bottom: 10px;
+            gap: 5px;
+        }
+
+        .banner-carousel .indicators .dot {
+            width: 5px;
+            height: 5px;
+        }
+    }
+</style>
+
+<!-- ============================================ -->
+<!-- BANNER CAROUSEL HTML                        -->
+<!-- ============================================ -->
+{% if banners %}
+<div class="banner-carousel" id="bannerCarousel">
+    <div class="slides-wrapper">
+        {% for banner in banners %}
+        <div class="slide {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}">
+            {% if banner.image %}
+                <img src="{{ banner.image.url }}" alt="{{ banner.title }}" loading="lazy">
+            {% else %}
+                <div style="width:100%;height:100%;background:linear-gradient(135deg, #5c121f, #1e1e1e);display:flex;align-items:center;justify-content:center;font-size:60px;color:rgba(255,255,255,0.06);">
+                    <i class="fas fa-image"></i>
+                </div>
+            {% endif %}
+            <div class="slide-overlay"></div>
+            
+            <div class="slide-content">
+                {% if banner.badge_text %}
+                    <span class="slide-badge"><i class="fas fa-tag"></i> {{ banner.badge_text }}</span>
+                {% else %}
+                    <span class="slide-badge"><i class="fas fa-star"></i> Featured Collection</span>
+                {% endif %}
+                
+                <h2 class="slide-title">
+                    {% if banner.title %}
+                        {% if banner.highlight_word %}
+                            <span class="white-text">{{ banner.title|cut:banner.highlight_word }}</span>
+                            <span class="gold-text">{{ banner.highlight_word }}</span>
+                        {% else %}
+                            <span class="white-text">{{ banner.title }}</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="white-text">Discover</span><br>
+                        <span class="gold-text">Luxury Home Decor</span>
+                    {% endif %}
+                </h2>
+                
+                {% if banner.short_description %}
+                    <p class="slide-desc">{{ banner.short_description }}</p>
+                {% else %}
+                    <p class="slide-desc">Elevate your space with premium collection of handcrafted decor pieces</p>
+                {% endif %}
+                
+                <a href="{% url 'Ecom:shop' %}" class="slide-btn">
+                    <span>Shop Now</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Navigation Arrows -->
+    <button class="nav-arrow prev" onclick="changeSlide(-1)" aria-label="Previous slide">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    <button class="nav-arrow next" onclick="changeSlide(1)" aria-label="Next slide">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+
+    <!-- Indicators -->
+    <div class="indicators">
+        {% for banner in banners %}
+        <button class="dot {% if forloop.first %}active{% endif %}" 
+                onclick="goToSlide({{ forloop.counter0 }})" 
+                aria-label="Go to slide {{ forloop.counter }}">
+        </button>
+        {% endfor %}
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="bannerProgress"></div>
+</div>
+
+<script>
+    // ============================================
+    // BANNER CAROUSEL JAVASCRIPT
+    // ============================================
+    (function() {
+        const carousel = document.getElementById('bannerCarousel');
+        if (!carousel) return;
+
+        const slides = carousel.querySelectorAll('.slide');
+        const dots = carousel.querySelectorAll('.dot');
+        const progressBar = document.getElementById('bannerProgress');
+        let currentSlide = 0;
+        let totalSlides = slides.length;
+        let interval = null;
+        const INTERVAL_TIME = 3000;
+        let progressInterval = null;
+
+        function goToSlide(index) {
+            clearInterval(interval);
+            clearInterval(progressInterval);
+            
+            slides.forEach(s => s.classList.remove('active'));
+            dots.forEach(d => d.classList.remove('active'));
+            
+            currentSlide = (index + totalSlides) % totalSlides;
+            
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+            
+            progressBar.style.width = '0%';
+            startAutoPlay();
+        }
+
+        function changeSlide(direction) {
+            goToSlide(currentSlide + direction);
+        }
+
+        function startAutoPlay() {
+            clearInterval(interval);
+            clearInterval(progressInterval);
+            
+            progressBar.style.width = '0%';
+            
+            let startTime = Date.now();
+            progressInterval = setInterval(function() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min((elapsed / INTERVAL_TIME) * 100, 100);
+                progressBar.style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                }
+            }, 50);
+            
+            interval = setInterval(function() {
+                goToSlide(currentSlide + 1);
+            }, INTERVAL_TIME);
+        }
+
+        carousel.addEventListener('mouseenter', function() {
+            clearInterval(interval);
+            clearInterval(progressInterval);
+        });
+
+        carousel.addEventListener('mouseleave', function() {
+            progressBar.style.width = '0%';
+            startAutoPlay();
+        });
+
+        let touchStartX = 0;
+
+        carousel.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+            clearInterval(interval);
+            clearInterval(progressInterval);
+        }, { passive: true });
+
+        carousel.addEventListener('touchend', function(e) {
+            const touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    changeSlide(1);
+                } else {
+                    changeSlide(-1);
+                }
+            } else {
+                progressBar.style.width = '0%';
+                startAutoPlay();
+            }
+        }, { passive: true });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                changeSlide(-1);
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+                changeSlide(1);
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                clearInterval(interval);
+                clearInterval(progressInterval);
+            } else {
+                progressBar.style.width = '0%';
+                startAutoPlay();
+            }
+        });
+
+        window.goToSlide = goToSlide;
+        window.changeSlide = changeSlide;
+
+        setTimeout(startAutoPlay, 500);
+    })();
+</script>
+{% endif %}

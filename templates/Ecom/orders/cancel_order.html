@@ -1,76 +1,769 @@
+{% extends 'base.html' %}
 <!-- templates/Ecom/orders/cancel_order.html -->
-
 {% load static %}
 
 {% block title %}Cancel Order - #{{ order.order_number }}{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'Ecom:orders' %}">My Orders</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'Ecom:order_detail' order.id %}">Order #{{ order.order_number }}</a></li>
-            <li class="breadcrumb-item active">Cancel Order</li>
-        </ol>
-    </nav>
+<style>
+:root {
+    --primary: #5c121f;
+    --primary-light: #7a1a2b;
+    --primary-dark: #3d0c14;
+    --secondary: #F4B400;
+    --bg: #FEF7ED;
+    --white: #ffffff;
+    --border: #ebe7e3;
+    --text: #1d1d1d;
+    --text-light: #6d6d6d;
+    --text-muted: #888888;
+    --success: #2e9d57;
+    --danger: #d64045;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --shadow: 0 10px 28px rgba(0,0,0,0.06);
+    --shadow-hover: 0 18px 40px rgba(92,18,31,0.12);
+    --transition: 0.35s ease;
+    --radius: 14px;
+    --radius-sm: 10px;
+    --radius-xs: 8px;
+}
 
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card shadow">
-                <div class="card-header bg-danger text-white">
-                    <h4 class="mb-0"><i class="fas fa-times-circle"></i> Cancel Order</h4>
+/* ============================================================
+   MAIN CONTAINER
+   ============================================================ */
+.main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    width: 100%;
+}
+
+.page-wrapper {
+    padding: 20px 0 24px 0;
+    min-height: 100%;
+    width: 100%;
+}
+
+/* ============================================================
+   HERO SECTION - PERFECT RESPONSIVE
+   ============================================================ */
+.hero-section {
+    background: var(--primary);
+    padding: 18px 28px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 20px rgba(92,18,31,0.12);
+    border-left: 5px solid var(--secondary);
+    width: 100%;
+}
+
+.hero-section .hero-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    min-width: 0;
+}
+
+.hero-section .hero-left .icon-box {
+    width: 48px;
+    height: 48px;
+    background: rgba(244,180,0,0.08);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary);
+    font-size: 20px;
+    flex-shrink: 0;
+    border: 1px solid rgba(244,180,0,0.06);
+}
+
+.hero-section .hero-left .content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.hero-section .hero-left .content .title {
+    color: var(--white);
+    font-size: 22px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.hero-section .hero-left .content .title .gold {
+    color: var(--secondary);
+}
+
+.hero-section .hero-left .content .desc {
+    color: rgba(255,255,255,0.5);
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hero-section .hero-left .content .desc .order-id {
+    color: var(--secondary);
+    font-weight: 600;
+}
+
+.hero-section .hero-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.hero-section .hero-right .chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 30px;
+    color: var(--white);
+    font-size: 12px;
+    font-weight: 500;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.hero-section .hero-right .chip:hover {
+    background: rgba(255,255,255,0.08);
+    transform: translateY(-2px);
+}
+
+.hero-section .hero-right .chip i {
+    color: var(--secondary);
+    font-size: 12px;
+}
+
+.hero-section .hero-right .chip .num {
+    font-weight: 700;
+    color: var(--secondary);
+}
+
+/* ============================================================
+   TWO COLUMN - IMAGE + FORM
+   ============================================================ */
+.cancel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: stretch;
+}
+
+/* ============================================================
+   LEFT CARD - IMAGE (height: 200px)
+   ============================================================ */
+.image-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+}
+
+.image-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-4px);
+}
+
+.image-card .img-wrap {
+    width: 100%;
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(145deg, var(--primary-dark), var(--primary), var(--primary-light));
+}
+
+.image-card .img-wrap img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+}
+
+.image-card .img-wrap .img-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 14px 18px 10px 18px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.5));
+    z-index: 2;
+}
+
+.image-card .img-wrap .img-overlay h4 {
+    color: var(--white);
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.image-card .img-wrap .img-overlay p {
+    color: rgba(255,255,255,0.6);
+    font-size: 12px;
+    margin: 2px 0 0 0;
+}
+
+.image-card .info-body {
+    padding: 14px 18px;
+    flex: 1;
+}
+
+.image-card .info-body .info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.image-card .info-body .info-row:last-child {
+    border-bottom: none;
+}
+
+.image-card .info-body .info-row .ir-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 11px;
+    flex-shrink: 0;
+}
+
+.image-card .info-body .info-row .ir-text .ir-label {
+    font-size: 8px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.image-card .info-body .info-row .ir-text .ir-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.image-card .info-body .refund-note {
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: #dbeafe;
+    border-radius: var(--radius-xs);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #1e40af;
+}
+
+/* ============================================================
+   RIGHT CARD - FORM
+   ============================================================ */
+.form-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: var(--transition);
+    border-top: 4px solid var(--danger);
+}
+
+.form-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-4px);
+}
+
+.form-card .form-head {
+    padding: 12px 18px;
+    background: #faf8f6;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-card .form-head .fh-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(214,64,69,0.08);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--danger);
+    font-size: 14px;
+}
+
+.form-card .form-head h5 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+}
+
+.form-card .form-body {
+    padding: 18px 20px;
+}
+
+/* ============================================================
+   WARNING BOX
+   ============================================================ */
+.warning-box {
+    background: #fef3c7;
+    border-radius: var(--radius-xs);
+    padding: 8px 12px;
+    margin-bottom: 14px;
+    border-left: 4px solid var(--warning);
+}
+
+.warning-box .w-title {
+    font-weight: 700;
+    color: #92400e;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.warning-box ul {
+    margin: 2px 0 0 0;
+    padding-left: 14px;
+    font-size: 10px;
+    color: #78350f;
+}
+
+.warning-box ul li {
+    padding: 1px 0;
+}
+
+/* ============================================================
+   FORM ELEMENTS
+   ============================================================ */
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+}
+
+.form-group label .required {
+    color: var(--danger);
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-xs);
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    transition: var(--transition);
+    outline: none;
+    resize: vertical;
+    min-height: 70px;
+}
+
+.form-group textarea:focus {
+    border-color: var(--primary);
+    background: var(--white);
+    box-shadow: 0 0 0 4px rgba(92,18,31,0.06);
+}
+
+.form-group .form-text {
+    display: block;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius-xs);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    flex: 1;
+}
+
+.btn-action-danger {
+    background: linear-gradient(135deg, var(--danger), #b3363a);
+    color: var(--white);
+    box-shadow: 0 4px 20px rgba(214,64,69,0.25);
+}
+.btn-action-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(214,64,69,0.35);
+    color: var(--white);
+}
+
+.btn-action-secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 2px solid var(--border);
+}
+.btn-action-secondary:hover {
+    background: var(--border);
+    transform: translateY(-3px);
+}
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 30px;
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.badge-status .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.badge-status.success { background: #d1fae5; color: #065f46; }
+.badge-status.success .dot { background: var(--success); }
+
+.badge-status.warning { background: #fef3c7; color: #92400e; }
+.badge-status.warning .dot { background: var(--warning); animation: blink 1.5s ease-in-out infinite; }
+
+.badge-status.danger { background: #fee2e2; color: #991b1b; }
+.badge-status.danger .dot { background: var(--danger); }
+
+.badge-status.info { background: #dbeafe; color: #1e40af; }
+.badge-status.info .dot { background: var(--info); }
+
+.badge-status.secondary { background: #f3f4f6; color: #374151; }
+.badge-status.secondary .dot { background: #6b7280; }
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* ============================================================
+   RESPONSIVE - PERFECT FOR ALL DEVICES
+   ============================================================ */
+
+/* Extra Large Screens (1200px+) */
+@media (min-width: 1200px) {
+    .hero-section { padding: 22px 32px; }
+    .hero-section .hero-left .content .title { font-size: 26px; }
+    .hero-section .hero-left .icon-box { width: 54px; height: 54px; font-size: 24px; }
+    .hero-section .hero-right .chip { font-size: 13px; padding: 6px 18px; }
+    .cancel-grid { gap: 32px; }
+}
+
+/* Large Screens (992px - 1199px) */
+@media (max-width: 1199px) and (min-width: 992px) {
+    .hero-section { padding: 18px 24px; }
+    .hero-section .hero-left .content .title { font-size: 22px; }
+    .hero-section .hero-left .icon-box { width: 46px; height: 46px; font-size: 20px; }
+    .hero-section .hero-right .chip { font-size: 12px; padding: 4px 14px; }
+}
+
+/* Tablets (768px - 991px) */
+@media (max-width: 991px) {
+    .cancel-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    .hero-section { padding: 16px 20px; }
+    .hero-section .hero-left .content .title { font-size: 20px; }
+    .hero-section .hero-left .icon-box { width: 42px; height: 42px; font-size: 18px; }
+    .hero-section .hero-right .chip { font-size: 12px; padding: 4px 12px; }
+    .main-container { padding: 0 16px; }
+    .page-wrapper { padding: 14px 0 18px 0; }
+}
+
+/* Mobile Landscape (576px - 767px) */
+@media (max-width: 767px) {
+    .main-container { padding: 0 12px; }
+    .hero-section {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 14px 16px;
+        gap: 12px;
+    }
+    .hero-section .hero-left { width: 100%; }
+    .hero-section .hero-left .content .title { font-size: 18px; }
+    .hero-section .hero-left .content .desc { 
+        white-space: normal;
+        font-size: 12px;
+    }
+    .hero-section .hero-left .icon-box { width: 38px; height: 38px; font-size: 16px; }
+    .hero-section .hero-right { width: 100%; gap: 6px; }
+    .hero-section .hero-right .chip { font-size: 11px; padding: 3px 10px; }
+    .cancel-grid { gap: 14px; }
+    .page-wrapper { padding: 8px 0 12px 0; }
+    .image-card .img-wrap { height: 160px; }
+    .image-card .img-wrap img { height: 160px; }
+    .image-card .img-wrap .img-overlay { padding: 10px 14px 8px 14px; }
+    .image-card .img-wrap .img-overlay h4 { font-size: 14px; }
+    .image-card .info-body { padding: 12px 14px; }
+    .form-card .form-head { padding: 10px 14px; }
+    .form-card .form-body { padding: 12px 14px; }
+    .btn-group { flex-direction: column; gap: 6px; }
+    .btn-action { padding: 7px 14px; font-size: 12px; }
+    .form-group textarea { font-size: 12px; padding: 6px 10px; min-height: 60px; }
+}
+
+/* Mobile Portrait (480px - 575px) */
+@media (max-width: 575px) {
+    .main-container { padding: 0 8px; }
+    .hero-section { padding: 10px 14px; border-left: 4px solid var(--secondary); }
+    .hero-section .hero-left .icon-box { width: 34px; height: 34px; font-size: 14px; border-radius: 8px; }
+    .hero-section .hero-left .content .title { font-size: 16px; }
+    .hero-section .hero-left .content .desc { font-size: 11px; }
+    .hero-section .hero-right .chip { font-size: 10px; padding: 2px 8px; gap: 4px; }
+    .hero-section .hero-right .chip i { font-size: 10px; }
+    .page-wrapper { padding: 6px 0 10px 0; }
+    .cancel-grid { gap: 10px; }
+    .image-card .img-wrap { height: 130px; }
+    .image-card .img-wrap img { height: 130px; }
+    .image-card .img-wrap .img-overlay { padding: 8px 12px 6px 12px; }
+    .image-card .img-wrap .img-overlay h4 { font-size: 13px; }
+    .image-card .img-wrap .img-overlay p { font-size: 10px; }
+    .image-card .info-body { padding: 8px 10px; }
+    .image-card .info-body .info-row { padding: 3px 0; gap: 8px; }
+    .image-card .info-body .info-row .ir-icon { width: 24px; height: 24px; font-size: 10px; }
+    .image-card .info-body .info-row .ir-text .ir-value { font-size: 11px; }
+    .form-card .form-head { padding: 8px 10px; }
+    .form-card .form-head h5 { font-size: 12px; }
+    .form-card .form-head .fh-icon { width: 28px; height: 28px; font-size: 12px; }
+    .form-card .form-body { padding: 10px 10px; }
+    .form-group textarea { font-size: 11px; padding: 5px 8px; min-height: 50px; }
+    .btn-action { font-size: 11px; padding: 5px 10px; }
+    .warning-box { padding: 6px 10px; margin-bottom: 10px; }
+    .warning-box .w-title { font-size: 10px; }
+    .warning-box ul { font-size: 9px; }
+}
+
+/* Extra Small (below 400px) */
+@media (max-width: 400px) {
+    .hero-section { padding: 8px 10px; border-left: 3px solid var(--secondary); }
+    .hero-section .hero-left .icon-box { width: 28px; height: 28px; font-size: 12px; border-radius: 6px; }
+    .hero-section .hero-left .content .title { font-size: 14px; }
+    .hero-section .hero-left .content .desc { font-size: 10px; }
+    .hero-section .hero-right .chip { font-size: 9px; padding: 2px 6px; }
+    .hero-section .hero-right .chip i { font-size: 9px; }
+    .image-card .img-wrap { height: 110px; }
+    .image-card .img-wrap img { height: 110px; }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-section { animation: fadeUp 0.5s ease both; }
+.image-card { animation: fadeUp 0.4s ease 0.05s both; }
+.form-card { animation: fadeUp 0.4s ease 0.1s both; }
+</style>
+
+<!-- ============================================================
+   MAIN CONTAINER
+   ============================================================ -->
+<div class="main-container">
+    <div class="page-wrapper">
+
+        <!-- ===== HERO SECTION ===== -->
+        <div class="hero-section">
+            <div class="hero-left">
+                <div class="icon-box">
+                    <i class="fas fa-times-circle"></i>
                 </div>
-                <div class="card-body">
-                    <!-- Order Summary -->
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Order #{{ order.order_number }}</strong>
-                        <p class="mb-0 mt-2">
-                            <span class="badge bg-secondary">{{ order.get_status_display }}</span>
-                            <span class="badge bg-{% if order.payment_status == 'paid' %}success{% else %}warning{% endif %}">
-                                {{ order.get_payment_status_display }}
-                            </span>
-                        </p>
-                        <p class="mb-0 mt-2">Total Amount: <strong>₹{{ order.total_amount }}</strong></p>
+                <div class="content">
+                    <div class="title">Cancel <span class="gold">Order</span></div>
+                    <div class="desc">
+                        <span class="order-id">#{{ order.order_number }}</span>
+                        <span style="color:rgba(255,255,255,0.1);margin:0 4px;">|</span>
+                        {{ order.created_at|date:"M d, Y" }}
+                        <span style="color:rgba(255,255,255,0.1);margin:0 4px;">|</span>
+                        <span style="color:rgba(255,255,255,0.3);">Request cancellation</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-right">
+                <span class="chip">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span><span class="num">{{ items|length }}</span> Items</span>
+                </span>
+                <span class="chip">
+                    <i class="fas fa-tag"></i>
+                    <span>₹<span class="num">{{ order.total_amount|floatformat:2 }}</span></span>
+                </span>
+                <span class="chip">
+                    <i class="fas fa-credit-card"></i>
+                    <span>
+                        <span class="badge-status {% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'pending' %}warning{% elif order.payment_status == 'refunded' %}info{% else %}danger{% endif %}" style="background:transparent;color:var(--white);padding:0;">
+                            <span class="dot"></span> {{ order.get_payment_status_display }}
+                        </span>
+                    </span>
+                </span>
+            </div>
+        </div>
+
+        <!-- ============================================================
+           TWO COLUMN - IMAGE + FORM
+           ============================================================ -->
+        <div class="cancel-grid">
+
+            <!-- ===== LEFT - IMAGE CARD ===== -->
+            <div class="image-card">
+                <div class="img-wrap">
+                    <img src="{% static 'images/cancel.png' %}" alt="Cancel Order">
+                    <div class="img-overlay">
+                        <h4>Order #{{ order.order_number }}</h4>
+                        <p>{{ order.created_at|date:"F d, Y" }}</p>
+                    </div>
+                </div>
+
+                <div class="info-body">
+                    <div class="info-row">
+                        <div class="ir-icon"><i class="fas fa-user"></i></div>
+                        <div class="ir-text">
+                            <div class="ir-label">Customer</div>
+                            <div class="ir-value">{{ order.customer_name|default:order.user.full_name }}</div>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="ir-icon"><i class="fas fa-box"></i></div>
+                        <div class="ir-text">
+                            <div class="ir-label">Items</div>
+                            <div class="ir-value" style="font-size:12px;">
+                                {% for item in items|slice:":2" %}
+                                    {{ item.product_name|truncatechars:12 }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                                {% if items|length > 2 %}
+                                    +{{ items|length|add:"-2" }} more
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-row" style="border-bottom:none;">
+                        <div class="ir-icon"><i class="fas fa-tag"></i></div>
+                        <div class="ir-text">
+                            <div class="ir-label">Total</div>
+                            <div class="ir-value" style="font-weight:700;color:var(--primary);font-size:14px;">₹{{ order.total_amount|floatformat:2 }}</div>
+                        </div>
                     </div>
 
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <strong>Before you cancel:</strong>
-                        <ul class="mb-0 mt-2">
-                            <li>This order will be cancelled permanently</li>
-                            <li>If paid, refund will be processed to your original payment method</li>
-                            <li>Cancellation cannot be undone once approved</li>
+                    {% if order.payment_status == 'paid' %}
+                    <div class="refund-note">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <span>Refund after approval</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- ===== RIGHT - FORM CARD ===== -->
+            <div class="form-card">
+                <div class="form-head">
+                    <div class="fh-icon"><i class="fas fa-edit"></i></div>
+                    <h5>Why are you cancelling?</h5>
+                </div>
+                <div class="form-body">
+
+                    <div class="warning-box">
+                        <div class="w-title">
+                            <i class="fas fa-exclamation-triangle"></i> Important
+                        </div>
+                        <ul>
+                            <li>Cancellation is <strong>permanent</strong></li>
+                            <li>Refund after approval</li>
+                            <li>Confirmation email sent</li>
                         </ul>
                     </div>
 
-                    <!-- Cancellation Form -->
                     <form method="post" id="cancelForm">
                         {% csrf_token %}
                         
-                        <div class="mb-3">
-                            <label for="{{ form.reason.id_for_label }}" class="form-label">
-                                Reason for Cancellation <span class="text-danger">*</span>
+                        <div class="form-group">
+                            <label for="{{ form.reason.id_for_label }}">
+                                Reason <span class="required">*</span>
                             </label>
                             {{ form.reason }}
                             {% if form.reason.errors %}
-                            <div class="text-danger">{{ form.reason.errors }}</div>
+                            <div class="text-danger" style="font-size:11px;margin-top:2px;">{{ form.reason.errors }}</div>
                             {% endif %}
-                            <small class="text-muted">Please provide a detailed reason for cancelling this order.</small>
+                            <span class="form-text">Please provide a detailed reason for cancelling this order.</span>
                         </div>
 
-                        <div class="d-flex justify-content-between">
-                            <a href="{% url 'Ecom:order_detail' order.id %}" class="btn btn-secondary">
+                        <div class="btn-group">
+                            <a href="{% url 'Ecom:order_detail' order.id %}" class="btn-action btn-action-secondary">
                                 <i class="fas fa-arrow-left"></i> Back
                             </a>
-                            <button type="submit" class="btn btn-danger" id="submitBtn">
-                                <i class="fas fa-times-circle"></i> Submit Cancellation Request
+                            <button type="submit" class="btn-action btn-action-danger" id="submitBtn">
+                                <i class="fas fa-check-circle"></i> Cancel Order
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
+
         </div>
+
     </div>
 </div>
 

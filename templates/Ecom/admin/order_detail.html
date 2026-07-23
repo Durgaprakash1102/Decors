@@ -1,395 +1,2151 @@
-
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
 {% block title %}Order #{{ order.order_number }} - Admin{% endblock %}
+{% block content %}
 
-{% block extra_css %}
 <style>
-    .order-detail-card {
-        border-left: 4px solid;
-        padding: 15px 20px;
-        background: #f8f9fa;
-        border-radius: 4px;
-        margin-bottom: 15px;
+    /* ============================================================
+       ROOT VARIABLES
+       ============================================================ */
+    :root {
+        --od-primary: #5c121f;
+        --od-primary-light: #f8f0ed;
+        --od-primary-gradient: linear-gradient(145deg, #5c121f 0%, #8a1a2f 50%, #5c121f 100%);
+        --od-gold: #c9a84c;
+        --od-bg: #f5f0eb;
+        --od-white: #ffffff;
+        --od-border: #e8e4e0;
+        --od-text: #1a1412;
+        --od-text-light: #5a4e48;
+        --od-text-muted: #a09892;
+        --od-success: #0f7b4a;
+        --od-danger: #b91c1c;
+        --od-shadow: 0 4px 24px rgba(92,18,31,0.06);
+        --od-shadow-lg: 0 12px 48px rgba(92,18,31,0.1);
+        --od-shadow-xl: 0 20px 60px rgba(92,18,31,0.15);
+        --od-radius: 16px;
+        --od-radius-sm: 10px;
+        --od-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        --od-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .order-detail-card.primary { border-color: #0d6efd; }
-    .order-detail-card.success { border-color: #28a745; }
-    .order-detail-card.warning { border-color: #ffc107; }
-    .order-detail-card.info { border-color: #17a2b8; }
-    .order-detail-card .label { font-size: 12px; color: #6c757d; }
-    .order-detail-card .value { font-size: 16px; font-weight: 600; }
-    
-    .status-badge {
-        padding: 4px 14px;
-        border-radius: 12px;
-        font-size: 13px;
-        font-weight: 600;
-        display: inline-block;
+
+    /* ============================================================
+       MASTER CARD
+       ============================================================ */
+    .od-master {
+        background: var(--od-white);
+        border-radius: var(--od-radius);
+        box-shadow: var(--od-shadow-lg);
+        border: 1px solid var(--od-border);
+        overflow: hidden;
+        width: 100%;
+        position: relative;
     }
-    .status-badge.pending { background: #fff3cd; color: #856404; }
-    .status-badge.processing { background: #cce5ff; color: #004085; }
-    .status-badge.shipped { background: #d1ecf1; color: #0c5460; }
-    .status-badge.delivered { background: #d4edda; color: #155724; }
-    .status-badge.cancelled { background: #e2e3e5; color: #383d41; }
-    .status-badge.failed { background: #f8d7da; color: #721c24; }
-    .status-badge.paid { background: #d4edda; color: #155724; }
-    .status-badge.refunded { background: #f8d7da; color: #721c24; }
-    .status-badge.pending_payment { background: #fff3cd; color: #856404; }
-    
-    .order-item {
+
+    .od-master::before {
+        content: '';
+        display: block;
+        height: 4px;
+        background: var(--od-primary-gradient);
+    }
+
+    /* ============================================================
+       HEADER
+       ============================================================ */
+    .od-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 16px 20px;
+        background: linear-gradient(135deg, rgba(92,18,31,0.02), rgba(138,26,47,0.005));
+        border-bottom: 1px solid var(--od-border);
+    }
+
+    .od-header-left {
         display: flex;
         align-items: center;
-        gap: 15px;
-        padding: 10px 0;
-        border-bottom: 1px solid #e9ecef;
-    }
-    .order-item:last-child {
-        border-bottom: none;
-    }
-    .order-item .item-details {
+        gap: 12px;
+        flex-wrap: wrap;
+        min-width: 0;
         flex: 1;
     }
-    .order-item .item-name {
+
+    .od-header-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--od-primary-gradient);
+        border-radius: var(--od-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--od-white);
+        font-size: 16px;
+        flex-shrink: 0;
+        box-shadow: 0 4px 16px rgba(92,18,31,0.2);
+    }
+
+    .od-header-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--od-text);
+        margin: 0;
+        line-height: 1.3;
+        word-break: break-word;
+    }
+
+    .od-header-title .order-num {
+        color: var(--od-primary);
+        background: rgba(92,18,31,0.06);
+        padding: 2px 10px;
+        border-radius: 6px;
+        font-size: 14px;
+        display: inline-block;
+    }
+
+    .od-header-meta {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-wrap: wrap;
+        margin-top: 3px;
+    }
+
+    .od-header-meta .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--od-bg);
+        padding: 2px 10px;
+        border-radius: 50px;
+        font-size: 10px;
+        color: var(--od-text-light);
+        border: 1px solid var(--od-border);
+        white-space: nowrap;
+    }
+
+    .od-header-meta .chip i {
+        color: var(--od-primary);
+        font-size: 9px;
+    }
+
+    .od-header-actions {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .od-btn {
+        padding: 7px 14px;
+        border-radius: var(--od-radius-sm);
+        font-size: 11px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: var(--od-transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        text-decoration: none;
+        white-space: nowrap;
+        font-family: var(--od-font);
+    }
+
+    .od-btn-outline {
+        background: transparent;
+        color: var(--od-text-light);
+        border: 1.5px solid var(--od-border);
+    }
+
+    .od-btn-outline:hover {
+        background: var(--od-bg);
+        border-color: var(--od-primary);
+        color: var(--od-primary);
+    }
+
+    .od-btn-primary {
+        background: var(--od-primary-gradient);
+        color: var(--od-white);
+        box-shadow: 0 4px 16px rgba(92,18,31,0.2);
+    }
+
+    .od-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 24px rgba(92,18,31,0.3);
+    }
+
+    .od-btn-danger {
+        background: var(--od-danger);
+        color: var(--od-white);
+    }
+
+    .od-btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 24px rgba(185,28,28,0.3);
+    }
+
+    /* ============================================================
+       STATUS BADGES
+       ============================================================ */
+    .od-status-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px 10px;
+        padding: 10px 20px 0 20px;
+    }
+
+    .od-badge {
+        padding: 4px 14px;
+        border-radius: 50px;
+        font-size: 10px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border: 1px solid transparent;
+        white-space: nowrap;
+        font-family: var(--od-font);
+    }
+
+    .od-badge .dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        display: inline-block;
+        animation: odPulse 2s infinite;
+    }
+
+    @keyframes odPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+
+    .od-badge.pending { background: #fffbeb; border-color: #fcd34d; color: #92400e; }
+    .od-badge.pending .dot { background: #92400e; }
+    .od-badge.processing { background: #eff6ff; border-color: #93c5fd; color: #1e40af; }
+    .od-badge.processing .dot { background: #1e40af; }
+    .od-badge.shipped { background: #ecfeff; border-color: #67e8f9; color: #0e7490; }
+    .od-badge.shipped .dot { background: #0e7490; }
+    .od-badge.delivered { background: #ecfdf5; border-color: #6ee7b7; color: #065f46; }
+    .od-badge.delivered .dot { background: #065f46; }
+    .od-badge.cancelled { background: #f8fafc; border-color: #cbd5e1; color: #475569; }
+    .od-badge.cancelled .dot { background: #475569; }
+    .od-badge.failed { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+    .od-badge.failed .dot { background: #991b1b; }
+    .od-badge.paid { background: #ecfdf5; border-color: #6ee7b7; color: #065f46; }
+    .od-badge.paid .dot { background: #065f46; }
+    .od-badge.refunded { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+    .od-badge.refunded .dot { background: #991b1b; }
+    .od-badge.pending_payment { background: #fffbeb; border-color: #fcd34d; color: #92400e; }
+    .od-badge.pending_payment .dot { background: #92400e; }
+
+    .od-savings-chip {
+        background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+        border: 1px solid #6ee7b7;
+        color: #065f46;
+        padding: 3px 12px;
+        border-radius: 50px;
+        font-size: 10px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+    }
+
+    .od-savings-chip i {
+        color: var(--od-gold);
+        font-size: 11px;
+    }
+
+    /* ============================================================
+       UPDATE FORM - PRIMARY HEADER, LIGHT PRIMARY BG
+       ============================================================ */
+    .od-update-form {
+        padding: 0 20px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease, padding 0.4s ease, opacity 0.4s ease;
+        opacity: 0;
+        border-top: 1px solid transparent;
+    }
+
+    .od-update-form.active {
+        max-height: 900px;
+        padding: 6px 20px 20px 20px;
+        opacity: 1;
+        border-top-color: var(--od-border);
+        margin-top: 4px;
+    }
+
+    .od-form-box {
+        background: var(--od-primary-light);
+        border-radius: var(--od-radius-sm);
+        border: 1px solid var(--od-border);
+        overflow: hidden;
+        box-shadow: var(--od-shadow);
+    }
+
+    .od-form-box .form-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        background: var(--od-primary);
+        border-bottom: none;
+    }
+
+    .od-form-box .form-head .title {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--od-white);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+    }
+
+    .od-form-box .form-head .title i {
+        color: var(--od-gold);
+        font-size: 16px;
+    }
+
+    .od-form-box .form-head .title .ref {
+        font-weight: 400;
+        color: rgba(255,255,255,0.6);
+        font-size: 12px;
+        background: rgba(255,255,255,0.1);
+        padding: 1px 12px;
+        border-radius: 50px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .od-form-box .form-head .close-btn {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.1);
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        font-size: 12px;
+        color: var(--od-white);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--od-transition);
+    }
+
+    .od-form-box .form-head .close-btn:hover {
+        background: var(--od-danger);
+        color: var(--od-white);
+        border-color: var(--od-danger);
+        transform: rotate(90deg);
+    }
+
+    .od-form-body {
+        padding: 18px 20px 20px 20px;
+        background: var(--od-primary-light);
+    }
+
+    .od-form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px 16px;
+        width: 100%;
+        margin-bottom: 12px;
+    }
+
+    .od-form-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .od-form-row.single {
+        grid-template-columns: 1fr;
+    }
+
+    .od-form-group {
+        margin-bottom: 0;
+    }
+
+    .od-form-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--od-text);
+        margin-bottom: 4px;
+    }
+
+    .od-form-label .required {
+        color: var(--od-danger);
+        margin-left: 2px;
+    }
+
+    .od-form-label .hint {
+        font-weight: 400;
+        color: var(--od-text-muted);
+        font-size: 9px;
+        margin-left: 4px;
+    }
+
+    .od-form-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1.5px solid var(--od-border);
+        border-radius: var(--od-radius-sm);
+        font-size: 13px;
+        font-family: var(--od-font);
+        color: var(--od-text);
+        background: var(--od-white);
+        transition: var(--od-transition);
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .od-form-control:focus {
+        border-color: var(--od-primary);
+        box-shadow: 0 0 0 4px rgba(92,18,31,0.06);
+    }
+
+    .od-form-control::placeholder {
+        color: #c5bdb7;
+    }
+
+    .od-form-control select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%23888'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 32px;
+        cursor: pointer;
+    }
+
+    .od-form-control textarea {
+        resize: vertical;
+        min-height: 55px;
+    }
+
+    .od-form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding-top: 14px;
+        border-top: 1px solid var(--od-border);
+        margin-top: 6px;
+        flex-wrap: wrap;
+        background: var(--od-primary-light);
+    }
+
+    .od-form-actions .od-btn {
+        min-width: 90px;
+        justify-content: center;
+        padding: 8px 18px;
+        font-size: 12px;
+    }
+
+    .od-form-actions .od-btn-outline {
+        background: transparent;
+        color: var(--od-text-light);
+        border: 1.5px solid var(--od-border);
+    }
+
+    .od-form-actions .od-btn-outline:hover {
+        background: var(--od-white);
+        border-color: var(--od-primary);
+        color: var(--od-primary);
+    }
+
+    /* ============================================================
+       CONTENT GRID
+       ============================================================ */
+    .od-grid {
+        display: grid;
+        grid-template-columns: 1.8fr 1.2fr;
+        gap: 16px;
+        padding: 14px 20px 20px 20px;
+        width: 100%;
+    }
+
+    /* ============================================================
+       CARDS
+       ============================================================ */
+    .od-card {
+        background: var(--od-white);
+        border-radius: var(--od-radius-sm);
+        border: 1px solid var(--od-border);
+        overflow: hidden;
+        margin-bottom: 12px;
+        width: 100%;
+        transition: var(--od-transition);
+    }
+
+    .od-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .od-card:hover {
+        border-color: var(--od-primary);
+        box-shadow: var(--od-shadow);
+    }
+
+    .od-card-header {
+        padding: 10px 14px;
+        background: var(--od-bg);
+        border-bottom: 1px solid var(--od-border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .od-card-header .icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--od-primary-gradient);
+        color: var(--od-white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        flex-shrink: 0;
+    }
+
+    .od-card-header h5 {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--od-text);
+        margin: 0;
+        flex: 1;
+    }
+
+    .od-card-header .count {
+        font-size: 9px;
+        color: var(--od-text-muted);
+        background: var(--od-white);
+        padding: 1px 10px;
+        border-radius: 50px;
+        border: 1px solid var(--od-border);
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .od-card-body {
+        padding: 12px 14px;
+        width: 100%;
+    }
+
+    /* ============================================================
+       ORDER ITEMS
+       ============================================================ */
+    .od-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--od-border);
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .od-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .od-item:first-child {
+        padding-top: 0;
+    }
+
+    .od-item-thumb {
+        width: 42px;
+        height: 42px;
+        border-radius: var(--od-radius-sm);
+        background: var(--od-bg);
+        border: 1px solid var(--od-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .od-item-thumb .qty {
+        position: absolute;
+        bottom: -3px;
+        right: -3px;
+        background: var(--od-primary-gradient);
+        color: white;
+        font-size: 7px;
+        font-weight: 700;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--od-white);
+    }
+
+    .od-item-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .od-item-thumb i {
+        font-size: 16px;
+        color: var(--od-text-muted);
+        opacity: 0.2;
+    }
+
+    .od-item-info {
+        flex: 1;
+        min-width: 60px;
+        word-break: break-word;
+    }
+
+    .od-item-name {
+        font-weight: 600;
+        font-size: 12px;
+        color: var(--od-text);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-wrap: wrap;
+        word-break: break-word;
+    }
+
+    .od-item-offer {
+        background: var(--od-danger);
+        color: var(--od-white);
+        font-size: 6px;
+        font-weight: 700;
+        padding: 1px 8px;
+        border-radius: 50px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .od-item-sku {
+        font-size: 9px;
+        color: var(--od-text-muted);
+        margin-top: 1px;
+        word-break: break-word;
+    }
+
+    .od-item-sku .sep {
+        margin: 0 4px;
+        color: var(--od-border);
+    }
+
+    .od-item-pricing {
+        text-align: right;
+        flex-shrink: 0;
+        min-width: 50px;
+    }
+
+    .od-item-price {
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--od-text);
+    }
+
+    .od-item-original {
+        font-size: 9px;
+        color: var(--od-text-muted);
+        text-decoration: line-through;
+        margin-right: 3px;
+    }
+
+    .od-item-save {
+        font-size: 8px;
+        color: var(--od-success);
         font-weight: 600;
     }
-    .order-item .item-meta {
-        font-size: 12px;
-        color: #6c757d;
+
+    /* ============================================================
+       TOTALS
+       ============================================================ */
+    .od-totals {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 2px solid var(--od-border);
+        width: 100%;
     }
-    .order-item .item-total {
+
+    .od-total {
+        display: flex;
+        justify-content: space-between;
+        padding: 3px 0;
+        font-size: 12px;
+        color: var(--od-text-light);
+        flex-wrap: wrap;
+        gap: 3px;
+        width: 100%;
+    }
+
+    .od-total.savings {
+        color: var(--od-success);
+    }
+
+    .od-total.final {
+        font-size: 17px;
         font-weight: 700;
-        text-align: right;
+        color: var(--od-text);
+        padding-top: 8px;
+        border-top: 2px solid var(--od-border);
+        margin-top: 3px;
     }
-    .order-item .item-price-breakdown {
+
+    .od-total .label {
+        color: var(--od-text-muted);
+        font-weight: 500;
+    }
+
+    .od-savings-box {
+        margin-top: 8px;
+        padding: 8px 14px;
+        background: #ecfdf5;
+        border: 1px solid #6ee7b7;
+        border-radius: var(--od-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
         font-size: 12px;
-        color: #6c757d;
-        text-align: right;
+        color: #065f46;
+        font-weight: 600;
+        flex-wrap: wrap;
+        width: 100%;
     }
-    
-    .tracking-info {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
+
+    .od-savings-box i {
+        font-size: 14px;
+        color: var(--od-gold);
+    }
+
+    /* ============================================================
+       CUSTOMER INFO
+       ============================================================ */
+    .od-customer-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 12px;
+        width: 100%;
+    }
+
+    .od-customer-item {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        padding: 5px 8px;
+        border-radius: var(--od-radius-sm);
+        background: var(--od-bg);
+        border: 1px solid var(--od-border);
+        overflow: hidden;
+        word-break: break-word;
+    }
+
+    .od-customer-item .label {
+        font-size: 7px;
+        color: var(--od-text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .od-customer-item .value {
+        font-size: 11px;
+        color: var(--od-text);
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    .od-customer-item .value a {
+        color: var(--od-primary);
+        text-decoration: none;
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+    .od-customer-item .code {
+        background: var(--od-white);
+        padding: 1px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        border: 1px solid var(--od-border);
+        font-family: monospace;
+        display: inline-block;
+        font-weight: 600;
+        word-break: break-all;
+    }
+
+    .od-customer-item.full {
+        grid-column: 1 / -1;
+    }
+
+    /* ============================================================
+       ADDRESS
+       ============================================================ */
+    .od-address {
+        background: var(--od-bg);
+        border-radius: var(--od-radius-sm);
+        padding: 10px 14px;
+        border: 1px solid var(--od-border);
+        word-break: break-word;
+        width: 100%;
+    }
+
+    .od-address .label {
+        font-size: 7px;
+        color: var(--od-text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 3px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .od-address .label i {
+        color: var(--od-primary);
+        font-size: 10px;
+    }
+
+    .od-address .text {
+        font-size: 11px;
+        line-height: 1.6;
+        color: var(--od-text);
+        white-space: pre-line;
+        margin: 0;
+        word-break: break-word;
+    }
+
+    /* ============================================================
+       TRACKING
+       ============================================================ */
+    .od-tracking {
+        background: var(--od-bg);
+        border-radius: var(--od-radius-sm);
+        padding: 10px 14px;
+        border: 1px solid var(--od-border);
+        width: 100%;
+    }
+
+    .od-tracking-item {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        padding: 3px 0;
+    }
+
+    .od-tracking-item .label {
+        font-size: 7px;
+        color: var(--od-text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .od-tracking-item .value {
+        font-size: 11px;
+        color: var(--od-text);
+        word-break: break-all;
+        font-weight: 500;
+    }
+
+    .od-tracking-item .value code {
+        background: var(--od-white);
+        padding: 1px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        border: 1px solid var(--od-border);
+        font-family: monospace;
+        font-weight: 600;
+        word-break: break-all;
+    }
+
+    .od-tracking-item .value a {
+        color: var(--od-primary);
+        text-decoration: none;
+        word-break: break-all;
+        font-weight: 500;
+    }
+
+    .od-tracking-empty {
+        text-align: center;
+        padding: 14px 0;
+        color: var(--od-text-muted);
+        font-size: 11px;
+    }
+
+    .od-tracking-empty i {
+        font-size: 24px;
+        display: block;
+        margin-bottom: 6px;
+        opacity: 0.2;
+    }
+
+    .od-tracking-btn {
+        width: 100%;
+        margin-top: 10px;
+        justify-content: center;
+        background: var(--od-primary-gradient);
+        color: var(--od-white);
+        border: none;
+        padding: 7px 14px;
+        border-radius: var(--od-radius-sm);
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--od-transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .od-tracking-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 24px rgba(92,18,31,0.3);
+    }
+
+    /* ============================================================
+       TRANSACTIONS TABLE
+       ============================================================ */
+    .od-table-wrap {
+        overflow-x: auto;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .od-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+        min-width: 350px;
+    }
+
+    .od-table thead th {
+        padding: 6px 10px;
+        text-align: left;
+        font-weight: 600;
+        color: var(--od-text-muted);
+        font-size: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--od-border);
+        background: var(--od-bg);
+        white-space: nowrap;
+    }
+
+    .od-table tbody td {
+        padding: 6px 10px;
+        border-bottom: 1px solid var(--od-border);
+        color: var(--od-text);
+        font-size: 11px;
+        word-break: break-word;
+    }
+
+    .od-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .od-table .tag {
+        padding: 1px 8px;
+        border-radius: 50px;
+        font-size: 8px;
+        font-weight: 600;
+        display: inline-block;
+        text-transform: capitalize;
+        white-space: nowrap;
+    }
+
+    .od-table .tag.success { background: #d4edda; color: #155724; }
+    .od-table .tag.danger { background: #f8d7da; color: #721c24; }
+    .od-table .tag.warning { background: #fff3cd; color: #856404; }
+    .od-table .tag.info { background: #cce5ff; color: #004085; }
+
+    .od-table .tx-id {
+        font-size: 9px;
+        background: var(--od-bg);
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        border: 1px solid var(--od-border);
+        display: inline-block;
+        font-weight: 500;
+        word-break: break-all;
+    }
+
+    .od-table .date-text {
+        font-size: 10px;
+        color: var(--od-text-muted);
+        white-space: nowrap;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+
+    @media (min-width: 1025px) {
+        .od-grid {
+            grid-template-columns: 1.8fr 1.2fr;
+            gap: 20px;
+            padding: 18px 24px 24px 24px;
+        }
+        .od-header {
+            padding: 20px 24px;
+        }
+        .od-header-title {
+            font-size: 20px;
+        }
+        .od-header-title .order-num {
+            font-size: 18px;
+        }
+        .od-header-icon {
+            width: 48px;
+            height: 48px;
+            font-size: 20px;
+        }
+        .od-btn {
+            padding: 10px 20px;
+            font-size: 13px;
+        }
+        .od-badge {
+            font-size: 12px;
+            padding: 6px 18px;
+        }
+        .od-status-row {
+            padding: 14px 24px 0 24px;
+        }
+        .od-update-form.active {
+            padding: 8px 24px 24px 24px;
+        }
+        .od-update-form {
+            padding: 0 24px;
+        }
+        .od-form-body {
+            padding: 22px 24px 24px 24px;
+        }
+        .od-form-box .form-head {
+            padding: 16px 24px;
+        }
+        .od-form-box .form-head .title {
+            font-size: 17px;
+        }
+        .od-form-control {
+            font-size: 14px;
+            padding: 10px 16px;
+        }
+        .od-form-label {
+            font-size: 12px;
+        }
+        .od-form-actions .od-btn {
+            min-width: 110px;
+            padding: 10px 22px;
+            font-size: 13px;
+        }
+        .od-card-body {
+            padding: 14px 18px;
+        }
+        .od-card-header {
+            padding: 12px 18px;
+        }
+        .od-card-header h5 {
+            font-size: 14px;
+        }
+        .od-item-name {
+            font-size: 14px;
+        }
+        .od-item-price {
+            font-size: 15px;
+        }
+        .od-total.final {
+            font-size: 20px;
+        }
+    }
+
+    @media (max-width: 1024px) {
+        .od-grid {
+            grid-template-columns: 1fr !important;
+            gap: 14px;
+            padding: 14px 18px 18px 18px;
+        }
+        .od-right {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .od-right .od-card {
+            margin-bottom: 0;
+        }
+        .od-header {
+            padding: 16px 18px;
+        }
+        .od-header-title {
+            font-size: 17px;
+        }
+        .od-header-title .order-num {
+            font-size: 15px;
+            padding: 2px 12px;
+        }
+        .od-header-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 17px;
+        }
+        .od-status-row {
+            padding: 12px 18px 0 18px;
+        }
+        .od-update-form.active {
+            padding: 6px 18px 20px 18px;
+        }
+        .od-update-form {
+            padding: 0 18px;
+        }
+        .od-form-body {
+            padding: 18px 18px 22px 18px;
+        }
+        .od-form-row {
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 14px;
+        }
+        .od-form-control {
+            font-size: 13px;
+            padding: 8px 12px;
+        }
+        .od-form-label {
+            font-size: 11px;
+        }
+        .od-form-actions .od-btn {
+            min-width: 90px;
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+        .od-form-box .form-head {
+            padding: 14px 18px;
+        }
+        .od-form-box .form-head .title {
+            font-size: 15px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .od-right {
+            grid-template-columns: 1fr !important;
+            gap: 0;
+        }
+        .od-header {
+            padding: 12px 14px;
+            gap: 8px;
+        }
+        .od-header-left {
+            gap: 10px;
+        }
+        .od-header-title {
+            font-size: 15px;
+        }
+        .od-header-title .order-num {
+            font-size: 13px;
+            padding: 2px 10px;
+        }
+        .od-header-icon {
+            width: 36px;
+            height: 36px;
+            font-size: 14px;
+        }
+        .od-header-meta .chip {
+            font-size: 9px;
+            padding: 2px 8px;
+        }
+        .od-btn {
+            font-size: 10px;
+            padding: 5px 12px;
+            gap: 4px;
+        }
+        .od-status-row {
+            padding: 10px 14px 0 14px;
+            gap: 5px 8px;
+        }
+        .od-badge {
+            font-size: 10px;
+            padding: 3px 12px;
+            gap: 4px;
+        }
+        .od-badge .dot {
+            width: 4px;
+            height: 4px;
+        }
+        .od-savings-chip {
+            font-size: 10px;
+            padding: 3px 12px;
+        }
+        .od-grid {
+            padding: 10px 12px 14px 12px;
+            gap: 12px;
+        }
+        .od-card-body {
+            padding: 10px 12px;
+        }
+        .od-card-header {
+            padding: 8px 12px;
+        }
+        .od-card-header h5 {
+            font-size: 11px;
+        }
+        .od-card-header .icon {
+            width: 24px;
+            height: 24px;
+            font-size: 10px;
+        }
+        .od-card-header .count {
+            font-size: 8px;
+            padding: 1px 8px;
+        }
+        .od-item {
+            padding: 6px 0;
+            gap: 10px;
+        }
+        .od-item-thumb {
+            width: 38px;
+            height: 38px;
+        }
+        .od-item-thumb .qty {
+            width: 14px;
+            height: 14px;
+            font-size: 6px;
+        }
+        .od-item-name {
+            font-size: 11px;
+        }
+        .od-item-offer {
+            font-size: 6px;
+            padding: 1px 6px;
+        }
+        .od-item-sku {
+            font-size: 9px;
+        }
+        .od-item-price {
+            font-size: 12px;
+        }
+        .od-item-pricing {
+            min-width: 45px;
+        }
+        .od-total {
+            font-size: 11px;
+            padding: 2px 0;
+        }
+        .od-total.final {
+            font-size: 16px;
+        }
+        .od-savings-box {
+            font-size: 11px;
+            padding: 6px 12px;
+        }
+        .od-savings-box i {
+            font-size: 13px;
+        }
+        .od-customer-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 5px 10px;
+        }
+        .od-customer-item .value {
+            font-size: 10px;
+        }
+        .od-update-form.active {
+            padding: 6px 14px 16px 14px;
+        }
+        .od-update-form {
+            padding: 0 14px;
+        }
+        .od-form-body {
+            padding: 14px 14px 18px 14px;
+        }
+        .od-form-box .form-head .title {
+            font-size: 14px;
+        }
+        .od-form-box .form-head .title .ref {
+            font-size: 11px;
+            padding: 1px 10px;
+        }
+        .od-form-box .form-head .close-btn {
+            width: 26px;
+            height: 26px;
+            font-size: 11px;
+        }
+        .od-form-box .form-head {
+            padding: 12px 14px;
+        }
+        .od-form-row {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .od-form-label {
+            font-size: 10px;
+        }
+        .od-form-control {
+            font-size: 13px;
+            padding: 7px 10px;
+        }
+        .od-form-actions {
+            padding-top: 12px;
+            gap: 8px;
+        }
+        .od-form-actions .od-btn {
+            min-width: 70px;
+            padding: 7px 14px;
+            font-size: 11px;
+        }
+        .od-address .text {
+            font-size: 10px;
+        }
+        .od-tracking-item .value {
+            font-size: 10px;
+        }
+        .od-tracking-btn {
+            font-size: 10px;
+            padding: 6px 12px;
+        }
+        .od-table {
+            font-size: 10px;
+            min-width: 300px;
+        }
+        .od-table thead th {
+            padding: 5px 8px;
+            font-size: 8px;
+        }
+        .od-table tbody td {
+            padding: 5px 8px;
+            font-size: 10px;
+        }
+        .od-savings-chip {
+            font-size: 10px;
+            padding: 3px 12px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .od-wrap {
+            padding: 6px;
+        }
+        .od-header {
+            padding: 8px 10px;
+            gap: 6px;
+        }
+        .od-header-left {
+            gap: 8px;
+        }
+        .od-header-title {
+            font-size: 13px;
+        }
+        .od-header-title .order-num {
+            font-size: 11px;
+            padding: 1px 8px;
+        }
+        .od-header-icon {
+            width: 30px;
+            height: 30px;
+            font-size: 12px;
+        }
+        .od-header-meta .chip {
+            font-size: 8px;
+            padding: 1px 6px;
+        }
+        .od-btn {
+            font-size: 9px;
+            padding: 4px 10px;
+            gap: 3px;
+        }
+        .od-status-row {
+            padding: 6px 10px 0 10px;
+            gap: 4px 6px;
+        }
+        .od-badge {
+            font-size: 9px;
+            padding: 2px 10px;
+            gap: 3px;
+        }
+        .od-badge .dot {
+            width: 4px;
+            height: 4px;
+        }
+        .od-savings-chip {
+            font-size: 9px;
+            padding: 2px 10px;
+        }
+        .od-grid {
+            padding: 6px 8px 10px 8px;
+            gap: 10px;
+        }
+        .od-card {
+            margin-bottom: 10px;
+        }
+        .od-card-body {
+            padding: 8px 10px;
+        }
+        .od-card-header {
+            padding: 6px 10px;
+        }
+        .od-card-header h5 {
+            font-size: 10px;
+        }
+        .od-card-header .icon {
+            width: 22px;
+            height: 22px;
+            font-size: 9px;
+        }
+        .od-card-header .count {
+            font-size: 7px;
+            padding: 1px 8px;
+        }
+        .od-item {
+            padding: 5px 0;
+            gap: 8px;
+        }
+        .od-item-thumb {
+            width: 34px;
+            height: 34px;
+        }
+        .od-item-thumb .qty {
+            width: 14px;
+            height: 14px;
+            font-size: 6px;
+        }
+        .od-item-name {
+            font-size: 10px;
+        }
+        .od-item-offer {
+            font-size: 5px;
+            padding: 1px 6px;
+        }
+        .od-item-sku {
+            font-size: 8px;
+        }
+        .od-item-price {
+            font-size: 11px;
+        }
+        .od-item-pricing {
+            min-width: 40px;
+        }
+        .od-total {
+            font-size: 10px;
+            padding: 2px 0;
+        }
+        .od-total.final {
+            font-size: 14px;
+        }
+        .od-savings-box {
+            font-size: 10px;
+            padding: 5px 10px;
+        }
+        .od-savings-box i {
+            font-size: 12px;
+        }
+        .od-customer-grid {
+            grid-template-columns: 1fr;
+            gap: 5px;
+        }
+        .od-customer-item {
+            padding: 3px 6px;
+        }
+        .od-customer-item .label {
+            font-size: 6px;
+        }
+        .od-customer-item .value {
+            font-size: 9px;
+        }
+        .od-address {
+            padding: 6px 8px;
+        }
+        .od-address .label {
+            font-size: 6px;
+        }
+        .od-address .text {
+            font-size: 9px;
+        }
+        .od-tracking {
+            padding: 6px 8px;
+        }
+        .od-tracking-item .label {
+            font-size: 6px;
+        }
+        .od-tracking-item .value {
+            font-size: 9px;
+        }
+        .od-tracking-item .value code {
+            font-size: 8px;
+            padding: 1px 6px;
+        }
+        .od-tracking-empty {
+            font-size: 9px;
+            padding: 10px 0;
+        }
+        .od-tracking-empty i {
+            font-size: 20px;
+        }
+        .od-tracking-btn {
+            font-size: 9px;
+            padding: 5px 10px;
+        }
+        .od-update-form.active {
+            padding: 4px 10px 12px 10px;
+        }
+        .od-update-form {
+            padding: 0 10px;
+        }
+        .od-form-body {
+            padding: 10px 10px 14px 10px;
+        }
+        .od-form-box .form-head .title {
+            font-size: 12px;
+        }
+        .od-form-box .form-head .title .ref {
+            font-size: 10px;
+            padding: 1px 8px;
+        }
+        .od-form-box .form-head .close-btn {
+            width: 22px;
+            height: 22px;
+            font-size: 10px;
+        }
+        .od-form-box .form-head {
+            padding: 10px 12px;
+        }
+        .od-form-row {
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .od-form-label {
+            font-size: 9px;
+        }
+        .od-form-control {
+            font-size: 12px;
+            padding: 5px 8px;
+        }
+        .od-form-actions {
+            padding-top: 10px;
+            gap: 6px;
+        }
+        .od-form-actions .od-btn {
+            min-width: 60px;
+            padding: 5px 12px;
+            font-size: 10px;
+        }
+        .od-table {
+            font-size: 9px;
+            min-width: 250px;
+        }
+        .od-table thead th {
+            padding: 4px 6px;
+            font-size: 7px;
+        }
+        .od-table tbody td {
+            padding: 4px 6px;
+            font-size: 9px;
+        }
+        .od-table .tag {
+            font-size: 7px;
+            padding: 1px 6px;
+        }
+        .od-table .tx-id {
+            font-size: 8px;
+            padding: 1px 4px;
+        }
+        .od-table .date-text {
+            font-size: 8px;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .od-wrap {
+            padding: 4px;
+        }
+        .od-header {
+            padding: 6px 8px;
+        }
+        .od-header-title {
+            font-size: 11px;
+        }
+        .od-header-title .order-num {
+            font-size: 10px;
+            padding: 1px 6px;
+        }
+        .od-header-icon {
+            width: 24px;
+            height: 24px;
+            font-size: 10px;
+        }
+        .od-header-meta .chip {
+            font-size: 7px;
+            padding: 1px 6px;
+        }
+        .od-btn {
+            font-size: 8px;
+            padding: 3px 8px;
+            gap: 2px;
+        }
+        .od-status-row {
+            padding: 4px 8px 0 8px;
+            gap: 2px 4px;
+        }
+        .od-badge {
+            font-size: 8px;
+            padding: 2px 8px;
+            gap: 2px;
+        }
+        .od-badge .dot {
+            width: 3px;
+            height: 3px;
+        }
+        .od-savings-chip {
+            font-size: 8px;
+            padding: 2px 8px;
+        }
+        .od-grid {
+            padding: 4px 4px 6px 4px;
+            gap: 6px;
+        }
+        .od-card {
+            margin-bottom: 6px;
+        }
+        .od-card-body {
+            padding: 4px 6px;
+        }
+        .od-card-header {
+            padding: 4px 6px;
+        }
+        .od-card-header h5 {
+            font-size: 9px;
+        }
+        .od-card-header .icon {
+            width: 18px;
+            height: 18px;
+            font-size: 8px;
+        }
+        .od-item {
+            padding: 4px 0;
+            gap: 6px;
+        }
+        .od-item-thumb {
+            width: 28px;
+            height: 28px;
+        }
+        .od-item-thumb .qty {
+            width: 12px;
+            height: 12px;
+            font-size: 5px;
+        }
+        .od-item-name {
+            font-size: 9px;
+        }
+        .od-item-price {
+            font-size: 10px;
+        }
+        .od-total.final {
+            font-size: 13px;
+        }
+        .od-update-form.active {
+            padding: 4px 8px 8px 8px;
+        }
+        .od-update-form {
+            padding: 0 8px;
+        }
+        .od-form-body {
+            padding: 6px 6px 10px 6px;
+        }
+        .od-form-box .form-head .title {
+            font-size: 11px;
+        }
+        .od-form-box .form-head .title .ref {
+            font-size: 9px;
+            padding: 1px 6px;
+        }
+        .od-form-box .form-head .close-btn {
+            width: 18px;
+            height: 18px;
+            font-size: 8px;
+        }
+        .od-form-box .form-head {
+            padding: 8px 10px;
+        }
+        .od-form-control {
+            font-size: 10px;
+            padding: 4px 6px;
+        }
+        .od-form-label {
+            font-size: 8px;
+        }
+        .od-form-actions .od-btn {
+            min-width: 40px;
+            font-size: 8px;
+            padding: 3px 8px;
+        }
+        .od-table {
+            font-size: 8px;
+            min-width: 200px;
+        }
+        .od-table thead th {
+            padding: 2px 4px;
+            font-size: 6px;
+        }
+        .od-table tbody td {
+            padding: 2px 4px;
+            font-size: 8px;
+        }
+        .od-tracking-btn {
+            font-size: 8px;
+            padding: 4px 8px;
+        }
+        .od-address .text {
+            font-size: 8px;
+        }
+        .od-tracking-item .value {
+            font-size: 8px;
+        }
+        .od-customer-item .value {
+            font-size: 8px;
+        }
+        .od-savings-box {
+            font-size: 8px;
+            padding: 3px 6px;
+        }
+        .od-savings-box i {
+            font-size: 10px;
+        }
     }
 </style>
-{% endblock %}
 
-{% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-            <h2><i class="fas fa-box text-primary"></i> Order #{{ order.order_number }}</h2>
-            <div class="mt-1">
-                <span class="status-badge {{ order.status }}">{{ order.get_status_display }}</span>
-                <span class="status-badge {{ order.payment_status }}">{{ order.get_payment_status_display }}</span>
+<!-- ============================================================
+   HTML STRUCTURE
+   ============================================================ -->
+<div class="od-wrap">
+
+    <!-- ===== MASTER CARD ===== -->
+    <div class="od-master">
+
+        <!-- ===== HEADER ===== -->
+        <div class="od-header">
+            <div class="od-header-left">
+                <div class="od-header-icon">
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <div>
+                    <h1 class="od-header-title">
+                        Order <span class="order-num">#{{ order.order_number }}</span>
+                    </h1>
+                    <div class="od-header-meta">
+                        <span class="chip">
+                            <i class="far fa-calendar-alt"></i> {{ order.created_at|date:"M d, Y" }}
+                        </span>
+                        <span class="chip">
+                            <i class="far fa-clock"></i> {{ order.created_at|date:"H:i" }}
+                        </span>
+                        <span class="chip">
+                            <i class="far fa-user"></i> {{ order.user.full_name|truncatechars:10 }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="od-header-actions">
+                <a href="{% url 'Ecom:admin_order_list' %}" class="od-btn od-btn-outline">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <button onclick="toggleForm()" class="od-btn od-btn-primary" id="updateBtn">
+                    <i class="fas fa-pen"></i>
+                </button>
             </div>
         </div>
-        <div class="d-flex gap-2 flex-wrap">
-            <a href="{% url 'Ecom:admin_order_list' %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Orders
-            </a>
-            <button onclick="updateOrderStatus({{ order.id }})" class="btn btn-primary">
-                <i class="fas fa-edit"></i> Update Status
-            </button>
-        </div>
-    </div>
 
-    <div class="row">
-        <!-- Left Column - Order Details -->
-        <div class="col-md-8">
-            <!-- Order Items -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-list text-primary"></i> Order Items</h5>
-                </div>
-                <div class="card-body">
-                    {% for item in items %}
-                    <div class="order-item">
-                        <div class="item-details">
-                            <div class="item-name">
-                                {{ item.product_name }}
-                                {% if item.offer_name %}
-                                    <span class="badge" style="background:#ff6b6b;color:white;font-size:9px;">
-                                        {{ item.offer_name }}
-                                    </span>
-                                {% endif %}
-                            </div>
-                            <div class="item-meta">
-                                SKU: {{ item.sku }} | Qty: {{ item.quantity }}
-                                {% if item.variant %}
-                                    | Variant: {{ item.variant.name|default:item.variant.sku }}
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="item-total">
-                            ₹{{ item.total|floatformat:2 }}
-                            {% if item.original_price > item.final_price %}
-                                <div class="item-price-breakdown">
-                                    <span class="text-decoration-line-through">₹{{ item.original_price|floatformat:2 }}</span>
-                                    <span class="text-success ms-1">Save ₹{{ item.product_discount|add:item.offer_discount|floatformat:2 }}</span>
-                                </div>
-                            {% endif %}
-                        </div>
+        <!-- ===== STATUS ROW ===== -->
+        <div class="od-status-row">
+            <span class="od-badge {{ order.status }}">
+                <span class="dot"></span> {{ order.get_status_display }}
+            </span>
+            <span class="od-badge {{ order.payment_status }}">
+                <span class="dot"></span> {{ order.get_payment_status_display }}
+            </span>
+            {% if order.total_savings > 0 %}
+                <span class="od-savings-chip">
+                    <i class="fas fa-gem"></i> ₹{{ order.total_savings|floatformat:0 }}
+                </span>
+            {% endif %}
+        </div>
+
+        <!-- ===== UPDATE FORM ===== -->
+        <div class="od-update-form" id="updateForm">
+            <div class="od-form-box">
+                <!-- Form Header - PRIMARY COLOR -->
+                <div class="form-head">
+                    <div class="title">
+                        <i class="fas fa-pen"></i> Update Order
+                        <span class="ref">#{{ order.order_number }}</span>
                     </div>
-                    {% endfor %}
-                    
-                    <!-- Order Totals -->
-                    <hr>
-                    <div class="row">
-                        <div class="col-md-6 offset-md-6">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Subtotal:</span>
+                    <button class="close-btn" onclick="toggleForm()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Form Body - LIGHT PRIMARY -->
+                <div class="od-form-body">
+                    <form method="POST" action="{% url 'Ecom:admin_order_update' order.id %}">
+                        {% csrf_token %}
+                        
+                        <div class="od-form-row">
+                            <div class="od-form-group">
+                                <label class="od-form-label">Status <span class="required">*</span></label>
+                                <select name="status" class="od-form-control">
+                                    {% for status_code, status_label in order.STATUS_CHOICES %}
+                                        <option value="{{ status_code }}" {% if order.status == status_code %}selected{% endif %}>
+                                            {{ status_label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="od-form-row">
+                            <div class="od-form-group">
+                                <label class="od-form-label">Tracking Number <span class="hint">(optional)</span></label>
+                                <input type="text" name="tracking_number" class="od-form-control" 
+                                       value="{{ order.tracking_number }}" placeholder="Enter tracking number">
+                            </div>
+                            <div class="od-form-group">
+                                <label class="od-form-label">Delivery Date <span class="hint">(optional)</span></label>
+                                <input type="datetime-local" name="delivery_date" class="od-form-control" 
+                                       value="{{ order.delivery_date|date:'Y-m-d\TH:i' }}">
+                            </div>
+                        </div>
+
+                        <div class="od-form-row single">
+                            <div class="od-form-group">
+                                <label class="od-form-label">Tracking URL <span class="hint">(optional)</span></label>
+                                <input type="url" name="tracking_url" class="od-form-control" 
+                                       value="{{ order.tracking_url }}" placeholder="https://track.example.com">
+                            </div>
+                        </div>
+
+                        <div class="od-form-row single">
+                            <div class="od-form-group">
+                                <label class="od-form-label">Notes <span class="hint">(optional)</span></label>
+                                <textarea name="notes" class="od-form-control" rows="2" 
+                                          placeholder="Add notes about this order">{{ order.notes }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="od-form-actions">
+                            <button type="button" class="od-btn od-btn-outline" onclick="toggleForm()">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                            <button type="submit" class="od-btn od-btn-primary">
+                                <i class="fas fa-save"></i> Update Order
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== CONTENT GRID ===== -->
+        <div class="od-grid">
+            <!-- Left Column -->
+            <div class="od-left">
+                <!-- Order Items -->
+                <div class="od-card">
+                    <div class="od-card-header">
+                        <span class="icon"><i class="fas fa-shopping-bag"></i></span>
+                        <h5>Order Items</h5>
+                        <span class="count">{{ items|length }}</span>
+                    </div>
+                    <div class="od-card-body">
+                        {% for item in items %}
+                        <div class="od-item">
+                            <div class="od-item-thumb">
+                                {% if item.product and item.product.images.all %}
+                                    {% with img=item.product.images.all|first %}
+                                        {% if img.image %}
+                                            <img src="{{ img.image.url }}" alt="{{ item.product_name }}">
+                                        {% else %}
+                                            <i class="fas fa-box"></i>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% else %}
+                                    <i class="fas fa-box"></i>
+                                {% endif %}
+                                <span class="qty">{{ item.quantity }}</span>
+                            </div>
+                            <div class="od-item-info">
+                                <div class="od-item-name">
+                                    {{ item.product_name }}
+                                    {% if item.offer_name %}
+                                        <span class="od-item-offer">{{ item.offer_name }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="od-item-sku">
+                                    SKU: {{ item.sku }}
+                                    {% if item.variant %}
+                                        <span class="sep">|</span> {{ item.variant.name|default:item.variant.sku }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="od-item-pricing">
+                                <div class="od-item-price">₹{{ item.total|floatformat:2 }}</div>
+                                {% if item.original_price > item.final_price %}
+                                    <div>
+                                        <span class="od-item-original">₹{{ item.original_price|floatformat:2 }}</span>
+                                        <span class="od-item-save">Save ₹{{ item.product_discount|add:item.offer_discount|floatformat:2 }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <div class="od-totals">
+                            <div class="od-total">
+                                <span class="label">Subtotal</span>
                                 <span>₹{{ order.subtotal|floatformat:2 }}</span>
                             </div>
                             {% if order.product_discount_total > 0 %}
-                            <div class="d-flex justify-content-between mb-1 text-success">
-                                <span>Product Discount:</span>
+                            <div class="od-total savings">
+                                <span class="label">Product Discount</span>
                                 <span>-₹{{ order.product_discount_total|floatformat:2 }}</span>
                             </div>
                             {% endif %}
                             {% if order.offer_discount > 0 %}
-                            <div class="d-flex justify-content-between mb-1 text-success">
-                                <span>Offer Savings:</span>
+                            <div class="od-total savings">
+                                <span class="label">Offer Savings</span>
                                 <span>-₹{{ order.offer_discount|floatformat:2 }}</span>
                             </div>
                             {% endif %}
                             {% if order.coupon_discount > 0 %}
-                            <div class="d-flex justify-content-between mb-1 text-success">
-                                <span>Coupon Discount:</span>
+                            <div class="od-total savings">
+                                <span class="label">Coupon Discount</span>
                                 <span>-₹{{ order.coupon_discount|floatformat:2 }}</span>
                             </div>
                             {% endif %}
-                            <hr>
-                            <div class="d-flex justify-content-between mb-1 fw-bold">
-                                <span>Total:</span>
+                            <div class="od-total final">
+                                <span>Total</span>
                                 <span>₹{{ order.total_amount|floatformat:2 }}</span>
                             </div>
                             {% if order.total_savings > 0 %}
-                            <div class="text-success text-end">
-                                <small>Total Savings: ₹{{ order.total_savings|floatformat:2 }}</small>
+                            <div class="od-savings-box">
+                                <span><i class="fas fa-gem"></i> Total Savings</span>
+                                <span>₹{{ order.total_savings|floatformat:2 }}</span>
                             </div>
                             {% endif %}
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Customer Information -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-user text-primary"></i> Customer Information</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Name:</strong> {{ order.user.full_name }}</p>
-                            <p><strong>Email:</strong> <a href="mailto:{{ order.user.email }}">{{ order.user.email }}</a></p>
-                            <p><strong>Phone:</strong> {{ order.user.phone|default:"Not provided" }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Order Date:</strong> {{ order.created_at|date:"F d, Y H:i" }}</p>
+                <!-- Customer Information -->
+                <div class="od-card">
+                    <div class="od-card-header">
+                        <span class="icon"><i class="fas fa-user-circle"></i></span>
+                        <h5>Customer Information</h5>
+                    </div>
+                    <div class="od-card-body">
+                        <div class="od-customer-grid">
+                            <div class="od-customer-item">
+                                <span class="label">Full Name</span>
+                                <span class="value">{{ order.user.full_name }}</span>
+                            </div>
+                            <div class="od-customer-item">
+                                <span class="label">Email</span>
+                                <span class="value"><a href="mailto:{{ order.user.email }}">{{ order.user.email }}</a></span>
+                            </div>
+                            <div class="od-customer-item">
+                                <span class="label">Phone</span>
+                                <span class="value">{{ order.user.phone|default:"N/A" }}</span>
+                            </div>
+                            <div class="od-customer-item">
+                                <span class="label">Order Date</span>
+                                <span class="value">{{ order.created_at|date:"M d, Y H:i" }}</span>
+                            </div>
                             {% if order.coupon %}
-                                <p><strong>Coupon:</strong> {{ order.coupon.code }}</p>
+                            <div class="od-customer-item">
+                                <span class="label">Coupon</span>
+                                <span class="value"><span class="code">{{ order.coupon.code }}</span></span>
+                            </div>
                             {% endif %}
                             {% if order.offer %}
-                                <p><strong>Offer:</strong> {{ order.offer.name }}</p>
+                            <div class="od-customer-item">
+                                <span class="label">Offer</span>
+                                <span class="value">{{ order.offer.name }}</span>
+                            </div>
                             {% endif %}
-                            <p><strong>Notes:</strong> {{ order.notes|default:"No notes" }}</p>
+                            <div class="od-customer-item full">
+                                <span class="label">Order Notes</span>
+                                <span class="value">{{ order.notes|default:"No notes" }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Right Column - Shipping & Tracking -->
-        <div class="col-md-4">
-            <!-- Shipping Address -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-map-marker-alt text-primary"></i> Shipping Address</h5>
-                </div>
-                <div class="card-body">
-                    <p style="white-space:pre-line;">{{ order.shipping_address|linebreaksbr }}</p>
-                </div>
-            </div>
-
-            <!-- Billing Address -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-credit-card text-primary"></i> Billing Address</h5>
-                </div>
-                <div class="card-body">
-                    <p style="white-space:pre-line;">{{ order.billing_address|linebreaksbr }}</p>
-                </div>
-            </div>
-
-            <!-- Tracking Information -->
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-truck text-primary"></i> Tracking Information</h5>
-                </div>
-                <div class="card-body">
-                    {% if order.tracking_number or order.tracking_url %}
-                        <div class="tracking-info">
-                            {% if order.tracking_number %}
-                                <p><strong>Tracking Number:</strong><br>
-                                <code>{{ order.tracking_number }}</code></p>
-                            {% endif %}
-                            {% if order.tracking_url %}
-                                <p><strong>Tracking URL:</strong><br>
-                                <a href="{{ order.tracking_url }}" target="_blank">{{ order.tracking_url|truncatechars:50 }}</a></p>
-                            {% endif %}
-                            {% if order.delivery_date %}
-                                <p><strong>Delivery Date:</strong><br>
-                                {{ order.delivery_date|date:"F d, Y H:i" }}</p>
-                            {% endif %}
+                <!-- Transactions -->
+                {% if transactions %}
+                <div class="od-card">
+                    <div class="od-card-header">
+                        <span class="icon"><i class="fas fa-history"></i></span>
+                        <h5>Transactions</h5>
+                        <span class="count">{{ transactions|length }}</span>
+                    </div>
+                    <div class="od-card-body" style="padding:0;">
+                        <div class="od-table-wrap">
+                            <table class="od-table">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>ID</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transaction in transactions %}
+                                    <tr>
+                                        <td>
+                                            <span class="tag {% if transaction.transaction_type == 'payment' %}success{% else %}warning{% endif %}">
+                                                {{ transaction.get_transaction_type_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="tx-id">
+                                                {% if transaction.razorpay_transaction_id %}
+                                                    {{ transaction.razorpay_transaction_id }}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </span>
+                                        </td>
+                                        <td>₹{{ transaction.amount|floatformat:2 }}</td>
+                                        <td>
+                                            <span class="tag {% if transaction.status == 'success' %}success{% elif transaction.status == 'failed' %}danger{% elif transaction.status == 'refunded' %}info{% else %}warning{% endif %}">
+                                                {{ transaction.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td class="date-text">
+                                            {{ transaction.created_at|date:"M d, H:i" }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
-                    {% else %}
-                        <p class="text-muted text-center py-3">No tracking information available.</p>
-                    {% endif %}
-                    <button onclick="updateOrderStatus({{ order.id }})" class="btn btn-sm btn-primary w-100 mt-2">
-                        <i class="fas fa-edit"></i> Update Tracking
-                    </button>
+                    </div>
                 </div>
+                {% endif %}
             </div>
-        </div>
-    </div>
 
-    <!-- Transactions -->
-    {% if transactions %}
-    <div class="card shadow-sm mt-4">
-        <div class="card-header bg-white">
-            <h5 class="mb-0"><i class="fas fa-history text-primary"></i> Transactions</h5>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th>Type</th>
-                            <th>Transaction ID</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for transaction in transactions %}
-                        <tr>
-                            <td>
-                                <span class="badge {% if transaction.transaction_type == 'payment' %}bg-primary{% else %}bg-warning{% endif %}">
-                                    {{ transaction.get_transaction_type_display }}
-                                </span>
-                            </td>
-                            <td>
-                                <code style="font-size:11px;">
-                                    {% if transaction.razorpay_transaction_id %}
-                                        {{ transaction.razorpay_transaction_id|truncatechars:20 }}
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </code>
-                            </td>
-                            <td>₹{{ transaction.amount|floatformat:2 }}</td>
-                            <td>
-                                <span class="badge {% if transaction.status == 'success' %}bg-success{% elif transaction.status == 'failed' %}bg-danger{% elif transaction.status == 'refunded' %}bg-info{% else %}bg-warning{% endif %}">
-                                    {{ transaction.get_status_display }}
-                                </span>
-                            </td>
-                            <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-</div>
+            <!-- Right Column -->
+            <div class="od-right">
+                <!-- Shipping Address -->
+                <div class="od-card">
+                    <div class="od-card-header">
+                        <span class="icon"><i class="fas fa-shipping-fast"></i></span>
+                        <h5>Shipping Address</h5>
+                    </div>
+                    <div class="od-card-body">
+                        <div class="od-address">
+                            <span class="label"><i class="fas fa-map-pin"></i> Delivery Address</span>
+                            <p class="text">{{ order.shipping_address|linebreaksbr }}</p>
+                        </div>
+                    </div>
+                </div>
 
-<!-- ============================================ -->
-<!-- UPDATE STATUS MODAL                          -->
-<!-- ============================================ -->
-<div class="modal fade" id="updateStatusModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Update Order #{{ order.order_number }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="updateStatusForm" method="POST" action="{% url 'Ecom:admin_order_update' order.id %}">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">Status</label>
-                        <select name="status" class="form-select">
-                            {% for status_code, status_label in order.STATUS_CHOICES %}
-                                <option value="{{ status_code }}" {% if order.status == status_code %}selected{% endif %}>
-                                    {{ status_label }}
-                                </option>
-                            {% endfor %}
-                        </select>
+                <!-- Billing Address -->
+                <div class="od-card">
+                    <div class="od-card-header">
+                        <span class="icon"><i class="fas fa-file-invoice"></i></span>
+                        <h5>Billing Address</h5>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Tracking Number</label>
-                        <input type="text" name="tracking_number" class="form-control" 
-                               value="{{ order.tracking_number }}" placeholder="Enter tracking number">
+                    <div class="od-card-body">
+                        <div class="od-address">
+                            <span class="label"><i class="fas fa-credit-card"></i> Billing Address</span>
+                            <p class="text">{{ order.billing_address|linebreaksbr }}</p>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Tracking URL</label>
-                        <input type="url" name="tracking_url" class="form-control" 
-                               value="{{ order.tracking_url }}" placeholder="https://track.example.com/12345">
+                </div>
+
+                <!-- Tracking Information -->
+                <div class="od-card">
+                    <div class="od-card-header">
+                        <span class="icon"><i class="fas fa-truck"></i></span>
+                        <h5>Tracking Information</h5>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Delivery Date</label>
-                        <input type="datetime-local" name="delivery_date" class="form-control" 
-                               value="{{ order.delivery_date|date:'Y-m-d\TH:i' }}">
+                    <div class="od-card-body">
+                        {% if order.tracking_number or order.tracking_url %}
+                            <div class="od-tracking">
+                                {% if order.tracking_number %}
+                                <div class="od-tracking-item">
+                                    <span class="label">Tracking Number</span>
+                                    <span class="value"><code>{{ order.tracking_number }}</code></span>
+                                </div>
+                                {% endif %}
+                                {% if order.tracking_url %}
+                                <div class="od-tracking-item" style="margin-top:4px;">
+                                    <span class="label">Tracking URL</span>
+                                    <span class="value"><a href="{{ order.tracking_url }}" target="_blank">{{ order.tracking_url }}</a></span>
+                                </div>
+                                {% endif %}
+                                {% if order.delivery_date %}
+                                <div class="od-tracking-item" style="margin-top:4px;">
+                                    <span class="label">Delivery Date</span>
+                                    <span class="value">{{ order.delivery_date|date:"M d, Y H:i" }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="od-tracking-empty">
+                                <i class="fas fa-box-open"></i>
+                                No tracking info
+                            </div>
+                        {% endif %}
+                        <button onclick="toggleForm()" class="od-tracking-btn">
+                            <i class="fas fa-edit"></i> Update Tracking
+                        </button>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Notes</label>
-                        <textarea name="notes" class="form-control" rows="2" 
-                                  placeholder="Add notes about this order">{{ order.notes }}</textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="submitStatusUpdate()">
-                    <i class="fas fa-save"></i> Update Order
-                </button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ============================================ -->
-<!-- JAVASCRIPT                                  -->
-<!-- ============================================ -->
+<!-- ============================================================
+   JAVASCRIPT
+   ============================================================ -->
 <script>
-    function updateOrderStatus(orderId) {
-        const modal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
-        modal.show();
+    function toggleForm() {
+        const form = document.getElementById('updateForm');
+        const btn = document.getElementById('updateBtn');
+        form.classList.toggle('active');
+        
+        if (form.classList.contains('active')) {
+            btn.innerHTML = '<i class="fas fa-times"></i>';
+            btn.className = 'od-btn od-btn-danger';
+            setTimeout(() => {
+                form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 150);
+        } else {
+            btn.innerHTML = '<i class="fas fa-pen"></i>';
+            btn.className = 'od-btn od-btn-primary';
+        }
     }
-    
-    function submitStatusUpdate() {
-        const form = document.getElementById('updateStatusForm');
-        form.submit();
-    }
-    
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const form = document.getElementById('updateForm');
+            if (form.classList.contains('active')) {
+                toggleForm();
             }
         }
-        return cookieValue;
-    }
+    });
 </script>
+
 {% endblock %}

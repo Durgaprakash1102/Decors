@@ -1043,11 +1043,7 @@ body, html {
                                    title="Edit Coupon">
                                     <i class="fas fa-pen"></i>
                                 </a>
-                                <button class="btn-action toggle {% if coupon.is_active %}active{% endif %}" 
-                                        onclick="toggleStatus('{{ coupon.id }}', '{{ coupon.code }}')" 
-                                        title="{% if coupon.is_active %}Deactivate{% else %}Activate{% endif %}">
-                                    <i class="fas fa-{% if coupon.is_active %}pause{% else %}play{% endif %}"></i>
-                                </button>
+                               
                                 <button class="btn-action delete" 
                                         onclick="confirmDelete('{{ coupon.id }}', '{{ coupon.code }}')" 
                                         title="Delete Coupon">

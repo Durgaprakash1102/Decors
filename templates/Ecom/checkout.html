@@ -1,647 +1,1574 @@
-
+{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Checkout - MyStore{% endblock %}
+{% block title %}Checkout - ShubhDecor{% endblock %}
+
+{% block content %}
 
 <style>
-    .address-card {
-        border: 2px solid #e9ecef;
+    /* ============================================ */
+    /* CHECKOUT PAGE - ULTRA PREMIUM DESIGN        */
+    /* ============================================ */
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .checkout-page {
+        background: #f7f5f3;
+        min-height: 100vh;
+        padding: 20px 0 50px;
+    }
+
+    .checkout-container {
+        max-width: 1360px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* ============================================ */
+    /* HEADER                                      */
+    /* ============================================ */
+    .checkout-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 28px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #e8e3df;
+    }
+
+    .checkout-header .left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .checkout-header .left .icon-box {
+        width: 44px;
+        height: 44px;
         border-radius: 12px;
-        padding: 15px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-bottom: 10px;
-        position: relative;
+        background: #5c121f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 18px;
+        box-shadow: 0 4px 16px rgba(92,18,31,0.08);
     }
-    .address-card:hover {
-        border-color: #0d6efd;
-        background: #f8f9fa;
+
+    .checkout-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin: 0;
+        letter-spacing: -0.5px;
     }
-    .address-card.selected {
-        border-color: #0d6efd;
-        background: #e7f1ff;
-        box-shadow: 0 0 0 3px rgba(13,110,253,0.1);
+
+    .checkout-header h1 span {
+        color: #5c121f;
     }
-    .address-card .address-radio {
-        position: absolute;
-        top: 15px;
-        right: 15px;
+
+    .checkout-header .steps {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        color: #bbb;
     }
-    .address-card .address-radio input[type="radio"] {
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
-        accent-color: #0d6efd;
+
+    .checkout-header .steps .step {
+        padding: 4px 16px;
+        border-radius: 30px;
+        background: rgba(92,18,31,0.04);
+        color: #999;
+        font-weight: 500;
     }
-    .address-card .address-name {
+
+    .checkout-header .steps .step.active {
+        background: #5c121f;
+        color: #fff;
+        box-shadow: 0 4px 16px rgba(92,18,31,0.08);
+    }
+
+    .checkout-header .steps .sep {
+        color: #ddd;
+    }
+
+    /* ============================================ */
+    /* GRID                                        */
+    /* ============================================ */
+    .checkout-grid {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    /* ============================================ */
+    /* LEFT CARD                                   */
+    /* ============================================ */
+    .checkout-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #eeebe8;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+        margin-bottom: 24px;
+    }
+
+    .checkout-card .card-header {
+        padding: 16px 20px;
+        background: #faf8f7;
+        border-bottom: 1px solid #eeebe8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .checkout-card .card-header h5 {
+        font-family: 'Inter', sans-serif;
+        font-size: 15px;
         font-weight: 600;
         color: #1a1a2e;
-        font-size: 16px;
-        margin-bottom: 4px;
-    }
-    .address-card .address-detail {
-        color: #6c757d;
-        font-size: 14px;
-        line-height: 1.6;
-        margin-bottom: 4px;
-    }
-    .address-card .address-phone {
-        color: #6c757d;
-        font-size: 14px;
-    }
-    .address-card .address-badge {
-        display: inline-block;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 600;
-        margin-top: 5px;
-    }
-    .address-card .address-badge.default {
-        background: #d4edda;
-        color: #155724;
-    }
-    .address-card .address-badge.shipping {
-        background: #cce5ff;
-        color: #004085;
-    }
-    .address-card .address-badge.billing {
-        background: #fff3cd;
-        color: #856404;
-    }
-    
-    .add-address-toggle {
-        color: #0d6efd;
-        cursor: pointer;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
+        margin: 0;
+        display: flex;
         align-items: center;
         gap: 8px;
-        padding: 10px 0;
-        transition: all 0.3s;
     }
-    .add-address-toggle:hover {
-        color: #0a58ca;
-        text-decoration: underline;
+
+    .checkout-card .card-header h5 i {
+        color: #5c121f;
+        font-size: 16px;
     }
-    
-    .new-address-form {
-        display: none;
-        padding: 20px;
-        background: #f8f9fa;
-        border-radius: 12px;
-        margin-top: 10px;
-        border: 1px solid #e9ecef;
-    }
-    .new-address-form.show {
-        display: block;
-        animation: slideDown 0.3s ease;
-    }
-    
-    .billing-address-section {
-        margin-top: 15px;
-        padding-top: 15px;
-        border-top: 1px dashed #e9ecef;
-    }
-    .billing-address-section .form-check {
-        margin-bottom: 10px;
-    }
-    
-    @keyframes slideDown {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .order-summary-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 10px 0;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    .order-summary-item:last-child {
-        border-bottom: none;
-    }
-    .order-summary-item .item-image {
-        width: 50px;
-        height: 50px;
-        border-radius: 8px;
-        object-fit: cover;
-        flex-shrink: 0;
-        background: #f8f9fa;
-    }
-    .order-summary-item .item-details {
-        flex: 1;
-    }
-    .order-summary-item .item-details .item-name {
-        font-size: 14px;
-        font-weight: 500;
-        color: #1a1a2e;
-    }
-    .order-summary-item .item-details .item-meta {
+
+    .checkout-card .card-header .badge {
+        font-family: 'Inter', sans-serif;
         font-size: 12px;
-        color: #6c757d;
+        color: #999;
+        background: #f5f0ed;
+        padding: 2px 14px;
+        border-radius: 20px;
     }
-    .order-summary-item .item-total {
+
+    .checkout-card .card-body {
+        padding: 20px;
+    }
+
+    /* ============================================ */
+    /* ADDRESS SECTION - NEW STUNNING DESIGN       */
+    /* ============================================ */
+    .address-section-title {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
         font-weight: 600;
         color: #1a1a2e;
-        white-space: nowrap;
-    }
-    
-    /* ============================================ */
-    /* DISCOUNT TAGS                               */
-    /* ============================================ */
-    .offer-tag {
-        font-size: 10px;
-        background: #ff6b6b;
-        color: white;
-        padding: 1px 8px;
-        border-radius: 10px;
-        font-weight: 600;
-        margin-left: 4px;
-        white-space: nowrap;
-    }
-    .offer-tag i {
-        margin-right: 2px;
-    }
-    .product-discount-tag {
-        font-size: 10px;
-        background: #dc3545;
-        color: white;
-        padding: 1px 8px;
-        border-radius: 10px;
-        font-weight: 600;
-        margin-left: 4px;
-        white-space: nowrap;
-    }
-    .product-discount-tag i {
-        margin-right: 2px;
-    }
-    .best-deal-tag {
-        font-size: 10px;
-        background: #28a745;
-        color: white;
-        padding: 1px 8px;
-        border-radius: 10px;
-        font-weight: 600;
-        margin-left: 4px;
-        white-space: nowrap;
-    }
-    .best-deal-tag i {
-        margin-right: 2px;
-    }
-    .savings-badge {
-        font-size: 11px;
-        color: #28a745;
-        font-weight: 600;
-    }
-
-    .offer-banner {
-        background: linear-gradient(135deg, #fff3cd, #ffe69b);
-        border: 1px solid #ffc107;
-        border-radius: 8px;
-        padding: 12px 16px;
-        margin-bottom: 15px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .offer-banner i {
-        color: #856404;
-        font-size: 20px;
-    }
-    .offer-banner .offer-text {
-        font-weight: 600;
-        color: #856404;
-        font-size: 14px;
-    }
-
-    .coupon-applied {
-        background: #d4edda;
-        border: 1px solid #28a745;
-        border-radius: 8px;
-        padding: 10px 14px;
-        margin: 10px 0;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
         display: flex;
         align-items: center;
         justify-content: space-between;
     }
-    .coupon-applied .coupon-code {
+
+    .address-section-title .count {
+        font-size: 11px;
+        color: #999;
+        font-weight: 400;
+        text-transform: none;
+        letter-spacing: 0;
+        background: #f5f0ed;
+        padding: 2px 14px;
+        border-radius: 20px;
+    }
+
+    .address-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .address-item {
+        display: flex;
+        align-items: stretch;
+        border: 2px solid #f0edeb;
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        background: #ffffff;
+        position: relative;
+    }
+
+    .address-item:hover {
+        border-color: #d5cec9;
+        transform: translateX(4px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+    }
+
+    .address-item.selected {
+        border-color: #5c121f;
+        background: rgba(92,18,31,0.01);
+        box-shadow: 0 0 0 4px rgba(92,18,31,0.04);
+    }
+
+    .address-item .radio-col {
+        display: flex;
+        align-items: center;
+        padding: 0 16px 0 18px;
+        flex-shrink: 0;
+        background: transparent;
+    }
+
+    .address-item .radio-col input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #5c121f;
+        transition: all 0.3s;
+    }
+
+    .address-item .radio-col input[type="radio"]:checked {
+        transform: scale(1.05);
+    }
+
+    .address-item .content {
+        flex: 1;
+        padding: 14px 18px 14px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .address-item .content .name-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .address-item .content .name-row .name {
+        font-family: 'Inter', sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: #1a1a2e;
+    }
+
+    .address-item .content .name-row .tag {
+        font-size: 9px;
+        padding: 2px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .tag.default { background: #28a745; color: #fff; }
+    .tag.shipping { background: #5c121f; color: #fff; }
+    .tag.billing { background: #f4b400; color: #1a1a2e; }
+
+    .address-item .content .detail {
+        font-family: 'Inter', sans-serif;
+        color: #888;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .address-item .content .detail .hl {
+        color: #5c121f;
+        font-weight: 500;
+    }
+
+    .address-item .content .phone-row {
+        font-family: 'Inter', sans-serif;
+        color: #888;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 2px;
+    }
+
+    .address-item .content .phone-row i {
+        color: #5c121f;
+        font-size: 13px;
+    }
+
+    .address-item .content .meta-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 4px;
+        flex-wrap: wrap;
+    }
+
+    .address-item .content .meta-row .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 10px;
+        padding: 2px 12px;
+        border-radius: 20px;
+        background: #f5f0ed;
+        color: #999;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+    }
+
+    .address-item .content .meta-row .pill i {
+        font-size: 10px;
+        color: #5c121f;
+    }
+
+    .address-item .content .meta-row .pill.default-pill {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .address-item .content .meta-row .pill.default-pill i {
+        color: #28a745;
+    }
+
+    .address-item .badge-right {
+        display: flex;
+        align-items: center;
+        padding-right: 16px;
+        flex-shrink: 0;
+    }
+
+    .address-item .badge-right .status {
+        font-size: 10px;
+        padding: 4px 14px;
+        border-radius: 30px;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        background: #e8f5e9;
+        color: #2e7d32;
+        white-space: nowrap;
+    }
+
+    .address-item .badge-right .status.selected-status {
+        background: #5c121f;
+        color: #fff;
+    }
+
+    /* ============================================ */
+    /* ADD ADDRESS                                 */
+    /* ============================================ */
+    .add-toggle {
+        color: #5c121f;
+        cursor: pointer;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 0;
+        transition: all 0.3s;
+        font-size: 14px;
+        border-bottom: 2px solid transparent;
+    }
+
+    .add-toggle:hover {
+        color: #7a1a2b;
+        border-bottom-color: #5c121f;
+    }
+
+    .add-toggle i {
+        transition: all 0.3s;
+    }
+
+    .add-toggle:hover i {
+        transform: rotate(90deg);
+    }
+
+    /* ============================================ */
+    /* NEW ADDRESS FORM                            */
+    /* ============================================ */
+    .new-address-form {
+        display: none;
+        padding: 18px;
+        background: #faf8f7;
+        border-radius: 12px;
+        margin-top: 10px;
+        border: 1px solid #f0edeb;
+        animation: slideDown 0.3s ease;
+    }
+
+    .new-address-form.show {
+        display: block;
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .new-address-form .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .new-address-form .form-group {
+        margin-bottom: 12px;
+    }
+
+    .new-address-form .form-group.full {
+        grid-column: 1 / -1;
+    }
+
+    .new-address-form .form-group label {
+        font-family: 'Inter', sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-bottom: 3px;
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .new-address-form .form-group label .req {
+        color: #dc3545;
+    }
+
+    .new-address-form .form-group input,
+    .new-address-form .form-group select {
+        width: 100%;
+        padding: 7px 12px;
+        border: 2px solid #f0edeb;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        transition: all 0.3s;
+        background: #ffffff;
+        color: #1a1a2e;
+        outline: none;
+    }
+
+    .new-address-form .form-group input:focus,
+    .new-address-form .form-group select:focus {
+        border-color: #5c121f;
+        box-shadow: 0 0 0 3px rgba(92,18,31,0.04);
+    }
+
+    .new-address-form .form-group input::placeholder {
+        color: #ccc;
+    }
+
+    .new-address-form .form-check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 8px 0 12px;
+    }
+
+    .new-address-form .form-check input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: #5c121f;
+        cursor: pointer;
+    }
+
+    .new-address-form .form-check label {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        color: #444;
+        cursor: pointer;
+    }
+
+    .new-address-form .btn-save {
+        padding: 7px 22px;
+        border: none;
+        border-radius: 8px;
+        background: #5c121f;
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .new-address-form .btn-save:hover {
+        background: #7a1a2b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(92,18,31,0.08);
+    }
+
+    .new-address-form .btn-cancel {
+        padding: 7px 18px;
+        border: 2px solid #f0edeb;
+        border-radius: 8px;
+        background: transparent;
+        color: #999;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-left: 6px;
+    }
+
+    .new-address-form .btn-cancel:hover {
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+
+    /* ============================================ */
+    /* EXTRA GRID                                  */
+    /* ============================================ */
+    .extra-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px dashed #f0edeb;
+    }
+
+    .extra-box {
+        background: #faf8f7;
+        border-radius: 10px;
+        padding: 14px 16px;
+        border: 1px solid #f0edeb;
+    }
+
+    .extra-box .box-title {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .extra-box .box-title i {
+        color: #5c121f;
+        font-size: 13px;
+    }
+
+    .extra-box .check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    .extra-box .check input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: #5c121f;
+        cursor: pointer;
+    }
+
+    .extra-box .check label {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        color: #1a1a2e;
+        cursor: pointer;
+    }
+
+    .extra-box textarea {
+        width: 100%;
+        padding: 7px 10px;
+        border: 2px solid #f0edeb;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        transition: all 0.3s;
+        background: #ffffff;
+        color: #1a1a2e;
+        outline: none;
+        resize: vertical;
+        min-height: 50px;
+    }
+
+    .extra-box textarea:focus {
+        border-color: #5c121f;
+        box-shadow: 0 0 0 3px rgba(92,18,31,0.04);
+    }
+
+    /* ============================================ */
+    /* PLACE ORDER BUTTON                          */
+    /* ============================================ */
+    .btn-place {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        background: #5c121f;
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.4s ease;
+        box-shadow: 0 4px 16px rgba(92,18,31,0.06);
+        margin-top: 18px;
+    }
+
+    .btn-place:hover {
+        background: #7a1a2b;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(92,18,31,0.1);
+    }
+
+    .btn-place i {
+        margin-right: 8px;
+    }
+
+    /* ============================================ */
+    /* ORDER SUMMARY                               */
+    /* ============================================ */
+    .order-summary {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #eeebe8;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+        position: sticky;
+        top: 20px;
+    }
+
+    .order-summary .card-header {
+        padding: 16px 20px;
+        background: #5c121f;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .order-summary .card-header h5 {
+        font-family: 'Inter', sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: #ffffff;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .order-summary .card-header h5 i {
+        color: #f4b400;
+    }
+
+    .order-summary .card-body {
+        padding: 20px;
+    }
+
+    .offer-banner {
+        background: #fff9f5;
+        border: 1px solid #fde8e0;
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .offer-banner i {
+        font-size: 18px;
+        color: #ff6b6b;
+        background: #fff;
+        padding: 6px;
+        border-radius: 50%;
+    }
+
+    .offer-banner .text {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: #c62828;
+    }
+
+    .offer-banner .text strong {
+        color: #5c121f;
+    }
+
+    .order-items-title {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-bottom: 10px;
+    }
+
+    .order-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid #f0edeb;
+    }
+
+    .order-item:last-child {
+        border-bottom: none;
+    }
+
+    .order-item .img {
+        width: 46px;
+        height: 46px;
+        border-radius: 8px;
+        object-fit: cover;
+        flex-shrink: 0;
+        background: #f5f0ed;
+        border: 1px solid #f0edeb;
+    }
+
+    .order-item .details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .order-item .details .name {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        color: #1a1a2e;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .order-item .details .meta {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        color: #999;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+
+    .order-item .details .meta .label {
+        font-size: 8px;
+        padding: 1px 10px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-family: 'Inter', sans-serif;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+
+    .label.offer { background: #ff6b6b; color: #fff; }
+    .label.discount { background: #dc3545; color: #fff; }
+    .label.best { background: #28a745; color: #fff; }
+
+    .order-item .total {
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        color: #5c121f;
+        font-size: 15px;
+        white-space: nowrap;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        color: #444;
+    }
+
+    .summary-row .label {
+        color: #999;
+    }
+
+    .summary-row .value {
+        font-weight: 500;
+        color: #1a1a2e;
+    }
+
+    .summary-row .value.discount {
+        color: #28a745;
+    }
+
+    .summary-row.total {
+        padding-top: 10px;
+        border-top: 2px solid #f0edeb;
+        margin-top: 4px;
+    }
+
+    .summary-row.total .label {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1a1a2e;
+    }
+
+    .summary-row.total .value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #5c121f;
+    }
+
+    .summary-savings {
+        text-align: center;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        color: #28a745;
+        font-weight: 600;
+        padding: 6px 0 2px 0;
+    }
+
+    .coupon-applied {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #e8f5e9;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        color: #2e7d32;
+        font-weight: 500;
+        margin-top: 10px;
+    }
+
+    .coupon-applied .code {
         font-weight: 700;
         color: #155724;
-        font-size: 14px;
     }
-    .coupon-applied .coupon-savings {
+
+    .coupon-applied .savings {
         color: #155724;
         font-weight: 600;
     }
 
+    .secure-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: center;
+        padding: 8px 0 2px 0;
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        color: #999;
+    }
+
+    .secure-badge i {
+        color: #28a745;
+        font-size: 14px;
+    }
+
+    /* ============================================ */
+    /* TOAST                                       */
+    /* ============================================ */
     .toast-container {
         position: fixed;
         top: 20px;
         right: 20px;
         z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
     }
+
     .toast {
         padding: 12px 20px;
         border-radius: 10px;
-        color: white;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
         font-weight: 500;
-        margin-bottom: 10px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-        animation: slideInRight 0.5s ease;
-        min-width: 250px;
+        color: #fff;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        animation: slideIn 0.4s ease;
         display: flex;
         align-items: center;
         gap: 10px;
+        min-width: 220px;
     }
+
     .toast.success { background: #28a745; }
     .toast.error { background: #dc3545; }
     .toast.info { background: #17a2b8; }
     .toast.warning { background: #ffc107; color: #1a1a2e; }
+
     .toast .toast-close {
         margin-left: auto;
         cursor: pointer;
-        opacity: 0.8;
-        font-size: 18px;
+        opacity: 0.5;
+        font-size: 16px;
+        transition: all 0.3s;
+        background: none;
+        border: none;
+        color: inherit;
+        padding: 0 4px;
     }
+
     .toast .toast-close:hover { opacity: 1; }
-    @keyframes slideInRight {
-        from { transform: translateX(100px); opacity: 0; }
+
+    @keyframes slideIn {
+        from { transform: translateX(60px); opacity: 0; }
         to { transform: translateX(0); opacity: 1; }
     }
-    
+
+    /* ============================================ */
+    /* RESPONSIVE                                  */
+    /* ============================================ */
+    @media (max-width: 1200px) {
+        .checkout-grid {
+            grid-template-columns: 1.4fr 1fr;
+            gap: 20px;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .checkout-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        .order-summary {
+            position: static;
+        }
+        .checkout-header h1 {
+            font-size: 24px;
+        }
+        .checkout-header .icon-box {
+            width: 38px;
+            height: 38px;
+            font-size: 15px;
+        }
+    }
+
     @media (max-width: 768px) {
-        .order-summary-item .item-image {
+        .checkout-container {
+            padding: 0 16px;
+        }
+        .checkout-card .card-header {
+            padding: 12px 14px;
+        }
+        .checkout-card .card-body {
+            padding: 14px;
+        }
+        .address-item .content {
+            padding: 10px 12px 10px 0;
+        }
+        .address-item .content .name-row .name {
+            font-size: 14px;
+        }
+        .address-item .content .detail {
+            font-size: 12px;
+        }
+        .address-item .content .phone-row {
+            font-size: 12px;
+        }
+        .address-item .radio-col {
+            padding: 0 10px 0 14px;
+        }
+        .address-item .badge-right {
+            padding-right: 12px;
+        }
+        .address-item .badge-right .status {
+            font-size: 9px;
+            padding: 2px 10px;
+        }
+        .new-address-form {
+            padding: 12px;
+        }
+        .new-address-form .form-row {
+            grid-template-columns: 1fr;
+        }
+        .new-address-form .form-group {
+            margin-bottom: 8px;
+        }
+        .new-address-form .form-group input,
+        .new-address-form .form-group select {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+        .extra-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .extra-box {
+            padding: 12px 14px;
+        }
+        .order-item .img {
             width: 40px;
             height: 40px;
         }
-        .order-summary-item .item-details .item-name {
+        .order-item .details .name {
             font-size: 13px;
         }
-        .address-card {
-            padding: 12px;
-        }
-        .new-address-form {
-            padding: 15px;
-        }
-        .toast {
-            min-width: 200px;
+        .order-item .total {
             font-size: 14px;
-            padding: 10px 16px;
+        }
+        .order-summary .card-header {
+            padding: 12px 14px;
+        }
+        .order-summary .card-body {
+            padding: 14px;
+        }
+        .summary-row {
+            font-size: 13px;
+        }
+        .summary-row.total .label {
+            font-size: 15px;
+        }
+        .summary-row.total .value {
+            font-size: 18px;
+        }
+        .btn-place {
+            font-size: 15px;
+            padding: 10px;
+        }
+        .checkout-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+        .checkout-header h1 {
+            font-size: 22px;
+        }
+        .checkout-header .steps {
+            font-size: 11px;
         }
         .offer-banner {
-            padding: 10px 12px;
+            padding: 8px 12px;
         }
-        .offer-banner .offer-text {
-            font-size: 13px;
+        .offer-banner .text {
+            font-size: 12px;
+        }
+        .toast-container {
+            top: 16px;
+            right: 16px;
+            left: 16px;
+        }
+        .toast {
+            font-size: 12px;
+            padding: 10px 16px;
+            min-width: auto;
         }
     }
-    @media (max-width: 480px) {
-        .order-summary-item {
+
+    @media (max-width: 576px) {
+        .address-item {
             flex-wrap: wrap;
-            gap: 8px;
         }
-        .order-summary-item .item-image {
-            width: 35px;
-            height: 35px;
+        .address-item .radio-col {
+            padding: 10px 0 0 14px;
+            width: 100%;
         }
-        .order-summary-item .item-total {
+        .address-item .content {
+            padding: 4px 14px 10px 14px;
+            width: 100%;
+        }
+        .address-item .badge-right {
+            padding: 0 14px 10px 14px;
+            width: 100%;
+        }
+        .address-item .content .name-row .name {
+            font-size: 13px;
+        }
+        .address-item .content .name-row .tag {
+            font-size: 8px;
+            padding: 1px 10px;
+        }
+        .address-item .content .detail {
+            font-size: 12px;
+        }
+        .address-item .content .phone-row {
+            font-size: 12px;
+        }
+        .address-item .content .meta-row .pill {
+            font-size: 9px;
+            padding: 1px 10px;
+        }
+        .address-item .badge-right .status {
+            font-size: 9px;
+            padding: 2px 12px;
+        }
+        .order-item {
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .order-item .img {
+            width: 36px;
+            height: 36px;
+        }
+        .order-item .total {
+            font-size: 13px;
+            width: 100%;
+            text-align: right;
+        }
+        .order-item .details .meta .label {
+            font-size: 7px;
+            padding: 1px 8px;
+        }
+        .new-address-form .form-group label {
+            font-size: 11px;
+        }
+        .new-address-form .btn-save {
+            font-size: 12px;
+            padding: 6px 16px;
+        }
+        .new-address-form .btn-cancel {
+            font-size: 12px;
+            padding: 6px 14px;
+        }
+        .extra-box .box-title {
+            font-size: 11px;
+        }
+        .extra-box .check label {
+            font-size: 12px;
+        }
+        .extra-box textarea {
+            font-size: 12px;
+            min-height: 40px;
+        }
+        .checkout-header h1 {
+            font-size: 20px;
+        }
+        .checkout-header .icon-box {
+            width: 34px;
+            height: 34px;
             font-size: 14px;
         }
-        .offer-tag {
-            font-size: 9px;
-            padding: 1px 6px;
+        .checkout-header .steps .step {
+            font-size: 10px;
+            padding: 3px 12px;
+        }
+        .summary-row {
+            font-size: 12px;
+        }
+        .summary-row.total .label {
+            font-size: 14px;
+        }
+        .summary-row.total .value {
+            font-size: 17px;
+        }
+        .btn-place {
+            font-size: 14px;
+            padding: 10px;
+        }
+        .offer-banner i {
+            font-size: 16px;
+        }
+        .offer-banner .text {
+            font-size: 11px;
         }
         .coupon-applied {
             flex-direction: column;
-            gap: 4px;
             text-align: center;
+            gap: 4px;
+            font-size: 12px;
         }
-        .product-discount-tag,
-        .best-deal-tag {
+    }
+
+    @media (max-width: 400px) {
+        .checkout-card .card-header h5 {
+            font-size: 13px;
+        }
+        .checkout-card .card-header .badge {
+            font-size: 11px;
+            padding: 2px 10px;
+        }
+        .address-item .content .name-row .name {
+            font-size: 12px;
+        }
+        .address-item .content .detail {
+            font-size: 11px;
+        }
+        .address-item .content .phone-row {
+            font-size: 11px;
+        }
+        .new-address-form {
+            padding: 10px;
+        }
+        .new-address-form .form-group input,
+        .new-address-form .form-group select {
+            padding: 5px 10px;
+            font-size: 11px;
+        }
+        .order-item .details .name {
+            font-size: 12px;
+        }
+        .order-item .details .meta {
+            font-size: 11px;
+        }
+        .checkout-header h1 {
+            font-size: 18px;
+        }
+        .checkout-header .icon-box {
+            width: 30px;
+            height: 30px;
+            font-size: 12px;
+        }
+        .btn-place {
+            font-size: 13px;
+            padding: 8px;
+        }
+        .summary-row.total .label {
+            font-size: 13px;
+        }
+        .summary-row.total .value {
+            font-size: 16px;
+        }
+        .extra-box {
+            padding: 10px 12px;
+        }
+        .extra-box textarea {
+            font-size: 11px;
+            min-height: 35px;
+        }
+        .address-item .badge-right .status {
             font-size: 8px;
-            padding: 1px 4px;
+            padding: 2px 10px;
         }
     }
 </style>
 
+<!-- ============================================ -->
+<!-- CHECKOUT PAGE                                -->
+<!-- ============================================ -->
+<div class="checkout-page">
+    <div class="checkout-container">
 
-{% block content %}
-<div class="container py-4">
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
+        <!-- Toast Container -->
+        <div class="toast-container" id="toastContainer"></div>
 
-    <h2 class="mb-4"><i class="fas fa-credit-card text-primary"></i> Checkout</h2>
-    
-    <div class="row">
-        <!-- Left Column - Address Selection -->
-        <div class="col-lg-7">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-map-marker-alt text-primary"></i> Shipping Address</h5>
+        <!-- ===== HEADER ===== -->
+        <div class="checkout-header">
+            <div class="left">
+                <div class="icon-box">
+                    <i class="fas fa-credit-card"></i>
                 </div>
-                <div class="card-body">
-                    <form method="POST" id="checkoutForm">
-                        {% csrf_token %}
-                        
-                        <!-- Existing Addresses -->
-                        {% if addresses %}
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Select Address</label>
-                                {% for address in addresses %}
-                                    <div class="address-card {% if address.is_default %}selected{% endif %}" onclick="selectAddress(this, {{ address.id }})">
-                                        <div class="address-radio">
-                                            <input type="radio" name="address_id" value="{{ address.id }}" {% if address.is_default %}checked{% endif %} required>
-                                        </div>
-                                        <div class="address-name">
-                                            {{ address.full_name }}
-                                            {% if address.is_default %}
-                                                <span class="address-badge default">Default</span>
-                                            {% endif %}
-                                            <span class="address-badge shipping">{{ address.get_address_type_display }}</span>
-                                        </div>
-                                        <div class="address-detail">
-                                            {{ address.address_line1 }}
-                                            {% if address.address_line2 %}, {{ address.address_line2 }}{% endif %}
-                                            {% if address.landmark %}<br>{{ address.landmark }}{% endif %}
-                                        </div>
-                                        <div class="address-detail">
-                                            {{ address.city }}, {{ address.state }} - {{ address.pincode }}
-                                        </div>
-                                        <div class="address-detail">
-                                            {{ address.country }}
-                                        </div>
-                                        <div class="address-phone">
-                                            <i class="fas fa-phone"></i> {{ address.phone }}
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle"></i> No saved addresses. Please add a new address below.
-                            </div>
-                        {% endif %}
-                        
-                        <!-- Add New Address Toggle -->
-                        <div class="mb-3">
-                            <a href="#" class="add-address-toggle" onclick="toggleNewAddress(event)">
-                                <i class="fas fa-plus-circle"></i> Add New Address
-                            </a>
-                        </div>
-                        
-                        <!-- New Address Form -->
-                        <div class="new-address-form" id="newAddressForm">
-                            <h6 class="mb-3">Enter New Address</h6>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                                    <input type="text" name="new_full_name" id="new_full_name" class="form-control" placeholder="Enter full name">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Phone <span class="text-danger">*</span></label>
-                                    <input type="text" name="new_phone" id="new_phone" class="form-control" placeholder="Enter phone number">
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Address Line 1 <span class="text-danger">*</span></label>
-                                <input type="text" name="new_address_line1" id="new_address_line1" class="form-control" placeholder="House number, street name">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Address Line 2</label>
-                                <input type="text" name="new_address_line2" id="new_address_line2" class="form-control" placeholder="Apartment, suite, etc. (optional)">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Landmark</label>
-                                <input type="text" name="new_landmark" id="new_landmark" class="form-control" placeholder="Nearby landmark (optional)">
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">City <span class="text-danger">*</span></label>
-                                    <input type="text" name="new_city" id="new_city" class="form-control" placeholder="Enter city">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">State <span class="text-danger">*</span></label>
-                                    <input type="text" name="new_state" id="new_state" class="form-control" placeholder="Enter state">
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Pincode <span class="text-danger">*</span></label>
-                                    <input type="text" name="new_pincode" id="new_pincode" class="form-control" placeholder="Enter pincode">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Country <span class="text-danger">*</span></label>
-                                    <input type="text" name="new_country" id="new_country" class="form-control" placeholder="Enter country" value="India">
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Address Type</label>
-                                <select name="new_address_type" id="new_address_type" class="form-control">
-                                    <option value="shipping">Shipping</option>
-                                    <option value="billing">Billing</option>
-                                    <option value="both">Both</option>
-                                </select>
-                            </div>
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" name="new_is_default" id="new_is_default" class="form-check-input" checked>
-                                <label class="form-check-label" for="new_is_default">Set as default address</label>
-                            </div>
-                            <button type="button" class="btn btn-success" onclick="saveNewAddress()">
-                                <i class="fas fa-save"></i> Save Address
-                            </button>
-                            <button type="button" class="btn btn-secondary" onclick="toggleNewAddress(event)">
-                                <i class="fas fa-times"></i> Cancel
-                            </button>
-                        </div>
-                        
-                        <!-- Billing Address -->
-                        <div class="billing-address-section">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="sameAsShipping" checked onchange="toggleBillingAddress()">
-                                <label class="form-check-label" for="sameAsShipping">
-                                    <strong>Billing address same as shipping</strong>
-                                </label>
-                            </div>
-                            
-                            <div id="billingAddressContainer" style="display:none; margin-top:15px;">
-                                <label class="form-label fw-bold">Billing Address</label>
-                                <textarea name="billing_address" class="form-control" rows="3" placeholder="Enter billing address"></textarea>
-                            </div>
-                        </div>
-                        
-                        <!-- Order Notes -->
-                        <div class="mt-3">
-                            <label class="form-label fw-bold">Order Notes <span class="text-muted">(optional)</span></label>
-                            <textarea name="notes" class="form-control" rows="3" placeholder="Any special instructions?"></textarea>
-                        </div>
-                        
-                        <!-- Hidden field for selected address -->
-                        <input type="hidden" name="selected_address_id" id="selectedAddressId" value="">
-                        
-                        <button type="submit" class="btn btn-primary btn-lg w-100 mt-4" id="placeOrderBtn">
-                            <i class="fas fa-lock"></i> Place Order & Pay
-                        </button>
-                    </form>
-                </div>
+                <h1>Checkout <span>.</span></h1>
+            </div>
+            <div class="steps">
+                <span class="step">Cart</span>
+                <span class="sep">›</span>
+                <span class="step active">Address</span>
+                <span class="sep">›</span>
+                <span class="step">Payment</span>
             </div>
         </div>
-        
-        <!-- Right Column - Order Summary -->
-        <div class="col-lg-5">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">Order Summary</h5>
+
+        <!-- ===== CHECKOUT CONTENT ===== -->
+        <div class="checkout-grid">
+
+            <!-- LEFT: Address -->
+            <div>
+                <div class="checkout-card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-map-pin"></i> Shipping Address</h5>
+                        <span class="badge">{{ addresses|length }} addresses</span>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" id="checkoutForm">
+                            {% csrf_token %}
+
+                            <!-- Address Section -->
+                            <div class="address-section-title">
+                                <span>Select Address</span>
+                                <span class="count">{{ addresses|length }} saved</span>
+                            </div>
+
+                            <!-- Address List -->
+                            <div class="address-list">
+                                {% if addresses %}
+                                    {% for address in addresses %}
+                                        <div class="address-item {% if address.is_default %}selected{% endif %}" onclick="selectAddress(this, {{ address.id }})">
+                                            <div class="radio-col">
+                                                <input type="radio" name="address_id" value="{{ address.id }}" {% if address.is_default %}checked{% endif %} required>
+                                            </div>
+                                            <div class="content">
+                                                <div class="name-row">
+                                                    <span class="name">{{ address.full_name }}</span>
+                                                    {% if address.is_default %}
+                                                        <span class="tag default">Default</span>
+                                                    {% endif %}
+                                                    <span class="tag shipping">{{ address.get_address_type_display }}</span>
+                                                </div>
+                                                <div class="detail">
+                                                    <span class="hl">{{ address.address_line1 }}</span>
+                                                    {% if address.address_line2 %}, {{ address.address_line2 }}{% endif %}
+                                                </div>
+                                                <div class="detail">
+                                                    {{ address.city }}, {{ address.state }} - <strong>{{ address.pincode }}</strong>
+                                                </div>
+                                                <div class="detail">
+                                                    {{ address.country }}
+                                                </div>
+                                                <div class="phone-row">
+                                                    <i class="fas fa-phone"></i> {{ address.phone }}
+                                                </div>
+                                                <div class="meta-row">
+                                                    <span class="pill"><i class="fas fa-tag"></i> {{ address.get_address_type_display }}</span>
+                                                    {% if address.is_default %}
+                                                        <span class="pill default-pill"><i class="fas fa-check-circle"></i> Default</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="badge-right">
+                                                {% if address.is_default %}
+                                                    <span class="status selected-status">Selected</span>
+                                                {% else %}
+                                                    <span class="status">Select</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div style="background:#faf8f7;border:1px solid #f0edeb;border-radius:12px;padding:16px 20px;text-align:center;">
+                                        <i class="fas fa-info-circle" style="color:#5c121f;font-size:18px;display:block;margin-bottom:6px;"></i>
+                                        <span style="font-family:'Inter',sans-serif;font-size:14px;color:#999;">No saved addresses</span>
+                                        <p style="font-family:'Inter',sans-serif;font-size:13px;color:#bbb;margin-top:2px;">Add a new address below</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Add New Address -->
+                            <div style="margin-bottom:10px;">
+                                <a href="#" class="add-toggle" onclick="toggleNewAddress(event)">
+                                    <i class="fas fa-plus-circle"></i> Add New Address
+                                </a>
+                            </div>
+
+                            <!-- New Address Form -->
+                            <div class="new-address-form" id="newAddressForm">
+                                <h6 style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:#1a1a2e;margin-bottom:12px;">New Address</h6>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Full Name <span class="req">*</span></label>
+                                        <input type="text" name="new_full_name" id="new_full_name" placeholder="Enter full name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Phone <span class="req">*</span></label>
+                                        <input type="text" name="new_phone" id="new_phone" placeholder="Enter phone number">
+                                    </div>
+                                </div>
+                                <div class="form-group full">
+                                    <label>Address Line 1 <span class="req">*</span></label>
+                                    <input type="text" name="new_address_line1" id="new_address_line1" placeholder="House number, street name">
+                                </div>
+                                <div class="form-group full">
+                                    <label>Address Line 2</label>
+                                    <input type="text" name="new_address_line2" id="new_address_line2" placeholder="Apartment, suite, etc. (optional)">
+                                </div>
+                                <div class="form-group full">
+                                    <label>Landmark</label>
+                                    <input type="text" name="new_landmark" id="new_landmark" placeholder="Nearby landmark (optional)">
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>City <span class="req">*</span></label>
+                                        <input type="text" name="new_city" id="new_city" placeholder="Enter city">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>State <span class="req">*</span></label>
+                                        <input type="text" name="new_state" id="new_state" placeholder="Enter state">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Pincode <span class="req">*</span></label>
+                                        <input type="text" name="new_pincode" id="new_pincode" placeholder="Enter pincode">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Country <span class="req">*</span></label>
+                                        <input type="text" name="new_country" id="new_country" placeholder="Enter country" value="India">
+                                    </div>
+                                </div>
+                                <div class="form-group full">
+                                    <label>Address Type</label>
+                                    <select name="new_address_type" id="new_address_type">
+                                        <option value="shipping">Shipping</option>
+                                        <option value="billing">Billing</option>
+                                        <option value="both">Both</option>
+                                    </select>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" name="new_is_default" id="new_is_default" checked>
+                                    <label for="new_is_default">Set as default address</label>
+                                </div>
+                                <div style="display:flex;gap:6px;margin-top:4px;">
+                                    <button type="button" class="btn-save" onclick="saveNewAddress()">
+                                        <i class="fas fa-save"></i> Save Address
+                                    </button>
+                                    <button type="button" class="btn-cancel" onclick="toggleNewAddress(event)">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Extra Grid: Billing + Notes -->
+                            <div class="extra-grid">
+                                <div class="extra-box">
+                                    <div class="box-title"><i class="fas fa-credit-card"></i> Billing</div>
+                                    <div class="check">
+                                        <input type="checkbox" id="sameAsShipping" checked onchange="toggleBillingAddress()">
+                                        <label for="sameAsShipping">Same as shipping</label>
+                                    </div>
+                                    <div id="billingAddressContainer" style="display:none;margin-top:6px;">
+                                        <textarea name="billing_address" rows="3" placeholder="Enter billing address"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="extra-box">
+                                    <div class="box-title"><i class="fas fa-pen"></i> Notes</div>
+                                    <textarea name="notes" rows="3" placeholder="Any special instructions?"></textarea>
+                                </div>
+                            </div>
+
+                            <input type="hidden" name="selected_address_id" id="selectedAddressId" value="">
+
+                            <button type="submit" class="btn-place" id="placeOrderBtn">
+                                <i class="fas fa-lock"></i> Place Order &amp; Pay
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Order Summary -->
+            <div class="order-summary">
+                <div class="card-header">
+                    <h5><i class="fas fa-receipt"></i> Order Summary</h5>
                 </div>
                 <div class="card-body">
-                    <!-- Total Savings Banner -->
+
+                    <!-- Savings Banner -->
                     {% with total_savings=product_discount_savings|add:offer_savings %}
                         {% if total_savings > 0 %}
                             <div class="offer-banner">
                                 <i class="fas fa-gift"></i>
-                                <span class="offer-text">
-                                    🎉 You saved <strong>₹{{ total_savings|floatformat:2 }}</strong> today!
-                                </span>
+                                <span class="text">You saved <strong>₹{{ total_savings|floatformat:2 }}</strong> today!</span>
                             </div>
                         {% endif %}
                     {% endwith %}
 
-                    <!-- Items List -->
-                    <div class="mb-3">
-                        <h6>Items ({{ total_items }})</h6>
-                        {% for data in items_data %}
-                            <div class="order-summary-item">
-                                <!-- Product Image -->
-                                {% if data.item.main_image %}
-                                    <img src="{{ data.item.main_image }}" alt="{{ data.item.item_name }}" class="item-image">
-                                {% else %}
-                                    <div class="item-image d-flex align-items-center justify-content-center bg-light">
-                                        <i class="fas fa-image text-muted"></i>
-                                    </div>
-                                {% endif %}
-                                
-                                <!-- Product Details -->
-                                <div class="item-details">
-                                    <div class="item-name">
-                                        {{ data.item.item_name|truncatechars:25 }}
-                                        
-                                        <!-- ============================================ -->
-                                        <!-- DISPLAY ONLY THE APPLIED DISCOUNT            -->
-                                        <!-- ============================================ -->
-                                        {% if data.offer_name and data.offer_name != "Product Discount" %}
-                                            <!-- Offer Applied -->
-                                            <span class="offer-tag">{{ data.offer_name }}</span>
-                                        {% elif data.product_discount_amount > 0 and not data.offer_name %}
-                                            <!-- Product Discount Applied -->
-                                            <span class="product-discount-tag">Product Discount</span>
-                                        {% endif %}
-                                        
-                                        <!-- Show Best Deal tag if both existed -->
-                                        {% if data.product_discount_amount > 0 and data.offer_discount > 0 %}
-                                            <span class="best-deal-tag">
-                                                <i class="fas fa-crown"></i> Best Deal
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                    <div class="item-meta">
-                                        Qty: {{ data.item.quantity }} × 
-                                        <span class="fw-bold">₹{{ data.final_price|floatformat:2 }}</span>
-                                        
-                                        <!-- Show original price if discounted -->
-                                        {% if data.final_price < data.original_price %}
-                                            <span class="text-muted text-decoration-line-through ms-1">₹{{ data.original_price|floatformat:2 }}</span>
-                                            <span class="savings-badge ms-1">
-                                                Save ₹{{ data.actual_savings|floatformat:2 }}
-                                            </span>
-                                        {% endif %}
-                                    </div>
+                    <!-- Items -->
+                    <div class="order-items-title">Items ({{ total_items }})</div>
+                    {% for data in items_data %}
+                        <div class="order-item">
+                            {% if data.item.main_image %}
+                                <img src="{{ data.item.main_image }}" alt="{{ data.item.item_name }}" class="img">
+                            {% else %}
+                                <div class="img d-flex align-items-center justify-content-center" style="background:#f5f0ed;">
+                                    <i class="fas fa-image" style="color:#ddd;"></i>
                                 </div>
-                                <div class="item-total">
-                                    ₹{{ data.item_total|floatformat:2 }}
+                            {% endif %}
+
+                            <div class="details">
+                                <div class="name">{{ data.item.item_name|truncatechars:25 }}</div>
+                                <div class="meta">
+                                    Qty: {{ data.item.quantity }} × ₹{{ data.final_price|floatformat:2 }}
+                                    {% if data.offer_name and data.offer_name != "Product Discount" %}
+                                        <span class="label offer">{{ data.offer_name }}</span>
+                                    {% elif data.product_discount_amount > 0 and not data.offer_name %}
+                                        <span class="label discount">Discount</span>
+                                    {% endif %}
+                                    {% if data.product_discount_amount > 0 and data.offer_discount > 0 %}
+                                        <span class="label best">Best Deal</span>
+                                    {% endif %}
+                                    {% if data.final_price < data.original_price %}
+                                        <span style="color:#28a745;font-size:11px;font-weight:600;">Save ₹{{ data.actual_savings|floatformat:2 }}</span>
+                                    {% endif %}
                                 </div>
                             </div>
-                        {% endfor %}
-                    </div>
-                    
-                    <hr>
-                    
+                            <div class="total">₹{{ data.item_total|floatformat:2 }}</div>
+                        </div>
+                    {% endfor %}
+
+                    <hr style="border-color:#f0edeb;margin:10px 0;">
+
                     <!-- Price Breakdown -->
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Subtotal</span>
-                        <span>₹{{ subtotal_without_offers|floatformat:2 }}</span>
+                    <div class="summary-row">
+                        <span class="label">Subtotal</span>
+                        <span class="value">₹{{ subtotal_without_offers|floatformat:2 }}</span>
                     </div>
-                    
-                    <!-- Product Discounts (Only if applied) -->
+
                     {% if product_discount_savings > 0 %}
-                    <div class="d-flex justify-content-between mb-2 text-success">
-                        <span><i class="fas fa-tags"></i> Product Discounts</span>
-                        <span>-₹{{ product_discount_savings|floatformat:2 }}</span>
+                    <div class="summary-row">
+                        <span class="label"><i class="fas fa-tags" style="color:#28a745;"></i> Product Discounts</span>
+                        <span class="value discount">-₹{{ product_discount_savings|floatformat:2 }}</span>
                     </div>
                     {% endif %}
-                    
-                    <!-- Offer Savings (Only if applied) -->
+
                     {% if offer_savings > 0 %}
-                    <div class="d-flex justify-content-between mb-2 text-success">
-                        <span><i class="fas fa-gift"></i> Offer Savings</span>
-                        <span>-₹{{ offer_savings|floatformat:2 }}</span>
+                    <div class="summary-row">
+                        <span class="label"><i class="fas fa-gift" style="color:#28a745;"></i> Offer Savings</span>
+                        <span class="value discount">-₹{{ offer_savings|floatformat:2 }}</span>
                     </div>
                     {% endif %}
-                    
-                    <div class="d-flex justify-content-between mb-2 fw-bold">
-                        <span>Subtotal after discounts</span>
-                        <span>₹{{ subtotal_with_offers|floatformat:2 }}</span>
+
+                    <div class="summary-row" style="font-weight:600;padding-top:4px;">
+                        <span class="label">Subtotal after discounts</span>
+                        <span class="value">₹{{ subtotal_with_offers|floatformat:2 }}</span>
                     </div>
-                    
-                    <!-- Coupon Discount -->
+
                     {% if coupon_discount > 0 %}
-                    <div class="d-flex justify-content-between mb-2 text-success">
-                        <span><i class="fas fa-ticket-alt"></i> Coupon Discount</span>
-                        <span>-₹{{ coupon_discount|floatformat:2 }}</span>
+                    <div class="summary-row">
+                        <span class="label"><i class="fas fa-ticket-alt" style="color:#28a745;"></i> Coupon Discount</span>
+                        <span class="value discount">-₹{{ coupon_discount|floatformat:2 }}</span>
                     </div>
                     {% endif %}
-                    
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Shipping</span>
-                        <span class="text-success">Free</span>
+
+                    <div class="summary-row">
+                        <span class="label">Shipping</span>
+                        <span class="value" style="color:#28a745;">Free</span>
                     </div>
-                    
-                    <hr>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="h5">Total</span>
-                        <span class="h5 text-success">₹{{ total|floatformat:2 }}</span>
+
+                    <hr style="border-color:#f0edeb;margin:8px 0;">
+
+                    <div class="summary-row total">
+                        <span class="label">Total</span>
+                        <span class="value">₹{{ total|floatformat:2 }}</span>
                     </div>
-                    
-                    <!-- Total Savings Summary -->
+
+                    <!-- Total Savings -->
                     {% with total_actual_savings=product_discount_savings|add:offer_savings|add:coupon_discount %}
                         {% if total_actual_savings > 0 %}
-                            <div class="text-success text-center mb-2">
-                                <small>You saved ₹{{ total_actual_savings|floatformat:2 }} today!</small>
+                            <div class="summary-savings">
+                                <i class="fas fa-wallet"></i> You saved ₹{{ total_actual_savings|floatformat:2 }} today!
                             </div>
                         {% endif %}
                     {% endwith %}
-                    
-                    <div class="alert alert-info small">
-                        <i class="fas fa-info-circle"></i> 
-                        Payment will be processed securely via Razorpay
-                    </div>
-                    
-                    <!-- Coupon Section -->
+
+                    <!-- Coupon -->
                     {% if cart.coupon %}
                         <div class="coupon-applied">
                             <span>
                                 <i class="fas fa-ticket-alt text-success"></i>
-                                <span class="coupon-code">{{ cart.coupon.code }}</span>
-                                <span class="text-muted small">applied</span>
+                                <span class="code">{{ cart.coupon.code }}</span>
+                                <span style="color:#999;font-weight:400;font-size:11px;">applied</span>
                             </span>
-                            <span class="coupon-savings">
+                            <span class="savings">
                                 <i class="fas fa-arrow-down"></i> Saved ₹{{ coupon_discount|floatformat:2 }}
                             </span>
                         </div>
                     {% endif %}
+
+                    <!-- Secure Badge -->
+                    <div class="secure-badge">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Secure Payment</span>
+                        <span style="color:#ddd;">•</span>
+                        <i class="fas fa-lock"></i>
+                        <span>Encrypted</span>
+                    </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
@@ -650,15 +1577,12 @@
 <!-- JAVASCRIPT                                  -->
 <!-- ============================================ -->
 <script>
-    // ============================================
-    // CSRF TOKEN HELPER
-    // ============================================
     function getCookie(name) {
-        let cookieValue = null;
+        var cookieValue = null;
         if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
@@ -668,77 +1592,73 @@
         return cookieValue;
     }
 
-    // ============================================
-    // TOAST NOTIFICATION
-    // ============================================
-    function showToast(message, type = 'success') {
-        const container = document.getElementById('toastContainer');
+    function showToast(message, type) {
+        type = type || 'success';
+        var container = document.getElementById('toastContainer');
         if (!container) return;
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        const icons = {
+        var toast = document.createElement('div');
+        toast.className = 'toast ' + type;
+        var icons = {
             success: 'fa-check-circle',
             error: 'fa-exclamation-circle',
             info: 'fa-info-circle',
             warning: 'fa-exclamation-triangle'
         };
-        toast.innerHTML = `
-            <i class="fas ${icons[type] || icons.info}"></i>
-            <span>${message}</span>
-            <span class="toast-close" onclick="this.parentElement.remove()">&times;</span>
-        `;
+        toast.innerHTML = '<i class="fas ' + (icons[type] || icons.info) + '"></i><span>' + message + '</span><button class="toast-close" onclick="this.parentElement.remove()">&times;</button>';
         container.appendChild(toast);
-        setTimeout(() => {
+        setTimeout(function() {
             if (toast.parentElement) {
                 toast.style.opacity = '0';
                 toast.style.transition = 'opacity 0.3s';
-                setTimeout(() => toast.remove(), 300);
+                setTimeout(function() {
+                    if (toast.parentElement) toast.remove();
+                }, 300);
             }
         }, 5000);
     }
 
-    // ============================================
-    // SELECT ADDRESS
-    // ============================================
     function selectAddress(element, addressId) {
-        document.querySelectorAll('.address-card').forEach(function(card) {
+        document.querySelectorAll('.address-item').forEach(function(card) {
             card.classList.remove('selected');
         });
         element.classList.add('selected');
-        
-        const radio = element.querySelector('input[type="radio"]');
+
+        var radio = element.querySelector('input[type="radio"]');
         if (radio) {
             radio.checked = true;
         }
+
+        // Update status badges
+        document.querySelectorAll('.address-item .badge-right .status').forEach(function(badge) {
+            badge.textContent = 'Select';
+            badge.className = 'status';
+        });
+        var selectedBadge = element.querySelector('.badge-right .status');
+        if (selectedBadge) {
+            selectedBadge.textContent = 'Selected';
+            selectedBadge.classList.add('selected-status');
+        }
+
         document.getElementById('selectedAddressId').value = addressId;
     }
 
-    // ============================================
-    // TOGGLE NEW ADDRESS FORM
-    // ============================================
     function toggleNewAddress(event) {
         event.preventDefault();
-        const form = document.getElementById('newAddressForm');
+        var form = document.getElementById('newAddressForm');
         form.classList.toggle('show');
         if (form.classList.contains('show')) {
             form.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }
 
-    // ============================================
-    // TOGGLE BILLING ADDRESS
-    // ============================================
     function toggleBillingAddress() {
-        const checkbox = document.getElementById('sameAsShipping');
-        const container = document.getElementById('billingAddressContainer');
+        var checkbox = document.getElementById('sameAsShipping');
+        var container = document.getElementById('billingAddressContainer');
         container.style.display = checkbox.checked ? 'none' : 'block';
     }
 
-    // ============================================
-    // SAVE NEW ADDRESS VIA AJAX
-    // ============================================
     function saveNewAddress() {
-        const data = {
+        var data = {
             full_name: document.getElementById('new_full_name').value,
             phone: document.getElementById('new_phone').value,
             address_line1: document.getElementById('new_address_line1').value,
@@ -751,17 +1671,17 @@
             address_type: document.getElementById('new_address_type').value,
             is_default: document.getElementById('new_is_default').checked,
         };
-        
+
         if (!data.full_name || !data.phone || !data.address_line1 || !data.city || !data.state || !data.pincode) {
             showToast('Please fill in all required fields.', 'error');
             return;
         }
-        
-        const btn = event.target;
-        const originalText = btn.innerHTML;
+
+        var btn = event.target;
+        var originalText = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
         btn.disabled = true;
-        
+
         fetch('{% url "Ecom:add_address" %}', {
             method: 'POST',
             headers: {
@@ -770,43 +1690,40 @@
             },
             body: JSON.stringify(data)
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
             if (data.success) {
                 showToast('Address saved successfully!', 'success');
-                setTimeout(() => location.reload(), 1000);
+                setTimeout(function() { location.reload(); }, 1000);
             } else {
                 showToast(data.error || 'Failed to save address', 'error');
             }
         })
-        .catch(error => {
+        .catch(function(error) {
             showToast('Network error. Please try again.', 'error');
         })
-        .finally(() => {
+        .finally(function() {
             btn.innerHTML = originalText;
             btn.disabled = false;
         });
     }
 
-    // ============================================
-    // FORM VALIDATION
-    // ============================================
     document.getElementById('checkoutForm').addEventListener('submit', function(e) {
-        const addressRadio = document.querySelector('input[name="address_id"]:checked');
-        const newAddressForm = document.getElementById('newAddressForm');
-        const isNewAddressVisible = newAddressForm.classList.contains('show');
-        
+        var addressRadio = document.querySelector('input[name="address_id"]:checked');
+        var newAddressForm = document.getElementById('newAddressForm');
+        var isNewAddressVisible = newAddressForm.classList.contains('show');
+
         if (!addressRadio && !isNewAddressVisible) {
             e.preventDefault();
             showToast('Please select an address or add a new one.', 'error');
             return;
         }
-        
+
         if (isNewAddressVisible) {
-            const requiredFields = ['new_full_name', 'new_phone', 'new_address_line1', 'new_city', 'new_state', 'new_pincode'];
-            let missing = false;
+            var requiredFields = ['new_full_name', 'new_phone', 'new_address_line1', 'new_city', 'new_state', 'new_pincode'];
+            var missing = false;
             requiredFields.forEach(function(id) {
-                const field = document.getElementById(id);
+                var field = document.getElementById(id);
                 if (field && !field.value.trim()) {
                     missing = true;
                     field.style.borderColor = '#dc3545';
@@ -820,16 +1737,18 @@
         }
     });
 
-    // ============================================
-    // AUTO-SELECT DEFAULT ADDRESS ON LOAD
-    // ============================================
     document.addEventListener('DOMContentLoaded', function() {
-        const defaultAddress = document.querySelector('.address-card.selected');
+        var defaultAddress = document.querySelector('.address-item.selected');
         if (defaultAddress) {
-            const radio = defaultAddress.querySelector('input[type="radio"]');
+            var radio = defaultAddress.querySelector('input[type="radio"]');
             if (radio) {
                 radio.checked = true;
                 document.getElementById('selectedAddressId').value = radio.value;
+            }
+            var badge = defaultAddress.querySelector('.badge-right .status');
+            if (badge) {
+                badge.textContent = 'Selected';
+                badge.classList.add('selected-status');
             }
         }
     });

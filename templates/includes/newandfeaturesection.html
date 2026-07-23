@@ -1,0 +1,963 @@
+<!-- ============================================ -->
+<!-- PRODUCT SECTIONS - Fixed Width Design        -->
+<!-- ============================================ -->
+<style>
+    /* ============================================ */
+    /* ROOT VARIABLES - Your Theme                 */
+    /* ============================================ */
+    :root {
+        --primary: #5c121f;
+        --secondary: #F4B400;
+        --accent: #D97706;
+        --text-dark: #1e1e1e;
+        --text-light: #5a5a5a;
+        --text-white: #ffffff;
+        --bg-white: #ffffff;
+        --bg-light: #f8f6f4;
+        --border: #e8e4e0;
+        --shadow: 0 6px 28px rgba(0, 0, 0, 0.07);
+        --transition: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* ============================================ */
+    /* WRAPPER - Fixed Width with Max              */
+    /* ============================================ */
+    .product-sections-wrapper {
+        padding: 0 20px;
+        max-width: 1460px !important;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .product-section-wrap {
+        margin-bottom: 50px;
+        padding: 0 5px;
+    }
+
+    .product-section-wrap.no-products {
+        display: none !important;
+    }
+
+    /* ============================================ */
+    /* SECTION HEADER - Premium                    */
+    /* ============================================ */
+    .product-section-wrap .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding-bottom: 14px;
+        border-bottom: 2px solid var(--border);
+        position: relative;
+    }
+
+    .product-section-wrap .section-header::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 70px;
+        height: 3px;
+        background: var(--primary);
+        border-radius: 3px;
+    }
+
+    .product-section-wrap .section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+    }
+
+    .product-section-wrap .section-title .icon-wrap {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        font-size: 18px;
+    }
+
+    .product-section-wrap .section-title .icon-wrap.new {
+        background: var(--primary);
+        color: var(--text-white);
+    }
+
+    .product-section-wrap .section-title .icon-wrap.featured {
+        background: linear-gradient(135deg, var(--secondary), var(--accent));
+        color: var(--text-dark);
+    }
+
+    /* View All Button - Premium */
+    .product-section-wrap .view-all {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--primary);
+        text-decoration: none;
+        padding: 9px 26px;
+        border-radius: 50px;
+        background: rgba(92, 18, 31, 0.06);
+        transition: var(--transition);
+        border: 2px solid var(--primary);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        position: relative;
+        overflow: hidden;
+        letter-spacing: 0.3px;
+    }
+
+    .product-section-wrap .view-all::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: var(--primary);
+        transition: left 0.4s ease;
+        z-index: 0;
+    }
+
+    .product-section-wrap .view-all:hover::before {
+        left: 0;
+    }
+
+    .product-section-wrap .view-all span,
+    .product-section-wrap .view-all i {
+        position: relative;
+        z-index: 1;
+    }
+
+    .product-section-wrap .view-all:hover {
+        color: var(--text-white);
+        border-color: var(--primary);
+        transform: translateX(4px);
+        box-shadow: 0 4px 20px rgba(92, 18, 31, 0.12);
+    }
+
+    .product-section-wrap .view-all i {
+        font-size: 12px;
+        transition: transform 0.3s ease;
+    }
+
+    .product-section-wrap .view-all:hover i {
+        transform: translateX(4px);
+    }
+
+    /* ============================================ */
+    /* PRODUCT GRID - Fixed 5 Columns              */
+    /* ============================================ */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 18px;
+        padding: 5px 0;
+        width: 100%;
+    }
+
+    /* ============================================ */
+    /* PRODUCT CARD - Fixed Width                  */
+    /* ============================================ */
+    .product-card-clean,
+    .product-card-gold {
+        width: 100%;
+        max-width: 100%;
+        background: var(--bg-white);
+        border-radius: 14px;
+        overflow: hidden;
+        transition: var(--transition);
+        border: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02);
+        position: relative;
+    }
+
+    /* ============================================ */
+    /* DESIGN 1: NEW ARRIVALS - Clean Premium      */
+    /* ============================================ */
+    .product-card-clean:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 16px 50px rgba(92, 18, 31, 0.06);
+        border-color: var(--primary);
+    }
+
+    .product-card-clean .product-image {
+        position: relative;
+        overflow: hidden;
+        background: var(--bg-light);
+        aspect-ratio: 1/1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-card-clean .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        transition: transform 0.5s ease;
+    }
+
+    .product-card-clean:hover .product-image img {
+        transform: scale(1.05);
+    }
+
+    .product-card-clean .product-image .no-image {
+        font-size: 36px;
+        color: #ddd;
+    }
+
+    /* Design 1 Badges */
+    .product-card-clean .badge {
+        position: absolute;
+        padding: 3px 12px;
+        border-radius: 4px;
+        font-family: 'Inter', sans-serif;
+        font-size: 8px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .badge-clean-new {
+        top: 10px;
+        left: 10px;
+        background: var(--primary);
+        color: var(--text-white);
+    }
+
+    .badge-clean-offer {
+        top: 38px;
+        left: 10px;
+        background: var(--secondary);
+        color: var(--text-dark);
+        font-size: 7px;
+        padding: 2px 8px;
+    }
+
+    .badge-clean-discount {
+        top: 38px;
+        left: 10px;
+        background: var(--accent);
+        color: var(--text-white);
+        font-size: 7px;
+        padding: 2px 8px;
+    }
+
+    .badge-clean-stock {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        padding: 2px 10px;
+        border-radius: 4px;
+        font-family: 'Inter', sans-serif;
+        font-size: 7px;
+        font-weight: 600;
+        z-index: 2;
+        backdrop-filter: blur(4px);
+    }
+
+    .badge-clean-stock.in {
+        background: rgba(212, 237, 218, 0.92);
+        color: #155724;
+        font-size: 10px;
+    }
+
+    .badge-clean-stock.low {
+        background: rgba(255, 243, 205, 0.92);
+        color: #856404;
+                font-size: 10px;
+
+    }
+
+    .badge-clean-stock.out {
+        background: rgba(248, 215, 218, 0.92);
+        color: #721c24;
+                font-size: 10px;
+
+    }
+
+    /* Design 1 Body */
+    .product-card-clean .product-body {
+        padding: 12px 14px 10px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        background: linear-gradient(145deg, #fffcfc, #e8dcd7);
+    }
+
+    .product-card-clean .product-name {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-dark);
+        text-decoration: none;
+        transition: color 0.3s ease;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.3;
+        min-height: 34px;
+    }
+
+    .product-card-clean .product-name:hover {
+        color: var(--primary);
+    }
+
+    .product-card-clean .product-price {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding-top: 5px;
+        border-top: 1px solid var(--border);
+    }
+
+    .product-card-clean .product-price .current {
+        font-family: 'Inter', sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .product-card-clean .product-price .original {
+        font-family: 'Inter', sans-serif;
+        font-size: 11px;
+        color: var(--text-light);
+        text-decoration: line-through;
+    }
+
+    .product-card-clean .product-price .tag {
+        font-size: 7px;
+        font-weight: 700;
+        padding: 1px 8px;
+        border-radius: 4px;
+        background: var(--secondary);
+        color: var(--text-dark);
+        text-transform: uppercase;
+    }
+
+    /* Design 1 Actions */
+    .product-card-clean .product-actions {
+        padding: 8px 14px 14px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 8px;
+    }
+
+    .product-card-clean .btn-view {
+        flex: 1;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1.5px solid var(--primary);
+        background: transparent;
+        color: var(--primary);
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        font-size: 11px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: var(--transition);
+    }
+
+    .product-card-clean .btn-view:hover {
+        background: var(--primary);
+        color: var(--text-white);
+        box-shadow: 0 4px 20px rgba(92, 18, 31, 0.10);
+        transform: translateY(-2px);
+    }
+
+    /* ============================================ */
+    /* DESIGN 2: FEATURED - Premium Gold           */
+    /* ============================================ */
+    .product-card-gold::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--secondary), var(--accent), var(--secondary));
+        background-size: 200% 100%;
+        opacity: 0;
+        transition: opacity 0.4s ease, background-position 0.6s ease;
+        z-index: 3;
+    }
+
+    .product-card-gold:hover::before {
+        opacity: 1;
+        background-position: 100% 0;
+    }
+
+    .product-card-gold:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 16px 50px rgba(244, 180, 0, 0.06);
+        border-color: var(--secondary);
+    }
+
+    .product-card-gold .product-image {
+        position: relative;
+        overflow: hidden;
+        background: var(--bg-light);
+        aspect-ratio: 1/1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+    }
+
+    .product-card-gold .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .product-card-gold:hover .product-image img {
+        transform: scale(1.06);
+    }
+
+    .product-card-gold .product-image .no-image {
+        font-size: 36px;
+        color: #ddd;
+    }
+
+    /* Design 2 Badges */
+    .product-card-gold .badge {
+        position: absolute;
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-family: 'Inter', sans-serif;
+        font-size: 8px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        box-shadow: 0 2px 15px rgba(244, 180, 0, 0.08);
+    }
+
+    .badge-gold-featured {
+        top: 10px;
+        right: 10px;
+        background: linear-gradient(135deg, var(--secondary), var(--accent));
+        color: var(--text-dark);
+        box-shadow: 0 2px 15px rgba(244, 180, 0, 0.12);
+    }
+
+    .badge-gold-offer {
+        top: 38px;
+        right: 10px;
+        background: var(--primary);
+        color: var(--text-white);
+        font-size: 7px;
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+
+    .badge-gold-discount {
+        top: 38px;
+        right: 10px;
+        background: var(--accent);
+        color: var(--text-white);
+        font-size: 7px;
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+
+    .badge-gold-stock {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-family: 'Inter', sans-serif;
+        font-size: 7px;
+        font-weight: 600;
+        z-index: 2;
+        backdrop-filter: blur(4px);
+    }
+
+    .badge-gold-stock.in {
+        background: rgba(212, 237, 218, 0.92);
+        color: #155724;
+        font-size: 10px;
+
+    }
+
+    .badge-gold-stock.low {
+        background: rgba(255, 243, 205, 0.92);
+        color: #856404;
+                font-size: 10px;
+
+    }
+
+    .badge-gold-stock.out {
+        background: rgba(248, 215, 218, 0.92);
+        color: #721c24;
+                font-size: 10px;
+
+    }
+
+    /* Design 2 Body */
+    .product-card-gold .product-body {
+        padding: 12px 14px 10px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .product-card-gold .product-name {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-dark);
+        text-decoration: none;
+        transition: color 0.3s ease;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.3;
+        min-height: 34px;
+    }
+
+    .product-card-gold .product-name:hover {
+        color: var(--accent);
+    }
+
+    .product-card-gold .product-price {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding-top: 5px;
+        border-top: 1px solid var(--border);
+    }
+
+    .product-card-gold .product-price .current {
+        font-family: 'Inter', sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .product-card-gold .product-price .original {
+        font-family: 'Inter', sans-serif;
+        font-size: 11px;
+        color: var(--text-light);
+        text-decoration: line-through;
+    }
+
+    .product-card-gold .product-price .tag {
+        font-size: 7px;
+        font-weight: 700;
+        padding: 1px 8px;
+        border-radius: 20px;
+        background: var(--secondary);
+        color: var(--text-dark);
+        text-transform: uppercase;
+    }
+
+    /* Design 2 Actions */
+    .product-card-gold .product-actions {
+        padding: 8px 14px 14px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 8px;
+    }
+
+    .product-card-gold .btn-view {
+        flex: 1;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1.5px solid var(--secondary);
+        background: transparent;
+        color: var(--secondary);
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        font-size: 11px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: var(--transition);
+    }
+
+    .product-card-gold .btn-view:hover {
+        background: var(--secondary);
+        color: var(--text-dark);
+        box-shadow: 0 4px 20px rgba(244, 180, 0, 0.10);
+        transform: translateY(-2px);
+        border-color: var(--secondary);
+    }
+
+    /* ============================================ */
+    /* EMPTY STATE                                 */
+    /* ============================================ */
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+        background: var(--bg-white);
+        border-radius: 14px;
+        border: 1.5px dashed var(--border);
+        grid-column: 1 / -1;
+    }
+
+    .empty-state i {
+        font-size: 40px;
+        color: var(--text-light);
+        opacity: 0.2;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .empty-state h5 {
+        font-family: 'Inter', sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 4px;
+    }
+
+    .empty-state p {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        color: var(--text-light);
+        margin: 0;
+    }
+
+    /* ============================================ */
+    /* RESPONSIVE                                  */
+    /* ============================================ */
+
+    @media (min-width: 1200px) {
+        .product-grid { grid-template-columns: repeat(5, 1fr); gap: 20px; }
+        .product-sections-wrapper { padding: 0 20px; max-width: 1260px; }
+    }
+
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .product-grid { grid-template-columns: repeat(4, 1fr); gap: 18px; }
+        .product-card-clean .product-name,
+        .product-card-gold .product-name { font-size: 12px; min-height: 30px; }
+        .product-card-clean .product-price .current,
+        .product-card-gold .product-price .current { font-size: 15px; }
+        .product-sections-wrapper { padding: 0 16px; max-width: 1000px; }
+        .product-section-wrap .view-all { font-size: 12px; padding: 7px 20px; }
+    }
+
+    @media (min-width: 768px) and (max-width: 991px) {
+        .product-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .product-card-clean .product-name,
+        .product-card-gold .product-name { font-size: 12px; min-height: 30px; }
+        .product-card-clean .product-price .current,
+        .product-card-gold .product-price .current { font-size: 15px; }
+        .product-card-clean .badge,
+        .product-card-gold .badge { font-size: 7px; padding: 2px 8px; }
+        .badge-clean-offer, .badge-clean-discount,
+        .badge-gold-offer, .badge-gold-discount { top: 36px; font-size: 6px; padding: 2px 6px; }
+        .product-card-clean .btn-view,
+        .product-card-gold .btn-view { font-size: 10px; padding: 5px 10px; }
+        .product-section-wrap .section-title { font-size: 22px; }
+        .product-section-wrap .section-title .icon-wrap { width: 38px; height: 38px; font-size: 16px; }
+        .product-sections-wrapper { padding: 0 14px; max-width: 800px; }
+        .product-section-wrap .view-all { font-size: 11px; padding: 6px 16px; }
+    }
+
+    @media (min-width: 576px) and (max-width: 767px) {
+        .product-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        .product-card-clean .product-name,
+        .product-card-gold .product-name { font-size: 11px; min-height: 26px; }
+        .product-card-clean .product-price .current,
+        .product-card-gold .product-price .current { font-size: 14px; }
+        .product-card-clean .product-price .original,
+        .product-card-gold .product-price .original { font-size: 10px; }
+        .product-card-clean .badge,
+        .product-card-gold .badge { font-size: 6px; padding: 2px 6px; top: 8px; }
+        .product-card-gold .badge { right: 8px; left: auto; }
+        .badge-clean-offer, .badge-clean-discount,
+        .badge-gold-offer, .badge-gold-discount { top: 32px; font-size: 5px; padding: 1px 4px; left: 8px; }
+        .badge-gold-offer, .badge-gold-discount { left: auto; right: 8px; }
+        .product-card-clean .badge-clean-stock,
+        .product-card-gold .badge-gold-stock { font-size: 6px; padding: 1px 6px; bottom: 8px; }
+        .product-card-gold .badge-gold-stock { left: 8px; right: auto; }
+        .product-card-clean .btn-view,
+        .product-card-gold .btn-view { font-size: 9px; padding: 4px 8px; }
+        .product-card-clean .product-body,
+        .product-card-gold .product-body { padding: 8px 10px 6px; }
+        .product-card-clean .product-actions,
+        .product-card-gold .product-actions { padding: 4px 10px 10px; }
+        .product-section-wrap .section-title { font-size: 19px; }
+        .product-section-wrap .section-title .icon-wrap { width: 32px; height: 32px; font-size: 14px; border-radius: 8px; }
+        .product-section-wrap .view-all { font-size: 10px; padding: 5px 14px; }
+        .product-sections-wrapper { padding: 0 12px; max-width: 600px; }
+        .product-section-wrap { margin-bottom: 30px; }
+    }
+
+    @media (max-width: 575px) {
+        .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .product-card-clean .product-name,
+        .product-card-gold .product-name { font-size: 10px; min-height: 22px; }
+        .product-card-clean .product-price .current,
+        .product-card-gold .product-price .current { font-size: 13px; }
+        .product-card-clean .product-price .original,
+        .product-card-gold .product-price .original { font-size: 9px; }
+        .product-card-clean .badge,
+        .product-card-gold .badge { font-size: 5px; padding: 1px 4px; top: 6px; left: 6px; }
+        .product-card-gold .badge { right: 6px; left: auto; }
+        .badge-clean-offer, .badge-clean-discount,
+        .badge-gold-offer, .badge-gold-discount { top: 26px; font-size: 4px; padding: 1px 3px; left: 6px; }
+        .badge-gold-offer, .badge-gold-discount { left: auto; right: 6px; }
+        .product-card-clean .badge-clean-stock,
+        .product-card-gold .badge-gold-stock { font-size: 5px; padding: 1px 4px; bottom: 6px; }
+        .product-card-gold .badge-gold-stock { left: 6px; right: auto; }
+        .product-card-clean .btn-view,
+        .product-card-gold .btn-view { font-size: 8px; padding: 3px 6px; gap: 3px; }
+        .product-card-clean .product-body,
+        .product-card-gold .product-body { padding: 6px 8px 4px; gap: 4px; }
+        .product-card-clean .product-actions,
+        .product-card-gold .product-actions { padding: 3px 8px 8px; }
+        .product-card-clean .product-price,
+        .product-card-gold .product-price { gap: 3px; padding-top: 3px; }
+        .product-card-clean .product-price .tag,
+        .product-card-gold .product-price .tag { font-size: 5px; padding: 1px 4px; }
+        .product-section-wrap .section-title { font-size: 17px; }
+        .product-section-wrap .section-title .icon-wrap { width: 28px; height: 28px; font-size: 12px; border-radius: 8px; }
+        .product-section-wrap .view-all { font-size: 9px; padding: 4px 12px; gap: 4px; }
+        .product-section-wrap .section-header { margin-bottom: 12px; padding-bottom: 6px; }
+        .product-sections-wrapper { padding: 0 8px; max-width: 480px; }
+        .product-section-wrap { margin-bottom: 25px; }
+    }
+
+    @media (max-width: 370px) {
+        .product-grid { gap: 6px; }
+        .product-card-clean .product-name,
+        .product-card-gold .product-name { font-size: 8px; min-height: 18px; }
+        .product-card-clean .product-price .current,
+        .product-card-gold .product-price .current { font-size: 11px; }
+        .product-card-clean .badge,
+        .product-card-gold .badge { font-size: 4px; padding: 1px 3px; }
+        .badge-clean-offer, .badge-clean-discount,
+        .badge-gold-offer, .badge-gold-discount { font-size: 3px; top: 22px; padding: 1px 2px; }
+        .product-card-clean .btn-view,
+        .product-card-gold .btn-view { font-size: 7px; padding: 2px 4px; }
+        .product-section-wrap .section-title { font-size: 14px; }
+        .product-section-wrap .section-title .icon-wrap { width: 22px; height: 22px; font-size: 10px; }
+        .product-section-wrap .view-all { font-size: 8px; padding: 3px 8px; }
+        .product-sections-wrapper { padding: 0 4px; max-width: 320px; }
+    }
+    /* ===============================
+   MOBILE BUTTON FIX
+================================ */
+
+@media (max-width: 767px){
+
+.product-card-clean .product-actions,
+.product-card-gold .product-actions{
+    padding:12px;
+}
+
+.product-card-clean .btn-view,
+.product-card-gold .btn-view{
+
+    width:100%;
+
+    min-height:42px;
+
+    padding:10px 14px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+    border-radius:10px;
+
+    gap:8px;
+}
+
+.product-card-clean .btn-view i,
+.product-card-gold .btn-view i{
+    font-size:13px;
+}
+
+}
+</style>
+
+<!-- ============================================ -->
+<!-- PRODUCT SECTIONS WRAPPER                     -->
+<!-- ============================================ -->
+<div class="product-sections-wrapper">
+
+    <!-- ============================================ -->
+    <!-- NEW ARRIVALS - Clean Premium Design         -->
+    <!-- ============================================ -->
+    {% if new_arrivals %}
+    <div class="product-section-wrap">
+        <div class="section-header">
+            <h3 class="section-title">
+                <span class="icon-wrap new"><i class="fas fa-clock"></i></span>
+                New Arrivals
+            </h3>
+            <a href="{% url 'Ecom:shop' %}?is_new=1" class="view-all">
+                <span>View All</span> <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="product-grid">
+            {% for product in new_arrivals|slice:":10" %}
+                <div class="product-card-clean">
+                    <div class="product-image">
+                        <a href="{% url 'Ecom:product_detail' product.id %}">
+                            {% if product.main_image %}
+                                <img src="{{ product.main_image }}" alt="{{ product.name }}" loading="lazy">
+                            {% else %}
+                                <div class="no-image"><i class="fas fa-image"></i></div>
+                            {% endif %}
+                        </a>
+                        
+                        <span class="badge badge-clean-new"><i class="fas fa-clock"></i> New</span>
+                        
+                        {% if product.offer_name and product.offer_name != "Product Discount" %}
+                            <span class="badge badge-clean-offer"><i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:6 }}</span>
+                        {% elif product.discount_percentage > 0 %}
+                            <span class="badge badge-clean-discount">-{{ product.discount_percentage|floatformat:0 }}%</span>
+                        {% endif %}
+                        
+                        <span class="badge-clean-stock 
+                            {% if product.is_out_of_stock %}out
+                            {% elif product.is_low_stock %}low
+                            {% else %}in{% endif %}">
+                            {% if product.is_out_of_stock %}Out
+                            {% elif product.is_low_stock %}Low
+                            {% else %}In{% endif %}
+                        </span>
+                    </div>
+
+                    <div class="product-body">
+                        <a href="{% url 'Ecom:product_detail' product.id %}" class="product-name">{{ product.name }}</a>
+                        
+                        <div class="product-price">
+                            {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                <span class="current">₹{{ product.offer_price|floatformat:2 }}</span>
+                                <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                                <span class="tag">Offer</span>
+                            {% elif product.discount_percentage > 0 %}
+                                <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
+                                <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                            {% else %}
+                                <span class="current">₹{{ product.price|floatformat:2 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="product-actions">
+                        <a href="{% url 'Ecom:product_detail' product.id %}" class="btn-view">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ============================================ -->
+    <!-- FEATURED PRODUCTS - Premium Gold Design     -->
+    <!-- ============================================ -->
+    {% if featured_products %}
+    <div class="product-section-wrap">
+        <div class="section-header">
+            <h3 class="section-title">
+                <span class="icon-wrap featured"><i class="fas fa-star"></i></span>
+                Featured Products
+            </h3>
+            <a href="{% url 'Ecom:shop' %}?is_featured=1" class="view-all">
+                <span>View All</span> <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="product-grid">
+            {% for product in featured_products|slice:":10" %}
+                <div class="product-card-gold">
+                    <div class="product-image">
+                        <a href="{% url 'Ecom:product_detail' product.id %}">
+                            {% if product.main_image %}
+                                <img src="{{ product.main_image }}" alt="{{ product.name }}" loading="lazy">
+                            {% else %}
+                                <div class="no-image"><i class="fas fa-image"></i></div>
+                            {% endif %}
+                        </a>
+                        
+                        <span class="badge badge-gold-featured"><i class="fas fa-star"></i> Featured</span>
+                        
+                        {% if product.offer_name and product.offer_name != "Product Discount" %}
+                            <span class="badge badge-gold-offer"><i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:6 }}</span>
+                        {% elif product.discount_percentage > 0 %}
+                            <span class="badge badge-gold-discount">-{{ product.discount_percentage|floatformat:0 }}%</span>
+                        {% endif %}
+                        
+                        <span class="badge-gold-stock 
+                            {% if product.is_out_of_stock %}out
+                            {% elif product.is_low_stock %}low
+                            {% else %}in{% endif %}">
+                            {% if product.is_out_of_stock %}Out
+                            {% elif product.is_low_stock %}Low
+                            {% else %}In{% endif %}
+                        </span>
+                    </div>
+
+                    <div class="product-body">
+                        <a href="{% url 'Ecom:product_detail' product.id %}" class="product-name">{{ product.name }}</a>
+                        
+                        <div class="product-price">
+                            {% if product.offer_name and product.offer_name != "Product Discount" %}
+                                <span class="current">₹{{ product.offer_price|floatformat:2 }}</span>
+                                <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                                <span class="tag">Offer</span>
+                            {% elif product.discount_percentage > 0 %}
+                                <span class="current">₹{{ product.final_price|floatformat:2 }}</span>
+                                <span class="original">₹{{ product.price|floatformat:2 }}</span>
+                            {% else %}
+                                <span class="current">₹{{ product.price|floatformat:2 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="product-actions">
+                        <a href="{% url 'Ecom:product_detail' product.id %}" class="btn-view">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>

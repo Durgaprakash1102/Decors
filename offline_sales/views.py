@@ -392,20 +392,22 @@ def product_search_view(request):
 @staff_member_required
 def offline_sale_view(request):
     """Main offline sale page"""
+
     store_settings = StoreSettings.objects.first()
     if not store_settings:
         messages.warning(request, 'Please configure store settings first.')
         return redirect('offline_sales:store_settings_edit')
-    
+
     cart = request.session.get('offline_cart', [])
-    
-    subtotal = Decimal('0')
-    total_discount = Decimal('0')
-    total_offer_discount = Decimal('0')
-    total_product_discount = Decimal('0')
-    grand_total = Decimal('0')
-    
+
+    subtotal = Decimal('0.00')
+    total_discount = Decimal('0.00')
+    total_product_discount = Decimal('0.00')
+    total_offer_discount = Decimal('0.00')
+    grand_total = Decimal('0.00')
+
     cart_items = []
+
     for item in cart:
         price = Decimal(str(item.get('price', 0)))
         original_price = Decimal(str(item.get('original_price', 0)))
@@ -413,15 +415,20 @@ def offline_sale_view(request):
         discount = Decimal(str(item.get('discount', 0)))
         offer_discount = Decimal(str(item.get('offer_discount', 0)))
         product_discount = Decimal(str(item.get('product_discount', 0)))
-        
+
         item_total = price * quantity
-        product_discount_total += product_discount * quantity
-        offer_discount_total += offer_discount * quantity
-        total_discount += discount * quantity
+
+        # Totals
         subtotal += original_price * quantity
-        
+        total_product_discount += product_discount * quantity
+        total_offer_discount += offer_discount * quantity
+        total_discount += discount * quantity
+        grand_total += item_total
+
         cart_items.append({
             'id': item.get('id'),
+            'product_id': item.get('product_id'),
+            'variant_id': item.get('variant_id'),
             'name': item.get('name'),
             'sku': item.get('sku'),
             'price': float(price),
@@ -438,11 +445,11 @@ def offline_sale_view(request):
             'color': item.get('color', ''),
             'size': item.get('size', ''),
         })
-    
-    grand_total = subtotal - total_discount
-    
-    recent_customers = OfflineCustomer.objects.filter(is_active=True).order_by('-last_purchase_at')[:20]
-    
+
+    recent_customers = OfflineCustomer.objects.filter(
+        is_active=True
+    ).order_by('-last_purchase_at')[:20]
+
     context = {
         'store_settings': store_settings,
         'cart_items': cart_items,
@@ -454,7 +461,12 @@ def offline_sale_view(request):
         'cart_count': len(cart_items),
         'recent_customers': recent_customers,
     }
-    return render(request, 'offline_sales/admin/offline_sale.html', context)
+
+    return render(
+        request,
+        'offline_sales/admin/offline_sale.html',
+        context
+    )
 @csrf_exempt
 @staff_member_required
 def offline_sale_add_product(request):

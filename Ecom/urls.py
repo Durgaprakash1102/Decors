@@ -149,4 +149,6 @@ path('admin/orders/', admin_order_list_view, name='admin_order_list'),
     path('order/<int:order_id>/replacement/', views.request_replacement_view, name='request_replacement'),
     path('admin/replacements/', views.admin_replacement_requests_view, name='admin_replacement_requests'),
     path('admin/replacement/<int:order_id>/', views.admin_replacement_detail_view, name='admin_replacement_detail'),
+    path('api/nav-counts/', views.get_nav_counts_api, name='api_nav_counts'),
+
 ]

@@ -1,159 +1,1114 @@
 <!-- templates/Ecom/admin/return_requests.html -->
-
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
 {% block title %}Return Requests{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-undo text-warning"></i> Return Requests</h2>
-        <div>
-            <span class="badge bg-warning p-2">{{ stats.pending }} Pending</span>
-            <span class="badge bg-success p-2">{{ stats.approved }} Approved</span>
-            <span class="badge bg-danger p-2">{{ stats.rejected }} Rejected</span>
-            <span class="badge bg-info p-2">{{ stats.items_received }} Received</span>
-            <span class="badge bg-secondary p-2">{{ stats.completed }} Completed</span>
+<style>
+:root {
+    --primary: #5c121f;
+    --primary-light: #7a1a2b;
+    --primary-dark: #3d0c14;
+    --secondary: #F4B400;
+    --secondary-light: #f7c948;
+    --bg: #f6f4f2;
+    --white: #ffffff;
+    --border: #ebe7e3;
+    --text: #1d1d1d;
+    --text-light: #6d6d6d;
+    --text-muted: #888888;
+    --success: #2e9d57;
+    --danger: #d64045;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --shadow: 0 10px 28px rgba(0,0,0,0.06);
+    --shadow-hover: 0 18px 40px rgba(92,18,31,0.12);
+    --transition: 0.35s ease;
+    --radius: 14px;
+    --radius-sm: 10px;
+    --radius-xs: 8px;
+    --font-primary: 'Inter', sans-serif;
+    --font-body: 'Inter', sans-serif;
+}
+
+/* ===== VERY SMALL TRANSPARENT SCROLLBAR ===== */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(92, 18, 31, 0.15);
+    border-radius: 10px;
+    transition: var(--transition);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(92, 18, 31, 0.3);
+}
+
+/* Firefox scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(92, 18, 31, 0.15) transparent;
+}
+
+/* ===== PAGE WRAPPER ===== */
+.page-wrapper {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* ===== TOP HEADER + STATS CARD - UNIFIED BLOCK ===== */
+.hero-stats-block {
+    width: 100%;
+    margin: 0;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+/* ===== TOP HEADER - HERO SECTION ===== */
+.top-header {
+    background: var(--primary);
+    padding: 18px 32px;
+    margin: 0;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 4px solid var(--secondary);
+    width: 100%;
+}
+
+.top-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -5%;
+    width: 400px;
+    height: 400px;
+    background: rgba(244, 180, 0, 0.06);
+    border-radius: 50%;
+}
+
+.top-header::after {
+    content: '';
+    position: absolute;
+    bottom: -40%;
+    left: 10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 50%;
+}
+
+.top-header-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.top-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.top-icon {
+    width: 44px;
+    height: 44px;
+    background: rgba(244, 180, 0, 0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary);
+    font-size: 20px;
+    border: 2px solid rgba(244, 180, 0, 0.2);
+}
+
+.top-title {
+    color: var(--white);
+    font-size: 20px;
+    font-weight: 700;
+    font-family: var(--font-primary);
+    letter-spacing: -0.3px;
+}
+
+.top-title span {
+    color: var(--secondary);
+}
+
+.top-sub {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+}
+
+/* ===== STATS CARD - PART OF UNIFIED BLOCK ===== */
+.stats-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0;
+    margin: 0;
+    overflow: hidden;
+    width: 100%;
+}
+
+.stats-card .stats-header {
+    padding: 14px 22px;
+    background: #faf8f6;
+    border-bottom: 2px solid var(--secondary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stats-card .stats-header i {
+    color: var(--secondary);
+    font-size: 16px;
+}
+
+.stats-card .stats-header h5 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+    font-family: var(--font-primary);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    padding: 0;
+}
+
+.stat-item {
+    padding: 18px 20px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    transition: var(--transition);
+    position: relative;
+}
+
+.stat-item:last-child {
+    border-right: none;
+}
+
+.stat-item:hover {
+    background: var(--bg);
+}
+
+.stat-item .stat-number {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.stat-item .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+.stat-item .stat-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-bottom: 4px;
+}
+
+.stat-item.pending .stat-dot { background: var(--warning); }
+.stat-item.approved .stat-dot { background: var(--success); }
+.stat-item.rejected .stat-dot { background: var(--danger); }
+.stat-item.received .stat-dot { background: var(--info); }
+.stat-item.completed .stat-dot { background: #6b7280; }
+
+.stat-item.pending .stat-number { color: var(--warning); }
+.stat-item.approved .stat-number { color: var(--success); }
+.stat-item.rejected .stat-number { color: var(--danger); }
+.stat-item.received .stat-number { color: var(--info); }
+.stat-item.completed .stat-number { color: #6b7280; }
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb-wrap {
+    background: var(--white);
+    padding: 10px 32px;
+    border: 1px solid var(--border);
+    border-top: none;
+    border-bottom: 1px solid var(--border);
+    width: 100%;
+    margin: 0;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    flex-wrap: wrap;
+}
+
+.breadcrumb a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.breadcrumb a:hover {
+    color: var(--secondary);
+    text-decoration: underline;
+}
+
+.breadcrumb .sep {
+    color: var(--text-muted);
+}
+
+.breadcrumb .current {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* ===== FILTER + TABLE BLOCK ===== */
+.filter-table-block {
+    width: 100%;
+    margin: 20px 0 0 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    background: var(--white);
+}
+
+/* ===== FILTER SECTION ===== */
+.filter-section {
+    padding: 14px 22px;
+    background: #faf8f6;
+    border-bottom: 1px solid var(--border);
+}
+
+.filter-section .filter-body {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.filter-section .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-section .filter-group label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filter-section .filter-group select {
+    padding: 8px 32px 8px 14px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-xs);
+    font-size: 13px;
+    font-family: var(--font-body);
+    color: var(--text);
+    background: var(--white);
+    transition: var(--transition);
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236d6d6d' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+    min-width: 180px;
+}
+
+.filter-section .filter-group select:focus {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 4px rgba(244, 180, 0, 0.1);
+}
+
+.filter-section .filter-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.btn-clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-xs);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    color: var(--text);
+    background: var(--white);
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.btn-clear:hover {
+    background: var(--border);
+    transform: translateY(-2px);
+}
+
+/* ===== TABLE SECTION ===== */
+.table-section {
+    padding: 0;
+    overflow-x: auto;
+}
+
+/* Table scrollbar - extra small transparent */
+.table-section::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+}
+
+.table-section::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.table-section::-webkit-scrollbar-thumb {
+    background: rgba(92, 18, 31, 0.12);
+    border-radius: 10px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.table thead {
+    background: #faf8f6;
+}
+
+.table thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+}
+
+.table tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background: var(--bg);
+}
+
+.table .order-link {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.table .order-link:hover {
+    color: var(--secondary);
+    text-decoration: underline;
+}
+
+.table .customer-name {
+    font-weight: 500;
+    color: var(--text);
+}
+
+.table .customer-email {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: block;
+}
+
+/* ===== PRODUCT IMAGE IN TABLE ===== */
+.product-image-cell {
+    width: 60px;
+    padding: 6px 12px !important;
+}
+
+.product-image-cell .product-thumb {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-xs);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.product-image-cell .product-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-image-cell .product-thumb .no-image {
+    font-size: 18px;
+    color: var(--text-muted);
+}
+
+/* ===== RETURN IMAGES THUMBNAILS ===== */
+.return-images-cell {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.return-images-cell .return-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-xs);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.return-images-cell .return-thumb:hover {
+    border-color: var(--secondary);
+    transform: scale(1.05);
+}
+
+.return-images-cell .return-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.return-images-cell .return-thumb .no-image {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.return-images-cell .more-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-xs);
+    background: var(--primary);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* ===== BADGES ===== */
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 14px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.badge-status .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.badge-status.pending { background: #fef3c7; color: #92400e; }
+.badge-status.pending .dot { background: var(--warning); animation: blink 1.5s ease-in-out infinite; }
+
+.badge-status.approved { background: #d1fae5; color: #065f46; }
+.badge-status.approved .dot { background: var(--success); }
+
+.badge-status.rejected { background: #fee2e2; color: #991b1b; }
+.badge-status.rejected .dot { background: var(--danger); }
+
+.badge-status.received { background: #dbeafe; color: #1e40af; }
+.badge-status.received .dot { background: var(--info); }
+
+.badge-status.completed { background: #f3f4f6; color: #374151; }
+.badge-status.completed .dot { background: #6b7280; }
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.badge-bank {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 12px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badge-bank.provided { background: #d1fae5; color: #065f46; }
+.badge-bank.missing { background: #fee2e2; color: #991b1b; }
+
+.btn-review {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-xs);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.btn-review:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(92,18,31,0.2);
+    color: var(--white);
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.empty-state .empty-icon {
+    font-size: 56px;
+    color: var(--success);
+    margin-bottom: 16px;
+    display: block;
+}
+
+.empty-state h5 {
+    font-size: 18px;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+
+.empty-state p {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .stat-item {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+    .stat-item:nth-child(3) {
+        border-bottom: none;
+    }
+}
+
+@media (max-width: 992px) {
+    .top-header {
+        padding: 16px 20px;
+    }
+    .breadcrumb-wrap {
+        padding: 8px 20px;
+    }
+    .page-wrapper {
+        padding: 0 16px 16px 16px;
+    }
+    .filter-section .filter-body {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filter-section .filter-actions {
+        margin-left: 0;
+    }
+    .filter-section .filter-group select {
+        min-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .top-header {
+        padding: 14px 16px;
+    }
+    .top-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .top-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 17px;
+    }
+    .top-title {
+        font-size: 17px;
+    }
+    .top-sub {
+        font-size: 12px;
+    }
+    .breadcrumb-wrap {
+        padding: 6px 16px;
+    }
+    .breadcrumb {
+        font-size: 12px;
+    }
+    .page-wrapper {
+        padding: 0 12px 12px 12px;
+    }
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .stat-item {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 14px 16px;
+    }
+    .stat-item:nth-child(2) {
+        border-bottom: none;
+    }
+    .stat-item .stat-number {
+        font-size: 24px;
+    }
+    .stat-item .stat-label {
+        font-size: 10px;
+    }
+    .stats-card .stats-header {
+        padding: 10px 16px;
+    }
+    .stats-card .stats-header h5 {
+        font-size: 13px;
+    }
+    .filter-section {
+        padding: 10px 16px;
+    }
+    .table thead th,
+    .table tbody td {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    .table {
+        min-width: 900px;
+    }
+    .product-image-cell {
+        width: 50px;
+        padding: 4px 8px !important;
+    }
+    .product-image-cell .product-thumb {
+        width: 40px;
+        height: 40px;
+    }
+    .return-images-cell .return-thumb {
+        width: 32px;
+        height: 32px;
+    }
+    .return-images-cell .more-badge {
+        width: 32px;
+        height: 32px;
+        font-size: 9px;
+    }
+}
+
+@media (max-width: 480px) {
+    .top-header {
+        padding: 12px 12px;
+    }
+    .top-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    .top-title {
+        font-size: 15px;
+    }
+    .top-sub {
+        font-size: 11px;
+    }
+    .breadcrumb-wrap {
+        padding: 4px 12px;
+    }
+    .breadcrumb {
+        font-size: 11px;
+        gap: 4px;
+    }
+    .page-wrapper {
+        padding: 0 8px 8px 8px;
+    }
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .stat-item {
+        padding: 10px 12px;
+    }
+    .stat-item .stat-number {
+        font-size: 20px;
+    }
+    .stat-item .stat-label {
+        font-size: 9px;
+    }
+    .stats-card .stats-header {
+        padding: 8px 12px;
+    }
+    .stats-card .stats-header h5 {
+        font-size: 12px;
+    }
+    .filter-section {
+        padding: 8px 12px;
+    }
+    .filter-section .filter-group label {
+        font-size: 10px;
+    }
+    .filter-section .filter-group select {
+        font-size: 12px;
+        padding: 6px 28px 6px 10px;
+    }
+    .btn-clear {
+        font-size: 12px;
+        padding: 6px 14px;
+    }
+    .btn-review {
+        font-size: 11px;
+        padding: 5px 12px;
+    }
+    .table thead th,
+    .table tbody td {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+    .badge-status {
+        font-size: 10px;
+        padding: 3px 10px;
+    }
+    .badge-bank {
+        font-size: 10px;
+        padding: 2px 8px;
+    }
+    .empty-state {
+        padding: 30px 16px;
+    }
+    .empty-state .empty-icon {
+        font-size: 40px;
+    }
+    .empty-state h5 {
+        font-size: 16px;
+    }
+    .product-image-cell {
+        width: 40px;
+        padding: 4px 6px !important;
+    }
+    .product-image-cell .product-thumb {
+        width: 32px;
+        height: 32px;
+    }
+    .return-images-cell .return-thumb {
+        width: 28px;
+        height: 28px;
+    }
+    .return-images-cell .more-badge {
+        width: 28px;
+        height: 28px;
+        font-size: 8px;
+    }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero-stats-block {
+    animation: fadeInUp 0.4s ease both;
+}
+
+.breadcrumb-wrap {
+    animation: fadeInUp 0.4s ease 0.05s both;
+}
+
+.filter-table-block {
+    animation: fadeInUp 0.35s ease 0.1s both;
+}
+</style>
+
+<!-- ===== HERO + STATS UNIFIED BLOCK ===== -->
+<div class="hero-stats-block">
+
+    <!-- ===== TOP HEADER - HERO SECTION ===== -->
+    <div class="top-header">
+        <div class="top-header-content">
+            <div class="top-left">
+                <div class="top-icon">
+                    <i class="fas fa-undo"></i>
+                </div>
+                <div>
+                    <div class="top-title">Return <span>Requests</span></div>
+                    <div class="top-sub">Manage customer return requests</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-md-2">
-            <div class="card bg-warning text-dark">
-                <div class="card-body">
-                    <h5 class="card-title">{{ stats.pending }}</h5>
-                    <p class="card-text mb-0">Pending</p>
-                </div>
+    <!-- ===== STATS CARD ===== -->
+    <div class="stats-card">
+        <div class="stats-grid">
+            <div class="stat-item pending">
+                <span class="stat-dot"></span>
+                <div class="stat-number">{{ stats.pending }}</div>
+                <div class="stat-label">Pending</div>
             </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h5 class="card-title">{{ stats.approved }}</h5>
-                    <p class="card-text mb-0">Approved</p>
-                </div>
+            <div class="stat-item approved">
+                <span class="stat-dot"></span>
+                <div class="stat-number">{{ stats.approved }}</div>
+                <div class="stat-label">Approved</div>
             </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-danger text-white">
-                <div class="card-body">
-                    <h5 class="card-title">{{ stats.rejected }}</h5>
-                    <p class="card-text mb-0">Rejected</p>
-                </div>
+            <div class="stat-item rejected">
+                <span class="stat-dot"></span>
+                <div class="stat-number">{{ stats.rejected }}</div>
+                <div class="stat-label">Rejected</div>
             </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <h5 class="card-title">{{ stats.items_received }}</h5>
-                    <p class="card-text mb-0">Items Received</p>
-                </div>
+            <div class="stat-item received">
+                <span class="stat-dot"></span>
+                <div class="stat-number">{{ stats.items_received }}</div>
+                <div class="stat-label">Items Received</div>
             </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card bg-secondary text-white">
-                <div class="card-body">
-                    <h5 class="card-title">{{ stats.completed }}</h5>
-                    <p class="card-text mb-0">Completed</p>
-                </div>
+            <div class="stat-item completed">
+                <span class="stat-dot"></span>
+                <div class="stat-number">{{ stats.completed }}</div>
+                <div class="stat-label">Completed</div>
             </div>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label">Filter by Status</label>
-                    <select name="status" class="form-select" onchange="this.form.submit()">
-                        <option value="">All Active</option>
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="page-wrapper">
+
+    <!-- ===== FILTER + TABLE UNIFIED BLOCK ===== -->
+    <div class="filter-table-block">
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <form method="get" class="filter-body">
+                <div class="filter-group">
+                    <label for="statusFilter"><i class="fas fa-filter"></i> Filter by Status</label>
+                    <select name="status" id="statusFilter">
+                        <option value="">All Requests</option>
                         <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
                         <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
                         <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
                         <option value="received" {% if status_filter == 'received' %}selected{% endif %}>Items Received</option>
-                        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed (All)</option>
+                        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
                     </select>
                 </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <a href="{% url 'Ecom:admin_return_requests' %}" class="btn btn-secondary">Clear Filters</a>
+                <div class="filter-actions">
+                    <a href="{% url 'Ecom:admin_return_requests' %}" class="btn-clear">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
                 </div>
             </form>
         </div>
-    </div>
 
-    <!-- Requests Table -->
-    <div class="card shadow">
-        <div class="card-body">
+        <!-- Table Section -->
+        <div class="table-section">
             {% if returns %}
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Order #</th>
-                            <th>Customer</th>
-                            <th>Amount</th>
-                            <th>Reason</th>
-                            <th>Requested At</th>
-                            <th>Status</th>
-                            <th>Bank Details</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for order in returns %}
-                        <tr>
-                            <td>
-                                <a href="{% url 'Ecom:admin_return_detail' order.id %}">
-                                    #{{ order.order_number }}
-                                </a>
-                            </td>
-                            <td>
-                                <div>{{ order.user.full_name }}</div>
-                                <small class="text-muted">{{ order.user.email }}</small>
-                            </td>
-                            <td>₹{{ order.total_amount }}</td>
-                            <td>{{ order.get_return_reason_display|default:"N/A" }}</td>
-                            <td>{{ order.return_requested_at|date:"F d, Y H:i" }}</td>
-                            <td>
-                                {% if order.return_completed %}
-                                    <span class="badge bg-success">Completed</span>
-                                {% elif order.return_items_received %}
-                                    <span class="badge bg-info">Items Received</span>
-                                {% elif order.return_approved %}
-                                    <span class="badge bg-warning text-dark">Approved</span>
-                                {% elif order.return_rejected %}
-                                    <span class="badge bg-danger">Rejected</span>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width:60px;">Product</th>
+                        <th>Order #</th>
+                        <th>Customer</th>
+                        <th style="text-align:right;">Amount</th>
+                        <th>Reason</th>
+                        <th>Return Images</th>
+                        <th>Requested</th>
+                        <th>Status</th>
+                        <th>Bank</th>
+                        <th style="text-align:center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in returns %}
+                    <tr>
+                        <!-- Product Image -->
+                        <td class="product-image-cell">
+                            <div class="product-thumb">
+                                {% if order.items.first.product.main_image %}
+                                    <img src="{{ order.items.first.product.main_image }}" alt="{{ order.items.first.product.name }}">
                                 {% else %}
-                                    <span class="badge bg-secondary">Pending</span>
+                                    <span class="no-image"><i class="fas fa-box"></i></span>
                                 {% endif %}
-                            </td>
-                            <td>
-                                {% if order.return_bank_details %}
-                                    <span class="badge bg-success"><i class="fas fa-check"></i> Provided</span>
-                                {% else %}
-                                    <span class="badge bg-danger"><i class="fas fa-times"></i> Missing</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <a href="{% url 'Ecom:admin_return_detail' order.id %}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-eye"></i> Review
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                            </div>
+                        </td>
+                        
+                        <!-- Order Number -->
+                        <td>
+                            <a href="{% url 'Ecom:admin_return_detail' order.id %}" class="order-link">
+                                #{{ order.order_number }}
+                            </a>
+                        </td>
+                        
+                        <!-- Customer -->
+                        <td>
+                            <div class="customer-name">{{ order.user.full_name }}</div>
+                            <span class="customer-email">{{ order.user.email }}</span>
+                        </td>
+                        
+                        <!-- Amount -->
+                        <td style="text-align:right;font-weight:600;color:var(--primary);">
+                            ₹{{ order.total_amount }}
+                        </td>
+                        
+                        <!-- Reason -->
+                        <td>{{ order.get_return_reason_display|default:"N/A" }}</td>
+                        
+                        <!-- Return Images -->
+                        <td>
+                            {% if order.return_images %}
+                                <div class="return-images-cell">
+                                    {% with order.return_images|slice:":3" as first_images %}
+                                        {% for image in first_images %}
+                                            <a href="{{ image }}" target="_blank" class="return-thumb">
+                                                <img src="{{ image }}" alt="Return image">
+                                            </a>
+                                        {% endfor %}
+                                    {% endwith %}
+                                    {% if order.return_images|length > 3 %}
+                                        <span class="more-badge">+{{ order.return_images|length|add:"-3" }}</span>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <span style="color:var(--text-muted);font-size:12px;">No images</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Requested Date -->
+                        <td style="font-size:12px;color:var(--text-muted);">
+                            {{ order.return_requested_at|date:"M d, Y" }}
+                        </td>
+                        
+                        <!-- Status -->
+                        <td>
+                            {% if order.return_completed %}
+                                <span class="badge-status completed">
+                                    <span class="dot"></span> Completed
+                                </span>
+                            {% elif order.return_items_received %}
+                                <span class="badge-status received">
+                                    <span class="dot"></span> Received
+                                </span>
+                            {% elif order.return_approved %}
+                                <span class="badge-status approved">
+                                    <span class="dot"></span> Approved
+                                </span>
+                            {% elif order.return_rejected %}
+                                <span class="badge-status rejected">
+                                    <span class="dot"></span> Rejected
+                                </span>
+                            {% else %}
+                                <span class="badge-status pending">
+                                    <span class="dot"></span> Pending
+                                </span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Bank Details -->
+                        <td>
+                            {% if order.return_bank_details %}
+                                <span class="badge-bank provided">
+                                    <i class="fas fa-check-circle"></i> Provided
+                                </span>
+                            {% else %}
+                                <span class="badge-bank missing">
+                                    <i class="fas fa-times-circle"></i> Missing
+                                </span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Action -->
+                        <td style="text-align:center;">
+                            <a href="{% url 'Ecom:admin_return_detail' order.id %}" class="btn-review">
+                                <i class="fas fa-eye"></i> Review
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
             {% else %}
-            <div class="text-center py-5">
-                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                <h5>No active return requests</h5>
-                <p class="text-muted">All return requests have been processed.</p>
+            <div class="empty-state">
+                <span class="empty-icon"><i class="fas fa-check-circle"></i></span>
+                <h5>No Return Requests</h5>
+                <p>All return requests have been processed.</p>
             </div>
             {% endif %}
         </div>
+
     </div>
+
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterSelect = document.getElementById('statusFilter');
+    if (filterSelect) {
+        filterSelect.addEventListener('change', function() {
+            this.closest('form').submit();
+        });
+    }
+});
+</script>
+
 {% endblock %}

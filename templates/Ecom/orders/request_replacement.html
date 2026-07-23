@@ -1,204 +1,1064 @@
 <!-- templates/Ecom/orders/request_replacement.html -->
-
+{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Request Replacement - Order #{{ order.order_number }}{% endblock %}
+{% block title %}Request Replacement - #{{ order.order_number }}{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'Ecom:orders' %}">My Orders</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'Ecom:order_detail' order.id %}">Order #{{ order.order_number }}</a></li>
-            <li class="breadcrumb-item active">Request Replacement</li>
-        </ol>
-    </nav>
+<style>
+/* ============================================================
+   UNIQUE RPL CLASSES - FRESH DESIGN V3
+   ============================================================ */
+:root {
+    --rpl-maroon: #5c121f;
+    --rpl-maroon-light: #7a1a2b;
+    --rpl-maroon-dark: #3d0c14;
+    --rpl-gold: #F4B400;
+    --rpl-gold-soft: #fef7ed;
+    --rpl-bg: #f7f5f2;
+    --rpl-white: #ffffff;
+    --rpl-border: #e8e3de;
+    --rpl-text: #1a1a1a;
+    --rpl-text-light: #6b6b6b;
+    --rpl-text-faint: #999999;
+    --rpl-error: #ef4444;
+    --rpl-shadow: 0 4px 24px rgba(0,0,0,0.04);
+    --rpl-shadow-hover: 0 12px 48px rgba(92,18,31,0.08);
+    --rpl-transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    --rpl-radius: 16px;
+    --rpl-radius-sm: 10px;
+}
 
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="fas fa-exchange-alt"></i> Request Replacement</h4>
+* {
+    box-sizing: border-box;
+}
+
+/* ============================================================
+   PAGE WRAPPER
+   ============================================================ */
+.rpl-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px 50px;
+}
+
+/* ============================================================
+   NOTIFICATION BANNER - NEW
+   ============================================================ */
+.rpl-notify {
+    background: var(--rpl-white);
+    border-radius: var(--rpl-radius);
+    padding: 16px 24px;
+    margin-bottom: 24px;
+    border: 1px solid var(--rpl-border);
+    box-shadow: var(--rpl-shadow);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.rpl-notify .rpl-notify-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.rpl-notify.rpl-active .rpl-notify-icon {
+    background: var(--rpl-gold-soft);
+    color: #92400e;
+    border: 2px solid #fcd34d;
+}
+
+.rpl-notify.rpl-expired .rpl-notify-icon {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 2px solid #fca5a5;
+}
+
+.rpl-notify .rpl-notify-text {
+    flex: 1;
+}
+
+.rpl-notify .rpl-notify-text .rpl-notify-title {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.rpl-notify.rpl-active .rpl-notify-text .rpl-notify-title {
+    color: #92400e;
+}
+
+.rpl-notify.rpl-expired .rpl-notify-text .rpl-notify-title {
+    color: #991b1b;
+}
+
+.rpl-notify .rpl-notify-text .rpl-notify-title .rpl-days {
+    font-size: 20px;
+}
+
+.rpl-notify .rpl-notify-text .rpl-notify-desc {
+    font-size: 12px;
+    color: var(--rpl-text-light);
+}
+
+.rpl-notify .rpl-notify-progress {
+    width: 150px;
+    height: 6px;
+    background: var(--rpl-bg);
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.rpl-notify .rpl-notify-progress .rpl-progress {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.8s ease;
+}
+
+.rpl-notify.rpl-active .rpl-notify-progress .rpl-progress {
+    background: linear-gradient(90deg, var(--rpl-gold), #d97706);
+}
+
+.rpl-notify.rpl-expired .rpl-notify-progress .rpl-progress {
+    background: var(--rpl-error);
+    width: 100% !important;
+}
+
+/* ============================================================
+   MAIN GRID - 2 COLUMN WITH LEFT SIDEBAR
+   ============================================================ */
+.rpl-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.8fr;
+    gap: 28px;
+    align-items: start;
+}
+
+/* ============================================================
+   LEFT SIDEBAR - ORDER CARD
+   ============================================================ */
+.rpl-sidebar {
+    background: var(--rpl-white);
+    border-radius: var(--rpl-radius);
+    border: 1px solid var(--rpl-border);
+    box-shadow: var(--rpl-shadow);
+    overflow: hidden;
+    position: sticky;
+    top: 20px;
+}
+
+.rpl-sidebar .rpl-sidebar-head {
+    padding: 16px 20px;
+    background: linear-gradient(135deg, var(--rpl-maroon), var(--rpl-maroon-dark));
+}
+
+.rpl-sidebar .rpl-sidebar-head h3 {
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rpl-sidebar .rpl-sidebar-head .rpl-badge {
+    background: rgba(244,180,0,0.15);
+    padding: 2px 14px;
+    border-radius: 30px;
+    color: var(--rpl-gold);
+    font-size: 10px;
+    font-weight: 500;
+    margin-left: auto;
+}
+
+.rpl-sidebar .rpl-sidebar-body {
+    padding: 20px;
+}
+
+/* Order Meta */
+.rpl-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.rpl-meta-grid .rpl-meta-item {
+    background: var(--rpl-bg);
+    padding: 8px 12px;
+    border-radius: var(--rpl-radius-sm);
+    text-align: center;
+}
+
+.rpl-meta-grid .rpl-meta-item .rpl-meta-label {
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--rpl-text-faint);
+    font-weight: 600;
+}
+
+.rpl-meta-grid .rpl-meta-item .rpl-meta-value {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--rpl-text);
+    margin-top: 2px;
+}
+
+.rpl-meta-grid .rpl-meta-item .rpl-meta-value.rpl-accent {
+    color: var(--rpl-maroon);
+}
+
+/* Product List */
+.rpl-sidebar .rpl-sidebar-products {
+    max-height: 160px;
+    overflow-y: auto;
+    padding-right: 4px;
+    margin-bottom: 14px;
+}
+
+.rpl-sidebar .rpl-sidebar-products::-webkit-scrollbar {
+    width: 3px;
+}
+
+.rpl-sidebar .rpl-sidebar-products::-webkit-scrollbar-track {
+    background: var(--rpl-bg);
+    border-radius: 10px;
+}
+
+.rpl-sidebar .rpl-sidebar-products::-webkit-scrollbar-thumb {
+    background: var(--rpl-maroon);
+    border-radius: 10px;
+}
+
+.rpl-sidebar .rpl-prod {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    background: var(--rpl-bg);
+    border-radius: var(--rpl-radius-sm);
+    margin-bottom: 4px;
+    transition: var(--rpl-transition);
+}
+
+.rpl-sidebar .rpl-prod:hover {
+    background: var(--rpl-gold-soft);
+}
+
+.rpl-sidebar .rpl-prod .rpl-prod-img {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--rpl-radius-sm);
+    object-fit: cover;
+    border: 1px solid var(--rpl-border);
+    flex-shrink: 0;
+}
+
+.rpl-sidebar .rpl-prod .rpl-prod-img-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--rpl-radius-sm);
+    background: var(--rpl-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--rpl-text-faint);
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.rpl-sidebar .rpl-prod .rpl-prod-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.rpl-sidebar .rpl-prod .rpl-prod-info .rpl-prod-name {
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--rpl-text);
+    margin: 0;
+}
+
+.rpl-sidebar .rpl-prod .rpl-prod-info .rpl-prod-sku {
+    font-size: 8px;
+    color: var(--rpl-text-faint);
+    margin: 0;
+}
+
+.rpl-sidebar .rpl-prod .rpl-prod-price {
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--rpl-maroon);
+    flex-shrink: 0;
+}
+
+/* Total */
+.rpl-sidebar .rpl-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--rpl-bg);
+    border-radius: var(--rpl-radius-sm);
+    border: 1px solid var(--rpl-border);
+    margin-bottom: 14px;
+}
+
+.rpl-sidebar .rpl-total .rpl-total-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--rpl-text);
+}
+
+.rpl-sidebar .rpl-total .rpl-total-amount {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--rpl-maroon);
+}
+
+/* Policy */
+.rpl-sidebar .rpl-policy {
+    background: var(--rpl-gold-soft);
+    border: 1px solid #fcd34d;
+    border-radius: var(--rpl-radius-sm);
+    padding: 10px 14px;
+}
+
+.rpl-sidebar .rpl-policy .rpl-policy-title {
+    font-weight: 700;
+    font-size: 11px;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.rpl-sidebar .rpl-policy .rpl-policy-title i {
+    color: var(--rpl-gold);
+}
+
+.rpl-sidebar .rpl-policy ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 10px;
+    color: #78350f;
+}
+
+.rpl-sidebar .rpl-policy ul li {
+    padding: 1px 0;
+}
+
+/* ============================================================
+   RIGHT PANEL - FORM
+   ============================================================ */
+.rpl-form-wrap {
+    background: var(--rpl-white);
+    border-radius: var(--rpl-radius);
+    border: 1px solid var(--rpl-border);
+    box-shadow: var(--rpl-shadow);
+    overflow: hidden;
+}
+
+.rpl-form-wrap .rpl-form-top {
+    padding: 20px 28px;
+    background: linear-gradient(135deg, var(--rpl-gold), #d97706);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.rpl-form-wrap .rpl-form-top .rpl-form-icon {
+    width: 44px;
+    height: 44px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+}
+
+.rpl-form-wrap .rpl-form-top h2 {
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.rpl-form-wrap .rpl-form-top h2 small {
+    display: block;
+    font-weight: 400;
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+.rpl-form-wrap .rpl-form-bottom {
+    padding: 28px;
+}
+
+/* ============================================================
+   FORM ELEMENTS - MODERN
+   ============================================================ */
+.rpl-field {
+    margin-bottom: 20px;
+}
+
+.rpl-field:last-child {
+    margin-bottom: 0;
+}
+
+.rpl-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--rpl-text);
+    margin-bottom: 6px;
+}
+
+.rpl-field label .rpl-req {
+    color: var(--rpl-error);
+}
+
+.rpl-field select,
+.rpl-field textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--rpl-border);
+    border-radius: var(--rpl-radius-sm);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--rpl-text);
+    background: var(--rpl-bg);
+    transition: var(--rpl-transition);
+    outline: none;
+}
+
+.rpl-field select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235c121f' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 44px;
+}
+
+.rpl-field textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.rpl-field select:focus,
+.rpl-field textarea:focus {
+    border-color: var(--rpl-gold);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(244,180,0,0.06);
+}
+
+.rpl-field .rpl-help {
+    font-size: 12px;
+    color: var(--rpl-text-faint);
+    margin-top: 4px;
+}
+
+/* ============================================================
+   UPLOAD - DRAG DROP STYLE
+   ============================================================ */
+.rpl-drop {
+    border: 2px dashed var(--rpl-border);
+    border-radius: var(--rpl-radius-sm);
+    padding: 28px;
+    text-align: center;
+    transition: var(--rpl-transition);
+    cursor: pointer;
+    background: var(--rpl-bg);
+    position: relative;
+}
+
+.rpl-drop:hover {
+    border-color: var(--rpl-gold);
+    background: var(--rpl-gold-soft);
+}
+
+.rpl-drop .rpl-drop-icon {
+    font-size: 40px;
+    color: var(--rpl-text-faint);
+}
+
+.rpl-drop .rpl-drop-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--rpl-text);
+    margin: 8px 0 4px;
+}
+
+.rpl-drop .rpl-drop-hint {
+    font-size: 12px;
+    color: var(--rpl-text-faint);
+}
+
+.rpl-drop input[type="file"] {
+    display: none;
+}
+
+.rpl-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.rpl-preview-grid .rpl-prev-item {
+    position: relative;
+    border-radius: var(--rpl-radius-sm);
+    overflow: hidden;
+    border: 2px solid var(--rpl-border);
+    aspect-ratio: 1;
+    transition: var(--rpl-transition);
+}
+
+.rpl-preview-grid .rpl-prev-item:hover {
+    border-color: var(--rpl-gold);
+}
+
+.rpl-preview-grid .rpl-prev-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.rpl-preview-grid .rpl-prev-item .rpl-count {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    font-size: 9px;
+    padding: 2px 9px;
+    border-radius: 30px;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.rpl-actions {
+    display: flex;
+    gap: 14px;
+    margin-top: 8px;
+}
+
+.rpl-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: var(--rpl-radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--rpl-transition);
+    text-decoration: none;
+    flex: 1;
+}
+
+.rpl-btn-secondary {
+    background: var(--rpl-bg);
+    color: var(--rpl-text);
+    border: 2px solid var(--rpl-border);
+}
+
+.rpl-btn-secondary:hover {
+    background: var(--rpl-border);
+    transform: translateY(-3px);
+}
+
+.rpl-btn-primary {
+    background: linear-gradient(135deg, var(--rpl-gold), #d97706);
+    color: white;
+    box-shadow: 0 4px 24px rgba(245,158,11,0.25);
+}
+
+.rpl-btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 36px rgba(245,158,11,0.35);
+    color: white;
+}
+
+.rpl-btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 992px) {
+    .rpl-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    
+    .rpl-sidebar {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .rpl-page {
+        padding: 16px 12px 32px;
+    }
+    
+    .rpl-notify {
+        padding: 14px 18px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .rpl-notify .rpl-notify-progress {
+        width: 100%;
+    }
+    
+    .rpl-meta-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .rpl-form-wrap .rpl-form-top {
+        padding: 16px 20px;
+    }
+    
+    .rpl-form-wrap .rpl-form-top h2 {
+        font-size: 16px;
+    }
+    
+    .rpl-form-wrap .rpl-form-bottom {
+        padding: 20px;
+    }
+    
+    .rpl-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .rpl-btn {
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .rpl-page {
+        padding: 10px 8px 20px;
+    }
+    
+    .rpl-notify {
+        padding: 12px 14px;
+        border-radius: var(--rpl-radius-sm);
+    }
+    
+    .rpl-notify .rpl-notify-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+    
+    .rpl-notify .rpl-notify-text .rpl-notify-title {
+        font-size: 13px;
+    }
+    
+    .rpl-notify .rpl-notify-text .rpl-notify-title .rpl-days {
+        font-size: 17px;
+    }
+    
+    .rpl-notify .rpl-notify-text .rpl-notify-desc {
+        font-size: 10px;
+    }
+    
+    .rpl-sidebar .rpl-sidebar-head {
+        padding: 12px 16px;
+    }
+    
+    .rpl-sidebar .rpl-sidebar-head h3 {
+        font-size: 13px;
+    }
+    
+    .rpl-sidebar .rpl-sidebar-body {
+        padding: 14px 16px;
+    }
+    
+    .rpl-meta-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+    }
+    
+    .rpl-meta-grid .rpl-meta-item {
+        padding: 6px 8px;
+    }
+    
+    .rpl-meta-grid .rpl-meta-item .rpl-meta-value {
+        font-size: 12px;
+    }
+    
+    .rpl-sidebar .rpl-prod {
+        padding: 4px 8px;
+    }
+    
+    .rpl-sidebar .rpl-prod .rpl-prod-img {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .rpl-sidebar .rpl-prod .rpl-prod-info .rpl-prod-name {
+        font-size: 10px;
+    }
+    
+    .rpl-sidebar .rpl-prod .rpl-prod-price {
+        font-size: 10px;
+    }
+    
+    .rpl-sidebar .rpl-total .rpl-total-amount {
+        font-size: 16px;
+    }
+    
+    .rpl-form-wrap .rpl-form-top .rpl-form-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+    
+    .rpl-form-wrap .rpl-form-top h2 {
+        font-size: 15px;
+    }
+    
+    .rpl-form-wrap .rpl-form-top h2 small {
+        font-size: 10px;
+    }
+    
+    .rpl-form-wrap .rpl-form-bottom {
+        padding: 16px;
+    }
+    
+    .rpl-field {
+        margin-bottom: 14px;
+    }
+    
+    .rpl-field label {
+        font-size: 12px;
+    }
+    
+    .rpl-field select,
+    .rpl-field textarea {
+        font-size: 12px;
+        padding: 10px 14px;
+    }
+    
+    .rpl-field textarea {
+        min-height: 70px;
+    }
+    
+    .rpl-field .rpl-help {
+        font-size: 10px;
+    }
+    
+    .rpl-drop {
+        padding: 20px;
+    }
+    
+    .rpl-drop .rpl-drop-icon {
+        font-size: 32px;
+    }
+    
+    .rpl-drop .rpl-drop-text {
+        font-size: 13px;
+    }
+    
+    .rpl-drop .rpl-drop-hint {
+        font-size: 10px;
+    }
+    
+    .rpl-preview-grid {
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+        gap: 6px;
+    }
+    
+    .rpl-btn {
+        font-size: 12px;
+        padding: 8px 14px;
+    }
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes rplSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.rpl-notify { animation: rplSlideIn 0.4s ease both; }
+.rpl-sidebar { animation: rplSlideIn 0.4s ease 0.08s both; }
+.rpl-form-wrap { animation: rplSlideIn 0.4s ease 0.16s both; }
+</style>
+
+<!-- ============================================================
+   PAGE CONTENT
+   ============================================================ -->
+<div class="rpl-page">
+
+    <!-- ===== NOTIFICATION BANNER ===== -->
+    <div class="rpl-notify {% if replacement_window_days > 0 %}rpl-active{% else %}rpl-expired{% endif %}">
+        <div class="rpl-notify-icon">
+            <i class="fas {% if replacement_window_days > 0 %}fa-clock{% else %}fa-exclamation-triangle{% endif %}"></i>
+        </div>
+        <div class="rpl-notify-text">
+            <div class="rpl-notify-title">
+                {% if replacement_window_days > 0 %}
+                    <span class="rpl-days">{{ replacement_window_days }}</span> day{{ replacement_window_days|pluralize }} left to request a replacement
+                {% else %}
+                    <strong>Replacement window has expired!</strong>
+                {% endif %}
+            </div>
+            <div class="rpl-notify-desc">
+                {% if replacement_window_days > 0 %}
+                    Submit your request before the 7-day window closes
+                {% else %}
+                    You can no longer request a replacement for this order
+                {% endif %}
+            </div>
+        </div>
+        <div class="rpl-notify-progress">
+            {% if replacement_window_days > 0 %}
+                {% widthratio replacement_window_days 7 100 as progress %}
+                <div class="rpl-progress" style="width: {{ progress|default:100 }}%;"></div>
+            {% else %}
+                <div class="rpl-progress" style="width: 100%;"></div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ===== MAIN GRID ===== -->
+    <div class="rpl-grid">
+
+        <!-- ===== LEFT SIDEBAR ===== -->
+        <div class="rpl-sidebar">
+            <div class="rpl-sidebar-head">
+                <h3>
+                    <i class="fas fa-shopping-bag"></i> Order Summary
+                    <span class="rpl-badge">#{{ order.order_number }}</span>
+                </h3>
+            </div>
+            <div class="rpl-sidebar-body">
+
+                <!-- Meta Grid -->
+                <div class="rpl-meta-grid">
+                    <div class="rpl-meta-item">
+                        <div class="rpl-meta-label">Date</div>
+                        <div class="rpl-meta-value">{{ order.created_at|date:"M d" }}</div>
+                    </div>
+                    <div class="rpl-meta-item">
+                        <div class="rpl-meta-label">Total</div>
+                        <div class="rpl-meta-value rpl-accent">₹{{ order.total_amount|floatformat:2 }}</div>
+                    </div>
+                    <div class="rpl-meta-item">
+                        <div class="rpl-meta-label">Items</div>
+                        <div class="rpl-meta-value">{{ order_items|length }}</div>
+                    </div>
+                    <div class="rpl-meta-item">
+                        <div class="rpl-meta-label">Status</div>
+                        <div class="rpl-meta-value" style="font-size:11px;color:var(--rpl-text-light);">{{ order.get_status_display }}</div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <!-- Window Reminder -->
-                    <div class="alert {% if replacement_window_days > 0 %}alert-info{% else %}alert-danger{% endif %}">
-                        <i class="fas fa-clock"></i>
-                        {% if replacement_window_days > 0 %}
-                            You have <strong>{{ replacement_window_days }}</strong> day{{ replacement_window_days|pluralize }} left to request a replacement.
+
+                <!-- Products -->
+                <div class="rpl-sidebar-products">
+                    {% for item in order_items %}
+                    <div class="rpl-prod">
+                        {% if item.product and item.product.main_image %}
+                        <img src="{{ item.product.main_image }}" class="rpl-prod-img" alt="{{ item.product_name }}">
                         {% else %}
-                            <strong>Replacement window has expired!</strong> You can no longer request a replacement for this order.
+                        <div class="rpl-prod-img-placeholder">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        {% endif %}
+                        <div class="rpl-prod-info">
+                            <p class="rpl-prod-name">{{ item.product_name|truncatechars:16 }}</p>
+                            <p class="rpl-prod-sku">SKU: {{ item.sku }}</p>
+                        </div>
+                        <div class="rpl-prod-price">₹{{ item.final_price|floatformat:2 }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Total -->
+                <div class="rpl-total">
+                    <span class="rpl-total-label">Total Amount</span>
+                    <span class="rpl-total-amount">₹{{ order.total_amount|floatformat:2 }}</span>
+                </div>
+
+                <!-- Policy -->
+                <div class="rpl-policy">
+                    <div class="rpl-policy-title">
+                        <i class="fas fa-shield-alt"></i> Replacement Policy
+                    </div>
+                    <ul>
+                        <li>Request within <strong>7 days</strong> of delivery</li>
+                        <li>Items in <strong>original condition</strong></li>
+                        <li><strong>Free</strong> replacement</li>
+                        <li><strong>New order</strong> will be created</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ===== RIGHT PANEL - FORM ===== -->
+        <div class="rpl-form-wrap">
+            <div class="rpl-form-top">
+                <div class="rpl-form-icon">
+                    <i class="fas fa-pen-fancy"></i>
+                </div>
+                <h2>
+                    Submit Replacement
+                    <small>Fill in the details below</small>
+                </h2>
+            </div>
+            <div class="rpl-form-bottom">
+
+                <form method="post" enctype="multipart/form-data" id="rplForm">
+                    {% csrf_token %}
+
+                    <!-- Reason -->
+                    <div class="rpl-field">
+                        <label for="{{ form.reason.id_for_label }}">
+                            Reason for Replacement <span class="rpl-req">*</span>
+                        </label>
+                        {{ form.reason }}
+                        {% if form.reason.errors %}
+                        <div style="color:var(--rpl-error);font-size:12px;margin-top:4px;">{{ form.reason.errors }}</div>
                         {% endif %}
                     </div>
 
-                    <!-- Order Summary -->
-                    <div class="card mb-4">
-                        <div class="card-header bg-light">
-                            <h6 class="mb-0">Order Summary</h6>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-sm mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>Product</th>
-                                            <th>SKU</th>
-                                            <th>Quantity</th>
-                                            <th>Price</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for item in order_items %}
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    {% if item.product and item.product.main_image %}
-                                                    <img src="{{ item.product.main_image }}" class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;">
-                                                    {% endif %}
-                                                    <span>{{ item.product_name }}</span>
-                                                </div>
-                                            </td>
-                                            <td>{{ item.sku }}</td>
-                                            <td>{{ item.quantity }}</td>
-                                            <td>₹{{ item.final_price }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                    <tfoot>
-                                        <tr class="table-active">
-                                            <td colspan="3" class="text-end"><strong>Total:</strong></td>
-                                            <td><strong>₹{{ order.total_amount }}</strong></td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                        </div>
+                    <!-- Description -->
+                    <div class="rpl-field">
+                        <label for="{{ form.description.id_for_label }}">
+                            Detailed Description <span class="rpl-req">*</span>
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <div style="color:var(--rpl-error);font-size:12px;margin-top:4px;">{{ form.description.errors }}</div>
+                        {% endif %}
+                        <span class="rpl-help">Please describe the issue in detail. This helps us process your replacement faster.</span>
                     </div>
 
-                    <!-- Replacement Form -->
-                    <form method="post" enctype="multipart/form-data" id="replacementForm">
-                        {% csrf_token %}
-                        
-                        <div class="mb-3">
-                            <label for="{{ form.reason.id_for_label }}" class="form-label">
-                                Reason for Replacement <span class="text-danger">*</span>
-                            </label>
-                            {{ form.reason }}
-                            {% if form.reason.errors %}
-                            <div class="text-danger">{{ form.reason.errors }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="{{ form.description.id_for_label }}" class="form-label">
-                                Detailed Description <span class="text-danger">*</span>
-                            </label>
-                            {{ form.description }}
-                            {% if form.description.errors %}
-                            <div class="text-danger">{{ form.description.errors }}</div>
-                            {% endif %}
-                            <small class="text-muted">Please describe the issue in detail. This helps us process your replacement faster.</small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="{{ form.images.id_for_label }}" class="form-label">
-                                Upload Images <span class="text-danger">*</span>
-                            </label>
+                    <!-- Images -->
+                    <div class="rpl-field">
+                        <label>
+                            Upload Images <span class="rpl-req">*</span>
+                        </label>
+                        <div class="rpl-drop" onclick="document.getElementById('rpl_id_images').click();">
+                            <div class="rpl-drop-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                            <div class="rpl-drop-text">Click to upload images</div>
+                            <div class="rpl-drop-hint">JPG, PNG, GIF, WEBP • Max 5 • 5MB each</div>
                             {{ form.images }}
-                            {% if form.images.errors %}
-                            <div class="text-danger">{{ form.images.errors }}</div>
-                            {% endif %}
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle"></i> 
-                                Please upload clear images showing the issue. Max 5 images (JPG, PNG, GIF, WEBP, BMP), max 5MB each.
-                                <span class="text-danger">Images are mandatory for replacement requests.</span>
-                            </small>
-                            <div id="imagePreview" class="row mt-3"></div>
                         </div>
+                        {% if form.images.errors %}
+                        <div style="color:var(--rpl-error);font-size:12px;margin-top:4px;">{{ form.images.errors }}</div>
+                        {% endif %}
+                        <div id="rplImagePreview" class="rpl-preview-grid"></div>
+                        <span class="rpl-help">
+                            <i class="fas fa-info-circle"></i> 
+                            Please upload clear images showing the issue. Max 5 images (JPG, PNG, GIF, WEBP, BMP), max 5MB each.
+                            <span style="color:var(--rpl-error);font-weight:600;">Images are mandatory for replacement requests.</span>
+                        </span>
+                    </div>
 
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i>
-                            <strong>Replacement Policy:</strong>
-                            <ul class="mb-0 mt-2">
-                                <li>Replacement must be requested within 7 days of delivery</li>
-                                <li>Items must be in original condition with packaging</li>
-                                <li>Replacement is free of cost (no additional charges)</li>
-                                <li>A new replacement order will be created for you</li>
-                            </ul>
-                        </div>
+                    <!-- Buttons -->
+                    <div class="rpl-actions">
+                        <a href="{% url 'Ecom:order_detail' order.id %}" class="rpl-btn rpl-btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                        <button type="submit" class="rpl-btn rpl-btn-primary" id="rplSubmitBtn">
+                            <i class="fas fa-paper-plane"></i> Submit Replacement Request
+                        </button>
+                    </div>
+                </form>
 
-                        <div class="d-flex justify-content-between">
-                            <a href="{% url 'Ecom:order_detail' order.id %}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Back
-                            </a>
-                            <button type="submit" class="btn btn-primary" id="submitBtn">
-                                <i class="fas fa-paper-plane"></i> Submit Replacement Request
-                            </button>
-                        </div>
-                    </form>
-                </div>
             </div>
         </div>
+
     </div>
+
 </div>
 
+<!-- ============================================================
+   SCRIPTS
+   ============================================================ -->
 <script>
-// Image preview
-document.getElementById('id_images').addEventListener('change', function(e) {
-    const preview = document.getElementById('imagePreview');
+document.getElementById('rpl_id_images').addEventListener('change', function(e) {
+    const preview = document.getElementById('rplImagePreview');
     preview.innerHTML = '';
     
     const files = e.target.files;
     if (files.length === 0) {
-        preview.innerHTML = '<div class="col-12 text-muted">No images selected</div>';
+        preview.innerHTML = '<div style="grid-column:1/-1;color:var(--rpl-text-faint);font-size:12px;text-align:center;">No images selected</div>';
         return;
     }
     
     if (files.length > 5) {
-        alert('You can upload a maximum of 5 images.');
+        alert('Maximum 5 images allowed.');
         this.value = '';
-        preview.innerHTML = '<div class="col-12 text-danger">Please select up to 5 images only.</div>';
         return;
     }
     
     for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (file.size > 5 * 1024 * 1024) {
-            alert(`Image "${file.name}" exceeds 5MB limit.`);
+        if (files[i].size > 5 * 1024 * 1024) {
+            alert(`"${files[i].name}" exceeds 5MB.`);
             this.value = '';
-            preview.innerHTML = '<div class="col-12 text-danger">One or more images exceed 5MB limit.</div>';
+            preview.innerHTML = '';
             return;
         }
         
         const reader = new FileReader();
         reader.onload = function(e) {
-            const col = document.createElement('div');
-            col.className = 'col-4 col-md-3 mb-3';
-            col.innerHTML = `
-                <div class="position-relative">
-                    <img src="${e.target.result}" class="img-fluid rounded border" style="height: 120px; width: 100%; object-fit: cover;">
-                    <span class="badge bg-dark position-absolute top-0 end-0 m-1">${i + 1}</span>
-                    <div class="text-center small mt-1 text-truncate">${file.name}</div>
-                </div>
+            const div = document.createElement('div');
+            div.className = 'rpl-prev-item';
+            div.innerHTML = `
+                <img src="${e.target.result}" alt="Preview">
+                <span class="rpl-count">${i + 1}</span>
             `;
-            preview.appendChild(col);
+            preview.appendChild(div);
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(files[i]);
     }
 });
 
-// Form submission
-document.getElementById('replacementForm').addEventListener('submit', function(e) {
-    const images = document.getElementById('id_images');
+document.getElementById('rplForm').addEventListener('submit', function(e) {
+    const images = document.getElementById('rpl_id_images');
     if (images.files.length === 0) {
         e.preventDefault();
         alert('Please upload at least one image showing the issue.');
         return false;
     }
     
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    if (!confirm('Submit this replacement request?')) {
+        e.preventDefault();
+        return false;
+    }
+    
+    const btn = document.getElementById('rplSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
 });
 </script>
 {% endblock %}

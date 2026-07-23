@@ -1,150 +1,784 @@
 <!-- templates/offline_sales/admin/order_list.html -->
-
-
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
-{% block title %}Orders{% endblock %}
+{% block title %}Offline Orders | Store Management{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Orders</h2>
-        <div>
-            <span class="badge bg-primary p-2">Total: {{ stats.total }}</span>
-            <span class="badge bg-success p-2">Completed: {{ stats.completed }}</span>
-            <span class="badge bg-warning p-2">Pending: {{ stats.pending }}</span>
-            <a href="{% url 'offline_sales:offline_sale' %}" class="btn btn-success">
-                <i class="fas fa-plus"></i> New Sale
+<style>
+:root {
+    --primary: #5c121f;
+    --primary-light: #7a1a2b;
+    --primary-dark: #3d0c14;
+    --secondary: #F4B400;
+    --secondary-light: #f7c948;
+    --bg: #f6f4f2;
+    --white: #ffffff;
+    --border: #ebe7e3;
+    --text: #1d1d1d;
+    --text-light: #6d6d6d;
+    --text-muted: #888888;
+    --success: #2e9d57;
+    --danger: #d64045;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --shadow: 0 10px 28px rgba(0,0,0,0.06);
+    --shadow-hover: 0 18px 40px rgba(92,18,31,0.12);
+    --transition: 0.35s ease;
+    --radius: 14px;
+    --radius-sm: 10px;
+    --radius-xs: 8px;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(92,18,31,0.12); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(92,18,31,0.25); }
+* { scrollbar-width: thin; scrollbar-color: rgba(92,18,31,0.12) transparent; }
+
+/* ============================================================
+   COMPLETELY DIFFERENT DESIGN - SIDEBAR STYLE CARDS
+   ============================================================ */
+
+/* ===== TOP HEADER ===== */
+.dashboard-header {
+    background: var(--white);
+    padding: 14px 10px;
+    border-bottom: 3px solid var(--secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.dashboard-header .left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dashboard-header .left .logo {
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary);
+    font-size: 18px;
+}
+
+.dashboard-header .left .info h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+}
+
+.dashboard-header .left .info h1 span {
+    color: var(--secondary);
+}
+
+.dashboard-header .left .info p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.dashboard-header .right .btn-create {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: var(--secondary);
+    color: var(--primary-dark);
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.dashboard-header .right .btn-create:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(244,180,0,0.25);
+    color: var(--primary-dark);
+}
+
+/* ===== STATS ===== */
+.stats-wrapper {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 14px 0;
+}
+
+.stat-item {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: var(--transition);
+}
+
+.stat-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.stat-item .icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.stat-item .icon.maroon { background: var(--primary); color: var(--white); }
+.stat-item .icon.gold { background: var(--secondary); color: var(--primary-dark); }
+.stat-item .icon.green { background: #d1fae5; color: #065f46; }
+.stat-item .icon.blue { background: #dbeafe; color: #1e40af; }
+
+.stat-item .data .num {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.stat-item .data .label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ===== FILTER ===== */
+.filter-wrap {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 14px 0;
+}
+
+.filter-wrap .filter-inner {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filter-wrap .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    min-width: 120px;
+}
+
+.filter-wrap .filter-group label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filter-wrap .filter-group select,
+.filter-wrap .filter-group input {
+    padding: 6px 10px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--white);
+    transition: var(--transition);
+    outline: none;
+    width: 100%;
+}
+
+.filter-wrap .filter-group select:focus,
+.filter-wrap .filter-group input:focus {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgba(244,180,0,0.08);
+}
+
+.filter-wrap .filter-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236d6d6d' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
+}
+
+.filter-wrap .filter-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.filter-wrap .filter-actions .btn-apply {
+    padding: 6px 16px;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    height: 35px;
+}
+
+.filter-wrap .filter-actions .btn-apply:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+.filter-wrap .filter-actions .btn-reset {
+    padding: 6px 14px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--white);
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    height: 35px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.filter-wrap .filter-actions .btn-reset:hover {
+    background: var(--bg);
+    transform: translateY(-2px);
+}
+
+/* ===== TABLE ===== */
+.table-container {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 14px 0;
+}
+
+.table-container .table-scroll {
+    overflow-x: auto;
+}
+
+.table-container table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.table-container table thead {
+    background: #faf8f6;
+}
+
+.table-container table thead th {
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--border);
+    border-right: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.table-container table thead th:last-child {
+    border-right: none;
+}
+
+.table-container table tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.table-container table tbody td:last-child {
+    border-right: none;
+}
+
+.table-container table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table-container table tbody tr:hover {
+    background: var(--bg);
+}
+
+.order-id {
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.customer-name {
+    font-weight: 500;
+    color: var(--text);
+}
+
+.customer-phone {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: block;
+}
+
+.amount-bold {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 14px;
+}
+
+/* ===== PRODUCT IMAGE ===== */
+.product-thumb {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    transition: var(--transition);
+    display: block;
+}
+
+.product-thumb:hover {
+    border-color: var(--secondary);
+    transform: scale(1.05);
+}
+
+/* ===== BADGES ===== */
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.badge-status .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.badge-status.success { background: #d1fae5; color: #065f46; }
+.badge-status.success .dot { background: var(--success); }
+
+.badge-status.warning { background: #fef3c7; color: #92400e; }
+.badge-status.warning .dot { background: var(--warning); animation: blink 1.5s ease-in-out infinite; }
+
+.badge-status.danger { background: #fee2e2; color: #991b1b; }
+.badge-status.danger .dot { background: var(--danger); }
+
+.badge-status.info { background: #dbeafe; color: #1e40af; }
+.badge-status.info .dot { background: var(--info); }
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.payment-method {
+    font-size: 10px;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 1px;
+}
+
+.btn-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.btn-view:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(92,18,31,0.15);
+    color: var(--white);
+}
+
+/* ===== EMPTY ===== */
+.empty-state {
+    text-align: center;
+    padding: 30px 20px;
+}
+
+.empty-state .icon {
+    font-size: 40px;
+    color: var(--text-muted);
+    opacity: 0.2;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.empty-state h5 {
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.empty-state p {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+/* ===== PAGINATION ===== */
+.pagination-wrap {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: center;
+}
+
+.pagination {
+    display: flex;
+    gap: 4px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.pagination .page-item .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
+    background: var(--white);
+}
+
+.pagination .page-item .page-link:hover {
+    background: var(--bg);
+    border-color: var(--secondary);
+    color: var(--primary);
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--white);
+}
+
+.pagination .page-item.disabled .page-link {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1200px) {
+    .stats-wrapper { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 992px) {
+    .filter-wrap .filter-inner { flex-direction: column; align-items: stretch; }
+    .filter-wrap .filter-group { min-width: 100%; }
+    .filter-wrap .filter-actions { flex-direction: row; }
+    .filter-wrap .filter-actions .btn-apply,
+    .filter-wrap .filter-actions .btn-reset { flex: 1; }
+}
+
+@media (max-width: 768px) {
+    .dashboard-header { flex-direction: column; align-items: flex-start; }
+    .dashboard-header .right { width: 100%; }
+    .dashboard-header .right .btn-create { width: 100%; justify-content: center; }
+    .stats-wrapper { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat-item { padding: 10px 12px; }
+    .stat-item .data .num { font-size: 18px; }
+    .stat-item .icon { width: 34px; height: 34px; font-size: 14px; }
+    .table-container table thead th,
+    .table-container table tbody td { padding: 6px 8px; font-size: 12px; }
+    .product-thumb { width: 28px; height: 28px; }
+}
+
+@media (max-width: 480px) {
+    .stats-wrapper { grid-template-columns: 1fr 1fr; gap: 4px; }
+    .stat-item { padding: 8px 8px; }
+    .stat-item .data .num { font-size: 15px; }
+    .stat-item .data .label { font-size: 8px; }
+    .stat-item .icon { width: 28px; height: 28px; font-size: 12px; }
+    .table-container table { font-size: 11px; }
+    .table-container table thead th,
+    .table-container table tbody td { padding: 4px 6px; }
+    .btn-view { font-size: 10px; padding: 3px 8px; }
+    .badge-status { font-size: 8px; padding: 2px 6px; }
+    .filter-wrap { padding: 8px 10px; }
+    .filter-wrap .filter-group select,
+    .filter-wrap .filter-group input { font-size: 11px; padding: 4px 6px; }
+    .pagination .page-item .page-link { min-width: 26px; height: 26px; font-size: 11px; padding: 0 6px; }
+    .dashboard-header .left .logo { width: 32px; height: 32px; font-size: 14px; }
+    .dashboard-header .left .info h1 { font-size: 15px; }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dashboard-header { animation: fadeUp 0.4s ease both; }
+.stat-item { animation: fadeUp 0.35s ease both; }
+.stat-item:nth-child(1) { animation-delay: 0.05s; }
+.stat-item:nth-child(2) { animation-delay: 0.09s; }
+.stat-item:nth-child(3) { animation-delay: 0.13s; }
+.stat-item:nth-child(4) { animation-delay: 0.17s; }
+.filter-wrap { animation: fadeUp 0.35s ease 0.08s both; }
+.table-container { animation: fadeUp 0.35s ease 0.12s both; }
+</style>
+
+<!-- ============================================================
+   HEADER
+   ============================================================ -->
+<div class="dashboard-header">
+    <div class="left">
+        <div class="logo">
+            <i class="fas fa-store-alt"></i>
+        </div>
+        <div class="info">
+            <h1>Offline <span>Orders</span></h1>
+            <p>Manage offline store transactions</p>
+        </div>
+    </div>
+    <div class="right">
+        <a href="{% url 'offline_sales:offline_sale' %}" class="btn-create">
+            <i class="fas fa-plus-circle"></i> New Sale
+        </a>
+    </div>
+</div>
+
+<!-- ===== STATS ===== -->
+<div class="stats-wrapper">
+    <div class="stat-item">
+        <div class="icon maroon"><i class="fas fa-shopping-bag"></i></div>
+        <div class="data">
+            <div class="num">{{ stats.total }}</div>
+            <div class="label">Total Orders</div>
+        </div>
+    </div>
+    <div class="stat-item">
+        <div class="icon green"><i class="fas fa-check-circle"></i></div>
+        <div class="data">
+            <div class="num">{{ stats.completed }}</div>
+            <div class="label">Completed</div>
+        </div>
+    </div>
+    <div class="stat-item">
+        <div class="icon gold"><i class="fas fa-clock"></i></div>
+        <div class="data">
+            <div class="num">{{ stats.pending }}</div>
+            <div class="label">Pending</div>
+        </div>
+    </div>
+    <div class="stat-item">
+        <div class="icon blue"><i class="fas fa-times-circle"></i></div>
+        <div class="data">
+            <div class="num">{{ stats.cancelled|default:0 }}</div>
+            <div class="label">Cancelled</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== FILTER ===== -->
+<div class="filter-wrap">
+    <form method="get" class="filter-inner">
+        <div class="filter-group">
+            <label for="status">Order Status</label>
+            <select name="status" id="status">
+                <option value="">All Statuses</option>
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="payment_status">Payment Status</label>
+            <select name="payment_status" id="payment_status">
+                <option value="">All Payments</option>
+                {% for value, label in payment_status_choices %}
+                    <option value="{{ value }}" {% if payment_filter == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="search">Search</label>
+            <input type="text" name="search" id="search" placeholder="Order #, Invoice #, Customer..." value="{{ search_query }}">
+        </div>
+        <div class="filter-actions">
+            <button type="submit" class="btn-apply">
+                <i class="fas fa-filter"></i> Apply
+            </button>
+            <a href="{% url 'offline_sales:orders_list' %}" class="btn-reset">
+                <i class="fas fa-undo"></i> Reset
             </a>
         </div>
-    </div>
+    </form>
+</div>
 
-    <!-- Filters -->
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label">Status</label>
-                    <select name="status" class="form-select">
-                        <option value="">All Statuses</option>
-                        {% for value, label in status_choices %}
-                            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Payment Status</label>
-                    <select name="payment_status" class="form-select">
-                        <option value="">All Payments</option>
-                        {% for value, label in payment_status_choices %}
-                            <option value="{{ value }}" {% if payment_filter == value %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Search</label>
-                    <input type="text" name="search" class="form-control" placeholder="Order #, Invoice #, Customer..." value="{{ search_query }}">
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-filter"></i> Filter
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="card shadow">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Order #</th>
-                            <th>Invoice #</th>
-                            <th>Customer</th>
-                            <th>Amount</th>
-                            <th>Payment</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for order in orders %}
-                        <tr>
-                            <td><strong>{{ order.order_number }}</strong></td>
-                            <td>{{ order.invoice_number|default:"-" }}</td>
-                            <td>
-                                {{ order.customer_name }}
-                                <br><small class="text-muted">{{ order.customer_phone }}</small>
-                            </td>
-                            <td><strong>₹{{ order.total_amount|floatformat:2 }}</strong></td>
-                            <td>
-                                <span class="badge bg-{% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'pending' %}warning{% else %}danger{% endif %}">
-                                    {{ order.get_payment_status_display }}
-                                </span>
-                                <br><small>{{ order.get_payment_method_display }}</small>
-                            </td>
-                            <td>
-                                <span class="badge bg-{% if order.status == 'completed' %}success{% elif order.status == 'pending' %}warning{% else %}secondary{% endif %}">
-                                    {{ order.get_status_display }}
-                                </span>
-                            </td>
-                            <td>{{ order.created_at|date:"M d, Y H:i" }}</td>
-                            <td>
-                                <a href="{% url 'offline_sales:order_detail' order.id %}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-eye"></i> View
-                                </a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="8" class="text-center py-4">
-                                <i class="fas fa-shopping-bag fa-3x text-muted mb-3 d-block"></i>
-                                <h5>No orders found</h5>
-                                <p class="text-muted">Start by creating your first sale.</p>
-                                <a href="{% url 'offline_sales:offline_sale' %}" class="btn btn-success mt-2">
-                                    <i class="fas fa-plus"></i> New Sale
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            {% if orders.has_other_pages %}
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    {% if orders.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ orders.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment_status={{ payment_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
-                        </li>
-                    {% endif %}
-                    {% for num in orders.paginator.page_range %}
-                        {% if orders.number == num %}
-                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                        {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment_status={{ payment_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
-                            </li>
+<!-- ===== TABLE ===== -->
+<div class="table-container">
+    <div class="table-scroll">
+        {% if orders %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Invoice</th>
+                    <th>Customer</th>
+                    <th>Product</th>
+                    <th style="text-align:right;">Amount</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th style="text-align:center;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td><span class="order-id">#{{ order.order_number }}</span></td>
+                    <td>{{ order.invoice_number|default:"—" }}</td>
+                    <td>
+                        <span class="customer-name">{{ order.customer_name }}</span>
+                        <span class="customer-phone">{{ order.customer_phone }}</span>
+                    </td>
+                    <td>
+                        {% if order.product_image %}
+                            <img src="{{ order.product_image }}" alt="Product" class="product-thumb">
+                        {% elif order.items.first %}
+                            {% with first_item=order.items.first %}
+                                {% if first_item.product %}
+                                    {% with main_img=first_item.product.main_image %}
+                                        {% if main_img %}
+                                            <img src="{{ main_img }}" alt="{{ first_item.product_name }}" class="product-thumb">
+                                        {% else %}
+                                            <img src="{% static 'images/no-image.png' %}" alt="No Image" class="product-thumb">
+                                        {% endif %}
+                                    {% endwith %}
+                                {% else %}
+                                    <img src="{% static 'images/no-image.png' %}" alt="No Image" class="product-thumb">
+                                {% endif %}
+                            {% endwith %}
+                        {% else %}
+                            <img src="{% static 'images/no-image.png' %}" alt="No Image" class="product-thumb">
                         {% endif %}
-                    {% endfor %}
-                    {% if orders.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ orders.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment_status={{ payment_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-            {% endif %}
+                    </td>
+                    <td style="text-align:right;"><span class="amount-bold">₹{{ order.total_amount|floatformat:2 }}</span></td>
+                    <td>
+                        <span class="badge-status {% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'pending' %}warning{% else %}danger{% endif %}">
+                            <span class="dot"></span> {{ order.get_payment_status_display }}
+                        </span>
+                        <span class="payment-method">{{ order.get_payment_method_display }}</span>
+                    </td>
+                    <td>
+                        <span class="badge-status {% if order.status == 'completed' %}success{% elif order.status == 'pending' %}warning{% else %}danger{% endif %}">
+                            <span class="dot"></span> {{ order.get_status_display }}
+                        </span>
+                    </td>
+                    <td style="font-size:11px;color:var(--text-muted);">{{ order.created_at|date:"M d, Y H:i" }}</td>
+                    <td style="text-align:center;">
+                        <a href="{% url 'offline_sales:order_detail' order.id %}" class="btn-view">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <span class="icon"><i class="fas fa-shopping-bag"></i></span>
+            <h5>No Orders Found</h5>
+            <p>Start by creating your first offline sale.</p>
         </div>
+        {% endif %}
     </div>
+
+    <!-- ===== PAGINATION ===== -->
+    {% if orders.has_other_pages %}
+    <div class="pagination-wrap">
+        <ul class="pagination">
+            {% if orders.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ orders.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment_status={{ payment_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+            </li>
+            {% endif %}
+
+            {% for num in orders.paginator.page_range %}
+                {% if orders.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment_status={{ payment_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if orders.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ orders.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment_status={{ payment_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

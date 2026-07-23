@@ -1,148 +1,1401 @@
-<!-- templates/offline_sales/admin/store_settings_list.html -->
-
+<!-- ============================================================
+   EXTENDED TEMPLATE (sidebar.html) 
+   ============================================================ -->
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
 {% block title %}Store Settings{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Store Settings</h2>
-        <div>
-            <a href="{% url 'offline_sales:store_settings_edit' %}" class="btn btn-primary">
-                <i class="fas fa-edit"></i> Edit Settings
-            </a>
+
+<style>
+    /* ============================================================
+       ROOT VARIABLES - YOUR THEME COLORS
+       ============================================================ */
+    :root {
+        --ss-primary: #5c121f;
+        --ss-primary-light: #8a1a2f;
+        --ss-primary-gradient: linear-gradient(145deg, #5c121f 0%, #8a1a2f 50%, #5c121f 100%);
+        --ss-gold: #c9a84c;
+        --ss-gold-light: #f5edd6;
+        --ss-gold-gradient: linear-gradient(135deg, #c9a84c, #f0d68a);
+        --ss-bg: #f5f0eb;
+        --ss-white: #ffffff;
+        --ss-border: #e8e4e0;
+        --ss-border-light: #f0ece8;
+        --ss-text: #1a1412;
+        --ss-text-light: #5a4e48;
+        --ss-text-muted: #a09892;
+        --ss-success: #0f7b4a;
+        --ss-danger: #b91c1c;
+        --ss-warning: #b45309;
+        --ss-info: #1a56a3;
+        --ss-shadow-sm: 0 2px 8px rgba(92,18,31,0.04);
+        --ss-shadow: 0 4px 24px rgba(92,18,31,0.06);
+        --ss-shadow-lg: 0 12px 48px rgba(92,18,31,0.1);
+        --ss-shadow-xl: 0 20px 60px rgba(92,18,31,0.12);
+        --ss-radius: 20px;
+        --ss-radius-sm: 12px;
+        --ss-radius-xs: 8px;
+        --ss-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        --ss-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ============================================================
+       RESET & BASE
+       ============================================================ */
+    .ss-wrap {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 16px 20px 30px 20px;
+        background: var(--ss-bg);
+        min-height: 100vh;
+        width: 100%;
+        box-sizing: border-box;
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* ============================================================
+       HERO HEADER
+       ============================================================ */
+    .ss-hero {
+        background: var(--ss-white);
+        border-radius: var(--ss-radius);
+        border: 1px solid var(--ss-border);
+        box-shadow: var(--ss-shadow);
+        overflow: hidden;
+        margin-bottom: 24px;
+        position: relative;
+    }
+
+    .ss-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--ss-primary-gradient);
+    }
+
+    .ss-hero::after {
+        content: '';
+        position: absolute;
+        top: 4px;
+        right: -50px;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .ss-hero-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 22px 28px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .ss-hero-left {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        flex-wrap: wrap;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .ss-hero-icon {
+        width: 54px;
+        height: 54px;
+        background: var(--ss-primary-gradient);
+        border-radius: var(--ss-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--ss-white);
+        font-size: 22px;
+        flex-shrink: 0;
+        box-shadow: 0 8px 30px rgba(92,18,31,0.2);
+        position: relative;
+    }
+
+    .ss-hero-icon::after {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        border-radius: var(--ss-radius-sm);
+        background: var(--ss-gold-gradient);
+        z-index: -1;
+        opacity: 0.2;
+    }
+
+    .ss-hero-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--ss-text);
+        font-family: var(--ss-font);
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .ss-hero-title .hl {
+        color: var(--ss-primary);
+        background: rgba(92,18,31,0.06);
+        padding: 2px 14px;
+        border-radius: 8px;
+        display: inline-block;
+    }
+
+    .ss-hero-sub {
+        font-size: 13px;
+        color: var(--ss-text-muted);
+        font-family: var(--ss-font);
+        margin: 4px 0 0 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .ss-hero-sub .status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 2px 14px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 600;
+        background: #d4edda;
+        color: #065f46;
+        border: 1px solid #6ee7b7;
+    }
+
+    .ss-hero-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 1;
+    }
+
+    .ss-btn {
+        padding: 10px 24px;
+        border-radius: var(--ss-radius-sm);
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: var(--ss-transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        white-space: nowrap;
+        font-family: var(--ss-font);
+        letter-spacing: 0.2px;
+    }
+
+    .ss-btn-primary {
+        background: var(--ss-primary-gradient);
+        color: var(--ss-white);
+        box-shadow: 0 4px 20px rgba(92,18,31,0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ss-btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+        transition: var(--ss-transition);
+    }
+
+    .ss-btn-primary:hover::before {
+        left: 100%;
+    }
+
+    .ss-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(92,18,31,0.3);
+    }
+
+    /* ============================================================
+       MAIN CARD
+       ============================================================ */
+    .ss-main {
+        background: var(--ss-white);
+        border-radius: var(--ss-radius);
+        border: 1px solid var(--ss-border);
+        box-shadow: var(--ss-shadow-lg);
+        overflow: hidden;
+        position: relative;
+        flex: 1;
+    }
+
+    .ss-main::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--ss-primary-gradient);
+        z-index: 2;
+    }
+
+    /* ============================================================
+       GRID LAYOUT
+       ============================================================ */
+    .ss-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        padding: 24px;
+        position: relative;
+        z-index: 1;
+        align-items: stretch;
+    }
+
+    .ss-grid-left,
+    .ss-grid-right {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        max-height: 600px;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+
+    .ss-grid-left::-webkit-scrollbar,
+    .ss-grid-right::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .ss-grid-left::-webkit-scrollbar-track,
+    .ss-grid-right::-webkit-scrollbar-track {
+        background: var(--ss-bg);
+        border-radius: 10px;
+    }
+
+    .ss-grid-left::-webkit-scrollbar-thumb,
+    .ss-grid-right::-webkit-scrollbar-thumb {
+        background: var(--ss-primary);
+        border-radius: 10px;
+        opacity: 0.3;
+    }
+
+    .ss-grid-left::-webkit-scrollbar-thumb:hover,
+    .ss-grid-right::-webkit-scrollbar-thumb:hover {
+        opacity: 0.6;
+    }
+
+    /* ============================================================
+       CARDS
+       ============================================================ */
+    .ss-card {
+        background: var(--ss-white);
+        border-radius: var(--ss-radius-sm);
+        border: 1px solid var(--ss-border-light);
+        overflow: hidden;
+        box-shadow: var(--ss-shadow-sm);
+        transition: var(--ss-transition);
+        flex-shrink: 0;
+        position: relative;
+    }
+
+    .ss-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--ss-primary-gradient);
+        opacity: 0;
+        transition: var(--ss-transition);
+        z-index: 1;
+    }
+
+    .ss-card:hover {
+        border-color: var(--ss-primary);
+        box-shadow: var(--ss-shadow);
+        transform: translateY(-3px);
+    }
+
+    .ss-card:hover::before {
+        opacity: 1;
+    }
+
+    .ss-card-head {
+        padding: 14px 20px;
+        background: linear-gradient(135deg, rgba(92,18,31,0.02), rgba(138,26,47,0.005));
+        border-bottom: 1px solid var(--ss-border-light);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .ss-card-head .ico {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: var(--ss-primary-gradient);
+        color: var(--ss-white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        flex-shrink: 0;
+        box-shadow: 0 4px 16px rgba(92,18,31,0.15);
+    }
+
+    .ss-card-head h5 {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--ss-text);
+        font-family: var(--ss-font);
+        margin: 0;
+        letter-spacing: 0.3px;
+    }
+
+    .ss-card-head .badge-count {
+        margin-left: auto;
+        font-size: 10px;
+        color: var(--ss-text-muted);
+        background: var(--ss-bg);
+        padding: 2px 12px;
+        border-radius: 50px;
+        border: 1px solid var(--ss-border-light);
+        font-weight: 600;
+    }
+
+    .ss-card-body {
+        padding: 18px 20px;
+    }
+
+    /* ============================================================
+       ROWS
+       ============================================================ */
+    .ss-row {
+        display: flex;
+        align-items: flex-start;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--ss-border-light);
+        gap: 16px;
+    }
+
+    .ss-row:last-child {
+        border-bottom: none;
+    }
+
+    .ss-row .lbl {
+        min-width: 100px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--ss-text-muted);
+        font-family: var(--ss-font);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        flex-shrink: 0;
+        padding-top: 2px;
+    }
+
+    .ss-row .val {
+        font-size: 14px;
+        color: var(--ss-text);
+        font-family: var(--ss-font);
+        word-break: break-word;
+        flex: 1;
+        line-height: 1.7;
+    }
+
+    .ss-row .val a {
+        color: var(--ss-primary);
+        text-decoration: none;
+        transition: var(--ss-transition);
+        font-weight: 500;
+    }
+
+    .ss-row .val a:hover {
+        color: var(--ss-gold);
+        text-decoration: underline;
+    }
+
+    .ss-row .val .logo-img {
+        max-height: 52px;
+        border-radius: var(--ss-radius-xs);
+        border: 1px solid var(--ss-border-light);
+        padding: 3px;
+        background: var(--ss-white);
+        transition: var(--ss-transition);
+        max-width: 100%;
+    }
+
+    .ss-row .val .logo-img:hover {
+        transform: scale(1.03);
+        border-color: var(--ss-primary);
+        box-shadow: var(--ss-shadow);
+    }
+
+    .ss-row .val .pill {
+        display: inline-block;
+        background: var(--ss-bg);
+        padding: 2px 14px;
+        border-radius: 50px;
+        font-size: 12px;
+        border: 1px solid var(--ss-border-light);
+        font-family: monospace;
+        font-weight: 600;
+        color: var(--ss-primary);
+    }
+
+    .ss-row .val .muted {
+        color: var(--ss-text-muted);
+        font-style: italic;
+    }
+
+    .ss-row .val strong {
+        color: var(--ss-primary);
+    }
+
+    /* ============================================================
+       INVOICE & POLICIES
+       ============================================================ */
+    .ss-invoice-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .ss-invoice-item {
+        background: var(--ss-bg);
+        border-radius: var(--ss-radius-xs);
+        padding: 14px 18px;
+        border: 1px solid var(--ss-border-light);
+        transition: var(--ss-transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ss-invoice-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 3px;
+        height: 100%;
+        background: var(--ss-primary-gradient);
+        opacity: 0.3;
+        transition: var(--ss-transition);
+    }
+
+    .ss-invoice-item:hover {
+        border-color: var(--ss-primary);
+        background: var(--ss-white);
+        box-shadow: var(--ss-shadow-sm);
+        transform: translateY(-2px);
+    }
+
+    .ss-invoice-item:hover::before {
+        opacity: 1;
+        width: 4px;
+    }
+
+    .ss-invoice-item .inv-lbl {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--ss-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        display: block;
+        margin-bottom: 3px;
+        font-family: var(--ss-font);
+    }
+
+    .ss-invoice-item .inv-lbl i {
+        color: var(--ss-primary);
+        margin-right: 4px;
+        font-size: 11px;
+    }
+
+    .ss-invoice-item .inv-val {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--ss-text);
+        font-family: var(--ss-font);
+        word-break: break-word;
+    }
+
+    .ss-invoice-item .inv-val .pill {
+        background: var(--ss-white);
+        padding: 2px 14px;
+        border-radius: 50px;
+        border: 1px solid var(--ss-border-light);
+        font-family: monospace;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--ss-primary);
+        display: inline-block;
+    }
+
+    /* ============================================================
+       QUICK ACTIONS - 3 BUTTONS IN COLUMN (YOUR THEME)
+       ============================================================ */
+    .ss-actions-column {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .ss-actions-column .ss-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 13px 20px;
+        font-size: 14px;
+        border-radius: var(--ss-radius-xs);
+        text-align: center;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ss-actions-column .ss-btn::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+        transition: var(--ss-transition);
+    }
+
+    .ss-actions-column .ss-btn:hover::after {
+        left: 100%;
+    }
+
+    .ss-btn-edit {
+        background: var(--ss-primary-gradient);
+        color: var(--ss-white);
+        box-shadow: 0 4px 16px rgba(92,18,31,0.25);
+    }
+
+    .ss-btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 24px rgba(92,18,31,0.35);
+    }
+
+    .ss-btn-barcode {
+        background: linear-gradient(135deg, #1a56a3, #2563eb);
+        color: var(--ss-white);
+        box-shadow: 0 4px 16px rgba(26,86,163,0.2);
+    }
+
+    .ss-btn-barcode:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 24px rgba(26,86,163,0.3);
+    }
+
+    .ss-btn-sale {
+        background: linear-gradient(135deg, #0f7b4a, #16a34a);
+        color: var(--ss-white);
+        box-shadow: 0 4px 16px rgba(15,123,74,0.2);
+    }
+
+    .ss-btn-sale:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 24px rgba(15,123,74,0.3);
+    }
+
+    /* ============================================================
+       TERMS & CONDITIONS
+       ============================================================ */
+    .ss-terms-section {
+        grid-column: 1 / -1;
+        margin-top: 0;
+    }
+
+    .ss-terms-full {
+        background: linear-gradient(135deg, var(--ss-bg), #fcf9f7);
+        border-radius: var(--ss-radius-sm);
+        padding: 20px 24px;
+        border: 1px solid var(--ss-border-light);
+        transition: var(--ss-transition);
+        position: relative;
+    }
+
+    .ss-terms-full:hover {
+        border-color: var(--ss-primary);
+        box-shadow: var(--ss-shadow);
+        transform: translateY(-2px);
+    }
+
+    .ss-terms-full .terms-icon {
+        position: absolute;
+        top: -12px;
+        right: 16px;
+        background: var(--ss-primary-gradient);
+        color: var(--ss-white);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        box-shadow: 0 4px 16px rgba(92,18,31,0.2);
+    }
+
+    .ss-terms-full .terms-label {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--ss-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--ss-font);
+    }
+
+    .ss-terms-full .terms-label i {
+        color: var(--ss-primary);
+        font-size: 14px;
+    }
+
+    .ss-terms-full .terms-text {
+        font-size: 14px;
+        line-height: 2;
+        color: var(--ss-text);
+        font-family: var(--ss-font);
+        white-space: pre-line;
+        margin: 0;
+    }
+
+    .ss-terms-full .terms-text .muted {
+        color: var(--ss-text-muted);
+        font-style: italic;
+    }
+
+    /* ============================================================
+       EMPTY STATE
+       ============================================================ */
+    .ss-empty {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .ss-empty .big-icon {
+        font-size: 60px;
+        color: var(--ss-primary);
+        display: block;
+        margin-bottom: 16px;
+        opacity: 0.2;
+    }
+
+    .ss-empty h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--ss-text);
+        font-family: var(--ss-font);
+        margin-bottom: 6px;
+    }
+
+    .ss-empty p {
+        font-size: 14px;
+        color: var(--ss-text-muted);
+        font-family: var(--ss-font);
+        margin-bottom: 18px;
+    }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    .ss-footer {
+        margin-top: 24px;
+        padding: 16px 24px;
+        background: var(--ss-white);
+        border-radius: var(--ss-radius);
+        border: 1px solid var(--ss-border);
+        box-shadow: var(--ss-shadow);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ss-footer::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--ss-primary-gradient);
+        opacity: 0.3;
+    }
+
+    .ss-footer-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        width: 100%;
+    }
+
+    .ss-footer-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        flex: 1;
+    }
+
+    .ss-footer-left .footer-icon {
+        width: 32px;
+        height: 32px;
+        background: var(--ss-primary-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--ss-white);
+        font-size: 13px;
+        flex-shrink: 0;
+    }
+
+    .ss-footer-left .footer-text {
+        font-size: 13px;
+        color: var(--ss-text-light);
+        font-family: var(--ss-font);
+    }
+
+    .ss-footer-left .footer-text strong {
+        color: var(--ss-primary);
+    }
+
+    .ss-footer-left .footer-divider {
+        width: 1px;
+        height: 20px;
+        background: var(--ss-border);
+    }
+
+    .ss-footer-left .footer-email {
+        font-size: 13px;
+        color: var(--ss-text-muted);
+        font-family: var(--ss-font);
+    }
+
+    .ss-footer-left .footer-email a {
+        color: var(--ss-primary);
+        text-decoration: none;
+        transition: var(--ss-transition);
+    }
+
+    .ss-footer-left .footer-email a:hover {
+        color: var(--ss-gold);
+        text-decoration: underline;
+    }
+
+    .ss-footer-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .ss-footer-right .footer-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 14px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 600;
+        background: #d4edda;
+        color: #065f46;
+        border: 1px solid #6ee7b7;
+    }
+
+    .ss-footer-right .footer-version {
+        font-size: 12px;
+        color: var(--ss-text-muted);
+        font-family: var(--ss-font);
+        opacity: 0.6;
+    }
+
+    .ss-footer-text-content {
+        font-size: 12px;
+        color: var(--ss-text-muted);
+        font-family: var(--ss-font);
+        line-height: 1.6;
+        padding: 10px 0 4px 0;
+        border-top: 1px solid var(--ss-border-light);
+        margin-top: 4px;
+        width: 100%;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .ss-footer-text-content .footer-quote-icon {
+        opacity: 0.3;
+        font-size: 14px;
+        color: var(--ss-text-muted);
+    }
+
+    .ss-footer-text-content .footer-text-body {
+        flex: 1;
+        word-break: break-word;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+
+    @media (max-width: 1024px) {
+        .ss-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        .ss-wrap {
+            padding: 12px 16px 24px 16px;
+        }
+        .ss-grid-left,
+        .ss-grid-right {
+            max-height: 500px;
+        }
+        .ss-invoice-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .ss-hero-content {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 14px;
+            padding: 18px 18px;
+        }
+        .ss-hero-actions {
+            width: 100%;
+            justify-content: stretch;
+        }
+        .ss-hero-actions .ss-btn {
+            flex: 1;
+            justify-content: center;
+        }
+        .ss-hero-title {
+            font-size: 20px;
+        }
+        .ss-hero-icon {
+            width: 44px;
+            height: 44px;
+            font-size: 18px;
+        }
+        .ss-grid {
+            grid-template-columns: 1fr;
+            padding: 16px;
+            gap: 16px;
+        }
+        .ss-grid-left,
+        .ss-grid-right {
+            max-height: none;
+            overflow-y: visible;
+            gap: 16px;
+        }
+        .ss-terms-section {
+            grid-column: 1;
+        }
+        .ss-row {
+            flex-direction: column;
+            gap: 4px;
+            padding: 6px 0;
+        }
+        .ss-row .lbl {
+            min-width: unset;
+            font-size: 10px;
+        }
+        .ss-row .val {
+            font-size: 13px;
+        }
+        .ss-card-body {
+            padding: 14px 16px;
+        }
+        .ss-card-head {
+            padding: 12px 16px;
+        }
+        .ss-card-head h5 {
+            font-size: 14px;
+        }
+        .ss-btn {
+            font-size: 12px;
+            padding: 8px 16px;
+        }
+        .ss-card {
+            margin-bottom: 0;
+        }
+        .ss-footer-top {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+        .ss-footer-left {
+            flex-wrap: wrap;
+        }
+        .ss-footer-left .footer-divider {
+            display: none;
+        }
+        .ss-footer-right {
+            justify-content: flex-start;
+        }
+        .ss-invoice-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .ss-footer-text-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            text-align: left;
+        }
+        .ss-actions-column .ss-btn {
+            font-size: 13px;
+            padding: 12px 16px;
+        }
+        .ss-terms-full {
+            padding: 16px 18px;
+        }
+        .ss-terms-full .terms-text {
+            font-size: 13px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .ss-wrap {
+            padding: 8px 8px 16px 8px;
+        }
+        .ss-hero-content {
+            padding: 14px 14px;
+        }
+        .ss-hero-title {
+            font-size: 17px;
+        }
+        .ss-hero-sub {
+            font-size: 12px;
+        }
+        .ss-hero-icon {
+            width: 36px;
+            height: 36px;
+            font-size: 15px;
+        }
+        .ss-btn {
+            font-size: 11px;
+            padding: 6px 14px;
+            gap: 6px;
+        }
+        .ss-grid {
+            padding: 12px;
+            gap: 12px;
+        }
+        .ss-card-body {
+            padding: 12px 14px;
+        }
+        .ss-card-head {
+            padding: 10px 14px;
+        }
+        .ss-card-head .ico {
+            width: 28px;
+            height: 28px;
+            font-size: 12px;
+        }
+        .ss-card-head h5 {
+            font-size: 13px;
+        }
+        .ss-row .val {
+            font-size: 12px;
+        }
+        .ss-row .val .logo-img {
+            max-height: 40px;
+        }
+        .ss-empty .big-icon {
+            font-size: 44px;
+        }
+        .ss-empty h3 {
+            font-size: 17px;
+        }
+        .ss-empty p {
+            font-size: 13px;
+        }
+        .ss-row .lbl {
+            font-size: 10px;
+        }
+        .ss-card {
+            margin-bottom: 0;
+        }
+        .ss-footer {
+            padding: 14px 16px;
+        }
+        .ss-footer-left .footer-text {
+            font-size: 12px;
+        }
+        .ss-footer-left .footer-email {
+            font-size: 12px;
+        }
+        .ss-footer-right .footer-badge {
+            font-size: 10px;
+            padding: 3px 10px;
+        }
+        .ss-footer-right .footer-version {
+            font-size: 11px;
+        }
+        .ss-invoice-item .inv-val {
+            font-size: 16px;
+        }
+        .ss-terms-full .terms-text {
+            font-size: 13px;
+        }
+        .ss-footer-text-content {
+            font-size: 11px;
+        }
+        .ss-actions-column .ss-btn {
+            font-size: 12px;
+            padding: 10px 14px;
+        }
+        .ss-invoice-item {
+            padding: 12px 14px;
+        }
+        .ss-terms-full {
+            padding: 14px 16px;
+        }
+        .ss-terms-full .terms-icon {
+            width: 28px;
+            height: 28px;
+            font-size: 12px;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .ss-hero-title {
+            font-size: 15px;
+        }
+        .ss-hero-icon {
+            width: 30px;
+            height: 30px;
+            font-size: 13px;
+        }
+        .ss-btn {
+            font-size: 10px;
+            padding: 5px 10px;
+            gap: 4px;
+        }
+        .ss-card-head h5 {
+            font-size: 12px;
+        }
+        .ss-row .val {
+            font-size: 11px;
+        }
+        .ss-empty h3 {
+            font-size: 15px;
+        }
+        .ss-footer {
+            padding: 10px 12px;
+        }
+        .ss-footer-left .footer-text {
+            font-size: 11px;
+        }
+        .ss-footer-left .footer-email {
+            font-size: 11px;
+        }
+        .ss-footer-right .footer-badge {
+            font-size: 9px;
+            padding: 2px 8px;
+        }
+        .ss-footer-right .footer-version {
+            font-size: 10px;
+        }
+        .ss-invoice-item .inv-val {
+            font-size: 14px;
+        }
+        .ss-terms-full .terms-text {
+            font-size: 12px;
+        }
+        .ss-footer-text-content {
+            font-size: 10px;
+        }
+        .ss-terms-full .terms-label {
+            font-size: 9px;
+        }
+        .ss-actions-column .ss-btn {
+            font-size: 11px;
+            padding: 8px 12px;
+        }
+        .ss-invoice-item {
+            padding: 10px 12px;
+        }
+        .ss-terms-full {
+            padding: 12px 14px;
+        }
+        .ss-terms-full .terms-icon {
+            width: 24px;
+            height: 24px;
+            font-size: 10px;
+            top: -10px;
+            right: 12px;
+        }
+    }
+</style>
+
+<!-- ============================================================
+   HTML STRUCTURE - YOUR THEME
+   ============================================================ -->
+<div class="ss-wrap">
+
+    <!-- ===== HERO HEADER ===== -->
+    <div class="ss-hero">
+        <div class="ss-hero-content">
+            <div class="ss-hero-left">
+                <div class="ss-hero-icon">
+                    <i class="fas fa-store-alt"></i>
+                </div>
+                <div>
+                    <h1 class="ss-hero-title">Store <span class="hl">Settings</span></h1>
+                    <div class="ss-hero-sub">
+                        <span>Manage your store configuration</span>
+                        {% if store_settings %}
+                            <span class="status-chip">
+                                <i class="fas fa-check-circle"></i> Configured
+                            </span>
+                        {% else %}
+                            <span class="status-chip" style="background:#fff3cd;color:#856404;border-color:#fcd34d;">
+                                <i class="fas fa-exclamation-triangle"></i> Not Configured
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+          <div class="ss-hero-actions">
+    <a href="{% url 'offline_sales:store_settings_edit' %}" class="ss-btn ss-btn-primary">
+        {% if store_settings %}
+            <i class="fas fa-edit"></i> Edit Settings
+        {% else %}
+            <i class="fas fa-plus"></i> Add Store
+        {% endif %}
+    </a>
+</div>
         </div>
     </div>
 
+    <!-- ===== MAIN CONTENT ===== -->
     {% if store_settings %}
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Store Information</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <strong>Store Name</strong>
-                        </div>
-                        <div class="col-md-9">{{ store_settings.store_name }}</div>
+    <div class="ss-main">
+        <div class="ss-grid">
+
+            <!-- ===== LEFT COLUMN - Store Information ===== -->
+            <div class="ss-grid-left">
+                <div class="ss-card">
+                    <div class="ss-card-head">
+                        <span class="ico"><i class="fas fa-info-circle"></i></span>
+                        <h5>Store Information</h5>
+                        <span class="badge-count">8 fields</span>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <strong>Store Logo</strong>
+                    <div class="ss-card-body">
+                        <div class="ss-row">
+                            <span class="lbl">Store Name</span>
+                            <span class="val"><strong>{{ store_settings.store_name }}</strong></span>
                         </div>
-                        <div class="col-md-9">
-                            {% if store_settings.store_logo %}
-                                <img src="{{ store_settings.store_logo.url }}" height="80" alt="Logo">
-                            {% else %}
-                                <span class="text-muted">No logo uploaded</span>
-                            {% endif %}
+                        <div class="ss-row">
+                            <span class="lbl">Logo</span>
+                            <span class="val">
+                                {% if store_settings.store_logo %}
+                                    <img src="{{ store_settings.store_logo.url }}" class="logo-img" alt="Logo">
+                                {% else %}
+                                    <span class="muted">No logo uploaded</span>
+                                {% endif %}
+                            </span>
                         </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <strong>Address</strong>
+                        <div class="ss-row">
+                            <span class="lbl">Address</span>
+                            <span class="val">{{ store_settings.store_address|linebreaksbr }}</span>
                         </div>
-                        <div class="col-md-9">{{ store_settings.store_address|linebreaks }}</div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <strong>Phone</strong>
+                        <div class="ss-row">
+                            <span class="lbl">Phone</span>
+                            <span class="val">{{ store_settings.store_phone }}</span>
                         </div>
-                        <div class="col-md-9">{{ store_settings.store_phone }}</div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <strong>Email</strong>
+                        <div class="ss-row">
+                            <span class="lbl">Email</span>
+                            <span class="val"><a href="mailto:{{ store_settings.store_email }}">{{ store_settings.store_email }}</a></span>
                         </div>
-                        <div class="col-md-9">{{ store_settings.store_email }}</div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <strong>Website</strong>
+                        <div class="ss-row">
+                            <span class="lbl">Website</span>
+                            <span class="val">
+                                {% if store_settings.store_website %}
+                                    <a href="{{ store_settings.store_website }}" target="_blank">{{ store_settings.store_website }}</a>
+                                {% else %}
+                                    <span class="muted">Not set</span>
+                                {% endif %}
+                            </span>
                         </div>
-                        <div class="col-md-9">
-                            {% if store_settings.store_website %}
-                                <a href="{{ store_settings.store_website }}" target="_blank">{{ store_settings.store_website }}</a>
-                            {% else %}
-                                <span class="text-muted">Not set</span>
-                            {% endif %}
+                        <div class="ss-row">
+                            <span class="lbl">GST Number</span>
+                            <span class="val">{{ store_settings.gst_number|default:"<span class='muted'>Not set</span>" }}</span>
                         </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <strong>GST Number</strong>
+                        <div class="ss-row" style="border-bottom:none;">
+                            <span class="lbl">PAN Number</span>
+                            <span class="val">{{ store_settings.pan_number|default:"<span class='muted'>Not set</span>" }}</span>
                         </div>
-                        <div class="col-md-9">{{ store_settings.gst_number|default:"Not set" }}</div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <strong>PAN Number</strong>
-                        </div>
-                        <div class="col-md-9">{{ store_settings.pan_number|default:"Not set" }}</div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <strong>Invoice Prefix</strong>
-                        </div>
-                        <div class="col-md-9">{{ store_settings.invoice_prefix }}</div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <strong>Next Invoice Number</strong>
-                        </div>
-                        <div class="col-md-9">{{ store_settings.invoice_start_number }}</div>
-                    </div>
-                    {% if store_settings.terms_conditions %}
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <strong>Terms & Conditions</strong>
-                        </div>
-                        <div class="col-md-9">{{ store_settings.terms_conditions|linebreaks }}</div>
-                    </div>
-                    {% endif %}
-                    {% if store_settings.footer_text %}
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <strong>Footer Text</strong>
-                        </div>
-                        <div class="col-md-9">{{ store_settings.footer_text|linebreaks }}</div>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">Quick Actions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'offline_sales:store_settings_edit' %}" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> Edit Settings
-                        </a>
-                        <a href="{% url 'offline_sales:barcode_list' %}" class="btn btn-secondary">
-                            <i class="fas fa-qrcode"></i> Manage Barcodes
-                        </a>
-                        <a href="{% url 'offline_sales:offline_sale' %}" class="btn btn-success">
-                            <i class="fas fa-shopping-cart"></i> Start Sale
-                        </a>
                     </div>
                 </div>
             </div>
+
+            <!-- ===== RIGHT COLUMN - Invoice + 3 Actions ===== -->
+            <div class="ss-grid-right">
+
+                <!-- Invoice & Policies Card -->
+                <div class="ss-card">
+                    <div class="ss-card-head">
+                        <span class="ico"><i class="fas fa-file-invoice"></i></span>
+                        <h5>Invoice &amp; Policies</h5>
+                    </div>
+                    <div class="ss-card-body">
+                        <div class="ss-invoice-grid">
+                            <div class="ss-invoice-item">
+                                <span class="inv-lbl"><i class="fas fa-tag"></i> Invoice Prefix</span>
+                                <span class="inv-val"><span class="pill">{{ store_settings.invoice_prefix }}</span></span>
+                            </div>
+                            <div class="ss-invoice-item">
+                                <span class="inv-lbl"><i class="fas fa-hashtag"></i> Next Invoice #</span>
+                                <span class="inv-val"><span class="pill">{{ store_settings.invoice_start_number }}</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Card - 3 Buttons in Column -->
+                <div class="ss-card">
+                    <div class="ss-card-head">
+                        <span class="ico"><i class="fas fa-bolt"></i></span>
+                        <h5>Quick Actions</h5>
+                    </div>
+                    <div class="ss-card-body">
+                        <div class="ss-actions-column">
+                            <a href="{% url 'offline_sales:store_settings_edit' %}" class="ss-btn ss-btn-edit">
+                                <i class="fas fa-edit"></i> Edit Store Settings
+                            </a>
+                            <a href="{% url 'offline_sales:barcode_list' %}" class="ss-btn ss-btn-barcode">
+                                <i class="fas fa-qrcode"></i> Manage Barcodes
+                            </a>
+                            <a href="{% url 'offline_sales:offline_sale' %}" class="ss-btn ss-btn-sale">
+                                <i class="fas fa-shopping-cart"></i> Start New Sale
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ===== FULL WIDTH - Terms & Conditions ===== -->
+            <div class="ss-terms-section">
+                <div class="ss-terms-full">
+                    <span class="terms-icon"><i class="fas fa-gavel"></i></span>
+                    <span class="terms-label"><i class="fas fa-file-signature"></i> Terms &amp; Conditions</span>
+                    <div class="terms-text">
+                        {% if store_settings.terms_conditions %}
+                            {{ store_settings.terms_conditions|linebreaksbr }}
+                        {% else %}
+                            <span class="muted">No terms and conditions have been set for this store.</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
     {% else %}
-    <div class="alert alert-warning">
-        <i class="fas fa-exclamation-triangle"></i>
-        No store settings found. Please configure your store settings first.
-        <a href="{% url 'offline_sales:store_settings_edit' %}" class="btn btn-primary mt-2">
-            <i class="fas fa-plus"></i> Configure Store
-        </a>
+    <!-- ===== EMPTY STATE ===== -->
+    <div class="ss-main">
+        <div class="ss-empty">
+            <span class="big-icon"><i class="fas fa-store-alt"></i></span>
+            <h3>No Store Settings Found</h3>
+            <p>Please configure your store settings first to get started with offline sales.</p>
+            <a href="{% url 'offline_sales:store_settings_edit' %}" class="ss-btn ss-btn-primary" style="display:inline-flex;padding:12px 32px;font-size:14px;">
+                <i class="fas fa-plus"></i> Configure Store
+            </a>
+        </div>
     </div>
     {% endif %}
+
+    <!-- ===== ELEGANT FOOTER ===== -->
+    <div class="ss-footer">
+        <div class="ss-footer-top">
+            <div class="ss-footer-left">
+                <div class="footer-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <span class="footer-text">
+                    {% if store_settings %}
+                        <strong>{{ store_settings.store_name }}</strong>
+                    {% else %}
+                        <strong>Store Settings</strong>
+                    {% endif %}
+                </span>
+                <span class="footer-divider"></span>
+                <span class="footer-email">
+                    {% if store_settings %}
+                        <a href="mailto:{{ store_settings.store_email }}">{{ store_settings.store_email }}</a>
+                    {% else %}
+                        <span>Offline Sales System</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="ss-footer-right">
+                <span class="footer-badge">
+                    <i class="fas fa-check-circle"></i> 
+                    {% if store_settings %} Active {% else %} Inactive {% endif %}
+                </span>
+                <span class="footer-version">
+                    <i class="fas fa-code"></i> v1.0
+                </span>
+            </div>
+        </div>
+
+        {% if store_settings.footer_text %}
+        <div class="ss-footer-text-content">
+            <span class="footer-quote-icon"><i class="fas fa-quote-left"></i></span>
+            <span class="footer-text-body">
+                {{ store_settings.footer_text|linebreaksbr }}
+            </span>
+            <span class="footer-quote-icon"><i class="fas fa-quote-right"></i></span>
+        </div>
+        {% else %}
+        <div class="ss-footer-text-content">
+            <span class="footer-text-body" style="color:var(--ss-text-muted);font-style:italic;">
+                <i class="fas fa-edit" style="opacity:0.3;margin-right:6px;"></i> 
+                No footer text configured. Add footer text in store settings.
+            </span>
+        </div>
+        {% endif %}
+    </div>
+
 </div>
+
 {% endblock %}

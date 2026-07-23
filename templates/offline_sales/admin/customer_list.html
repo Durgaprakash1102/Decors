@@ -1,115 +1,1123 @@
-
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
-{% block title %}Customers{% endblock %}
+{% block title %}Customers - MyStore{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Customers</h2>
-        <div>
-            <span class="badge bg-primary p-2">Total: {{ total_customers }}</span>
-            <a href="{% url 'offline_sales:customers_create' %}" class="btn btn-success">
-                <i class="fas fa-plus"></i> Add Customer
+
+<style>
+/* =====================================================
+   ROOT VARIABLES - Premium
+   ===================================================== */
+:root {
+    --primary: #5c121f;
+    --primary-light: #7a1a2b;
+    --primary-dark: #3d0c14;
+    --primary-gradient: linear-gradient(135deg, #5c121f 0%, #7a1a2b 50%, #8f2035 100%);
+    --secondary: #f4b400;
+    --success: #10b981;
+    --success-bg: rgba(16, 185, 129, 0.1);
+    --danger: #ef4444;
+    --danger-bg: rgba(239, 68, 68, 0.1);
+    --warning: #f59e0b;
+    --warning-bg: rgba(245, 158, 11, 0.1);
+    --info: #3b82f6;
+    --info-bg: rgba(59, 130, 246, 0.08);
+    --bg: #f6f4f2;
+    --white: #ffffff;
+    --border: #e8e3de;
+    --border-light: #f0ede8;
+    --text: #1a1a2e;
+    --text-secondary: #4a4a5a;
+    --text-muted: #8a8a9a;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 20px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 40px rgba(92,18,31,0.08);
+    --radius: 14px;
+    --radius-sm: 10px;
+    --radius-xs: 6px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* =====================================================
+   PAGE WRAPPER
+   ===================================================== */
+.customer-page {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+    background: var(--bg);
+}
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 18px 28px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.page-header .left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.page-header .left .icon-box {
+    width: 44px;
+    height: 44px;
+    background: var(--primary-gradient);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 18px;
+    box-shadow: 0 4px 16px rgba(92,18,31,0.2);
+    flex-shrink: 0;
+}
+
+.page-header .left h1 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.3px;
+}
+
+.page-header .left h1 span {
+    background: var(--primary-gradient);
+    color: var(--white);
+    font-size: 11px;
+    padding: 2px 12px;
+    border-radius: 30px;
+    margin-left: 8px;
+    font-weight: 700;
+}
+
+.page-header .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.page-header .actions .total-badge {
+    background: var(--bg);
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-header .actions .total-badge strong {
+    color: var(--primary);
+    font-size: 15px;
+}
+
+.page-header .actions .btn {
+    padding: 8px 20px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-family: inherit;
+}
+
+.btn-primary-custom {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 4px 16px rgba(92,18,31,0.2);
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(92,18,31,0.3);
+    color: white;
+}
+
+/* =====================================================
+   SEARCH SECTION
+   ===================================================== */
+.search-section {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 28px;
+}
+
+.search-section .search-wrap {
+    display: flex;
+    gap: 10px;
+    max-width: 650px;
+    align-items: center;
+}
+
+.search-section .search-wrap .search-input-wrapper {
+    flex: 1;
+    position: relative;
+}
+
+.search-section .search-wrap .search-input-wrapper i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.search-section .search-wrap .search-input-wrapper input {
+    width: 100%;
+    padding: 10px 16px 10px 42px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    transition: var(--transition);
+    outline: none;
+}
+
+.search-section .search-wrap .search-input-wrapper input:focus {
+    border-color: var(--primary);
+    background: var(--white);
+    box-shadow: 0 0 0 4px rgba(92,18,31,0.06);
+}
+
+.search-section .search-wrap .search-input-wrapper input::placeholder {
+    color: var(--text-muted);
+}
+
+.search-section .search-wrap .btn-search {
+    padding: 10px 24px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: var(--primary-gradient);
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(92,18,31,0.15);
+}
+
+.search-section .search-wrap .btn-search:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(92,18,31,0.25);
+}
+
+.search-section .search-wrap .btn-clear {
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--white);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.search-section .search-wrap .btn-clear:hover {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
+}
+
+/* =====================================================
+   TABLE SECTION
+   ===================================================== */
+.table-section {
+    background: var(--white);
+    padding: 0 28px 20px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--white);
+}
+
+/* =====================================================
+   TABLE STYLES
+   ===================================================== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 1100px;
+}
+
+/* --- HEADER --- */
+thead {
+    background: var(--bg);
+    border-bottom: 2px solid var(--border);
+}
+
+thead th {
+    padding: 13px 16px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    border-right: 1px solid var(--border-light);
+}
+
+thead th:last-child {
+    border-right: none;
+}
+
+thead th i {
+    margin-right: 6px;
+    font-size: 11px;
+    opacity: 0.5;
+}
+
+/* --- BODY --- */
+tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+tbody tr:last-child {
+    border-bottom: none;
+}
+
+tbody tr:hover {
+    background: rgba(92,18,31,0.02);
+}
+
+tbody td {
+    padding: 13px 16px;
+    vertical-align: middle;
+    border-right: 1px solid var(--border-light);
+}
+
+tbody td:last-child {
+    border-right: none;
+}
+
+/* --- Customer Column --- */
+.customer-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.customer-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(92,18,31,0.12);
+}
+
+.customer-name {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 14px;
+}
+
+/* --- Contact --- */
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.contact-info .phone {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 13px;
+}
+
+.contact-info .phone i {
+    color: var(--primary);
+    font-size: 11px;
+    margin-right: 6px;
+    width: 14px;
+}
+
+.contact-info .email {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.contact-info .email i {
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-right: 6px;
+    width: 14px;
+}
+
+/* --- Badges --- */
+.stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.stat-badge.orders {
+    background: var(--info-bg);
+    color: var(--info);
+}
+
+.stat-badge.purchases {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.stat-badge.last-purchase {
+    background: var(--bg);
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.stat-badge.last-purchase.never {
+    color: var(--text-muted);
+    font-style: italic;
+    background: transparent;
+}
+
+/* --- Notes --- */
+.notes-cell {
+    max-width: 180px;
+    min-width: 100px;
+}
+
+.notes-cell .notes-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    cursor: default;
+}
+
+.notes-cell .notes-text .empty-notes {
+    color: var(--text-muted);
+    font-size: 11px;
+    opacity: 0.4;
+}
+
+/* --- Actions --- */
+.action-group {
+    display: flex;
+    gap: 6px;
+}
+
+.action-btn {
+    padding: 5px 12px;
+    border-radius: var(--radius-xs);
+    border: none;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.action-btn.edit {
+    background: var(--info-bg);
+    color: var(--info);
+}
+
+.action-btn.edit:hover {
+    background: var(--info);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.action-btn.delete {
+    background: var(--danger-bg);
+    color: var(--danger);
+}
+
+.action-btn.delete:hover {
+    background: var(--danger);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* =====================================================
+   EMPTY STATE
+   ===================================================== */
+.empty-state {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.empty-state .empty-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 32px;
+    color: var(--border);
+    border: 2px dashed var(--border);
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    color: var(--text);
+    margin-bottom: 6px;
+    font-weight: 800;
+}
+
+.empty-state p {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+.empty-state .empty-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    background: var(--primary-gradient);
+    color: white;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+    transition: var(--transition);
+    box-shadow: 0 4px 16px rgba(92,18,31,0.2);
+}
+
+.empty-state .empty-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(92,18,31,0.35);
+}
+
+/* =====================================================
+   PAGINATION
+   ===================================================== */
+.pagination-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0 0;
+    border-top: 1px solid var(--border);
+    margin-top: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.pagination-info {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.pagination-info strong {
+    color: var(--text);
+    font-weight: 700;
+}
+
+.pagination {
+    display: flex;
+    gap: 4px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    align-items: center;
+}
+
+.pagination .page-item .page-link {
+    padding: 7px 14px;
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--border);
+    background: var(--white);
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: var(--transition);
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 38px;
+    justify-content: center;
+}
+
+.pagination .page-item .page-link:hover {
+    background: var(--bg);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--primary-gradient);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 4px 16px rgba(92,18,31,0.2);
+}
+
+.pagination .page-item.disabled .page-link {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pagination .page-item.dots .page-link {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: default;
+    padding: 7px 4px;
+    min-width: auto;
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+/* Tablets & Smaller Desktops */
+@media (max-width: 1200px) {
+    .page-header {
+        padding: 16px 20px;
+    }
+    .search-section {
+        padding: 14px 20px;
+    }
+    .table-section {
+        padding: 0 20px 16px;
+    }
+}
+
+/* Medium Screens */
+@media (max-width: 992px) {
+    thead th,
+    tbody td {
+        padding: 11px 12px;
+        font-size: 12px;
+    }
+    
+    .notes-cell {
+        max-width: 120px;
+        min-width: 70px;
+    }
+    
+    .customer-avatar {
+        width: 34px;
+        height: 34px;
+        font-size: 12px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 14px 16px;
+        position: relative;
+    }
+    
+    .page-header .left h1 {
+        font-size: 18px;
+    }
+    
+    .page-header .actions {
+        width: 100%;
+        gap: 8px;
+    }
+    
+    .page-header .actions .total-badge {
+        flex: 1;
+        justify-content: center;
+        font-size: 12px;
+        padding: 7px 14px;
+    }
+    
+    .page-header .actions .btn {
+        flex: 1;
+        justify-content: center;
+        font-size: 12px;
+        padding: 7px 14px;
+    }
+    
+    .search-section {
+        padding: 12px 16px;
+    }
+    
+    .search-section .search-wrap {
+        flex-wrap: wrap;
+        max-width: 100%;
+        gap: 8px;
+    }
+    
+    .search-section .search-wrap .search-input-wrapper {
+        flex: 1 1 100%;
+        min-width: 100%;
+    }
+    
+    .search-section .search-wrap .search-input-wrapper input {
+        padding: 9px 14px 9px 38px;
+        font-size: 13px;
+    }
+    
+    .search-section .search-wrap .btn-search,
+    .search-section .search-wrap .btn-clear {
+        flex: 1;
+        justify-content: center;
+        font-size: 13px;
+        padding: 9px 16px;
+    }
+    
+    .table-section {
+        padding: 0 0 12px;
+    }
+    
+    .table-wrapper {
+        border: none;
+        border-radius: 0;
+    }
+    
+    /* Mobile Card View */
+    thead {
+        display: none;
+    }
+    
+    tbody tr {
+        display: block;
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        margin-bottom: 10px;
+        background: var(--white);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    tbody tr:last-child {
+        margin-bottom: 0;
+    }
+    
+    tbody td {
+        display: flex;
+        align-items: center;
+        padding: 5px 0;
+        border: none !important;
+        gap: 10px;
+    }
+    
+    tbody td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        min-width: 90px;
+        flex-shrink: 0;
+    }
+    
+    tbody td:first-child {
+        padding-top: 0;
+    }
+    
+    tbody td:last-child {
+        padding-bottom: 0;
+    }
+    
+    .customer-cell {
+        flex: 1;
+    }
+    
+    .contact-info {
+        flex: 1;
+    }
+    
+    .notes-cell {
+        max-width: none;
+        min-width: auto;
+        flex: 1;
+    }
+    
+    .notes-cell .notes-text {
+        -webkit-line-clamp: unset;
+        white-space: normal;
+    }
+    
+    .action-group {
+        flex: 1;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    
+    .action-btn {
+        flex: 1;
+        justify-content: center;
+        min-width: 60px;
+        font-size: 10px;
+        padding: 4px 10px;
+    }
+    
+    .pagination-wrap {
+        flex-direction: column;
+        align-items: center;
+        padding: 12px 16px 0;
+        gap: 8px;
+    }
+    
+    .pagination-info {
+        text-align: center;
+        font-size: 12px;
+    }
+    
+    .pagination .page-item .page-link {
+        padding: 5px 10px;
+        font-size: 12px;
+        min-width: 32px;
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+    .page-header .actions {
+        flex-direction: column;
+    }
+    
+    .page-header .actions .total-badge,
+    .page-header .actions .btn {
+        width: 100%;
+        flex: none;
+    }
+    
+    .search-section .search-wrap .btn-search,
+    .search-section .search-wrap .btn-clear {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+    
+    tbody tr {
+        padding: 12px;
+    }
+    
+    tbody td::before {
+        min-width: 70px;
+        font-size: 9px;
+    }
+    
+    .customer-avatar {
+        width: 30px;
+        height: 30px;
+        font-size: 11px;
+    }
+    
+    .customer-name {
+        font-size: 13px;
+    }
+    
+    .stat-badge {
+        font-size: 10px;
+        padding: 3px 10px;
+    }
+    
+    .pagination .page-item .page-link {
+        padding: 4px 8px;
+        font-size: 11px;
+        min-width: 28px;
+    }
+    
+    .pagination-info {
+        font-size: 11px;
+    }
+}
+
+/* Extra Small */
+@media (max-width: 360px) {
+    tbody td::before {
+        min-width: 55px;
+        font-size: 8px;
+    }
+    
+    tbody td {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    
+    .action-btn {
+        font-size: 9px;
+        padding: 3px 6px;
+        min-width: 45px;
+    }
+}
+</style>
+
+<!-- =====================================================
+PAGE CONTENT
+===================================================== -->
+<div class="customer-page">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <div class="left">
+            <div class="icon-box">
+                <i class="fas fa-users"></i>
+            </div>
+            <h1>
+                Customers
+            </h1>
+        </div>
+        <div class="actions">
+            <span class="total-badge">
+                <i class="fas fa-user-check"></i> Total: <strong>{{ total_customers }}</strong>
+            </span>
+            <a href="{% url 'offline_sales:customers_create' %}" class="btn btn-primary-custom">
+                <i class="fas fa-plus-circle"></i> Add Customer
             </a>
         </div>
     </div>
 
-    <!-- Search -->
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-8">
-                    <input type="text" name="search" class="form-control" placeholder="Search by name, phone, or email..." value="{{ search_query }}">
-                </div>
-                <div class="col-md-4">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-search"></i> Search
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Customers Table -->
-    <div class="card shadow">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Phone</th>
-                            <th>Email</th>
-                            <th>Orders</th>
-                            <th>Total Purchases</th>
-                            <th>Last Purchase</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for customer in customers %}
-                        <tr>
-                            <td><strong>{{ customer.full_name }}</strong></td>
-                            <td>{{ customer.phone }}</td>
-                            <td>{{ customer.email|default:"-" }}</td>
-                            <td>{{ customer.total_orders }}</td>
-                            <td>₹{{ customer.total_purchases|floatformat:2 }}</td>
-                            <td>{{ customer.last_purchase_at|date:"M d, Y"|default:"Never" }}</td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <a href="{% url 'offline_sales:customer_edit' customer.id %}" class="btn btn-sm btn-primary" title="Edit">
-                                        <i class="fas fa-edit">Edit</i>
-                                    </a>
-                                    <a href="{% url 'offline_sales:customer_delete' customer.id %}" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this customer?')">
-                                        <i class="fas fa-trash">Delete</i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="7" class="text-center py-4">
-                                <i class="fas fa-users fa-3x text-muted mb-3 d-block"></i>
-                                <h5>No customers found</h5>
-                                <p class="text-muted">Start by adding your first customer.</p>
-                                <a href="{% url 'offline_sales:customer_create' %}" class="btn btn-success mt-2">
-                                    <i class="fas fa-plus"></i> Add Customer
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <!-- SEARCH -->
+    <div class="search-section">
+        <form method="get" class="search-wrap">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" placeholder="Search by name, phone, or email..." value="{{ search_query }}" id="searchInput">
             </div>
-
-            <!-- Pagination -->
-            {% if customers.has_other_pages %}
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    {% if customers.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ customers.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
-                        </li>
-                    {% endif %}
-                    {% for num in customers.paginator.page_range %}
-                        {% if customers.number == num %}
-                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                        {% elif num > customers.number|add:'-3' and num < customers.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                    {% if customers.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ customers.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
+            <button type="submit" class="btn-search">
+                <i class="fas fa-search"></i> Search
+            </button>
+            {% if search_query %}
+                <a href="?" class="btn-clear">
+                    <i class="fas fa-times"></i> Clear
+                </a>
             {% endif %}
-        </div>
+        </form>
     </div>
+
+    <!-- TABLE -->
+    <div class="table-section">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-user"></i> Customer</th>
+                        <th><i class="fas fa-address-card"></i> Contact</th>
+                        <th><i class="fas fa-shopping-bag"></i> Orders</th>
+                        <th><i class="fas fa-rupee-sign"></i> Purchases</th>
+                        <th><i class="fas fa-clock"></i> Last Purchase</th>
+                        <th><i class="fas fa-sticky-note"></i> Notes</th>
+                        <th><i class="fas fa-cog"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                    <tr>
+                        <td data-label="Customer">
+                            <div class="customer-cell">
+                                <div class="customer-avatar">
+                                    {{ customer.full_name|slice:":1"|upper }}
+                                </div>
+                                <span class="customer-name">{{ customer.full_name }}</span>
+                            </div>
+                        </td>
+                        <td data-label="Contact">
+                            <div class="contact-info">
+                                <span class="phone"><i class="fas fa-phone-alt"></i>{{ customer.phone }}</span>
+                                {% if customer.email %}
+                                    <span class="email"><i class="fas fa-envelope"></i>{{ customer.email }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td data-label="Orders">
+                            <span class="stat-badge orders">
+                                <i class="fas fa-shopping-bag"></i> {{ customer.total_orders }}
+                            </span>
+                        </td>
+                        <td data-label="Purchases">
+                            <span class="stat-badge purchases">
+                                <i class="fas fa-rupee-sign"></i> ₹{{ customer.total_purchases|floatformat:2 }}
+                            </span>
+                        </td>
+                        <td data-label="Last Purchase">
+                            <span class="stat-badge last-purchase {% if not customer.last_purchase_at %}never{% endif %}">
+                                <i class="fas fa-clock"></i>
+                                {{ customer.last_purchase_at|date:"M d, Y"|default:"Never" }}
+                            </span>
+                        </td>
+                        <td data-label="Notes" class="notes-cell">
+                            <div class="notes-text">
+                                {% if customer.notes %}
+                                    {{ customer.notes|truncatechars:60 }}
+                                {% else %}
+                                    <span class="empty-notes">—</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td data-label="Actions">
+                            <div class="action-group">
+                                <a href="{% url 'offline_sales:customer_edit' customer.id %}" class="action-btn edit" title="Edit Customer">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a href="{% url 'offline_sales:customer_delete' customer.id %}" class="action-btn delete" title="Delete Customer">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <h3>No Customers Found</h3>
+                                <p>
+                                    {% if search_query %}
+                                        No customers match your search criteria.
+                                    {% else %}
+                                        Start building your customer base by adding your first customer.
+                                    {% endif %}
+                                </p>
+                                <a href="{% url 'offline_sales:customers_create' %}" class="empty-link">
+                                    <i class="fas fa-plus-circle"></i> Add Customer
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAGINATION -->
+        {% if customers.has_other_pages %}
+        <div class="pagination-wrap">
+            <div class="pagination-info">
+                Showing <strong>{{ customers.start_index }}</strong> to <strong>{{ customers.end_index }}</strong> of <strong>{{ customers.paginator.count }}</strong> customers
+            </div>
+            <ul class="pagination">
+                {% if customers.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ customers.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                            <i class="fas fa-chevron-left"></i> Prev
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="fas fa-chevron-left"></i> Prev</span>
+                    </li>
+                {% endif %}
+
+                {% for num in customers.paginator.page_range %}
+                    {% if customers.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > customers.number|add:'-3' and num < customers.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                    {% elif num == customers.number|add:'-3' or num == customers.number|add:'3' %}
+                        <li class="page-item dots">
+                            <span class="page-link">…</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if customers.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ customers.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next <i class="fas fa-chevron-right"></i></span>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+
 </div>
+
+<script>
+// Live search with debounce
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        let timeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                this.closest('form').submit();
+            }, 400);
+        });
+    }
+});
+</script>
+
 {% endblock %}

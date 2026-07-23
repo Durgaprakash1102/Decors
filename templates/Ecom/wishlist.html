@@ -1,408 +1,917 @@
-
+{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}My Wishlist - MyStore{% endblock %}
+{% block title %}My Wishlist - ShubhDecor{% endblock %}
 
-{% block extra_css %}
+{% block content %}
+
 <style>
-    .wishlist-card {
-        transition: all 0.3s ease;
-        border: 1px solid #e9ecef;
+    /* ============================================ */
+    /* WISHLIST PAGE - CLEAN PERFECT DESIGN        */
+    /* ============================================ */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .wishlist-page {
+        background: #f8f6f4;
+        min-height: 100vh;
+        padding: 25px 0 50px;
+    }
+
+    .wishlist-container {
+        max-width: 1360px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* ============================================ */
+    /* HEADER - CLEAN                              */
+    /* ============================================ */
+    .wishlist-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 28px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #e8e3df;
+    }
+
+    .wishlist-header .left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .wishlist-header .left .icon-box {
+        width: 44px;
+        height: 44px;
         border-radius: 12px;
-        overflow: hidden;
-    }
-    .wishlist-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
-    .wishlist-card .card-img-top {
-        border-radius: 0;
-        transition: transform 0.3s ease;
-    }
-    .wishlist-card:hover .card-img-top {
-        transform: scale(1.05);
-    }
-    .wishlist-card .card-body {
-        padding: 15px;
-    }
-    .wishlist-card .card-title {
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 8px;
-        line-height: 1.4;
-        min-height: 40px;
-    }
-    .wishlist-card .card-title a {
-        color: #1a1a2e;
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-    .wishlist-card .card-title a:hover {
-        color: #0d6efd;
-    }
-    .wishlist-card .card-text {
-        margin-bottom: 12px;
-    }
-    .wishlist-card .card-text .current-price {
+        background: #5c121f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
         font-size: 18px;
+        box-shadow: 0 4px 16px rgba(92,18,31,0.08);
+    }
+
+    .wishlist-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 26px;
         font-weight: 700;
-        color: #2d7d46;
+        color: #1a1a2e;
+        margin: 0;
     }
-    .wishlist-card .card-text .original-price {
-        font-size: 14px;
-        color: #999;
-        text-decoration: line-through;
+
+    .wishlist-header h1 span {
+        color: #5c121f;
     }
-    .wishlist-card .card-text .discount-badge {
-        background: #dc3545;
-        color: white;
+
+    .wishlist-header .count-badge {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        color: #5c121f;
+        font-weight: 500;
+        background: rgba(92,18,31,0.06);
+        padding: 4px 16px;
+        border-radius: 30px;
+    }
+
+    .wishlist-header .count-badge strong {
+        font-weight: 700;
+    }
+
+    /* ============================================ */
+    /* PRODUCT GRID - RESPONSIVE                   */
+    /* ============================================ */
+    .wishlist-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+    }
+
+    .wishlist-card {
+        background: #ffffff;
+        border-radius: 14px;
+        overflow: hidden;
+        transition: all 0.4s ease;
+        border: 1px solid #eeebe8;
+        display: flex;
+        flex-direction: row;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        position: relative;
+        height: 200px;
+    }
+
+    .wishlist-card:hover {
+        transform: translateY(-4px);
+        border-color: #d5cec9;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+    }
+
+    /* ============================================ */
+    /* IMAGE - FIXED SIZE (SAME FOR ALL)           */
+    /* ============================================ */
+    .wishlist-card .image-wrap {
+        flex: 0 0 200px;
+        width: 200px;
+        height: 100%;
+        overflow: hidden;
+        background: #faf8f7;
+        position: relative;
+    }
+
+    .wishlist-card .image-wrap a {
+        display: block;
+        height: 100%;
+        width: 100%;
+    }
+
+    .wishlist-card .image-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .wishlist-card:hover .image-wrap img {
+        transform: scale(1.04);
+    }
+
+    .wishlist-card .image-wrap .no-image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        background: #f5f0ed;
+        color: #e0d6d0;
+        font-size: 28px;
+    }
+
+    /* ============================================ */
+    /* BADGES - SMALL & NON-COVERING               */
+    /* ============================================ */
+    .wishlist-card .badge-stock {
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
         padding: 2px 10px;
         border-radius: 12px;
-        font-size: 11px;
+        font-size: 8px;
         font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        z-index: 2;
+        max-width: 80px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
-    .wishlist-card .card-text .offer-badge {
+
+    .badge-stock.in-stock { background: #28a745; color: #fff; }
+    .badge-stock.low-stock { background: #ffc107; color: #000; }
+    .badge-stock.out-of-stock { background: #dc3545; color: #fff; }
+
+    .wishlist-card .badge-offer {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 8px;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
         background: #ff6b6b;
-        color: white;
+        color: #fff;
+        z-index: 2;
+        max-width: 80px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .wishlist-card .badge-discount {
+        position: absolute;
+        top: 8px;
+        left: 8px;
         padding: 2px 10px;
         border-radius: 12px;
-        font-size: 11px;
-        font-weight: 600;
-        animation: pulse-offer 2s infinite;
+        font-size: 8px;
+        font-weight: 700;
+        font-family: 'Inter', sans-serif;
+        background: #dc3545;
+        color: #fff;
+        z-index: 2;
+        max-width: 80px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
-    @keyframes pulse-offer {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-    }
-    .wishlist-card .card-text .offer-name {
-        font-size: 11px;
-        color: #ff6b6b;
-        font-weight: 600;
-        display: block;
-        margin-top: 2px;
-    }
-    .wishlist-card .card-text .savings-text {
-        font-size: 12px;
-        color: #28a745;
-        font-weight: 600;
-        display: block;
-    }
+
+    /* ============================================ */
+    /* DELETE BUTTON - TOP RIGHT CORNER OF CARD    */
+    /* ============================================ */
     .wishlist-card .btn-remove {
         position: absolute;
         top: 10px;
         right: 10px;
-        width: 32px;
-        height: 32px;
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid #e9ecef;
+        background: rgba(255,255,255,0.92);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(0,0,0,0.04);
         color: #dc3545;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         transition: all 0.3s ease;
-        z-index: 2;
+        z-index: 10;
         font-size: 14px;
         padding: 0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
+
     .wishlist-card .btn-remove:hover {
         background: #dc3545;
-        color: white;
-        transform: scale(1.1);
+        color: #fff;
+        transform: scale(1.08);
+        box-shadow: 0 4px 16px rgba(220,53,69,0.15);
     }
-    .wishlist-card .btn-move-cart {
-        width: 100%;
-        padding: 8px;
-        border-radius: 8px;
+
+    .wishlist-card .btn-remove i {
+        font-size: 14px;
+    }
+
+    /* ============================================ */
+    /* BODY - CLEAN CONTENT                        */
+    /* ============================================ */
+    .wishlist-card .body {
+        flex: 1;
+        padding: 14px 16px 14px 18px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-width: 0;
+    }
+
+    .wishlist-card .body .name {
+        font-size: 15px;
         font-weight: 600;
-        font-size: 13px;
-        transition: all 0.3s ease;
-        background: #0d6efd;
-        color: white;
-        border: none;
-        text-decoration: none;
-        display: inline-block;
-        text-align: center;
-    }
-    .wishlist-card .btn-move-cart:hover {
-        background: #0b5ed7;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(13,110,253,0.3);
-        color: white;
-    }
-    .wishlist-card .btn-move-cart.out-of-stock {
-        background: #6c757d;
-        cursor: not-allowed;
-    }
-    .wishlist-card .btn-move-cart.out-of-stock:hover {
-        background: #6c757d;
-        transform: none;
-        box-shadow: none;
-    }
-    .wishlist-card .stock-badge {
-        position: absolute;
-        bottom: 10px;
-        left: 10px;
-        padding: 3px 10px;
-        border-radius: 10px;
-        font-size: 10px;
-        font-weight: 600;
-        z-index: 2;
-    }
-    .wishlist-card .stock-badge.in-stock {
-        background: #d4edda;
-        color: #155724;
-    }
-    .wishlist-card .stock-badge.low-stock {
-        background: #fff3cd;
-        color: #856404;
-    }
-    .wishlist-card .stock-badge.out-of-stock {
-        background: #f8d7da;
-        color: #721c24;
-    }
-    .wishlist-card .product-image-wrapper {
-        position: relative;
+        color: #1a1a2e;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
         overflow: hidden;
-        height: 200px;
-        background: #f8f9fa;
+        text-decoration: none;
+        transition: all 0.3s;
+        font-family: 'Inter', sans-serif;
+        line-height: 1.4;
+        margin-bottom: 2px;
     }
-    .wishlist-card .product-image-wrapper img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s ease;
+
+    .wishlist-card .body .name:hover {
+        color: #5c121f;
     }
-    .wishlist-card:hover .product-image-wrapper img {
-        transform: scale(1.05);
+
+    /* ============================================ */
+    /* DESCRIPTION - CLEAN                         */
+    /* ============================================ */
+    .wishlist-card .body .desc {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        color: #999;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.5;
+        margin-bottom: 4px;
+        min-height: 36px;
+        font-weight: 300;
     }
-    .wishlist-card .product-image-wrapper .no-image {
+
+    /* ============================================ */
+    /* VARIANT - CLEAN                             */
+    /* ============================================ */
+    .wishlist-card .body .variant {
+        font-size: 12px;
+        color: #999;
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 4px;
+    }
+
+    .wishlist-card .body .variant i {
+        margin-right: 4px;
+        color: #5c121f;
+        font-size: 10px;
+    }
+
+    /* ============================================ */
+    /* PRICE + BUTTON - CLEAN                      */
+    /* ============================================ */
+    .wishlist-card .body .bottom-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-top: 8px;
+        border-top: 1px solid #f0edeb;
+    }
+
+    .wishlist-card .body .price-wrap {
         display: flex;
         align-items: center;
-        justify-content: center;
-        height: 100%;
-        color: #adb5bd;
-        font-size: 48px;
+        gap: 6px;
+        flex-wrap: wrap;
     }
-    
-    /* Toast Notification */
+
+    .wishlist-card .body .price-wrap .current {
+        font-size: 18px;
+        font-weight: 700;
+        color: #5c121f;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .wishlist-card .body .price-wrap .original {
+        font-size: 13px;
+        color: #ccc;
+        text-decoration: line-through;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .wishlist-card .body .price-wrap .tag {
+        font-size: 8px;
+        padding: 1px 10px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-family: 'Inter', sans-serif;
+        text-transform: uppercase;
+    }
+
+    .tag.offer { background: #ff6b6b; color: #fff; }
+    .tag.discount { background: #dc3545; color: #fff; }
+
+    .wishlist-card .body .savings {
+        font-size: 11px;
+        color: #28a745;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        display: block;
+        width: 100%;
+    }
+
+    /* ============================================ */
+    /* BUTTON - CLEAN                              */
+    /* ============================================ */
+    .wishlist-card .body .btn-cart {
+        padding: 5px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 12px;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s ease;
+        background: #5c121f;
+        color: #fff;
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .wishlist-card .body .btn-cart:hover {
+        background: #7a1a2b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(92,18,31,0.08);
+    }
+
+    .wishlist-card .body .btn-cart.out-of-stock {
+        background: #e8e3df;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    .wishlist-card .body .btn-cart i {
+        font-size: 12px;
+    }
+
+    /* ============================================ */
+    /* EMPTY STATE                                 */
+    /* ============================================ */
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid #eeebe8;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+    }
+
+    .empty-state .empty-icon {
+        font-size: 52px;
+        color: #e0d6d0;
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .empty-state h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 26px;
+        color: #1a1a2e;
+        margin-bottom: 4px;
+    }
+
+    .empty-state p {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        color: #bbb;
+        max-width: 360px;
+        margin: 0 auto 20px;
+    }
+
+    .empty-state .btn-shop {
+        background: #5c121f;
+        color: #fff;
+        border: none;
+        padding: 10px 32px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+        box-shadow: 0 4px 16px rgba(92,18,31,0.06);
+    }
+
+    .empty-state .btn-shop:hover {
+        background: #7a1a2b;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(92,18,31,0.1);
+    }
+
+    /* ============================================ */
+    /* TOAST                                       */
+    /* ============================================ */
     .toast-container {
         position: fixed;
-        top: 20px;
-        right: 20px;
+        top: 24px;
+        right: 24px;
         z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
     }
+
     .toast {
         padding: 12px 20px;
         border-radius: 10px;
-        color: white;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
         font-weight: 500;
-        margin-bottom: 10px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-        animation: slideInRight 0.5s ease;
-        min-width: 250px;
+        color: #fff;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        animation: slideIn 0.4s ease;
         display: flex;
         align-items: center;
         gap: 10px;
+        min-width: 240px;
+        border: 1px solid rgba(255,255,255,0.05);
     }
+
     .toast.success { background: #28a745; }
     .toast.error { background: #dc3545; }
     .toast.info { background: #17a2b8; }
     .toast.warning { background: #ffc107; color: #1a1a2e; }
+
     .toast .toast-close {
         margin-left: auto;
         cursor: pointer;
-        opacity: 0.8;
-        font-size: 18px;
+        opacity: 0.5;
+        font-size: 16px;
+        transition: all 0.3s;
+        background: none;
+        border: none;
+        color: inherit;
+        padding: 0 4px;
     }
+
     .toast .toast-close:hover { opacity: 1; }
-    @keyframes slideInRight {
-        from { transform: translateX(100px); opacity: 0; }
+
+    @keyframes slideIn {
+        from { transform: translateX(80px); opacity: 0; }
         to { transform: translateX(0); opacity: 1; }
     }
+
+    /* ============================================ */
+    /* RESPONSIVE - PERFECT                        */
+    /* ============================================ */
     
-    @media (max-width: 768px) {
-        .wishlist-card .product-image-wrapper {
-            height: 150px;
+    /* Large Screens - 3 Columns */
+    @media (min-width: 1400px) {
+        .wishlist-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
         }
-        .wishlist-card .card-title {
-            font-size: 13px;
-            min-height: 35px;
+        .wishlist-card {
+            height: 190px;
         }
-        .wishlist-card .card-text .current-price {
-            font-size: 16px;
+        .wishlist-card .image-wrap {
+            flex: 0 0 180px;
+            width: 180px;
         }
     }
-    @media (max-width: 480px) {
-        .wishlist-card .product-image-wrapper {
-            height: 120px;
+
+    /* Desktop - 2 Columns */
+    @media (min-width: 992px) and (max-width: 1399px) {
+        .wishlist-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
         }
-        .wishlist-card .card-body {
-            padding: 10px;
+        .wishlist-card {
+            height: 200px;
         }
-        .wishlist-card .card-title {
+        .wishlist-card .image-wrap {
+            flex: 0 0 200px;
+            width: 200px;
+        }
+    }
+
+    /* Tablet - 2 Columns */
+    @media (min-width: 577px) and (max-width: 991px) {
+        .wishlist-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+        .wishlist-card {
+            height: 180px;
+        }
+        .wishlist-card .image-wrap {
+            flex: 0 0 160px;
+            width: 160px;
+        }
+        .wishlist-card .body {
+            padding: 12px 14px;
+        }
+        .wishlist-card .body .name {
+            font-size: 14px;
+        }
+        .wishlist-card .body .desc {
             font-size: 12px;
             min-height: 30px;
         }
-        .wishlist-card .card-text .current-price {
-            font-size: 14px;
+        .wishlist-card .body .price-wrap .current {
+            font-size: 17px;
         }
-        .wishlist-card .btn-move-cart {
-            font-size: 11px;
-            padding: 6px;
+        .wishlist-header h1 {
+            font-size: 24px;
+        }
+        .wishlist-header .icon-box {
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+        }
+    }
+
+    /* Mobile - 1 Column */
+    @media (max-width: 576px) {
+        .wishlist-container {
+            padding: 0 16px;
+        }
+        .wishlist-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        .wishlist-card {
+            flex-direction: row;
+            height: 150px;
+            border-radius: 12px;
+        }
+        .wishlist-card .image-wrap {
+            flex: 0 0 130px;
+            width: 130px;
+        }
+        .wishlist-card .badge-stock,
+        .wishlist-card .badge-offer,
+        .wishlist-card .badge-discount {
+            font-size: 7px;
+            padding: 1px 8px;
+            max-width: 60px;
+            border-radius: 10px;
+        }
+        .wishlist-card .badge-stock {
+            bottom: 6px;
+            left: 6px;
+        }
+        .wishlist-card .badge-offer {
+            top: 6px;
+            left: 6px;
+        }
+        .wishlist-card .badge-discount {
+            top: 6px;
+            left: 6px;
         }
         .wishlist-card .btn-remove {
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             font-size: 12px;
+            top: 8px;
+            right: 8px;
+        }
+        .wishlist-card .body {
+            padding: 10px 12px;
+        }
+        .wishlist-card .body .name {
+            font-size: 14px;
+            -webkit-line-clamp: 1;
+        }
+        .wishlist-card .body .desc {
+            font-size: 12px;
+            min-height: 0;
+            -webkit-line-clamp: 1;
+            display: block;
+        }
+        .wishlist-card .body .variant {
+            font-size: 11px;
+            margin-bottom: 2px;
+        }
+        .wishlist-card .body .price-wrap .current {
+            font-size: 16px;
+        }
+        .wishlist-card .body .price-wrap .original {
+            font-size: 12px;
+        }
+        .wishlist-card .body .price-wrap .tag {
+            font-size: 7px;
+            padding: 1px 8px;
+        }
+        .wishlist-card .body .savings {
+            font-size: 10px;
+        }
+        .wishlist-card .body .bottom-row {
+            padding-top: 6px;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 4px;
+        }
+        .wishlist-card .body .btn-cart {
+            font-size: 11px;
+            padding: 4px 12px;
+            justify-content: center;
+        }
+        .wishlist-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .wishlist-header h1 {
+            font-size: 22px;
+        }
+        .wishlist-header .icon-box {
+            width: 38px;
+            height: 38px;
+            font-size: 15px;
+        }
+        .wishlist-header .count-badge {
+            font-size: 12px;
+            padding: 3px 14px;
+            align-self: flex-start;
+        }
+        .empty-state {
+            padding: 40px 16px;
+        }
+        .empty-state h3 {
+            font-size: 20px;
+        }
+        .empty-state .empty-icon {
+            font-size: 36px;
+        }
+        .empty-state .btn-shop {
+            font-size: 13px;
+            padding: 8px 24px;
+        }
+        .toast-container {
+            top: 16px;
+            right: 16px;
+            left: 16px;
+        }
+        .toast {
+            font-size: 12px;
+            padding: 10px 16px;
+            min-width: auto;
+        }
+    }
+
+    /* Extra Small Mobile */
+    @media (max-width: 400px) {
+        .wishlist-card {
+            height: 130px;
+        }
+        .wishlist-card .image-wrap {
+            flex: 0 0 110px;
+            width: 110px;
+        }
+        .wishlist-card .badge-stock,
+        .wishlist-card .badge-offer,
+        .wishlist-card .badge-discount {
+            font-size: 6px;
+            padding: 1px 6px;
+            max-width: 50px;
+        }
+        .wishlist-card .btn-remove {
+            width: 24px;
+            height: 24px;
+            font-size: 10px;
+            top: 6px;
+            right: 6px;
+        }
+        .wishlist-card .body {
+            padding: 8px 10px;
+        }
+        .wishlist-card .body .name {
+            font-size: 13px;
+        }
+        .wishlist-card .body .desc {
+            font-size: 11px;
+            display: none;
+        }
+        .wishlist-card .body .price-wrap .current {
+            font-size: 15px;
+        }
+        .wishlist-card .body .price-wrap .original {
+            font-size: 11px;
+        }
+        .wishlist-card .body .btn-cart {
+            font-size: 10px;
+            padding: 3px 10px;
+        }
+        .wishlist-header h1 {
+            font-size: 20px;
+        }
+        .wishlist-header .icon-box {
+            width: 34px;
+            height: 34px;
+            font-size: 13px;
+        }
+        .wishlist-header .count-badge {
+            font-size: 11px;
+            padding: 2px 12px;
         }
     }
 </style>
-{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
+<!-- ============================================ -->
+<!-- WISHLIST PAGE - CLEAN PERFECT                -->
+<!-- ============================================ -->
+<div class="wishlist-page">
+    <div class="wishlist-container">
 
-    <h2 class="mb-4">
-        <i class="fas fa-heart text-danger"></i> My Wishlist
-        <span class="badge bg-secondary ms-2">{{ total_items }}</span>
-    </h2>
-    
-    {% if items %}
-        <div class="row">
+        <!-- Toast Container -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- ===== HEADER ===== -->
+        <div class="wishlist-header">
+            <div class="left">
+                <div class="icon-box">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <h1>Wishlist <span>.</span></h1>
+            </div>
+            <span class="count-badge"><strong>{{ total_items }}</strong> items</span>
+        </div>
+
+        <!-- ===== WISHLIST GRID ===== -->
+        {% if items %}
+        <div class="wishlist-grid">
             {% for item in items %}
-                <div class="col-md-3 col-6 mb-4">
-                    <div class="wishlist-card card h-100">
-                        <div class="product-image-wrapper">
-                            <a href="{% url 'Ecom:product_detail' item.product.id %}">
-                                {% if item.main_image %}
-                                    <img src="{{ item.main_image }}" alt="{{ item.product.name }}" loading="lazy">
-                                {% else %}
-                                    <div class="no-image">
-                                        <i class="fas fa-image"></i>
-                                    </div>
-                                {% endif %}
-                            </a>
-                            
-                            <!-- Stock Badge -->
-                            {% if item.product.is_out_of_stock %}
-                                <span class="stock-badge out-of-stock">
-                                    <i class="fas fa-times-circle"></i> Out of Stock
-                                </span>
-                            {% elif item.product.is_low_stock %}
-                                <span class="stock-badge low-stock">
-                                    <i class="fas fa-exclamation-triangle"></i> {{ item.product.stock_quantity }} left
-                                </span>
+            <div class="wishlist-card">
+                <!-- Image - Fixed Size -->
+                <div class="image-wrap">
+                    <a href="{% url 'Ecom:product_detail' item.product.id %}">
+                        {% if item.main_image %}
+                            <img src="{{ item.main_image }}" alt="{{ item.product.name }}" loading="lazy">
+                        {% else %}
+                            <div class="no-image">
+                                <i class="fas fa-image"></i>
+                            </div>
+                        {% endif %}
+                    </a>
+
+                    <!-- Badges - Small, Non-covering -->
+                    {% if item.product.offer_name and item.product.offer_name != "Product Discount" %}
+                        <span class="badge-offer">Offer</span>
+                    {% elif item.product.discount_percentage > 0 %}
+                        <span class="badge-discount">-{{ item.product.discount_percentage|floatformat:0 }}%</span>
+                    {% endif %}
+
+                    {% if item.product.is_out_of_stock %}
+                        <span class="badge-stock out-of-stock">Out</span>
+                    {% elif item.product.is_low_stock %}
+                        <span class="badge-stock low-stock">{{ item.product.stock_quantity }}</span>
+                    {% else %}
+                        <span class="badge-stock in-stock">In</span>
+                    {% endif %}
+                </div>
+
+                <!-- Body -->
+                <div class="body">
+                    <!-- Name -->
+                    <a href="{% url 'Ecom:product_detail' item.product.id %}" class="name">
+                        {{ item.product.name }}
+                    </a>
+
+                    <!-- Description -->
+                    <div class="desc">
+                        {{ item.product.description|striptags|truncatechars:70|default:"Beautiful piece for your home decor" }}
+                    </div>
+
+                    <!-- Variant -->
+                    {% if item.variant %}
+                        <div class="variant">
+                            <i class="fas fa-cubes"></i>
+                            {% if item.variant.name %}
+                                {{ item.variant.name }}
                             {% else %}
-                                <span class="stock-badge in-stock">
-                                    <i class="fas fa-check-circle"></i> In Stock
-                                </span>
+                                {% if item.variant.color %}{{ item.variant.color }}{% endif %}
+                                {% if item.variant.size %}{% if item.variant.color %} / {% endif %}{{ item.variant.size }}{% endif %}
                             {% endif %}
-                            
-                            <!-- Remove Button -->
-                            <button class="btn-remove" onclick="removeWishlistItem({{ item.id }})" title="Remove from wishlist">
-                                <i class="fas fa-times"></i>
+                        </div>
+                    {% endif %}
+
+                    <!-- Bottom Row -->
+                    <div class="bottom-row">
+                        <div class="price-wrap">
+                            {% if item.product.offer_name and item.product.offer_name != "Product Discount" %}
+                                <span class="current">₹{{ item.product.offer_price|floatformat:2 }}</span>
+                                <span class="original">₹{{ item.product.price|floatformat:2 }}</span>
+                                <span class="tag offer">Offer</span>
+                                <span class="savings"><i class="fas fa-wallet"></i> Save ₹{{ item.product.total_savings|floatformat:2 }}</span>
+                            {% elif item.product.discount_percentage > 0 %}
+                                <span class="current">₹{{ item.product.final_price|floatformat:2 }}</span>
+                                <span class="original">₹{{ item.product.price|floatformat:2 }}</span>
+                                <span class="tag discount">{{ item.product.discount_percentage|floatformat:0 }}%</span>
+                            {% else %}
+                                <span class="current">₹{{ item.product.price|floatformat:2 }}</span>
+                            {% endif %}
+                        </div>
+
+                        {% if item.product.is_out_of_stock %}
+                            <button class="btn-cart out-of-stock" disabled>
+                                <i class="fas fa-times-circle"></i> Out
                             </button>
-                        </div>
-                        
-                        <div class="card-body">
-                            <h6 class="card-title">
-                                <a href="{% url 'Ecom:product_detail' item.product.id %}">
-                                    {{ item.product.name|truncatechars:30 }}
-                                </a>
-                            </h6>
-                            
-                            <!-- ============================================ -->
-                            <!-- PRICE WITH OFFER SUPPORT                    -->
-                            <!-- ============================================ -->
-                            <div class="card-text">
-                                {% if item.product.offer_name and item.product.offer_name != "Product Discount" %}
-                                    <!-- Offer Applied -->
-                                    <span class="current-price">₹{{ item.product.offer_price|floatformat:2 }}</span>
-                                    <span class="original-price ms-1">₹{{ item.product.price|floatformat:2 }}</span>
-                                    <span class="offer-badge ms-1">
-                                        <i class="fas fa-gift"></i> Offer
-                                    </span>
-                                    <span class="offer-name">
-                                        <i class="fas fa-tag"></i> {{ item.product.offer_name }}
-                                    </span>
-                                    <span class="savings-text">
-                                        Save ₹{{ item.product.total_savings|floatformat:2 }}
-                                    </span>
-                                {% elif item.product.discount_percentage > 0 %}
-                                    <!-- Product Discount Only -->
-                                    <span class="current-price">₹{{ item.product.final_price|floatformat:2 }}</span>
-                                    <span class="original-price ms-1">₹{{ item.product.price|floatformat:2 }}</span>
-                                    <span class="discount-badge ms-1">
-                                        {{ item.product.discount_percentage|floatformat:0 }}% OFF
-                                    </span>
-                                {% else %}
-                                    <!-- No Discount -->
-                                    <span class="current-price">₹{{ item.product.price|floatformat:2 }}</span>
-                                {% endif %}
-                            </div>
-                            
-                            <!-- ============================================ -->
-                            <!-- VARIANT INFO (if variant exists)            -->
-                            <!-- ============================================ -->
-                            {% if item.variant %}
-                                <div style="font-size:12px;color:#6c757d;margin-bottom:8px;">
-                                    <i class="fas fa-cubes"></i>
-                                    {% if item.variant.name %}
-                                        {{ item.variant.name }}
-                                    {% else %}
-                                        {% if item.variant.color %}{{ item.variant.color }}{% endif %}
-                                        {% if item.variant.size %}{% if item.variant.color %} / {% endif %}{{ item.variant.size }}{% endif %}
-                                    {% endif %}
-                                    <span class="text-muted">({{ item.variant.sku }})</span>
-                                </div>
-                            {% endif %}
-                            
-                            <div class="d-grid gap-2">
-                                {% if item.product.is_out_of_stock %}
-                                    <a href="#" class="btn-move-cart out-of-stock" onclick="event.preventDefault(); showToast('This product is out of stock', 'warning');">
-                                        <i class="fas fa-times-circle"></i> Out of Stock
-                                    </a>
-                                {% else %}
-                                    <a href="{% url 'Ecom:move_to_cart' item.id %}" class="btn-move-cart">
-                                        <i class="fas fa-shopping-cart"></i> Move to Cart
-                                    </a>
-                                {% endif %}
-                            </div>
-                        </div>
+                        {% else %}
+                            <a href="{% url 'Ecom:move_to_cart' item.id %}" class="btn-cart">
+                                <i class="fas fa-shopping-cart"></i> Add
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
+
+                <!-- DELETE BUTTON - TOP RIGHT CORNER OF CARD -->
+                <button class="btn-remove" onclick="removeWishlistItem({{ item.id }})" title="Remove from wishlist">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
             {% endfor %}
         </div>
-    {% else %}
-        <div class="text-center py-5">
-            <i class="fas fa-heart fa-4x text-muted"></i>
-            <h4 class="mt-3">Your wishlist is empty</h4>
-            <p class="text-muted">Start adding items to your wishlist</p>
-            <a href="{% url 'Ecom:shop' %}" class="btn btn-primary">
-                <i class="fas fa-store"></i> Start Shopping
+        {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+            <span class="empty-icon"><i class="fas fa-heart-broken"></i></span>
+            <h3>Your wishlist is empty</h3>
+            <p>Start adding items you love</p>
+            <a href="{% url 'Ecom:shop' %}" class="btn-shop">
+                <i class="fas fa-store"></i> Explore Products
             </a>
         </div>
-    {% endif %}
+        {% endif %}
+
+    </div>
 </div>
 
 <!-- ============================================ -->
 <!-- JAVASCRIPT                                  -->
 <!-- ============================================ -->
 <script>
-    // ============================================
-    // CSRF TOKEN HELPER
-    // ============================================
     function getCookie(name) {
-        let cookieValue = null;
+        var cookieValue = null;
         if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
@@ -412,60 +921,53 @@
         return cookieValue;
     }
 
-    // ============================================
-    // TOAST NOTIFICATION
-    // ============================================
-    function showToast(message, type = 'success') {
-        const container = document.getElementById('toastContainer');
+    function showToast(message, type) {
+        type = type || 'success';
+        var container = document.getElementById('toastContainer');
         if (!container) return;
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        const icons = {
+        var toast = document.createElement('div');
+        toast.className = 'toast ' + type;
+        var icons = {
             success: 'fa-check-circle',
             error: 'fa-exclamation-circle',
             info: 'fa-info-circle',
             warning: 'fa-exclamation-triangle'
         };
-        toast.innerHTML = `
-            <i class="fas ${icons[type] || icons.info}"></i>
-            <span>${message}</span>
-            <span class="toast-close" onclick="this.parentElement.remove()">&times;</span>
-        `;
+        toast.innerHTML = '<i class="fas ' + (icons[type] || icons.info) + '"></i><span>' + message + '</span><button class="toast-close" onclick="this.parentElement.remove()">&times;</button>';
         container.appendChild(toast);
-        setTimeout(() => {
+        setTimeout(function() {
             if (toast.parentElement) {
                 toast.style.opacity = '0';
                 toast.style.transition = 'opacity 0.3s';
-                setTimeout(() => toast.remove(), 300);
+                setTimeout(function() {
+                    if (toast.parentElement) toast.remove();
+                }, 300);
             }
         }, 5000);
     }
 
-    // ============================================
-    // REMOVE WISHLIST ITEM
-    // ============================================
     function removeWishlistItem(itemId) {
-        if (!confirm('Remove this item from wishlist?')) return;
-        
-        const button = document.querySelector(`button[onclick="removeWishlistItem(${itemId})"]`);
+        if (!confirm('Remove this item from your wishlist?')) return;
+
+        var button = document.querySelector('button[onclick="removeWishlistItem(' + itemId + ')"]');
         if (button) {
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             button.disabled = true;
         }
-        
+
         fetch('{% url "Ecom:remove_from_wishlist" 0 %}'.replace('0', itemId), {
             method: 'POST',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken'),
             }
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
             if (data.success) {
-                showToast('Item removed from wishlist', 'success');
-                setTimeout(() => {
+                showToast('Removed from wishlist', 'success');
+                setTimeout(function() {
                     location.reload();
-                }, 800);
+                }, 600);
             } else {
                 showToast(data.error || 'Error removing item', 'error');
                 if (button) {
@@ -474,7 +976,7 @@
                 }
             }
         })
-        .catch(error => {
+        .catch(function(error) {
             showToast('Network error. Please try again.', 'error');
             if (button) {
                 button.innerHTML = '<i class="fas fa-times"></i>';
@@ -482,25 +984,5 @@
             }
         });
     }
-
-    // ============================================
-    // AUTO-DISMISS TOASTS
-    // ============================================
-    document.addEventListener('DOMContentLoaded', function() {
-        // Auto-dismiss toasts after 5 seconds
-        document.querySelectorAll('.toast').forEach(function(toast) {
-            setTimeout(function() {
-                if (toast.parentElement) {
-                    toast.style.opacity = '0';
-                    toast.style.transition = 'opacity 0.3s';
-                    setTimeout(function() {
-                        if (toast.parentElement) {
-                            toast.remove();
-                        }
-                    }, 300);
-                }
-            }, 5000);
-        });
-    });
 </script>
 {% endblock %}

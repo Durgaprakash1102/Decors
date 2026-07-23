@@ -1,531 +1,2036 @@
-
+<!-- templates/Ecom/admin/replacement_detail.html -->
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
 {% block title %}Replacement Request - Order #{{ order.order_number }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'Ecom:admin_replacement_requests' %}">Replacement Requests</a></li>
-            <li class="breadcrumb-item active">Order #{{ order.order_number }}</li>
-        </ol>
+
+<style>
+:root {
+    --primary: #5c121f;
+    --primary-light: #7a1a2b;
+    --primary-dark: #3d0c14;
+    --secondary: #F4B400;
+    --secondary-light: #f7c948;
+    --bg: #f6f4f2;
+    --white: #ffffff;
+    --border: #ebe7e3;
+    --text: #1d1d1d;
+    --text-light: #6d6d6d;
+    --text-muted: #888888;
+    --success: #2e9d57;
+    --danger: #d64045;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --shadow: 0 8px 24px rgba(0,0,0,0.05);
+    --shadow-hover: 0 12px 36px rgba(92,18,31,0.10);
+    --transition: 0.3s ease;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-xs: 6px;
+    --font-primary: 'Inter', sans-serif;
+    --font-body: 'Inter', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* ============================================================
+   PAGE WRAPPER
+   ============================================================ */
+.page-wrapper {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+/* ============================================================
+   TOP HEADER
+   ============================================================ */
+.top-header {
+    background: var(--primary);
+    padding: 18px 32px;
+    margin: 0;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 4px solid var(--secondary);
+}
+
+.top-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -5%;
+    width: 400px;
+    height: 400px;
+    background: rgba(244, 180, 0, 0.06);
+    border-radius: 50%;
+}
+
+.top-header::after {
+    content: '';
+    position: absolute;
+    bottom: -40%;
+    left: 10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 50%;
+}
+
+.top-header-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.top-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.top-icon {
+    width: 44px;
+    height: 44px;
+    background: rgba(244, 180, 0, 0.15);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary);
+    font-size: 20px;
+    border: 2px solid rgba(244, 180, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.top-title {
+    color: var(--white);
+    font-size: 20px;
+    font-weight: 700;
+    font-family: var(--font-primary);
+    letter-spacing: -0.3px;
+    word-break: break-word;
+}
+
+.top-title span {
+    color: var(--secondary);
+}
+
+.top-sub {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    margin-top: 1px;
+}
+
+.top-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.status-badge-lg {
+    padding: 5px 16px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.status-badge-lg .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.status-badge-lg .dot.pending {
+    background: var(--warning);
+    animation: blink 1.5s ease-in-out infinite;
+}
+.status-badge-lg .dot.approved { background: var(--success); }
+.status-badge-lg .dot.rejected { background: var(--danger); }
+.status-badge-lg .dot.completed { background: #9ca3af; }
+
+.status-badge-lg.pending { background: #fef3c7; color: #92400e; }
+.status-badge-lg.approved { background: #d1fae5; color: #065f46; }
+.status-badge-lg.rejected { background: #fee2e2; color: #991b1b; }
+.status-badge-lg.completed { background: #f3f4f6; color: #374151; }
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* ============================================================
+   BREADCRUMB
+   ============================================================ */
+.breadcrumb-wrap {
+    background: var(--white);
+    padding: 10px 32px;
+    border-bottom: 1px solid var(--border);
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    flex-wrap: wrap;
+}
+
+.breadcrumb a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.breadcrumb a:hover {
+    color: var(--secondary);
+    text-decoration: underline;
+}
+
+.breadcrumb .sep {
+    color: var(--text-muted);
+}
+
+.breadcrumb .current {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+.main-content {
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 0;
+    background: var(--bg);
+}
+
+/* ============================================================
+   LEFT COLUMN
+   ============================================================ */
+.left-col {
+    padding: 18px 24px 20px 32px;
+    background: var(--bg);
+}
+
+/* ============================================================
+   RIGHT COLUMN
+   ============================================================ */
+.right-col {
+    padding: 18px 32px 20px 16px;
+    background: var(--bg);
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.card:last-child {
+    margin-bottom: 0;
+}
+
+.card-header {
+    padding: 12px 18px;
+    background: #faf8f6;
+    border-bottom: 2px solid var(--secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-header .header-icon {
+    color: var(--secondary);
+    font-size: 14px;
+    width: 18px;
+    flex-shrink: 0;
+}
+
+.card-header h5 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    font-family: var(--font-primary);
+    margin: 0;
+}
+
+.card-body {
+    padding: 16px 18px;
+}
+
+/* ============================================================
+   INFO GRID
+   ============================================================ */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 20px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-item .label {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.info-item .value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    word-break: break-word;
+}
+
+.info-item .value .badge {
+    display: inline-block;
+    padding: 1px 12px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.badge-success { background: #d1fae5; color: #065f46; }
+.badge-danger { background: #fee2e2; color: #991b1b; }
+.badge-warning { background: #fef3c7; color: #92400e; }
+.badge-secondary { background: #f3f4f6; color: #374151; }
+.badge-info { background: #dbeafe; color: #1e40af; }
+
+/* ============================================================
+   REPLACEMENT DETAILS
+   ============================================================ */
+.replacement-box {
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    border-left: 3px solid var(--secondary);
+    margin-top: 8px;
+}
+
+.replacement-box p {
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: var(--text-light);
+    word-break: break-word;
+}
+
+.replacement-box p:last-child {
+    margin-bottom: 0;
+}
+
+.replacement-box strong {
+    color: var(--text);
+}
+
+/* ============================================================
+   IMAGE GRID
+   ============================================================ */
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.image-grid .img-item {
+    border-radius: var(--radius-xs);
+    overflow: hidden;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+}
+
+.image-grid .img-item:hover {
+    border-color: var(--secondary);
+    transform: scale(1.03);
+    box-shadow: var(--shadow-hover);
+    z-index: 2;
+}
+
+.image-grid .img-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-grid .img-item .no-img {
+    color: var(--text-muted);
+    font-size: 20px;
+}
+
+.image-grid .img-item .hover-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition);
+    color: var(--white);
+    font-size: 20px;
+}
+
+.image-grid .img-item:hover .hover-overlay {
+    opacity: 1;
+}
+
+/* ============================================================
+   ALERT BOX
+   ============================================================ */
+.alert-box {
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    margin-top: 8px;
+}
+
+.alert-box.success {
+    background: #d1fae5;
+    border: 1px solid #a7f3d0;
+}
+
+.alert-box.success h6 {
+    color: #065f46;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.alert-box.success p {
+    font-size: 12px;
+    color: #065f46;
+    margin-bottom: 3px;
+    word-break: break-word;
+}
+
+.alert-box.success a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.alert-box.success a:hover {
+    color: var(--secondary);
+    text-decoration: underline;
+}
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+.table-wrap {
+    overflow-x: auto;
+    margin-top: 4px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    min-width: 500px;
+}
+
+.table thead {
+    background: var(--bg);
+}
+
+.table thead th {
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--border);
+}
+
+.table tbody td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    word-break: break-word;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background: var(--bg);
+}
+
+.table tfoot td {
+    padding: 8px 12px;
+    font-weight: 700;
+    border-top: 2px solid var(--border);
+}
+
+.table tfoot tr {
+    background: var(--bg);
+}
+
+/* ============================================================
+   SIDEBAR CARDS
+   ============================================================ */
+.sidebar-card {
+    margin-bottom: 12px;
+}
+
+.sidebar-card:last-child {
+    margin-bottom: 0;
+}
+
+.sidebar-card .card-body {
+    padding: 14px 16px;
+}
+
+/* ============================================================
+   FORM
+   ============================================================ */
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+}
+
+.form-group label .required {
+    color: var(--danger);
+}
+
+.form-control {
+    width: 100%;
+    padding: 7px 12px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-xs);
+    font-size: 12px;
+    font-family: var(--font-body);
+    color: var(--text);
+    background: var(--white);
+    transition: var(--transition);
+    outline: none;
+}
+
+.form-control:focus {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgba(244, 180, 0, 0.1);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+
+.form-control.textarea {
+    resize: vertical;
+    min-height: 70px;
+}
+
+.form-control select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236d6d6d' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+}
+
+.form-text {
+    display: block;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ============================================================
+   TRACKING FIELDS
+   ============================================================ */
+.tracking-fields {
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+}
+
+.tracking-fields .form-group:last-child {
+    margin-bottom: 0;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius-xs);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    width: 100%;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background: var(--primary-light);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(92,18,31,0.18);
+}
+
+.btn-success {
+    background: var(--success);
+    color: var(--white);
+}
+
+.btn-success:hover {
+    background: #1e7e3a;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(46,157,87,0.18);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: var(--white);
+}
+
+.btn-danger:hover {
+    background: #b3363a;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(214,64,69,0.18);
+}
+
+.btn-info {
+    background: var(--info);
+    color: var(--white);
+}
+
+.btn-info:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(59,130,246,0.18);
+}
+
+.btn-secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 2px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--border);
+    transform: translateY(-1px);
+}
+
+/* ============================================================
+   QUICK ACTIONS
+   ============================================================ */
+.quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.quick-actions .btn {
+    font-size: 11px;
+    padding: 6px 14px;
+}
+
+/* ============================================================
+   TIMELINE
+   ============================================================ */
+.timeline {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: var(--border);
+}
+
+.timeline li {
+    padding: 0 0 12px 24px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+}
+
+.timeline li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.timeline li .timeline-icon {
+    position: absolute;
+    left: 0;
+    top: 1px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6px;
+    color: var(--white);
+    flex-shrink: 0;
+}
+
+.timeline li .timeline-icon.success { background: var(--success); }
+.timeline li .timeline-icon.warning { background: var(--warning); }
+.timeline li .timeline-icon.info { background: var(--info); }
+.timeline li .timeline-icon.danger { background: var(--danger); }
+.timeline li .timeline-icon.secondary { background: var(--text-muted); }
+
+.timeline li .timeline-content {
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.4;
+}
+
+.timeline li .timeline-content .time {
+    display: block;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+
+.timeline li .timeline-content .sub {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+    word-break: break-word;
+}
+
+/* ============================================================
+   STATUS BOX
+   ============================================================ */
+.status-box {
+    background: var(--bg);
+    border-radius: var(--radius-xs);
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    border-left: 3px solid var(--secondary);
+}
+
+.status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.status-row .label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.status-row .value {
+    font-size: 11px;
+}
+
+/* ============================================================
+   COMPLETED BOX
+   ============================================================ */
+.completed-box {
+    border-radius: var(--radius-xs);
+    padding: 12px 14px;
+    text-align: center;
+}
+
+.completed-box.success {
+    background: #d1fae5;
+}
+
+.completed-box.danger {
+    background: #fee2e2;
+}
+
+.completed-box .icon {
+    font-size: 20px;
+    display: block;
+    margin-bottom: 3px;
+}
+
+.completed-box .icon.success { color: #065f46; }
+.completed-box .icon.danger { color: #991b1b; }
+
+.completed-box strong {
+    font-size: 13px;
+}
+
+.completed-box strong.success { color: #065f46; }
+.completed-box strong.danger { color: #991b1b; }
+
+.completed-box p {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.top-header {
+    animation: fadeInUp 0.35s ease both;
+}
+
+.breadcrumb-wrap {
+    animation: fadeInUp 0.35s ease 0.04s both;
+}
+
+.card {
+    animation: fadeInUp 0.3s ease both;
+}
+
+.card:nth-child(1) { animation-delay: 0.05s; }
+.card:nth-child(2) { animation-delay: 0.08s; }
+.card:nth-child(3) { animation-delay: 0.11s; }
+
+.sidebar-card {
+    animation: fadeInUp 0.3s ease both;
+}
+
+.sidebar-card:nth-child(1) { animation-delay: 0.06s; }
+.sidebar-card:nth-child(2) { animation-delay: 0.09s; }
+.sidebar-card:nth-child(3) { animation-delay: 0.12s; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+/* Tablet and smaller */
+@media (max-width: 1024px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .left-col {
+        padding: 14px 20px 14px 20px;
+    }
+    
+    .right-col {
+        padding: 0 20px 14px 20px;
+    }
+    
+    .top-header {
+        padding: 14px 20px;
+    }
+    
+    .breadcrumb-wrap {
+        padding: 8px 20px;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .image-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+}
+
+/* Mobile landscape and smaller tablets */
+@media (max-width: 768px) {
+    .top-header {
+        padding: 12px 16px;
+    }
+    
+    .top-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .top-left {
+        gap: 10px;
+        width: 100%;
+    }
+    
+    .top-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+        border-radius: 8px;
+    }
+    
+    .top-title {
+        font-size: 17px;
+    }
+    
+    .top-sub {
+        font-size: 11px;
+    }
+    
+    .top-right {
+        width: 100%;
+    }
+    
+    .status-badge-lg {
+        font-size: 10px;
+        padding: 4px 14px;
+    }
+    
+    .breadcrumb-wrap {
+        padding: 6px 16px;
+    }
+    
+    .breadcrumb {
+        font-size: 11px;
+    }
+    
+    .left-col {
+        padding: 12px 14px 12px 14px;
+    }
+    
+    .right-col {
+        padding: 0 14px 12px 14px;
+    }
+    
+    .card-header {
+        padding: 10px 14px;
+    }
+    
+    .card-header h5 {
+        font-size: 13px;
+    }
+    
+    .card-body {
+        padding: 12px 14px;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+    
+    .info-item {
+        padding: 3px 0;
+    }
+    
+    .info-item .value {
+        font-size: 12px;
+    }
+    
+    .image-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 6px;
+    }
+    
+    .table-wrap {
+        margin: 0 -6px;
+        padding: 0 6px;
+    }
+    
+    .table {
+        min-width: 450px;
+        font-size: 11px;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 6px 8px;
+    }
+    
+    .replacement-box {
+        padding: 10px 14px;
+    }
+    
+    .replacement-box p {
+        font-size: 12px;
+    }
+    
+    .sidebar-card .card-body {
+        padding: 12px 14px;
+    }
+    
+    .quick-actions .btn {
+        font-size: 10px;
+        padding: 5px 12px;
+    }
+    
+    .btn {
+        font-size: 11px;
+        padding: 6px 14px;
+    }
+    
+    .form-control {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+    
+    .alert-box {
+        padding: 10px 14px;
+    }
+    
+    .timeline li {
+        padding-bottom: 10px;
+        padding-left: 22px;
+    }
+    
+    .timeline li .timeline-content {
+        font-size: 11px;
+    }
+}
+
+/* Mobile portrait and very small devices */
+@media (max-width: 480px) {
+    .top-header {
+        padding: 10px 12px;
+    }
+    
+    .top-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+        border-radius: 6px;
+    }
+    
+    .top-title {
+        font-size: 15px;
+    }
+    
+    .top-sub {
+        font-size: 10px;
+    }
+    
+    .status-badge-lg {
+        font-size: 9px;
+        padding: 3px 10px;
+    }
+    
+    .status-badge-lg .dot {
+        width: 5px;
+        height: 5px;
+    }
+    
+    .breadcrumb-wrap {
+        padding: 4px 12px;
+    }
+    
+    .breadcrumb {
+        font-size: 10px;
+        gap: 4px;
+    }
+    
+    .left-col {
+        padding: 10px 10px 10px 10px;
+    }
+    
+    .right-col {
+        padding: 0 10px 10px 10px;
+    }
+    
+    .card-header {
+        padding: 8px 10px;
+    }
+    
+    .card-header h5 {
+        font-size: 12px;
+    }
+    
+    .card-body {
+        padding: 10px 10px;
+    }
+    
+    .image-grid {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+        gap: 4px;
+    }
+    
+    .image-grid .img-item .no-img {
+        font-size: 16px;
+    }
+    
+    .btn {
+        font-size: 10px;
+        padding: 5px 12px;
+    }
+    
+    .quick-actions .btn {
+        font-size: 9px;
+        padding: 4px 10px;
+    }
+    
+    .replacement-box {
+        padding: 8px 12px;
+    }
+    
+    .replacement-box p {
+        font-size: 11px;
+    }
+    
+    .info-item .value {
+        font-size: 11px;
+    }
+    
+    .status-row .label {
+        font-size: 9px;
+    }
+    
+    .status-row .value {
+        font-size: 10px;
+    }
+    
+    .timeline li {
+        padding-bottom: 8px;
+        padding-left: 20px;
+    }
+    
+    .timeline li .timeline-icon {
+        width: 12px;
+        height: 12px;
+        font-size: 5px;
+    }
+    
+    .timeline li .timeline-content {
+        font-size: 10px;
+    }
+    
+    .timeline li .timeline-content .time {
+        font-size: 9px;
+    }
+    
+    .timeline li .timeline-content .sub {
+        font-size: 10px;
+    }
+    
+    .card {
+        margin-bottom: 8px;
+    }
+    
+    .sidebar-card {
+        margin-bottom: 8px;
+    }
+    
+    .status-box {
+        padding: 8px 10px;
+        margin-bottom: 10px;
+    }
+    
+    .tracking-fields {
+        padding: 8px 10px;
+        margin-bottom: 10px;
+    }
+    
+    .alert-box {
+        padding: 8px 12px;
+    }
+    
+    .alert-box.success h6 {
+        font-size: 12px;
+    }
+    
+    .alert-box.success p {
+        font-size: 11px;
+    }
+    
+    .table {
+        min-width: 350px;
+        font-size: 10px;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 4px 6px;
+    }
+}
+
+/* Very small phones (320px and below) */
+@media (max-width: 360px) {
+    .top-title {
+        font-size: 13px;
+    }
+    
+    .top-icon {
+        width: 26px;
+        height: 26px;
+        font-size: 12px;
+    }
+    
+    .image-grid {
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: 3px;
+    }
+    
+    .card-header h5 {
+        font-size: 11px;
+    }
+    
+    .info-item .label {
+        font-size: 8px;
+    }
+    
+    .info-item .value {
+        font-size: 10px;
+    }
+    
+    .replacement-box p {
+        font-size: 10px;
+    }
+    
+    .btn {
+        font-size: 9px;
+        padding: 4px 10px;
+    }
+}
+/* ======================================
+   EXTRA SMALL DEVICES (<400px)
+====================================== */
+@media (max-width:400px){
+
+    html,
+    body{
+        overflow-x:hidden;
+    }
+
+    *{
+        box-sizing:border-box;
+        max-width:100%;
+    }
+
+    .main-content{
+        display:block;
+    }
+
+    .left-col,
+    .right-col{
+        width:100%;
+        padding:8px;
+    }
+
+    .card{
+        width:100%;
+        margin-bottom:10px;
+        border-radius:8px;
+    }
+
+    .card-header{
+        padding:8px 10px;
+    }
+
+    .card-header h5{
+        font-size:11px;
+        line-height:1.3;
+    }
+
+    .card-body{
+        padding:10px;
+    }
+
+    /* Header */
+
+    .top-header{
+        padding:10px;
+    }
+
+    .top-header-content{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .top-left{
+        width:100%;
+        gap:8px;
+    }
+
+    .top-right{
+        width:100%;
+    }
+
+    .status-badge-lg{
+        width:100%;
+        justify-content:center;
+        white-space:normal;
+        text-align:center;
+    }
+
+    .top-icon{
+        width:28px;
+        height:28px;
+        font-size:12px;
+    }
+
+    .top-title{
+        font-size:13px;
+        line-height:1.3;
+        word-break:break-word;
+    }
+
+    .top-sub{
+        font-size:10px;
+    }
+
+    /* Info */
+
+    .info-grid{
+        grid-template-columns:1fr;
+    }
+
+    .info-item{
+        padding:6px 0;
+    }
+
+    .info-item .label{
+        font-size:8px;
+    }
+
+    .info-item .value{
+        font-size:10px;
+        word-break:break-word;
+        overflow-wrap:anywhere;
+    }
+
+    /* Images */
+
+    .image-grid{
+        grid-template-columns:repeat(2,1fr);
+        gap:5px;
+    }
+
+    /* Buttons */
+
+    .btn{
+        width:100%;
+        font-size:10px;
+        padding:8px;
+    }
+
+    .quick-actions{
+        gap:6px;
+    }
+
+    /* Forms */
+
+    .form-control{
+        width:100%;
+        font-size:11px;
+        padding:8px;
+    }
+
+    textarea.form-control{
+        min-height:70px;
+    }
+
+    /* Table */
+
+    .table-wrap{
+        overflow-x:auto;
+        margin:0 -10px;
+        padding:0 10px;
+    }
+
+    .table{
+        min-width:520px;
+        font-size:10px;
+    }
+
+    .table th,
+    .table td{
+        padding:5px;
+        white-space:nowrap;
+    }
+
+    /* Timeline */
+
+    .timeline li{
+        padding-left:18px;
+    }
+
+    .timeline li .timeline-icon{
+        width:10px;
+        height:10px;
+        font-size:5px;
+    }
+
+    .timeline-content{
+        font-size:10px;
+    }
+
+    /* Long text */
+
+    .replacement-box,
+    .alert-box,
+    .status-box{
+        word-break:break-word;
+        overflow-wrap:anywhere;
+    }
+
+    pre,
+    a,
+    span,
+    p{
+        overflow-wrap:anywhere;
+        word-break:break-word;
+    }
+}
+/* Tablet / Laptop */
+@media (min-width:769px) and (max-width:1200px){
+
+    .main-content{
+        display:grid;
+        grid-template-columns:1fr;
+        gap:20px;
+    }
+
+    .left-col{
+        padding:18px;
+    }
+
+    .right-col{
+        padding:0 18px 18px;
+        width:100%;
+        max-width:100%;
+    }
+}
+</style>
+
+<!-- ============================================================
+   TOP HEADER
+   ============================================================ -->
+<div class="top-header">
+    <div class="top-header-content">
+        <div class="top-left">
+            <div class="top-icon">
+                <i class="fas fa-exchange-alt"></i>
+            </div>
+            <div>
+                <div class="top-title">Replacement Request <span>#{{ order.order_number }}</span></div>
+                <div class="top-sub">Manage replacement details and take actions</div>
+            </div>
+        </div>
+        <div class="top-right">
+            {% if order.replacement_completed %}
+                <span class="status-badge-lg completed">
+                    <span class="dot completed"></span> Completed
+                </span>
+            {% elif order.replacement_approved %}
+                <span class="status-badge-lg approved">
+                    <span class="dot approved"></span> Approved
+                </span>
+            {% elif order.replacement_rejected %}
+                <span class="status-badge-lg rejected">
+                    <span class="dot rejected"></span> Rejected
+                </span>
+            {% else %}
+                <span class="status-badge-lg pending">
+                    <span class="dot pending"></span> Pending
+                </span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+   BREADCRUMB
+   ============================================================ -->
+<div class="breadcrumb-wrap">
+    <nav class="breadcrumb">
+        <a href="{% url 'Ecom:admin_replacement_requests' %}">Replacement Requests</a>
+        <span class="sep">›</span>
+        <span class="current">Order #{{ order.order_number }}</span>
     </nav>
+</div>
 
-    <div class="row">
-        <div class="col-md-8">
-            <!-- Order Details Card -->
-            <div class="card shadow mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Replacement Request - Order #{{ order.order_number }}</h5>
+<!-- ============================================================
+   MAIN CONTENT
+   ============================================================ -->
+<div class="main-content">
+
+    <!-- ===== LEFT COLUMN ===== -->
+    <div class="left-col">
+
+        <!-- ===== ORDER INFO CARD ===== -->
+        <div class="card">
+            <div class="card-header">
+                <span class="header-icon"><i class="fas fa-info-circle"></i></span>
+                <h5>Order Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">Customer</span>
+                        <span class="value">{{ order.user.full_name }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Email</span>
+                        <span class="value">{{ order.user.email }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Phone</span>
+                        <span class="value">{{ order.user.phone|default:"N/A" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Order Date</span>
+                        <span class="value">{{ order.created_at|date:"F d, Y H:i" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Delivery Date</span>
+                        <span class="value">{{ order.delivery_date|date:"F d, Y"|default:"Not delivered" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Order Status</span>
+                        <span class="value">
+                            <span class="badge {% if order.status == 'delivered' %}badge-success{% elif order.status == 'cancelled' %}badge-danger{% else %}badge-secondary{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Payment Status</span>
+                        <span class="value">
+                            <span class="badge {% if order.payment_status == 'paid' %}badge-success{% elif order.payment_status == 'refunded' %}badge-info{% else %}badge-warning{% endif %}">
+                                {{ order.get_payment_status_display }}
+                            </span>
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Total Amount</span>
+                        <span class="value" style="font-weight:700;color:var(--primary);font-size:15px;">₹{{ order.total_amount }}</span>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <!-- Customer Info -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Customer:</strong> {{ order.user.full_name }}</p>
-                            <p><strong>Email:</strong> {{ order.user.email }}</p>
-                            <p><strong>Phone:</strong> {{ order.user.phone|default:"N/A" }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Order Date:</strong> {{ order.created_at|date:"F d, Y H:i" }}</p>
-                            <p><strong>Delivery Date:</strong> {{ order.delivery_date|date:"F d, Y"|default:"Not delivered" }}</p>
-                            <p><strong>Order Status:</strong> 
-                                <span class="badge bg-{% if order.status == 'delivered' %}success{% elif order.status == 'cancelled' %}danger{% else %}secondary{% endif %}">
-                                    {{ order.get_status_display }}
-                                </span>
-                            </p>
-                            <p><strong>Payment Status:</strong> 
-                                <span class="badge bg-{% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'refunded' %}info{% else %}warning{% endif %}">
-                                    {{ order.get_payment_status_display }}
-                                </span>
-                            </p>
-                            <p><strong>Total Amount:</strong> ₹{{ order.total_amount }}</p>
-                            <p><strong>Replacement Status:</strong>
-                                <span class="badge bg-{% if order.replacement_completed %}success{% elif order.replacement_approved %}warning{% elif order.replacement_rejected %}danger{% else %}secondary{% endif %}">
-                                    {{ order.replacement_status_display }}
-                                </span>
-                            </p>
-                        </div>
-                    </div>
 
-                    <!-- Replacement Details -->
-                    <div class="mt-3">
-                        <h6>Replacement Details:</h6>
-                        <div class="bg-light p-3 rounded">
-                            <p><strong>Reason:</strong> {{ order.get_replacement_reason_display }}</p>
-                            <p><strong>Description:</strong></p>
-                            <p style="white-space: pre-line;">{{ order.replacement_description }}</p>
-                            <p class="text-muted mt-2">
-                                <small>Requested on: {{ order.replacement_requested_at|date:"F d, Y H:i" }}</small>
-                            </p>
-                        </div>
+                <!-- Replacement Details -->
+                <div style="margin-top:12px;">
+                    <h6 style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;">
+                        <i class="fas fa-comment" style="color:var(--secondary);"></i> Replacement Details
+                    </h6>
+                    <div class="replacement-box">
+                        <p><strong>Reason:</strong> {{ order.get_replacement_reason_display }}</p>
+                        <p><strong>Description:</strong></p>
+                        <p style="white-space:pre-line;font-size:12px;color:var(--text-light);">{{ order.replacement_description }}</p>
+                        <p style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+                            <i class="fas fa-clock"></i> Requested on: {{ order.replacement_requested_at|date:"F d, Y H:i" }}
+                        </p>
                     </div>
+                </div>
 
-                    <!-- Replacement Images -->
-                    {% if replacement_images %}
-                    <div class="mt-3">
-                        <h6>Replacement Images:</h6>
-                        <div class="row">
-                            {% for image in replacement_images %}
-                            <div class="col-3 mb-2">
-                                <a href="{{ image }}" target="_blank">
-                                    <img src="{{ image }}" class="img-fluid rounded border" style="height: 120px; width: 100%; object-fit: cover;">
-                                </a>
+                <!-- Replacement Images -->
+                {% if replacement_images %}
+                <div style="margin-top:12px;">
+                    <h6 style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;">
+                        <i class="fas fa-image" style="color:var(--secondary);"></i> Replacement Images
+                        <span style="font-size:10px;font-weight:400;color:var(--text-muted);">({{ replacement_images|length }})</span>
+                    </h6>
+                    <div class="image-grid" id="imageGrid">
+                        {% for image in replacement_images %}
+                        <a href="{{ image }}" target="_blank" class="img-item" data-index="{{ forloop.counter0 }}">
+                            <img src="{{ image }}" alt="Replacement image {{ forloop.counter }}" loading="lazy">
+                            <div class="hover-overlay">
+                                <i class="fas fa-external-link-alt"></i>
                             </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Replacement Order -->
+                {% if replacement_order %}
+                <div style="margin-top:12px;">
+                    <div class="alert-box success">
+                        <h6><i class="fas fa-check-circle"></i> Replacement Order Created</h6>
+                        <p>
+                            <strong>Order #:</strong> 
+                            <a href="{% url 'Ecom:admin_order_detail' replacement_order.id %}">
+                                {{ replacement_order.order_number }}
+                            </a>
+                        </p>
+                        <p><strong>Status:</strong> {{ replacement_order.get_status_display }}</p>
+                        <p><strong>Amount:</strong> ₹{{ replacement_order.total_amount }} (Free)</p>
+                        {% if replacement_order.tracking_number %}
+                        <p><strong>Tracking:</strong> {{ replacement_order.tracking_number }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ===== ORDER ITEMS CARD ===== -->
+        <div class="card">
+            <div class="card-header">
+                <span class="header-icon"><i class="fas fa-box"></i></span>
+                <h5>Order Items</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>SKU</th>
+                                <th style="text-align:center;">Qty</th>
+                                <th style="text-align:right;">Price</th>
+                                <th style="text-align:right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>{{ item.product_name }}</td>
+                                <td>{{ item.sku }}</td>
+                                <td style="text-align:center;">{{ item.quantity }}</td>
+                                <td style="text-align:right;">₹{{ item.final_price }}</td>
+                                <td style="text-align:right;">₹{{ item.total }}</td>
+                            </tr>
                             {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Replacement Order -->
-                    {% if replacement_order %}
-                    <div class="mt-4">
-                        <div class="alert alert-success">
-                            <h6><i class="fas fa-check-circle"></i> Replacement Order Created</h6>
-                            <p class="mb-0">
-                                <strong>Order #:</strong> 
-                                <a href="{% url 'Ecom:admin_order_detail' replacement_order.id %}">
-                                    {{ replacement_order.order_number }}
-                                </a>
-                            </p>
-                            <p class="mb-0"><strong>Status:</strong> {{ replacement_order.get_status_display }}</p>
-                            <p class="mb-0"><strong>Amount:</strong> ₹{{ replacement_order.total_amount }} (Free)</p>
-                            {% if replacement_order.tracking_number %}
-                            <p class="mb-0"><strong>Tracking:</strong> {{ replacement_order.tracking_number }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Order Items -->
-                    <div class="mt-4">
-                        <h6>Order Items:</h6>
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>SKU</th>
-                                        <th>Quantity</th>
-                                        <th>Price</th>
-                                        <th>Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for item in items %}
-                                    <tr>
-                                        <td>{{ item.product_name }}</td>
-                                        <td>{{ item.sku }}</td>
-                                        <td>{{ item.quantity }}</td>
-                                        <td>₹{{ item.final_price }}</td>
-                                        <td>₹{{ item.total }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                                <tfoot>
-                                    <tr class="table-active">
-                                        <td colspan="4" class="text-end"><strong>Grand Total:</strong></td>
-                                        <td><strong>₹{{ order.total_amount }}</strong></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Transactions -->
-                    <div class="mt-4">
-                        <h6>Transaction History:</h6>
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Type</th>
-                                        <th>Amount</th>
-                                        <th>Status</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for tx in transactions %}
-                                    <tr>
-                                        <td>{{ tx.get_transaction_type_display }}</td>
-                                        <td>₹{{ tx.amount }}</td>
-                                        <td>
-                                            <span class="badge bg-{% if tx.status == 'success' %}success{% elif tx.status == 'pending' %}warning{% else %}danger{% endif %}">
-                                                {{ tx.get_status_display }}
-                                            </span>
-                                        </td>
-                                        <td>{{ tx.created_at|date:"F d, Y H:i" }}</td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="4" class="text-center text-muted">No transactions</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" style="text-align:right;"><strong>Grand Total:</strong></td>
+                                <td style="text-align:right;font-weight:700;color:var(--primary);">₹{{ order.total_amount }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <!-- Admin Action Card -->
-            <div class="card shadow mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-tools"></i> Admin Actions</h5>
-                </div>
-                <div class="card-body">
-                    <!-- Current Status -->
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Current Status:</strong> 
-                        <span class="badge bg-{% if order.replacement_completed %}success{% elif order.replacement_approved %}warning{% elif order.replacement_rejected %}danger{% else %}secondary{% endif %}">
-                            {{ order.replacement_status_display }}
-                        </span>
-                        <br>
-                        <strong>Order Status:</strong> 
-                        <span class="badge bg-{% if order.status == 'delivered' %}success{% elif order.status == 'cancelled' %}danger{% else %}secondary{% endif %}">
-                            {{ order.get_status_display }}
-                        </span>
-                    </div>
-
-                    <!-- Only show action form if not already completed -->
-                    {% if not order.replacement_completed and not order.status == 'cancelled' %}
-                    <form method="post" id="replacementForm">
-                        {% csrf_token %}
-                        
-                        <div class="mb-3">
-                            <label for="{{ form.action.id_for_label }}" class="form-label">Action <span class="text-danger">*</span></label>
-                            {{ form.action }}
-                            <small class="text-muted">Select an action to perform on this replacement request.</small>
-                        </div>
-
-                        <!-- Tracking Fields - Shown for shipping/delivery actions -->
-                        <div class="mb-3" id="trackingFields" style="display:none;">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h6 class="card-title">📦 Tracking Information</h6>
-                                    <div class="mb-2">
-                                        <label for="{{ form.tracking_number.id_for_label }}" class="form-label">Tracking Number</label>
-                                        {{ form.tracking_number }}
-                                        <small class="text-muted">Enter the tracking number for the replacement shipment.</small>
-                                    </div>
-                                    <div class="mb-2">
-                                        <label for="{{ form.tracking_url.id_for_label }}" class="form-label">Tracking URL</label>
-                                        {{ form.tracking_url }}
-                                        <small class="text-muted">Optional: Enter the tracking URL for customer to track.</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Notes -->
-                        <div class="mb-3">
-                            <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
-                            {{ form.notes }}
-                            <small class="text-muted">Add any notes about this action (optional).</small>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100" id="submitBtn">
-                            <i class="fas fa-check"></i> Apply Action
-                        </button>
-                    </form>
-                    {% else %}
-                    <div class="alert {% if order.replacement_completed %}alert-success{% else %}alert-danger{% endif %}">
-                        <i class="fas fa-check-circle"></i>
-                        <strong>
-                            {% if order.replacement_completed %}
-                                Replacement Already Completed
-                            {% elif order.status == 'cancelled' %}
-                                Order Cancelled
-                            {% endif %}
-                        </strong>
-                        <p class="mb-0 small">
-                            {% if order.replacement_completed %}
-                                This replacement was completed on {{ order.replacement_completed_at|date:"F d, Y H:i" }}
-                            {% elif order.status == 'cancelled' %}
-                                This order was cancelled on {{ order.cancelled_at|date:"F d, Y H:i" }}
-                            {% endif %}
-                        </p>
-                    </div>
-                    {% endif %}
-
-                    <!-- Quick Actions - Only show if not completed -->
-                    {% if not order.replacement_completed and not order.status == 'cancelled' %}
-                    <div class="card shadow mb-4">
-                        <div class="card-header bg-secondary text-white">
-                            <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-grid gap-2">
-                                {% if order.replacement_requested and not order.replacement_approved and not order.replacement_rejected %}
-                                    <button class="btn btn-success" onclick="quickAction('approve')">
-                                        <i class="fas fa-check"></i> Quick Approve
-                                    </button>
-                                    <button class="btn btn-danger" onclick="quickAction('reject')">
-                                        <i class="fas fa-times"></i> Quick Reject
-                                    </button>
-                                {% endif %}
-                                {% if order.replacement_approved and not order.replacement_completed %}
-                                    {% if replacement_order %}
-                                        {% if replacement_order.status == 'processing' %}
-                                            <button class="btn btn-info" onclick="quickActionWithTracking('mark_shipped')">
-                                                <i class="fas fa-shipping-fast"></i> Mark as Shipped
-                                            </button>
-                                        {% endif %}
-                                        {% if replacement_order.status == 'shipped' %}
-                                            <button class="btn btn-success" onclick="quickAction('mark_delivered')">
-                                                <i class="fas fa-check-circle"></i> Mark as Delivered
-                                            </button>
-                                        {% endif %}
-                                    {% endif %}
-                                    <button class="btn btn-secondary" onclick="quickAction('complete_replacement')">
-                                        <i class="fas fa-flag-checkered"></i> Complete Replacement
-                                    </button>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
+        <!-- ===== TRANSACTIONS CARD ===== -->
+        <div class="card">
+            <div class="card-header">
+                <span class="header-icon"><i class="fas fa-receipt"></i></span>
+                <h5>Transaction History</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th style="text-align:right;">Amount</th>
+                                <th style="text-align:center;">Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in transactions %}
+                            <tr>
+                                <td>{{ tx.get_transaction_type_display }}</td>
+                                <td style="text-align:right;">₹{{ tx.amount }}</td>
+                                <td style="text-align:center;">
+                                    <span class="badge {% if tx.status == 'success' %}badge-success{% elif tx.status == 'pending' %}badge-warning{% else %}badge-danger{% endif %}">
+                                        {{ tx.get_status_display }}
+                                    </span>
+                                </td>
+                                <td style="font-size:11px;color:var(--text-muted);">{{ tx.created_at|date:"F d, Y H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" style="text-align:center;color:var(--text-muted);padding:16px 0;">No transactions</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Timeline Card -->
-            <div class="card shadow">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-history"></i> Replacement Timeline</h5>
-                </div>
-                <div class="card-body">
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <i class="fas fa-check-circle text-success"></i>
-                            Order Placed - {{ order.created_at|date:"F d, Y H:i" }}
-                        </li>
-                        {% if order.delivery_date %}
-                        <li class="mb-2">
-                            <i class="fas fa-truck text-info"></i>
-                            Delivered - {{ order.delivery_date|date:"F d, Y" }}
-                        </li>
-                        {% endif %}
-                        {% if order.replacement_requested %}
-                        <li class="mb-2">
-                            <i class="fas fa-clock text-warning"></i>
-                            Replacement Requested - {{ order.replacement_requested_at|date:"F d, Y H:i" }}
-                            <br><small class="text-muted">Reason: {{ order.get_replacement_reason_display }}</small>
-                        </li>
-                        {% endif %}
-                        {% if order.replacement_approved %}
-                        <li class="mb-2">
-                            <i class="fas fa-check-circle text-success"></i>
-                            Replacement Approved - {{ order.replacement_approved_at|date:"F d, Y H:i" }}
-                        </li>
-                        {% endif %}
-                        {% if order.replacement_rejected %}
-                        <li class="mb-2">
-                            <i class="fas fa-times-circle text-danger"></i>
-                            Replacement Rejected - {{ order.replacement_rejected_at|date:"F d, Y H:i" }}
-                            <br><small class="text-muted">Reason: {{ order.replacement_rejection_reason }}</small>
-                        </li>
-                        {% endif %}
-                        {% if replacement_order %}
-                        <li class="mb-2">
-                            <i class="fas fa-file-invoice text-info"></i>
-                            Replacement Order Created - {{ replacement_order.created_at|date:"F d, Y H:i" }}
-                        </li>
-                        {% if replacement_order.status == 'shipped' or replacement_order.status == 'delivered' %}
-                        <li class="mb-2">
-                            <i class="fas fa-shipping-fast text-info"></i>
-                            Replacement Shipped - 
-                            {% if replacement_order.updated_at %}
-                                {{ replacement_order.updated_at|date:"F d, Y H:i" }}
+    <!-- ===== RIGHT COLUMN ===== -->
+    <div class="right-col">
+
+        <!-- ===== ADMIN ACTIONS CARD ===== -->
+        <div class="sidebar-card card">
+            <div class="card-header">
+                <span class="header-icon"><i class="fas fa-tools"></i></span>
+                <h5>Admin Actions</h5>
+            </div>
+            <div class="card-body">
+                <!-- Current Status -->
+                <div class="status-box">
+                    <div class="status-row">
+                        <span class="label">Current Status:</span>
+                        <span class="value">
+                            {% if order.replacement_completed %}
+                                <span class="badge badge-success">Completed</span>
+                            {% elif order.replacement_approved %}
+                                <span class="badge badge-warning">Approved</span>
+                            {% elif order.replacement_rejected %}
+                                <span class="badge badge-danger">Rejected</span>
                             {% else %}
-                                {{ replacement_order.created_at|date:"F d, Y H:i" }}
+                                <span class="badge badge-secondary">Pending</span>
                             {% endif %}
-                            {% if replacement_order.tracking_number %}
-                                <br><small>Tracking: {{ replacement_order.tracking_number }}</small>
-                            {% endif %}
-                        </li>
-                        {% endif %}
-                        {% if replacement_order.delivery_date %}
-                        <li class="mb-2">
-                            <i class="fas fa-check-circle text-success"></i>
-                            Replacement Delivered - {{ replacement_order.delivery_date|date:"F d, Y" }}
-                        </li>
-                        {% endif %}
-                        {% endif %}
-                        {% if order.replacement_completed %}
-                        <li class="mb-2">
-                            <i class="fas fa-flag-checkered text-success"></i>
-                            Replacement Completed - {{ order.replacement_completed_at|date:"F d, Y H:i" }}
-                        </li>
-                        {% endif %}
-                    </ul>
+                        </span>
+                    </div>
+                    <div class="status-row" style="margin-top:3px;">
+                        <span class="label">Order Status:</span>
+                        <span class="value">
+                            <span class="badge {% if order.status == 'delivered' %}badge-success{% elif order.status == 'cancelled' %}badge-danger{% else %}badge-secondary{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </span>
+                    </div>
                 </div>
+
+                <!-- Action Form -->
+                {% if not order.replacement_completed and not order.status == 'cancelled' %}
+                <form method="post" id="replacementForm">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="{{ form.action.id_for_label }}">Action <span class="required">*</span></label>
+                        {{ form.action }}
+                        <span class="form-text">Select an action to perform.</span>
+                    </div>
+
+                    <div class="tracking-fields" id="trackingFields" style="display:none;">
+                        <div class="form-group">
+                            <label for="{{ form.tracking_number.id_for_label }}">Tracking Number</label>
+                            {{ form.tracking_number }}
+                            <span class="form-text">Enter the tracking number.</span>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label for="{{ form.tracking_url.id_for_label }}">Tracking URL</label>
+                            {{ form.tracking_url }}
+                            <span class="form-text">Optional tracking URL.</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.notes.id_for_label }}">Notes</label>
+                        {{ form.notes }}
+                        <span class="form-text">Add any notes about this action.</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-check"></i> Apply Action
+                    </button>
+                </form>
+                {% else %}
+                <div class="completed-box {% if order.replacement_completed %}success{% else %}danger{% endif %}">
+                    <span class="icon {% if order.replacement_completed %}success{% else %}danger{% endif %}">
+                        <i class="fas {% if order.replacement_completed %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                    </span>
+                    <strong class="{% if order.replacement_completed %}success{% else %}danger{% endif %}">
+                        {% if order.replacement_completed %}Replacement Completed{% else %}Order Cancelled{% endif %}
+                    </strong>
+                    <p>
+                        {% if order.replacement_completed %}
+                            {{ order.replacement_completed_at|date:"F d, Y H:i" }}
+                        {% elif order.status == 'cancelled' %}
+                            {{ order.cancelled_at|date:"F d, Y H:i" }}
+                        {% endif %}
+                    </p>
+                </div>
+                {% endif %}
+
+                <!-- Quick Actions -->
+                {% if not order.replacement_completed and not order.status == 'cancelled' %}
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+                    <h6 style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
+                        <i class="fas fa-bolt" style="color:var(--secondary);"></i> Quick Actions
+                    </h6>
+                    <div class="quick-actions">
+                        {% if order.replacement_requested and not order.replacement_approved and not order.replacement_rejected %}
+                            <button class="btn btn-success" onclick="quickAction('approve')">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button class="btn btn-danger" onclick="quickAction('reject')">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        {% endif %}
+                        {% if order.replacement_approved and not order.replacement_completed %}
+                            {% if replacement_order %}
+                                {% if replacement_order.status == 'processing' %}
+                                    <button class="btn btn-info" onclick="quickActionWithTracking('mark_shipped')">
+                                        <i class="fas fa-shipping-fast"></i> Mark Shipped
+                                    </button>
+                                {% endif %}
+                                {% if replacement_order.status == 'shipped' %}
+                                    <button class="btn btn-success" onclick="quickAction('mark_delivered')">
+                                        <i class="fas fa-check-circle"></i> Mark Delivered
+                                    </button>
+                                {% endif %}
+                            {% endif %}
+                            <button class="btn btn-secondary" onclick="quickAction('complete_replacement')">
+                                <i class="fas fa-flag-checkered"></i> Complete
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ===== TIMELINE CARD ===== -->
+        <div class="sidebar-card card">
+            <div class="card-header">
+                <span class="header-icon"><i class="fas fa-history"></i></span>
+                <h5>Replacement Timeline</h5>
+            </div>
+            <div class="card-body" style="padding:12px 14px;">
+                <ul class="timeline">
+                    <li>
+                        <span class="timeline-icon success"><i class="fas fa-check"></i></span>
+                        <div class="timeline-content">
+                            Order Placed
+                            <span class="time">{{ order.created_at|date:"F d, Y H:i" }}</span>
+                        </div>
+                    </li>
+                    {% if order.delivery_date %}
+                    <li>
+                        <span class="timeline-icon info"><i class="fas fa-truck"></i></span>
+                        <div class="timeline-content">
+                            Delivered
+                            <span class="time">{{ order.delivery_date|date:"F d, Y" }}</span>
+                        </div>
+                    </li>
+                    {% endif %}
+                    {% if order.replacement_requested %}
+                    <li>
+                        <span class="timeline-icon warning"><i class="fas fa-clock"></i></span>
+                        <div class="timeline-content">
+                            Replacement Requested
+                            <span class="time">{{ order.replacement_requested_at|date:"F d, Y H:i" }}</span>
+                            <span class="sub">Reason: {{ order.get_replacement_reason_display }}</span>
+                        </div>
+                    </li>
+                    {% endif %}
+                    {% if order.replacement_approved %}
+                    <li>
+                        <span class="timeline-icon success"><i class="fas fa-check"></i></span>
+                        <div class="timeline-content">
+                            Replacement Approved
+                            <span class="time">{{ order.replacement_approved_at|date:"F d, Y H:i" }}</span>
+                        </div>
+                    </li>
+                    {% endif %}
+                    {% if order.replacement_rejected %}
+                    <li>
+                        <span class="timeline-icon danger"><i class="fas fa-times"></i></span>
+                        <div class="timeline-content">
+                            Replacement Rejected
+                            <span class="time">{{ order.replacement_rejected_at|date:"F d, Y H:i" }}</span>
+                            <span class="sub">Reason: {{ order.replacement_rejection_reason }}</span>
+                        </div>
+                    </li>
+                    {% endif %}
+                    {% if replacement_order %}
+                    <li>
+                        <span class="timeline-icon info"><i class="fas fa-file-invoice"></i></span>
+                        <div class="timeline-content">
+                            Replacement Order Created
+                            <span class="time">{{ replacement_order.created_at|date:"F d, Y H:i" }}</span>
+                        </div>
+                    </li>
+                    {% if replacement_order.status == 'shipped' or replacement_order.status == 'delivered' %}
+                    <li>
+                        <span class="timeline-icon info"><i class="fas fa-shipping-fast"></i></span>
+                        <div class="timeline-content">
+                            Replacement Shipped
+                            <span class="time">{{ replacement_order.updated_at|date:"F d, Y H:i" }}</span>
+                            {% if replacement_order.tracking_number %}
+                            <span class="sub">Tracking: {{ replacement_order.tracking_number }}</span>
+                            {% endif %}
+                        </div>
+                    </li>
+                    {% endif %}
+                    {% if replacement_order.delivery_date %}
+                    <li>
+                        <span class="timeline-icon success"><i class="fas fa-check"></i></span>
+                        <div class="timeline-content">
+                            Replacement Delivered
+                            <span class="time">{{ replacement_order.delivery_date|date:"F d, Y" }}</span>
+                        </div>
+                    </li>
+                    {% endif %}
+                    {% endif %}
+                    {% if order.replacement_completed %}
+                    <li>
+                        <span class="timeline-icon success"><i class="fas fa-flag-checkered"></i></span>
+                        <div class="timeline-content">
+                            Replacement Completed
+                            <span class="time">{{ order.replacement_completed_at|date:"F d, Y H:i" }}</span>
+                        </div>
+                    </li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-// Show/hide tracking fields based on action
-document.getElementById('id_action').addEventListener('change', function() {
+// ============================================================
+// FORM FUNCTIONS
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+    const actionField = document.getElementById('id_action');
     const trackingFields = document.getElementById('trackingFields');
     
-    if (this.value === 'mark_shipped' || this.value === 'mark_delivered') {
-        trackingFields.style.display = 'block';
-    } else {
-        trackingFields.style.display = 'none';
+    if (actionField) {
+        actionField.addEventListener('change', function() {
+            if (this.value === 'mark_shipped' || this.value === 'mark_delivered') {
+                trackingFields.style.display = 'block';
+            } else {
+                trackingFields.style.display = 'none';
+            }
+        });
+        
+        // Initial check
+        if (actionField.value === 'mark_shipped' || actionField.value === 'mark_delivered') {
+            trackingFields.style.display = 'block';
+        }
+    }
+
+    const form = document.getElementById('replacementForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const action = document.getElementById('id_action').value;
+            const notes = document.getElementById('id_notes');
+            const trackingNumber = document.getElementById('id_tracking_number');
+            
+            if (action === 'reject' && !notes.value.trim()) {
+                e.preventDefault();
+                alert('Please provide a reason for rejection.');
+                return false;
+            }
+            
+            if (action === 'mark_shipped' && !trackingNumber.value.trim()) {
+                e.preventDefault();
+                alert('Please enter a tracking number.');
+                return false;
+            }
+            
+            if (action === 'approve' && !confirm('Approve this replacement request? A new order will be created.')) {
+                e.preventDefault();
+                return false;
+            }
+        });
     }
 });
 
-// Quick action buttons
 function quickAction(action) {
     if (action === 'reject') {
-        const reason = prompt('Please enter the reason for rejection:');
+        const reason = prompt('Enter rejection reason:');
         if (reason === null) return;
         if (!reason.trim()) {
-            alert('Please provide a reason for rejection.');
+            alert('Please provide a reason.');
             return;
         }
         document.getElementById('id_notes').value = reason;
     }
     
-    if (action === 'approve') {
-        if (!confirm('Are you sure you want to approve this replacement? A new replacement order will be created.')) {
-            return;
-        }
-    }
-    
-    if (action === 'complete_replacement') {
-        if (!confirm('Complete this replacement process? This action cannot be undone.')) {
-            return;
-        }
-    }
-    
-    if (action === 'mark_delivered') {
-        if (!confirm('Mark replacement as delivered? This will update the order status.')) {
-            return;
-        }
-    }
+    if (action === 'approve' && !confirm('Approve this replacement?')) return;
+    if (action === 'complete_replacement' && !confirm('Complete this replacement?')) return;
+    if (action === 'mark_delivered' && !confirm('Mark as delivered?')) return;
     
     document.getElementById('id_action').value = action;
     document.getElementById('replacementForm').submit();
 }
 
-// Quick action with tracking number prompt
 function quickActionWithTracking(action) {
     if (action === 'mark_shipped') {
-        const trackingNumber = prompt('Please enter the tracking number for the replacement shipment:');
+        const trackingNumber = prompt('Enter tracking number:');
         if (trackingNumber === null) return;
         if (!trackingNumber.trim()) {
-            alert('Please provide a tracking number.');
+            alert('Please enter tracking number.');
             return;
         }
         document.getElementById('id_tracking_number').value = trackingNumber;
         
-        const trackingUrl = prompt('Optional: Enter tracking URL (or leave blank):');
+        const trackingUrl = prompt('Optional: Enter tracking URL:');
         if (trackingUrl !== null) {
             document.getElementById('id_tracking_url').value = trackingUrl;
         }
         
-        if (!confirm('Mark replacement as shipped with tracking number: ' + trackingNumber + '?')) {
-            return;
-        }
+        if (!confirm('Mark as shipped with tracking: ' + trackingNumber + '?')) return;
     }
     
     document.getElementById('id_action').value = action;
     document.getElementById('replacementForm').submit();
 }
-
-// Form validation
-document.getElementById('replacementForm').addEventListener('submit', function(e) {
-    const action = document.getElementById('id_action').value;
-    const notes = document.getElementById('id_notes');
-    const trackingNumber = document.getElementById('id_tracking_number');
-    
-    if (action === 'reject') {
-        if (!notes.value.trim()) {
-            e.preventDefault();
-            alert('Please provide a reason for rejection in the notes field.');
-            return false;
-        }
-    }
-    
-    if (action === 'mark_shipped') {
-        if (!trackingNumber.value.trim()) {
-            e.preventDefault();
-            alert('Please enter a tracking number for the replacement shipment.');
-            return false;
-        }
-    }
-    
-    if (action === 'approve') {
-        if (!confirm('Are you sure you want to approve this replacement request? A new replacement order will be created.')) {
-            e.preventDefault();
-            return false;
-        }
-    }
-});
-
-// Auto-show tracking fields if action is already mark_shipped or mark_delivered
-document.addEventListener('DOMContentLoaded', function() {
-    const actionField = document.getElementById('id_action');
-    const trackingFields = document.getElementById('trackingFields');
-    
-    if (actionField && (actionField.value === 'mark_shipped' || actionField.value === 'mark_delivered')) {
-        trackingFields.style.display = 'block';
-    }
-});
 </script>
 
-<style>
-/* Style improvements */
-.card {
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.card-header {
-    font-weight: 600;
-}
-
-.badge {
-    font-size: 0.8rem;
-    padding: 0.4rem 0.8rem;
-}
-
-.timeline .list-unstyled {
-    margin-bottom: 0;
-}
-
-.timeline .list-unstyled li {
-    padding: 8px 0;
-    border-bottom: 1px solid #f1f3f5;
-}
-
-.timeline .list-unstyled li:last-child {
-    border-bottom: none;
-}
-
-#trackingFields .card {
-    border: 1px solid #dee2e6;
-}
-
-#trackingFields .card-body {
-    padding: 15px;
-}
-
-/* Quick action buttons */
-.d-grid .btn {
-    margin-bottom: 5px;
-    font-size: 0.9rem;
-}
-
-.d-grid .btn:last-child {
-    margin-bottom: 0;
-}
-</style>
 {% endblock %}

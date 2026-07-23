@@ -1,10 +1,11 @@
 <!-- templates/offline_sales/admin/offline_sale.html -->
+{% extends 'includes/sidebar.html' %}
 
 {% load static %}
 
 {% block title %}Offline Sale{% endblock %}
+{% block content %}
 
-{% block extra_css %}
 <style>
     /* ============================================
        GLOBAL STYLES
@@ -909,9 +910,7 @@
         .quantity-control button { width: 24px; height: 24px; font-size: 0.8rem; }
     }
 </style>
-{% endblock %}
 
-{% block content %}
 <div class="offline-sale-container">
     
     <!-- ============================================

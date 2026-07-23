@@ -1,86 +1,1112 @@
 <!-- templates/Ecom/admin/cancellation_requests.html -->
 
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
 {% block title %}Cancellation Requests{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-times-circle text-danger"></i> Cancellation Requests</h2>
-        <div>
-            <span class="badge bg-warning p-2">{{ stats.pending }} Pending</span>
-            <span class="badge bg-info p-2">{{ stats.pending_refund }} Awaiting Refund</span>
-            <span class="badge bg-secondary p-2">{{ stats.total }} Total</span>
+
+<style>
+/* =====================================================
+   ROOT VARIABLES
+   ===================================================== */
+:root {
+    --primary: #5c121f;
+    --primary-light: #7a1a2b;
+    --secondary: #f4b400;
+    --success: #10b981;
+    --success-bg: #d1fae5;
+    --danger: #ef4444;
+    --danger-bg: #fee2e2;
+    --warning: #f59e0b;
+    --warning-bg: #fef3c7;
+    --info: #3b82f6;
+    --info-bg: #dbeafe;
+    --bg: #f8f6f4;
+    --white: #ffffff;
+    --border: #e8e3de;
+    --text: #1a1a2e;
+    --text-muted: #6b7280;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-hover: 0 4px 20px rgba(0,0,0,0.08);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --transition: all 0.25s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* =====================================================
+   PAGE WRAPPER - NO PADDING
+   ===================================================== */
+.cancellation-page {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    width: 100%;
+}
+
+.page-header .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-header .header-left .header-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--danger-bg);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--danger);
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.page-header .header-left h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+}
+
+.page-header .header-left h1 small {
+    font-weight: 400;
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-left: 8px;
+}
+
+.page-header .header-right {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.header-right .stat-pill {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--white);
+    border: 1px solid var(--border);
+}
+
+.stat-pill .num {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.stat-pill.pending {
+    border-color: var(--warning);
+    color: var(--warning);
+}
+.stat-pill.pending .num {
+    color: var(--warning);
+}
+
+.stat-pill.refund {
+    border-color: var(--info);
+    color: var(--info);
+}
+.stat-pill.refund .num {
+    color: var(--info);
+}
+
+.stat-pill.total {
+    border-color: var(--text-muted);
+    color: var(--text-muted);
+}
+.stat-pill.total .num {
+    color: var(--text);
+}
+
+/* =====================================================
+   STATS CARDS
+   ===================================================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+}
+
+.stat-card {
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    background: var(--white);
+    box-shadow: var(--shadow-hover);
+}
+
+.stat-card .stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.stat-card .stat-icon.pending-icon {
+    background: var(--warning-bg);
+    color: var(--warning);
+}
+
+.stat-card .stat-icon.refund-icon {
+    background: var(--info-bg);
+    color: var(--info);
+}
+
+.stat-card .stat-icon.total-icon {
+    background: #e5e7eb;
+    color: var(--text-muted);
+}
+
+.stat-card .stat-info .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.stat-card .stat-info .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* =====================================================
+   SECTION CONTENT
+   ===================================================== */
+.section-content {
+    padding: 16px 0px 20px;
+}
+
+/* =====================================================
+   TABLE CARD
+   ===================================================== */
+.table-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.table-card .table-header {
+    padding: 14px 20px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.table-card .table-header .header-title {
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+}
+
+.table-card .table-header .header-title .badge-count {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 12px;
+    border-radius: 20px;
+    background: var(--warning-bg);
+    color: var(--warning);
+}
+
+.table-card .table-header .header-title .badge-count.info {
+    background: var(--info-bg);
+    color: var(--info);
+}
+
+/* =====================================================
+   TABLE
+   ===================================================== */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 750px;
+}
+
+.table thead {
+    background: var(--bg);
+}
+
+.table thead th {
+    padding: 10px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.table tbody td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background: rgba(92,18,31,0.02);
+}
+
+/* =====================================================
+   PRODUCT IMAGE IN TABLE
+   ===================================================== */
+.product-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.product-cell .product-img-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.product-cell .product-img-wrap .product-img {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.product-cell .product-img-wrap .product-img:hover {
+    border-color: var(--primary);
+    transform: scale(1.05);
+}
+
+.product-cell .product-img-wrap .product-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-cell .product-img-wrap .product-img .no-img {
+    font-size: 20px;
+    color: var(--text-muted);
+}
+
+.product-cell .product-img-wrap .multi-badge {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    background: var(--primary);
+    color: var(--white);
+    font-size: 9px;
+    font-weight: 700;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--white);
+    box-shadow: var(--shadow);
+}
+
+.product-cell .product-info {
+    min-width: 0;
+}
+
+.product-cell .product-info .product-name {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 13px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+}
+
+.product-cell .product-info .product-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+}
+
+.product-cell .product-info .product-sku {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.product-cell .product-info .item-count {
+    font-size: 10px;
+    color: var(--text-muted);
+    background: var(--bg);
+    padding: 1px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.product-cell .product-info .item-count i {
+    font-size: 9px;
+}
+
+/* Customer */
+.customer-cell .customer-name {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.customer-cell .customer-email {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: block;
+}
+
+/* Order Link */
+.order-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.order-link:hover {
+    color: var(--primary-light);
+    text-decoration: underline;
+}
+
+/* Amount */
+.amount {
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+}
+
+/* Status Badge */
+.status-badge {
+    padding: 3px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.status-badge.pending {
+    background: var(--warning-bg);
+    color: var(--warning);
+}
+
+.status-badge.refund-pending {
+    background: var(--info-bg);
+    color: var(--info);
+}
+
+/* =====================================================
+   ACTION BUTTONS
+   ===================================================== */
+.action-btn {
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    text-decoration: none;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.action-btn.primary {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.action-btn.primary:hover {
+    background: var(--primary-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(92,18,31,0.15);
+}
+
+.action-btn.info {
+    background: var(--info);
+    color: var(--white);
+}
+
+.action-btn.info:hover {
+    background: #2563EB;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59,130,246,0.15);
+}
+
+/* =====================================================
+   EMPTY STATE
+   ===================================================== */
+.empty-state {
+    padding: 48px 20px;
+    text-align: center;
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 2px dashed var(--border);
+}
+
+.empty-state .empty-icon {
+    font-size: 42px;
+    color: var(--border);
+    margin-bottom: 8px;
+}
+
+.empty-state h3 {
+    font-size: 18px;
+    color: var(--text);
+    margin: 0 0 4px 0;
+}
+
+.empty-state p {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0;
+}
+
+/* =====================================================
+   RESPONSIVE - ALL DEVICES
+   ===================================================== */
+
+/* === Tablets & Small Laptops === */
+@media (max-width: 1024px) {
+    .table {
+        font-size: 12px;
+        min-width: 650px;
+    }
+    
+    .table thead th {
+        padding: 8px 12px;
+        font-size: 10px;
+    }
+    
+    .table tbody td {
+        padding: 8px 12px;
+    }
+    
+    .product-cell .product-img-wrap .product-img {
+        width: 42px;
+        height: 42px;
+    }
+    
+    .product-cell .product-info .product-name {
+        font-size: 12px;
+    }
+}
+
+/* === Tablets === */
+@media (max-width: 768px) {
+    .page-header {
+        padding: 12px 16px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    .page-header .header-left h1 {
+        font-size: 17px;
+    }
+    
+    .page-header .header-left h1 small {
+        font-size: 12px;
+        display: block;
+        margin-left: 0;
+    }
+    
+    .page-header .header-right {
+        justify-content: flex-start;
+    }
+    
+    .header-right .stat-pill {
+        font-size: 11px;
+        padding: 4px 12px;
+    }
+    
+    .stat-pill .num {
+        font-size: 14px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        padding: 12px 16px;
+    }
+    
+    .stat-card {
+        padding: 12px 16px;
+        flex-direction: column;
+        text-align: center;
+        gap: 6px;
+    }
+    
+    .stat-card .stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .stat-card .stat-info .stat-value {
+        font-size: 20px;
+    }
+    
+    .stat-card .stat-info .stat-label {
+        font-size: 11px;
+    }
+    
+    .section-content {
+        padding: 12px 16px 16px;
+    }
+    
+    .table-card .table-header {
+        padding: 10px 14px;
+    }
+    
+    .table-card .table-header .header-title {
+        font-size: 13px;
+    }
+    
+    /* Mobile Card View for Table */
+    .table {
+        min-width: 100%;
+    }
+    
+    .table thead {
+        display: none;
+    }
+    
+    .table tbody tr {
+        display: block;
+        border-bottom: 2px solid var(--border);
+        padding: 10px 0;
+        margin-bottom: 8px;
+        background: var(--white);
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+    }
+    
+    .table tbody tr:hover {
+        background: var(--white);
+    }
+    
+    .table tbody td {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 14px;
+        border: none;
+        text-align: left !important;
+        font-size: 13px;
+        flex-wrap: wrap;
+    }
+    
+    .table tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 10px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        min-width: 80px;
+        flex-shrink: 0;
+    }
+    
+    .table tbody td:last-child {
+        border-bottom: none;
+        padding-bottom: 10px;
+    }
+    
+    .product-cell {
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+    }
+    
+    .product-cell .product-img-wrap .product-img {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .customer-cell .customer-email {
+        font-size: 11px;
+    }
+    
+    .status-badge {
+        font-size: 10px;
+        padding: 2px 10px;
+    }
+    
+    .action-btn {
+        padding: 5px 12px;
+        font-size: 11px;
+    }
+    
+    .action-btn i {
+        font-size: 11px;
+    }
+}
+
+/* === Mobile Phones === */
+@media (max-width: 480px) {
+    .page-header {
+        padding: 10px 14px;
+    }
+    
+    .page-header .header-left .header-icon {
+        width: 34px;
+        height: 34px;
+        font-size: 15px;
+    }
+    
+    .page-header .header-left h1 {
+        font-size: 15px;
+    }
+    
+    .page-header .header-left h1 small {
+        font-size: 11px;
+    }
+    
+    .header-right .stat-pill {
+        font-size: 10px;
+        padding: 3px 10px;
+    }
+    
+    .stat-pill .num {
+        font-size: 12px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 6px;
+        padding: 10px 14px;
+    }
+    
+    .stat-card {
+        padding: 10px 8px;
+        flex-direction: column;
+        text-align: center;
+        gap: 4px;
+        border-radius: var(--radius-sm);
+    }
+    
+    .stat-card .stat-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 13px;
+        border-radius: 50%;
+    }
+    
+    .stat-card .stat-info .stat-value {
+        font-size: 16px;
+    }
+    
+    .stat-card .stat-info .stat-label {
+        font-size: 9px;
+    }
+    
+    .section-content {
+        padding: 10px 14px 14px;
+    }
+    
+    .table-card {
+        border-radius: var(--radius-sm);
+    }
+    
+    .table-card .table-header {
+        padding: 8px 12px;
+    }
+    
+    .table-card .table-header .header-title {
+        font-size: 12px;
+    }
+    
+    .table-card .table-header .header-title .badge-count {
+        font-size: 10px;
+        padding: 1px 8px;
+    }
+    
+    .table tbody td {
+        padding: 5px 12px;
+        font-size: 12px;
+        gap: 6px;
+    }
+    
+    .table tbody td::before {
+        font-size: 9px;
+        min-width: 70px;
+    }
+    
+    .product-cell .product-img-wrap .product-img {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .product-cell .product-info .product-name {
+        font-size: 12px;
+    }
+    
+    .product-cell .product-info .product-sku {
+        font-size: 10px;
+    }
+    
+    .product-cell .product-info .item-count {
+        font-size: 9px;
+        padding: 1px 8px;
+    }
+    
+    .customer-cell .customer-name {
+        font-size: 12px;
+    }
+    
+    .customer-cell .customer-email {
+        font-size: 10px;
+    }
+    
+    .order-link {
+        font-size: 12px;
+    }
+    
+    .amount {
+        font-size: 12px;
+    }
+    
+    .status-badge {
+        font-size: 9px;
+        padding: 2px 8px;
+        gap: 3px;
+    }
+    
+    .status-badge i {
+        font-size: 9px;
+    }
+    
+    .action-btn {
+        padding: 4px 10px;
+        font-size: 10px;
+        gap: 3px;
+    }
+    
+    .action-btn i {
+        font-size: 10px;
+    }
+    
+    .empty-state {
+        padding: 30px 16px;
+    }
+    
+    .empty-state .empty-icon {
+        font-size: 32px;
+    }
+    
+    .empty-state h3 {
+        font-size: 16px;
+    }
+    
+    .empty-state p {
+        font-size: 13px;
+    }
+}
+
+/* === Very Small Phones === */
+@media (max-width: 360px) {
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        padding: 8px 10px;
+    }
+    
+    .stat-card {
+        padding: 8px 6px;
+    }
+    
+    .stat-card .stat-info .stat-value {
+        font-size: 14px;
+    }
+    
+    .stat-card .stat-info .stat-label {
+        font-size: 8px;
+    }
+    
+    .page-header {
+        padding: 8px 10px;
+    }
+    
+    .page-header .header-left h1 {
+        font-size: 14px;
+    }
+    
+    .page-header .header-left h1 small {
+        font-size: 10px;
+    }
+    
+    .section-content {
+        padding: 8px 10px 12px;
+    }
+    
+    .table tbody td {
+        padding: 4px 10px;
+        font-size: 11px;
+        gap: 4px;
+    }
+    
+    .table tbody td::before {
+        font-size: 8px;
+        min-width: 60px;
+    }
+    
+    .product-cell .product-img-wrap .product-img {
+        width: 34px;
+        height: 34px;
+    }
+    
+    .action-btn {
+        padding: 3px 8px;
+        font-size: 9px;
+    }
+    
+    .action-btn i {
+        font-size: 9px;
+    }
+}
+</style>
+
+<!-- =====================================================
+PAGE CONTENT
+===================================================== -->
+<div class="cancellation-page">
+
+    <!-- ===== HEADER ===== -->
+    <div class="page-header">
+        <div class="header-left">
+            <div class="header-icon">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <h1>
+                Cancellation Requests
+                <small>Manage order cancellations</small>
+            </h1>
+        </div>
+        <div class="header-right">
+            <span class="stat-pill pending">
+                <i class="fas fa-clock"></i>
+                <span class="num">{{ stats.pending }}</span> Pending
+            </span>
+            <span class="stat-pill refund">
+                <i class="fas fa-hand-holding-usd"></i>
+                <span class="num">{{ stats.pending_refund }}</span> Refund
+            </span>
+            <span class="stat-pill total">
+                <i class="fas fa-list"></i>
+                <span class="num">{{ stats.total }}</span> Total
+            </span>
         </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card bg-warning text-dark">
-                <div class="card-body">
-                    <h5 class="card-title">{{ stats.pending }}</h5>
-                    <p class="card-text mb-0">Pending Requests</p>
-                </div>
+    <!-- ===== STATS CARDS ===== -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon pending-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ stats.pending }}</div>
+                <div class="stat-label">Pending Requests</div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <h5 class="card-title">{{ stats.pending_refund }}</h5>
-                    <p class="card-text mb-0">Awaiting Refund</p>
-                </div>
+        <div class="stat-card">
+            <div class="stat-icon refund-icon">
+                <i class="fas fa-hand-holding-usd"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ stats.pending_refund }}</div>
+                <div class="stat-label">Awaiting Refund</div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-secondary text-white">
-                <div class="card-body">
-                    <h5 class="card-title">{{ stats.total }}</h5>
-                    <p class="card-text mb-0">Total Requests</p>
-                </div>
+        <div class="stat-card">
+            <div class="stat-icon total-icon">
+                <i class="fas fa-list"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ stats.total }}</div>
+                <div class="stat-label">Total Requests</div>
             </div>
         </div>
     </div>
 
-    <!-- Pending Cancellations -->
-    {% if cancellations %}
-    <div class="card shadow">
-        <div class="card-header bg-warning">
-            <h5 class="mb-0">Pending Cancellations</h5>
-        </div>
-        <div class="card-body">
+    <!-- ===== CONTENT SECTION ===== -->
+    <div class="section-content">
+
+        <!-- ===== PENDING CANCELLATIONS ===== -->
+        {% if cancellations %}
+        <div class="table-card">
+            <div class="table-header">
+                <div class="header-title">
+                    <i class="fas fa-clock" style="color:var(--warning);"></i>
+                    Pending Cancellations
+                    <span class="badge-count">{{ cancellations|length }}</span>
+                </div>
+            </div>
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table">
                     <thead>
                         <tr>
-                            <th>Order #</th>
-                            <th>Customer</th>
-                            <th>Amount</th>
-                            <th>Requested At</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th style="min-width:160px;">Product</th>
+                            <th style="min-width:120px;">Order #</th>
+                            <th style="min-width:140px;">Customer</th>
+                            <th style="min-width:90px;">Amount</th>
+                            <th style="min-width:120px;">Requested At</th>
+                            <th style="min-width:100px;">Status</th>
+                            <th style="min-width:100px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for order in cancellations %}
                         <tr>
-                            <td>
-                                <a href="{% url 'Ecom:admin_cancellation_detail' order.id %}">
+                            <td data-label="Product">
+                                <div class="product-cell">
+                                    <div class="product-img-wrap">
+                                        <div class="product-img">
+                                            {% with first_item=order.items.first %}
+                                                {% if first_item and first_item.product %}
+                                                    {% if first_item.product.main_image %}
+                                                        <img src="{{ first_item.product.main_image }}" alt="{{ first_item.product.name }}" loading="lazy">
+                                                    {% elif first_item.variant and first_item.variant.main_image %}
+                                                        <img src="{{ first_item.variant.main_image }}" alt="{{ first_item.variant.name }}" loading="lazy">
+                                                    {% else %}
+                                                        <span class="no-img"><i class="fas fa-box"></i></span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="no-img"><i class="fas fa-box"></i></span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </div>
+                                        {% if order.items.count > 1 %}
+                                        <span class="multi-badge">+{{ order.items.count|add:"-1" }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="product-info">
+                                        {% with first_item=order.items.first %}
+                                            {% if first_item %}
+                                                <span class="product-name">{{ first_item.product.name|default:"Unknown Product" }}</span>
+                                                <div class="product-meta">
+                                                    <span class="product-sku">SKU: {{ first_item.product.sku|default:"N/A" }}</span>
+                                                    <span class="item-count">
+                                                        <i class="fas fa-shopping-bag"></i> {{ order.items.count }} item{{ order.items.count|pluralize }}
+                                                    </span>
+                                                </div>
+                                            {% else %}
+                                                <span class="product-name">No items</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td data-label="Order #">
+                                <a href="{% url 'Ecom:admin_cancellation_detail' order.id %}" class="order-link">
                                     #{{ order.order_number }}
                                 </a>
                             </td>
-                            <td>
-                                <div>{{ order.user.full_name }}</div>
-                                <small class="text-muted">{{ order.user.email }}</small>
+                            <td data-label="Customer">
+                                <div class="customer-cell">
+                                    <span class="customer-name">{{ order.user.full_name }}</span>
+                                    <span class="customer-email">{{ order.user.email }}</span>
+                                </div>
                             </td>
-                            <td>₹{{ order.total_amount }}</td>
-                            <td>{{ order.cancellation_requested_at|date:"F d, Y H:i" }}</td>
-                            <td>
-                                <span class="badge bg-warning text-dark">Pending</span>
+                            <td data-label="Amount" class="amount">₹{{ order.total_amount|floatformat:2 }}</td>
+                            <td data-label="Requested At">
+                                {{ order.cancellation_requested_at|date:"M d, Y" }}
+                                <span style="font-size:11px;color:var(--text-muted);display:block;">
+                                    {{ order.cancellation_requested_at|time:"H:i" }}
+                                </span>
                             </td>
-                            <td>
-                                <a href="{% url 'Ecom:admin_cancellation_detail' order.id %}" class="btn btn-sm btn-primary">
+                            <td data-label="Status">
+                                <span class="status-badge pending">
+                                    <i class="fas fa-clock"></i> Pending
+                                </span>
+                            </td>
+                            <td data-label="Action">
+                                <a href="{% url 'Ecom:admin_cancellation_detail' order.id %}" 
+                                   class="action-btn primary">
                                     <i class="fas fa-eye"></i> Review
                                 </a>
                             </td>
@@ -90,48 +1116,108 @@
                 </table>
             </div>
         </div>
-    </div>
-    {% else %}
-    <div class="alert alert-success">
-        <i class="fas fa-check-circle"></i> No pending cancellation requests.
-    </div>
-    {% endif %}
-
-    <!-- Cancelled Orders Awaiting Refund -->
-    {% if cancelled_pending_refund %}
-    <div class="card shadow mt-4">
-        <div class="card-header bg-info text-white">
-            <h5 class="mb-0">Cancelled Orders - Awaiting Refund</h5>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>No Pending Requests</h3>
+            <p>All cancellation requests have been processed.</p>
         </div>
-        <div class="card-body">
+        {% endif %}
+
+        <!-- ===== AWAITING REFUND ===== -->
+        {% if cancelled_pending_refund %}
+        <div class="table-card" style="margin-top:16px;">
+            <div class="table-header">
+                <div class="header-title">
+                    <i class="fas fa-hand-holding-usd" style="color:var(--info);"></i>
+                    Awaiting Refund
+                    <span class="badge-count info">{{ cancelled_pending_refund|length }}</span>
+                </div>
+            </div>
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table">
                     <thead>
                         <tr>
-                            <th>Order #</th>
-                            <th>Customer</th>
-                            <th>Amount</th>
-                            <th>Cancelled At</th>
-                            <th>Action</th>
+                            <th style="min-width:160px;">Product</th>
+                            <th style="min-width:120px;">Order #</th>
+                            <th style="min-width:140px;">Customer</th>
+                            <th style="min-width:90px;">Amount</th>
+                            <th style="min-width:120px;">Cancelled At</th>
+                            <th style="min-width:100px;">Status</th>
+                            <th style="min-width:100px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for order in cancelled_pending_refund %}
                         <tr>
-                            <td>
-                                <a href="{% url 'Ecom:admin_order_detail' order.id %}">
+                            <td data-label="Product">
+                                <div class="product-cell">
+                                    <div class="product-img-wrap">
+                                        <div class="product-img">
+                                            {% with first_item=order.items.first %}
+                                                {% if first_item and first_item.product %}
+                                                    {% if first_item.product.main_image %}
+                                                        <img src="{{ first_item.product.main_image }}" alt="{{ first_item.product.name }}" loading="lazy">
+                                                    {% elif first_item.variant and first_item.variant.main_image %}
+                                                        <img src="{{ first_item.variant.main_image }}" alt="{{ first_item.variant.name }}" loading="lazy">
+                                                    {% else %}
+                                                        <span class="no-img"><i class="fas fa-box"></i></span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="no-img"><i class="fas fa-box"></i></span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </div>
+                                        {% if order.items.count > 1 %}
+                                        <span class="multi-badge">+{{ order.items.count|add:"-1" }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="product-info">
+                                        {% with first_item=order.items.first %}
+                                            {% if first_item %}
+                                                <span class="product-name">{{ first_item.product.name|default:"Unknown Product" }}</span>
+                                                <div class="product-meta">
+                                                    <span class="product-sku">SKU: {{ first_item.product.sku|default:"N/A" }}</span>
+                                                    <span class="item-count">
+                                                        <i class="fas fa-shopping-bag"></i> {{ order.items.count }} item{{ order.items.count|pluralize }}
+                                                    </span>
+                                                </div>
+                                            {% else %}
+                                                <span class="product-name">No items</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td data-label="Order #">
+                                <a href="{% url 'Ecom:admin_order_detail' order.id %}" class="order-link">
                                     #{{ order.order_number }}
                                 </a>
                             </td>
-                            <td>
-                                <div>{{ order.user.full_name }}</div>
-                                <small class="text-muted">{{ order.user.email }}</small>
+                            <td data-label="Customer">
+                                <div class="customer-cell">
+                                    <span class="customer-name">{{ order.user.full_name }}</span>
+                                    <span class="customer-email">{{ order.user.email }}</span>
+                                </div>
                             </td>
-                            <td>₹{{ order.total_amount }}</td>
-                            <td>{{ order.cancelled_at|date:"F d, Y H:i" }}</td>
-                            <td>
-                                <a href="{% url 'Ecom:admin_order_detail' order.id %}" class="btn btn-sm btn-info">
-                                    <i class="fas fa-hand-holding-usd"></i> Process Refund
+                            <td data-label="Amount" class="amount">₹{{ order.total_amount|floatformat:2 }}</td>
+                            <td data-label="Cancelled At">
+                                {{ order.cancelled_at|date:"M d, Y" }}
+                                <span style="font-size:11px;color:var(--text-muted);display:block;">
+                                    {{ order.cancelled_at|time:"H:i" }}
+                                </span>
+                            </td>
+                            <td data-label="Status">
+                                <span class="status-badge refund-pending">
+                                    <i class="fas fa-spinner fa-pulse"></i> Refund Pending
+                                </span>
+                            </td>
+                            <td data-label="Action">
+                                <a href="{% url 'Ecom:admin_order_detail' order.id %}" 
+                                   class="action-btn info">
+                                    <i class="fas fa-hand-holding-usd"></i> Process
                                 </a>
                             </td>
                         </tr>
@@ -140,7 +1226,9 @@
                 </table>
             </div>
         </div>
+        {% endif %}
+
     </div>
-    {% endif %}
 </div>
+
 {% endblock %}

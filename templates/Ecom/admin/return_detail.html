@@ -1,486 +1,1691 @@
 <!-- templates/Ecom/admin/return_detail.html -->
-
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
 {% block title %}Return Request - Order #{{ order.order_number }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'Ecom:admin_return_requests' %}">Return Requests</a></li>
-            <li class="breadcrumb-item active">Order #{{ order.order_number }}</li>
-        </ol>
-    </nav>
+<style>
+:root {
+    --primary: #5c121f;
+    --primary-light: #7a1a2b;
+    --primary-dark: #3d0c14;
+    --secondary: #F4B400;
+    --secondary-light: #f7c948;
+    --bg: #f6f4f2;
+    --white: #ffffff;
+    --border: #ebe7e3;
+    --text: #1d1d1d;
+    --text-light: #6d6d6d;
+    --text-muted: #888888;
+    --success: #2e9d57;
+    --danger: #d64045;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --shadow: 0 10px 28px rgba(0,0,0,0.06);
+    --shadow-hover: 0 18px 40px rgba(92,18,31,0.12);
+    --transition: 0.35s ease;
+    --radius: 14px;
+    --radius-sm: 10px;
+    --radius-xs: 8px;
+    --font-primary: 'Inter', sans-serif;
+    --font-body: 'Inter', sans-serif;
+}
 
-    <div class="row">
-        <div class="col-md-8">
-            <!-- Order Details Card -->
-            <div class="card shadow mb-4">
-                <div class="card-header bg-warning">
-                    <h5 class="mb-0">Return Request - Order #{{ order.order_number }}</h5>
+/* ===== VERY SMALL TRANSPARENT SCROLLBAR ===== */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(92, 18, 31, 0.15);
+    border-radius: 10px;
+    transition: var(--transition);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(92, 18, 31, 0.3);
+}
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(92, 18, 31, 0.15) transparent;
+}
+
+/* ===== PAGE WRAPPER ===== */
+.page-wrapper {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* ===== TOP HEADER - HERO SECTION ===== */
+.top-header {
+    background: var(--primary);
+    padding: 18px 32px;
+    margin: 0;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 4px solid var(--secondary);
+    border-radius: var(--radius) var(--radius) 0 0;
+    width: 100%;
+}
+
+.top-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -5%;
+    width: 400px;
+    height: 400px;
+    background: rgba(244, 180, 0, 0.06);
+    border-radius: 50%;
+}
+
+.top-header::after {
+    content: '';
+    position: absolute;
+    bottom: -40%;
+    left: 10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 50%;
+}
+
+.top-header-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.top-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.top-icon {
+    width: 44px;
+    height: 44px;
+    background: rgba(244, 180, 0, 0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary);
+    font-size: 20px;
+    border: 2px solid rgba(244, 180, 0, 0.2);
+}
+
+.top-title {
+    color: var(--white);
+    font-size: 20px;
+    font-weight: 700;
+    font-family: var(--font-primary);
+    letter-spacing: -0.3px;
+}
+
+.top-title span {
+    color: var(--secondary);
+}
+
+.top-sub {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+}
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb-wrap {
+    background: var(--white);
+    padding: 10px 32px;
+    border: 1px solid var(--border);
+    border-top: none;
+    border-bottom: 1px solid var(--border);
+    width: 100%;
+    margin: 0;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    flex-wrap: wrap;
+}
+
+.breadcrumb a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.breadcrumb a:hover {
+    color: var(--secondary);
+    text-decoration: underline;
+}
+
+.breadcrumb .sep {
+    color: var(--text-muted);
+}
+
+.breadcrumb .current {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* ===== MAIN CONTENT GRID ===== */
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* ===== CARDS ===== */
+.card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 20px;
+    transition: var(--transition);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-hover);
+}
+
+.card:last-child {
+    margin-bottom: 0;
+}
+
+.card-header {
+    padding: 14px 22px;
+    background: #faf8f6;
+    border-bottom: 2px solid var(--secondary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-header .header-icon {
+    color: var(--secondary);
+    font-size: 16px;
+    width: 22px;
+}
+
+.card-header h5 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+    font-family: var(--font-primary);
+}
+
+.card-body {
+    padding: 20px 22px;
+}
+
+/* ===== INFO GRID ===== */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 24px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-item .label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-item .value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+/* ===== BADGES ===== */
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 14px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.badge-status .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.badge-status.pending { background: #fef3c7; color: #92400e; }
+.badge-status.pending .dot { background: var(--warning); animation: blink 1.5s ease-in-out infinite; }
+
+.badge-status.approved { background: #d1fae5; color: #065f46; }
+.badge-status.approved .dot { background: var(--success); }
+
+.badge-status.rejected { background: #fee2e2; color: #991b1b; }
+.badge-status.rejected .dot { background: var(--danger); }
+
+.badge-status.received { background: #dbeafe; color: #1e40af; }
+.badge-status.received .dot { background: var(--info); }
+
+.badge-status.completed { background: #f3f4f6; color: #374151; }
+.badge-status.completed .dot { background: #6b7280; }
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* ===== DETAIL BOX ===== */
+.detail-box {
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    border-left: 4px solid var(--secondary);
+    margin-top: 6px;
+}
+
+.detail-box p {
+    margin-bottom: 4px;
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+.detail-box p:last-child {
+    margin-bottom: 0;
+}
+
+.detail-box strong {
+    color: var(--text);
+}
+
+/* ===== IMAGE GRID ===== */
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.image-grid .img-item {
+    border-radius: var(--radius-xs);
+    overflow: hidden;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.image-grid .img-item:hover {
+    border-color: var(--secondary);
+    transform: scale(1.03);
+}
+
+.image-grid .img-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ===== TABLE ===== */
+.table-wrap {
+    overflow-x: auto;
+    margin-top: 4px;
+}
+.table-wrap::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+}
+.table-wrap::-webkit-scrollbar-track {
+    background: transparent;
+}
+.table-wrap::-webkit-scrollbar-thumb {
+    background: rgba(92, 18, 31, 0.12);
+    border-radius: 10px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.table thead {
+    background: var(--bg);
+}
+
+.table thead th {
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+}
+
+.table tbody td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background: var(--bg);
+}
+
+.table tfoot td {
+    padding: 8px 12px;
+    font-weight: 700;
+    border-top: 2px solid var(--border);
+}
+
+.table tfoot tr {
+    background: var(--bg);
+}
+
+/* ============================================================
+   SIDEBAR - ADMIN ACTIONS & TIMELINE (NEAT & CLEAN)
+   ============================================================ */
+
+.sidebar-card {
+    margin-bottom: 20px;
+}
+
+.sidebar-card:last-child {
+    margin-bottom: 0;
+}
+
+.sidebar-card .card-body {
+    padding: 18px 20px;
+}
+
+/* ===== STATUS SUMMARY ===== */
+.status-summary {
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    border-left: 3px solid var(--secondary);
+}
+
+.status-summary .status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    font-size: 13px;
+}
+
+.status-summary .status-row .label {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.status-summary .status-row .value {
+    font-weight: 600;
+}
+
+/* ===== BANK DETAILS TOGGLE ===== */
+.bank-details-toggle {
+    margin-bottom: 14px;
+}
+
+.bank-details-toggle .bank-header {
+    background: #d1fae5;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    border-left: 3px solid var(--success);
+}
+
+.bank-details-toggle .bank-header strong {
+    color: #065f46;
+    font-size: 13px;
+}
+
+.bank-details-toggle .bank-header .small-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.bank-details-toggle .btn-view {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 6px;
+}
+
+.bank-details-toggle .btn-view:hover {
+    background: var(--border);
+}
+
+.bank-details-toggle .bank-content {
+    display: none;
+    margin-top: 8px;
+    background: var(--white);
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+
+.bank-details-toggle .bank-content pre {
+    white-space: pre-line;
+    font-size: 12px;
+    margin: 0;
+    font-family: var(--font-body);
+}
+
+.bank-details-toggle .bank-content.show {
+    display: block;
+}
+
+/* ===== NO BANK DETAILS ===== */
+.no-bank-details {
+    background: #fef3c7;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    border-left: 3px solid var(--warning);
+    margin-bottom: 14px;
+}
+
+.no-bank-details strong {
+    color: #92400e;
+    font-size: 13px;
+}
+
+.no-bank-details .small-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ===== FORM ===== */
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+}
+
+.form-group label .required {
+    color: var(--danger);
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-xs);
+    font-size: 13px;
+    font-family: var(--font-body);
+    color: var(--text);
+    background: var(--white);
+    transition: var(--transition);
+    outline: none;
+}
+
+.form-control:focus {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 4px rgba(244, 180, 0, 0.1);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+
+.form-control.textarea {
+    resize: vertical;
+    min-height: 70px;
+}
+
+.form-control select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236d6d6d' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+}
+
+.form-text {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ===== REFUND FIELDS ===== */
+.refund-fields {
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 14px;
+}
+
+.refund-fields .form-group:last-child {
+    margin-bottom: 0;
+}
+
+.refund-fields .refund-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+
+.refund-fields .refund-title i {
+    color: var(--secondary);
+    margin-right: 6px;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius-xs);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    width: 100%;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: var(--white);
+}
+.btn-primary:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(92,18,31,0.2);
+}
+
+.btn-success {
+    background: var(--success);
+    color: var(--white);
+}
+.btn-success:hover {
+    background: #1e7e3a;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(46,157,87,0.2);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: var(--white);
+}
+.btn-danger:hover {
+    background: #b3363a;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(214,64,69,0.2);
+}
+
+.btn-info {
+    background: var(--info);
+    color: var(--white);
+}
+.btn-info:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(59,130,246,0.2);
+}
+
+.btn-warning-custom {
+    background: var(--warning);
+    color: var(--white);
+}
+.btn-warning-custom:hover {
+    background: #d97706;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(245,158,11,0.2);
+}
+
+.btn-secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 2px solid var(--border);
+}
+.btn-secondary:hover {
+    background: var(--border);
+    transform: translateY(-2px);
+}
+
+/* ===== QUICK ACTIONS ===== */
+.quick-actions {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+
+.quick-actions .quick-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.quick-actions .quick-title i {
+    color: var(--secondary);
+    margin-right: 4px;
+}
+
+.quick-actions .quick-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.quick-actions .btn {
+    font-size: 12px;
+    padding: 7px 14px;
+}
+
+/* ===== COMPLETED STATUS ===== */
+.completed-status {
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    text-align: center;
+}
+
+.completed-status.success {
+    background: #d1fae5;
+    border: 1px solid #6ee7b7;
+}
+.completed-status.danger {
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+}
+
+.completed-status strong {
+    font-size: 13px;
+}
+.completed-status.success strong { color: #065f46; }
+.completed-status.danger strong { color: #991b1b; }
+
+.completed-status .small-text {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+}
+
+/* ============================================================
+   TIMELINE - CLEAN DESIGN
+   ============================================================ */
+
+.timeline {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: var(--border);
+}
+
+.timeline li {
+    padding: 0 0 14px 30px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+}
+
+.timeline li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.timeline li .timeline-icon {
+    position: absolute;
+    left: 0;
+    top: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    color: var(--white);
+    flex-shrink: 0;
+}
+
+.timeline li .timeline-icon.success { background: var(--success); }
+.timeline li .timeline-icon.warning { background: var(--warning); }
+.timeline li .timeline-icon.info { background: var(--info); }
+.timeline li .timeline-icon.danger { background: var(--danger); }
+.timeline li .timeline-icon.secondary { background: var(--text-muted); }
+
+.timeline li .timeline-content {
+    font-size: 13px;
+    color: var(--text);
+}
+
+.timeline li .timeline-content .time {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+
+.timeline li .timeline-content .sub {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+
+.timeline li .timeline-content .sub i {
+    margin-right: 4px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1200px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 992px) {
+    .top-header {
+        padding: 16px 20px;
+    }
+    .breadcrumb-wrap {
+        padding: 8px 20px;
+    }
+    .page-wrapper {
+        padding: 0 16px 16px 16px;
+    }
+    .info-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .top-header {
+        padding: 14px 16px;
+    }
+    .top-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .top-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 17px;
+    }
+    .top-title {
+        font-size: 17px;
+    }
+    .top-sub {
+        font-size: 12px;
+    }
+    .breadcrumb-wrap {
+        padding: 6px 16px;
+    }
+    .breadcrumb {
+        font-size: 12px;
+    }
+    .page-wrapper {
+        padding: 0 12px 12px 12px;
+    }
+    .content-grid {
+        gap: 14px;
+        margin-top: 14px;
+    }
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+    .info-item {
+        padding: 4px 0;
+    }
+    .info-item .value {
+        font-size: 13px;
+    }
+    .image-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+    .card-header {
+        padding: 10px 16px;
+    }
+    .card-header h5 {
+        font-size: 13px;
+    }
+    .card-body {
+        padding: 14px 16px;
+    }
+    .sidebar-card .card-body {
+        padding: 14px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .top-header {
+        padding: 12px 12px;
+    }
+    .top-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    .top-title {
+        font-size: 15px;
+    }
+    .top-sub {
+        font-size: 11px;
+    }
+    .breadcrumb-wrap {
+        padding: 4px 12px;
+    }
+    .breadcrumb {
+        font-size: 11px;
+        gap: 4px;
+    }
+    .page-wrapper {
+        padding: 0 8px 8px 8px;
+    }
+    .image-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+    }
+    .table {
+        font-size: 12px;
+    }
+    .table thead th,
+    .table tbody td {
+        padding: 6px 8px;
+    }
+    .table-wrap {
+        margin: 0 -4px;
+        padding: 0 4px;
+    }
+    .table {
+        min-width: 500px;
+    }
+    .btn {
+        font-size: 12px;
+        padding: 7px 14px;
+    }
+    .form-control {
+        font-size: 12px;
+        padding: 7px 10px;
+    }
+    .detail-box {
+        padding: 10px 12px;
+    }
+    .detail-box p {
+        font-size: 12px;
+    }
+    .sidebar-card .card-body {
+        padding: 12px 14px;
+    }
+    .timeline li .timeline-content {
+        font-size: 12px;
+    }
+    .status-summary .status-row {
+        font-size: 12px;
+    }
+    .quick-actions .btn {
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+    .refund-fields {
+        padding: 10px 12px;
+    }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.top-header {
+    animation: fadeInUp 0.4s ease both;
+}
+
+.breadcrumb-wrap {
+    animation: fadeInUp 0.4s ease 0.05s both;
+}
+
+.card {
+    animation: fadeInUp 0.35s ease both;
+}
+
+.card:nth-child(1) { animation-delay: 0.06s; }
+.card:nth-child(2) { animation-delay: 0.1s; }
+.card:nth-child(3) { animation-delay: 0.14s; }
+
+.sidebar-card {
+    animation: fadeInUp 0.35s ease both;
+}
+
+.sidebar-card:nth-child(1) { animation-delay: 0.08s; }
+.sidebar-card:nth-child(2) { animation-delay: 0.12s; }
+/* ===============================
+   FIX FOR DEVICES BELOW 500px
+=================================*/
+@media (max-width:500px){
+
+    *{
+        box-sizing:border-box;
+    }
+
+    html,
+    body{
+        width:100%;
+        overflow-x:hidden;
+    }
+
+    .page-wrapper,
+    .content-grid,
+    .left-col,
+    .right-col,
+    .card,
+    .card-body,
+    .sidebar-card{
+        width:100%;
+        max-width:100%;
+        min-width:0;
+    }
+
+    .top-header,
+    .breadcrumb-wrap{
+        padding:12px;
+    }
+
+    .top-header-content{
+        display:flex;
+        flex-direction:column;
+        align-items:flex-start;
+        width:100%;
+    }
+
+    .top-left{
+        width:100%;
+        flex-wrap:wrap;
+    }
+
+    .top-right{
+        width:100%;
+    }
+
+    .top-right .badge-status{
+        width:100%;
+        justify-content:center;
+    }
+
+    .info-grid{
+        display:grid;
+        grid-template-columns:1fr;
+    }
+
+    .info-item,
+    .value{
+        min-width:0;
+        word-break:break-word;
+        overflow-wrap:anywhere;
+    }
+
+    img{
+        max-width:100%;
+        height:auto;
+    }
+
+    .image-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .btn{
+        width:100%;
+    }
+
+    input,
+    select,
+    textarea{
+        width:100%;
+        max-width:100%;
+    }
+
+    .detail-box,
+    .status-summary,
+    .refund-fields{
+        width:100%;
+        overflow:hidden;
+    }
+
+    .table-wrap{
+        width:100%;
+        overflow-x:auto;
+        -webkit-overflow-scrolling:touch;
+    }
+
+    .table{
+        min-width:650px;
+    }
+
+    pre{
+        white-space:pre-wrap;
+        word-break:break-word;
+    }
+}
+</style>
+
+<!-- ===== TOP HEADER - HERO SECTION ===== -->
+<div class="top-header">
+    <div class="top-header-content">
+        <div class="top-left">
+            <div class="top-icon">
+                <i class="fas fa-undo"></i>
+            </div>
+            <div>
+                <div class="top-title">Return Request <span>#{{ order.order_number }}</span></div>
+                <div class="top-sub">Manage return request details and take actions</div>
+            </div>
+        </div>
+        <div class="top-right">
+            <span class="badge-status {% if order.return_completed %}completed{% elif order.return_items_received %}received{% elif order.return_approved %}approved{% elif order.return_rejected %}rejected{% else %}pending{% endif %}">
+                <span class="dot"></span>
+                {% if order.return_completed %}Completed{% elif order.return_items_received %}Items Received{% elif order.return_approved %}Approved{% elif order.return_rejected %}Rejected{% else %}Pending{% endif %}
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- ===== BREADCRUMB ===== -->
+<div class="breadcrumb-wrap">
+    <nav class="breadcrumb">
+        <a href="{% url 'Ecom:admin_return_requests' %}"><i class="fas fa-arrow-left"></i> Return Requests</a>
+        <span class="sep">›</span>
+        <span class="current">Order #{{ order.order_number }}</span>
+    </nav>
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="page-wrapper">
+    <div class="content-grid">
+
+        <!-- ===== LEFT COLUMN ===== -->
+        <div class="left-col">
+
+            <!-- ===== ORDER INFO CARD ===== -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="header-icon"><i class="fas fa-info-circle"></i></span>
+                    <h5>Order &amp; Return Information</h5>
                 </div>
                 <div class="card-body">
-                    <!-- Customer Info -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Customer:</strong> {{ order.user.full_name }}</p>
-                            <p><strong>Email:</strong> {{ order.user.email }}</p>
-                            <p><strong>Phone:</strong> {{ order.user.phone|default:"N/A" }}</p>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">Customer</span>
+                            <span class="value">{{ order.user.full_name }}</span>
                         </div>
-                        <div class="col-md-6">
-                            <p><strong>Order Date:</strong> {{ order.created_at|date:"F d, Y H:i" }}</p>
-                            <p><strong>Delivery Date:</strong> {{ order.delivery_date|date:"F d, Y"|default:"Not delivered" }}</p>
-                            <p><strong>Total Amount:</strong> ₹{{ order.total_amount }}</p>
-                            <p><strong>Payment Status:</strong> 
-                                <span class="badge bg-{% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'refunded' %}info{% else %}warning{% endif %}">
-                                    {{ order.get_payment_status_display }}
+                        <div class="info-item">
+                            <span class="label">Email</span>
+                            <span class="value">{{ order.user.email }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Phone</span>
+                            <span class="value">{{ order.user.phone|default:"N/A" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Order Date</span>
+                            <span class="value">{{ order.created_at|date:"F d, Y H:i" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Delivery Date</span>
+                            <span class="value">{{ order.delivery_date|date:"F d, Y"|default:"Not delivered" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Total Amount</span>
+                            <span class="value" style="font-weight:700;color:var(--primary);font-size:16px;">₹{{ order.total_amount }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Payment Status</span>
+                            <span class="value">
+                                <span class="badge-status {% if order.payment_status == 'paid' %}approved{% elif order.payment_status == 'refunded' %}received{% else %}pending{% endif %}">
+                                    <span class="dot"></span> {{ order.get_payment_status_display }}
                                 </span>
-                            </p>
-                            <p><strong>Return Status:</strong>
-                                <span class="badge bg-{% if order.return_completed %}success{% elif order.return_items_received %}info{% elif order.return_approved %}warning{% elif order.return_rejected %}danger{% else %}secondary{% endif %}">
-                                    {{ order.return_status_display }}
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Return Status</span>
+                            <span class="value">
+                                <span class="badge-status {% if order.return_completed %}completed{% elif order.return_items_received %}received{% elif order.return_approved %}approved{% elif order.return_rejected %}rejected{% else %}pending{% endif %}">
+                                    <span class="dot"></span> {{ order.return_status_display }}
                                 </span>
-                            </p>
+                            </span>
                         </div>
                     </div>
 
                     <!-- Return Details -->
-                    <div class="mt-3">
-                        <h6>Return Details:</h6>
-                        <div class="bg-light p-3 rounded">
+                    <div style="margin-top:14px;">
+                        <h6 style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;">
+                            <i class="fas fa-comment" style="color:var(--secondary);"></i> Return Details
+                        </h6>
+                        <div class="detail-box">
                             <p><strong>Reason:</strong> {{ order.get_return_reason_display }}</p>
                             <p><strong>Description:</strong></p>
-                            <p style="white-space: pre-line;">{{ order.return_description }}</p>
-                            <p class="text-muted mt-2">
-                                <small>Requested on: {{ order.return_requested_at|date:"F d, Y H:i" }}</small>
+                            <p style="white-space:pre-line;font-size:13px;color:var(--text-light);">{{ order.return_description }}</p>
+                            <p style="font-size:12px;color:var(--text-muted);margin-top:4px;">
+                                <i class="fas fa-clock"></i> Requested on: {{ order.return_requested_at|date:"F d, Y H:i" }}
                             </p>
                         </div>
                     </div>
 
                     <!-- Customer Bank Details -->
-                    <div class="mt-3">
-                        <h6><i class="fas fa-university text-primary"></i> Customer Bank Details</h6>
-                        <div class="bg-light p-3 rounded">
-                            {% if order.return_bank_details %}
-                                <p style="white-space: pre-line;">{{ order.return_bank_details }}</p>
-                                <p class="text-muted mt-2">
-                                    <small><i class="fas fa-check-circle text-success"></i> Provided by customer on {{ order.return_requested_at|date:"F d, Y" }}</small>
-                                </p>
-                            {% else %}
-                                <p class="text-muted">No bank details provided by customer.</p>
-                            {% endif %}
-                        </div>
-                    </div>
+                    
 
                     <!-- Return Images -->
                     {% if order.return_images %}
-                    <div class="mt-3">
-                        <h6>Return Images:</h6>
-                        <div class="row">
+                    <div style="margin-top:14px;">
+                        <h6 style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;">
+                            <i class="fas fa-image" style="color:var(--secondary);"></i> Return Images
+                        </h6>
+                        <div class="image-grid">
                             {% for image in order.return_images %}
-                            <div class="col-3 mb-2">
-                                <a href="{{ image }}" target="_blank">
-                                    <img src="{{ image }}" class="img-fluid rounded border" style="height: 120px; width: 100%; object-fit: cover;">
-                                </a>
-                            </div>
+                            <a href="{{ image }}" target="_blank" class="img-item">
+                                <img src="{{ image }}" alt="Return image">
+                            </a>
                             {% endfor %}
                         </div>
                     </div>
                     {% endif %}
+                </div>
+            </div>
 
-                    <!-- Order Items -->
-                    <div class="mt-4">
-                        <h6>Order Items:</h6>
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>SKU</th>
-                                        <th>Quantity</th>
-                                        <th>Price</th>
-                                        <th>Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for item in items %}
-                                    <tr>
-                                        <td>{{ item.product_name }}</td>
-                                        <td>{{ item.sku }}</td>
-                                        <td>{{ item.quantity }}</td>
-                                        <td>₹{{ item.final_price }}</td>
-                                        <td>₹{{ item.total }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                                <tfoot>
-                                    <tr class="table-active">
-                                        <td colspan="4" class="text-end"><strong>Grand Total:</strong></td>
-                                        <td><strong>₹{{ order.total_amount }}</strong></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
+            <!-- ===== ORDER ITEMS CARD ===== -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="header-icon"><i class="fas fa-box"></i></span>
+                    <h5>Order Items</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-wrap">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th style="text-align:center;">Qty</th>
+                                    <th style="text-align:right;">Price</th>
+                                    <th style="text-align:right;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>{{ item.product_name }}</td>
+                                    <td>{{ item.sku }}</td>
+                                    <td style="text-align:center;">{{ item.quantity }}</td>
+                                    <td style="text-align:right;">₹{{ item.final_price }}</td>
+                                    <td style="text-align:right;">₹{{ item.total }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" style="text-align:right;"><strong>Grand Total:</strong></td>
+                                    <td style="text-align:right;font-weight:700;color:var(--primary);">₹{{ order.total_amount }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Transactions -->
-                    <div class="mt-4">
-                        <h6>Transaction History:</h6>
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Type</th>
-                                        <th>Amount</th>
-                                        <th>Status</th>
-                                        <th>Date</th>
-                                        <th>Refund Method</th>
-                                        <th>Notes</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for tx in transactions %}
-                                    <tr>
-                                        <td>{{ tx.get_transaction_type_display }}</td>
-                                        <td>₹{{ tx.amount }}</td>
-                                        <td>
-                                            <span class="badge bg-{% if tx.status == 'success' %}success{% elif tx.status == 'pending' %}warning{% else %}danger{% endif %}">
-                                                {{ tx.get_status_display }}
-                                            </span>
-                                        </td>
-                                        <td>{{ tx.created_at|date:"F d, Y H:i" }}</td>
-                                        <td>
-                                            {% if tx.transaction_type == 'refund' %}
-                                                {% if 'Razorpay' in tx.notes %}
-                                                    <span class="badge bg-primary">Razorpay</span>
-                                                {% elif 'Manual' in tx.notes %}
-                                                    <span class="badge bg-warning text-dark">Manual</span>
-                                                {% else %}
-                                                    <span class="badge bg-secondary">N/A</span>
-                                                {% endif %}
+            <!-- ===== TRANSACTIONS CARD ===== -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="header-icon"><i class="fas fa-receipt"></i></span>
+                    <h5>Transaction History</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-wrap">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th style="text-align:right;">Amount</th>
+                                    <th style="text-align:center;">Status</th>
+                                    <th>Date</th>
+                                    <th>Refund Method</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tx in transactions %}
+                                <tr>
+                                    <td>{{ tx.get_transaction_type_display }}</td>
+                                    <td style="text-align:right;">₹{{ tx.amount }}</td>
+                                    <td style="text-align:center;">
+                                        <span class="badge-status {% if tx.status == 'success' %}approved{% elif tx.status == 'pending' %}pending{% else %}rejected{% endif %}">
+                                            <span class="dot"></span> {{ tx.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td style="font-size:12px;color:var(--text-muted);">{{ tx.created_at|date:"M d, Y H:i" }}</td>
+                                    <td>
+                                        {% if tx.transaction_type == 'refund' %}
+                                            {% if 'Razorpay' in tx.notes %}
+                                                <span class="badge-status approved" style="padding:2px 10px;font-size:10px;"><span class="dot"></span> Razorpay</span>
+                                            {% elif 'Manual' in tx.notes %}
+                                                <span class="badge-status pending" style="padding:2px 10px;font-size:10px;"><span class="dot"></span> Manual</span>
                                             {% else %}
-                                                <span class="badge bg-secondary">-</span>
+                                                <span class="badge-status completed" style="padding:2px 10px;font-size:10px;"><span class="dot"></span> N/A</span>
                                             {% endif %}
-                                        </td>
-                                        <td style="max-width: 150px; font-size: 12px;">
-                                            {% if tx.notes %}
-                                                {{ tx.notes|truncatechars:30 }}
-                                            {% else %}
-                                                -
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted">No transactions</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                                        {% else %}
+                                            <span class="badge-status completed" style="padding:2px 10px;font-size:10px;"><span class="dot"></span> -</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="max-width:150px;font-size:12px;color:var(--text-muted);">
+                                        {% if tx.notes %}{{ tx.notes|truncatechars:30 }}{% else %}-{% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" style="text-align:center;color:var(--text-muted);padding:16px 0;">No transactions</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <!-- Admin Action Card -->
-            <div class="card shadow mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-tools"></i> Admin Actions</h5>
+        <!-- ===== RIGHT COLUMN ===== -->
+        <div class="right-col">
+
+            <!-- ===== ADMIN ACTIONS CARD ===== -->
+            <div class="sidebar-card card">
+                <div class="card-header">
+                    <span class="header-icon"><i class="fas fa-tools"></i></span>
+                    <h5>Admin Actions</h5>
                 </div>
                 <div class="card-body">
-                    <!-- Current Status -->
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Current Status:</strong> 
-                        <span class="badge bg-{% if order.return_completed %}success{% elif order.return_items_received %}info{% elif order.return_approved %}warning{% elif order.return_rejected %}danger{% else %}secondary{% endif %}">
-                            {{ order.return_status_display }}
-                        </span>
-                        <br>
-                        <strong>Payment Status:</strong> 
-                        <span class="badge bg-{% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'refunded' %}info{% else %}warning{% endif %}">
-                            {{ order.get_payment_status_display }}
-                        </span>
-                        <br>
-                        <strong>Order Status:</strong> 
-                        <span class="badge bg-{% if order.status == 'cancelled' %}danger{% else %}secondary{% endif %}">
-                            {{ order.get_status_display }}
-                        </span>
+
+                    <!-- Status Summary -->
+                    <div class="status-summary">
+                        <div class="status-row">
+                            <span class="label">Return Status</span>
+                            <span class="value">
+                                <span class="badge-status {% if order.return_completed %}completed{% elif order.return_items_received %}received{% elif order.return_approved %}approved{% elif order.return_rejected %}rejected{% else %}pending{% endif %}" style="padding:2px 12px;font-size:11px;">
+                                    <span class="dot"></span> {{ order.return_status_display }}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="status-row">
+                            <span class="label">Payment Status</span>
+                            <span class="value">
+                                <span class="badge-status {% if order.payment_status == 'paid' %}approved{% elif order.payment_status == 'refunded' %}received{% else %}pending{% endif %}" style="padding:2px 12px;font-size:11px;">
+                                    <span class="dot"></span> {{ order.get_payment_status_display }}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="status-row">
+                            <span class="label">Order Status</span>
+                            <span class="value">
+                                <span class="badge-status {% if order.status == 'cancelled' %}rejected{% else %}approved{% endif %}" style="padding:2px 12px;font-size:11px;">
+                                    <span class="dot"></span> {{ order.get_status_display }}
+                                </span>
+                            </span>
+                        </div>
                     </div>
 
-                    <!-- Customer Bank Details Quick View -->
+                    <!-- Bank Details -->
                     {% if order.return_bank_details %}
-                    <div class="alert alert-success">
-                        <i class="fas fa-check-circle"></i>
-                        <strong>Bank Details Provided</strong>
-                        <p class="mb-0 small">Customer has provided bank details for refund.</p>
-                        <button class="btn btn-sm btn-outline-success mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#bankDetailsCollapse">
-                            <i class="fas fa-eye"></i> View Bank Details
-                        </button>
-                        <div class="collapse mt-2" id="bankDetailsCollapse">
-                            <div class="card card-body bg-white">
-                                <pre style="white-space: pre-line; font-size: 13px; margin: 0;">{{ order.return_bank_details }}</pre>
-                            </div>
+                    <div class="bank-details-toggle">
+                        <div class="bank-header">
+                            <strong><i class="fas fa-check-circle"></i> Bank Details Provided</strong>
+                            <div class="small-text">Customer has provided bank details for refund.</div>
+                            <button class="btn-view" type="button" onclick="toggleBankDetails()">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+                        </div>
+                        <div class="bank-content" id="bankDetailsCollapse">
+                            <pre>{{ order.return_bank_details }}</pre>
                         </div>
                     </div>
                     {% else %}
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <strong>No Bank Details</strong>
-                        <p class="mb-0 small">Customer has not provided bank details.</p>
+                    <div class="no-bank-details">
+                        <strong><i class="fas fa-exclamation-triangle"></i> No Bank Details</strong>
+                        <div class="small-text">Customer has not provided bank details.</div>
                     </div>
                     {% endif %}
 
-                    <!-- Only show action form if not already completed -->
+                    <!-- Action Form -->
                     {% if not order.return_completed and not order.status == 'cancelled' %}
                     <form method="post" id="returnActionForm">
                         {% csrf_token %}
-                        
-                        <div class="mb-3">
-                            <label for="{{ form.action.id_for_label }}" class="form-label">Action <span class="text-danger">*</span></label>
+
+                        <div class="form-group">
+                            <label for="{{ form.action.id_for_label }}">Action <span class="required">*</span></label>
                             {{ form.action }}
-                            <small class="text-muted">Select an action to perform on this return request.</small>
+                            <span class="form-text">Select an action to perform.</span>
                         </div>
 
-                        <!-- Refund Fields - Only shown when initiating refund -->
-                        <div class="mb-3" id="refundFields" style="display:none;">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h6 class="card-title">💰 Refund Configuration</h6>
-                                    <p class="small text-muted">Choose how you want to process the refund.</p>
-                                    
-                                    <div class="mb-2">
-                                        <label for="{{ form.refund_method.id_for_label }}" class="form-label">Refund Method <span class="text-danger">*</span></label>
-                                        {{ form.refund_method }}
-                                        <small class="text-muted">
-                                            <i class="fas fa-info-circle"></i>
-                                            Razorpay Auto-Refund is recommended for faster processing.
-                                        </small>
-                                    </div>
-                                    
-                                    <div class="mb-2">
-                                        <label for="{{ form.refund_amount.id_for_label }}" class="form-label">Refund Amount</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">₹</span>
-                                            {{ form.refund_amount }}
-                                        </div>
-                                        <small class="text-muted">
-                                            <i class="fas fa-info-circle"></i> 
-                                            Leave empty to use order total: <strong>₹{{ order.total_amount }}</strong>
-                                        </small>
-                                    </div>
-                                    
-                                    <!-- Bank Details - Required for manual transfer -->
-                                    <div class="mb-2" id="bankFields" style="display:none;">
-                                        <label for="{{ form.bank_details.id_for_label }}" class="form-label">Bank Details <span class="text-danger">*</span></label>
-                                        {% if order.return_bank_details %}
-                                            <div class="alert alert-success mb-2">
-                                                <i class="fas fa-check-circle"></i>
-                                                <strong>Customer's Bank Details:</strong>
-                                                <pre style="white-space: pre-line; font-size: 12px; margin-top: 5px; background: white; padding: 10px; border-radius: 5px;">{{ order.return_bank_details }}</pre>
-                                                <small class="text-muted">These details were provided by the customer during return request.</small>
-                                            </div>
-                                            {{ form.bank_details }}
-                                            <small class="text-muted">
-                                                <i class="fas fa-edit"></i>
-                                                Edit above if needed, or use customer's provided details.
-                                            </small>
-                                        {% else %}
-                                            {{ form.bank_details }}
-                                            <small class="text-muted">
-                                                <i class="fas fa-exclamation-triangle text-warning"></i>
-                                                Customer has not provided bank details. Please contact the customer to get bank details.
-                                            </small>
-                                        {% endif %}
-                                    </div>
+                        <!-- Refund Fields -->
+                        <div class="refund-fields" id="refundFields" style="display:none;">
+                            <div class="refund-title"><i class="fas fa-hand-holding-usd"></i> Refund Configuration</div>
+                            <div class="form-group">
+                                <label for="{{ form.refund_method.id_for_label }}">Refund Method <span class="required">*</span></label>
+                                {{ form.refund_method }}
+                                <span class="form-text">Choose how to process the refund.</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.refund_amount.id_for_label }}">Refund Amount</label>
+                                <div style="display:flex;align-items:center;gap:4px;">
+                                    <span style="background:var(--bg);padding:8px 12px;border-radius:var(--radius-xs);border:2px solid var(--border);font-weight:600;">₹</span>
+                                    {{ form.refund_amount }}
                                 </div>
+                                <span class="form-text">Leave empty for full amount: <strong>₹{{ order.total_amount }}</strong></span>
+                            </div>
+                            <div class="form-group" id="bankFields" style="display:none;">
+                                <label for="{{ form.bank_details.id_for_label }}">Bank Details <span class="required">*</span></label>
+                                {% if order.return_bank_details %}
+                                <div style="background:#d1fae5;padding:8px 12px;border-radius:6px;margin-bottom:8px;border-left:3px solid var(--success);font-size:12px;">
+                                    <strong style="color:#065f46;"><i class="fas fa-check-circle"></i> Customer's Bank Details:</strong>
+                                    <pre style="white-space:pre-line;font-size:12px;margin-top:4px;background:white;padding:8px;border-radius:4px;">{{ order.return_bank_details }}</pre>
+                                </div>
+                                {% endif %}
+                                {{ form.bank_details }}
+                                <span class="form-text">Enter bank details for manual transfer.</span>
                             </div>
                         </div>
 
-                        <!-- Notes -->
-                        <div class="mb-3">
-                            <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                        <div class="form-group">
+                            <label for="{{ form.notes.id_for_label }}">Notes</label>
                             {{ form.notes }}
-                            <small class="text-muted">Add any notes about this action (optional).</small>
+                            <span class="form-text">Add notes about this action.</span>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100" id="submitBtn">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
                             <i class="fas fa-check"></i> Apply Action
                         </button>
                     </form>
                     {% else %}
-                    <div class="alert {% if order.return_completed %}alert-success{% else %}alert-danger{% endif %}">
-                        <i class="fas fa-check-circle"></i>
-                        <strong>
-                            {% if order.return_completed %}
-                                Return Already Completed
-                            {% elif order.status == 'cancelled' %}
-                                Order Cancelled
-                            {% endif %}
+                    <div class="completed-status {% if order.return_completed %}success{% else %}danger{% endif %}">
+                        <strong><i class="fas fa-check-circle"></i>
+                            {% if order.return_completed %}Return Already Completed{% else %}Order Cancelled{% endif %}
                         </strong>
-                        <p class="mb-0 small">
+                        <div class="small-text">
                             {% if order.return_completed %}
-                                This return was completed on {{ order.return_completed_at|date:"F d, Y H:i" }}
+                                Completed on {{ order.return_completed_at|date:"F d, Y H:i" }}
                             {% elif order.status == 'cancelled' %}
-                                This order was cancelled on {{ order.cancelled_at|date:"F d, Y H:i" }}
+                                Cancelled on {{ order.cancelled_at|date:"F d, Y H:i" }}
                             {% endif %}
-                        </p>
+                        </div>
                     </div>
                     {% endif %}
 
-                    <!-- Quick Actions - Only show if not completed -->
+                    <!-- Quick Actions -->
                     {% if not order.return_completed and not order.status == 'cancelled' %}
-                    <div class="card shadow mb-4">
-                        <div class="card-header bg-secondary text-white">
-                            <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-grid gap-2">
-                                {% if order.return_requested and not order.return_approved and not order.return_rejected %}
-                                    <button class="btn btn-success" onclick="quickAction('approve')">
-                                        <i class="fas fa-check"></i> Quick Approve
-                                    </button>
-                                    <button class="btn btn-danger" onclick="quickAction('reject')">
-                                        <i class="fas fa-times"></i> Quick Reject
-                                    </button>
-                                {% endif %}
-                                {% if order.return_approved and not order.return_items_received %}
-                                    <button class="btn btn-info" onclick="quickAction('mark_received')">
-                                        <i class="fas fa-box"></i> Mark Items Received
-                                    </button>
-                                {% endif %}
-                                {% if order.return_items_received and not order.refund_requested %}
-                                    <button class="btn btn-warning" onclick="quickAction('initiate_refund')">
-                                        <i class="fas fa-hand-holding-usd"></i> Initiate Refund
-                                    </button>
-                                {% endif %}
-                                {% if order.refund_approved and not order.refund_completed %}
-                                    <button class="btn btn-success" onclick="quickAction('mark_refund_completed')">
-                                        <i class="fas fa-check-circle"></i> Mark Refund Completed
-                                    </button>
-                                {% endif %}
-                                {% if order.return_items_received and not order.return_completed %}
-                                    <button class="btn btn-secondary" onclick="quickAction('complete_return')">
-                                        <i class="fas fa-flag-checkered"></i> Complete Return
-                                    </button>
-                                {% endif %}
-                            </div>
+                    <div class="quick-actions">
+                        <div class="quick-title"><i class="fas fa-bolt"></i> Quick Actions</div>
+                        <div class="quick-grid">
+                            {% if order.return_requested and not order.return_approved and not order.return_rejected %}
+                                <button class="btn btn-success" onclick="quickAction('approve')">
+                                    <i class="fas fa-check"></i> Quick Approve
+                                </button>
+                                <button class="btn btn-danger" onclick="quickAction('reject')">
+                                    <i class="fas fa-times"></i> Quick Reject
+                                </button>
+                            {% endif %}
+                            {% if order.return_approved and not order.return_items_received %}
+                                <button class="btn btn-info" onclick="quickAction('mark_received')">
+                                    <i class="fas fa-box"></i> Mark Items Received
+                                </button>
+                            {% endif %}
+                            {% if order.return_items_received and not order.refund_requested %}
+                                <button class="btn btn-warning-custom" onclick="quickAction('initiate_refund')">
+                                    <i class="fas fa-hand-holding-usd"></i> Initiate Refund
+                                </button>
+                            {% endif %}
+                            {% if order.refund_approved and not order.refund_completed %}
+                                <button class="btn btn-success" onclick="quickAction('mark_refund_completed')">
+                                    <i class="fas fa-check-circle"></i> Mark Refund Completed
+                                </button>
+                            {% endif %}
+                            {% if order.return_items_received and not order.return_completed %}
+                                <button class="btn btn-secondary" onclick="quickAction('complete_return')">
+                                    <i class="fas fa-flag-checkered"></i> Complete Return
+                                </button>
+                            {% endif %}
                         </div>
                     </div>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- Timeline Card -->
-            <div class="card shadow">
+            <!-- ===== TIMELINE CARD ===== -->
+            <div class="sidebar-card card">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-history"></i> Return Timeline</h5>
+                    <span class="header-icon"><i class="fas fa-history"></i></span>
+                    <h5>Return Timeline</h5>
                 </div>
-                <div class="card-body">
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <i class="fas fa-check-circle text-success"></i>
-                            Order Placed - {{ order.created_at|date:"F d, Y H:i" }}
+                <div class="card-body" style="padding:14px 18px;">
+                    <ul class="timeline">
+                        <li>
+                            <span class="timeline-icon success"><i class="fas fa-check"></i></span>
+                            <div class="timeline-content">
+                                Order Placed
+                                <span class="time">{{ order.created_at|date:"F d, Y H:i" }}</span>
+                            </div>
                         </li>
                         {% if order.delivery_date %}
-                        <li class="mb-2">
-                            <i class="fas fa-truck text-info"></i>
-                            Delivered - {{ order.delivery_date|date:"F d, Y" }}
+                        <li>
+                            <span class="timeline-icon info"><i class="fas fa-truck"></i></span>
+                            <div class="timeline-content">
+                                Delivered
+                                <span class="time">{{ order.delivery_date|date:"F d, Y" }}</span>
+                            </div>
                         </li>
                         {% endif %}
                         {% if order.return_requested %}
-                        <li class="mb-2">
-                            <i class="fas fa-clock text-warning"></i>
-                            Return Requested - {{ order.return_requested_at|date:"F d, Y H:i" }}
-                            <br><small class="text-muted">Reason: {{ order.get_return_reason_display }}</small>
-                            {% if order.return_bank_details %}
-                            <br><small class="text-success"><i class="fas fa-university"></i> Bank details provided</small>
-                            {% endif %}
+                        <li>
+                            <span class="timeline-icon warning"><i class="fas fa-clock"></i></span>
+                            <div class="timeline-content">
+                                Return Requested
+                                <span class="time">{{ order.return_requested_at|date:"F d, Y H:i" }}</span>
+                                <span class="sub">Reason: {{ order.get_return_reason_display }}</span>
+                                {% if order.return_bank_details %}
+                                <span class="sub" style="color:var(--success);"><i class="fas fa-university"></i> Bank details provided</span>
+                                {% endif %}
+                            </div>
                         </li>
                         {% endif %}
                         {% if order.return_approved %}
-                        <li class="mb-2">
-                            <i class="fas fa-check-circle text-success"></i>
-                            Return Approved - {{ order.return_approved_at|date:"F d, Y H:i" }}
+                        <li>
+                            <span class="timeline-icon success"><i class="fas fa-check"></i></span>
+                            <div class="timeline-content">
+                                Return Approved
+                                <span class="time">{{ order.return_approved_at|date:"F d, Y H:i" }}</span>
+                            </div>
                         </li>
                         {% endif %}
                         {% if order.return_rejected %}
-                        <li class="mb-2">
-                            <i class="fas fa-times-circle text-danger"></i>
-                            Return Rejected - {{ order.return_rejected_at|date:"F d, Y H:i" }}
-                            <br><small class="text-muted">Reason: {{ order.return_rejection_reason }}</small>
+                        <li>
+                            <span class="timeline-icon danger"><i class="fas fa-times"></i></span>
+                            <div class="timeline-content">
+                                Return Rejected
+                                <span class="time">{{ order.return_rejected_at|date:"F d, Y H:i" }}</span>
+                                <span class="sub">Reason: {{ order.return_rejection_reason }}</span>
+                            </div>
                         </li>
                         {% endif %}
                         {% if order.return_items_received %}
-                        <li class="mb-2">
-                            <i class="fas fa-box text-info"></i>
-                            Items Received - {{ order.return_items_received_at|date:"F d, Y H:i" }}
+                        <li>
+                            <span class="timeline-icon info"><i class="fas fa-box"></i></span>
+                            <div class="timeline-content">
+                                Items Received
+                                <span class="time">{{ order.return_items_received_at|date:"F d, Y H:i" }}</span>
+                            </div>
                         </li>
                         {% endif %}
                         {% if order.refund_requested %}
-                        <li class="mb-2">
-                            <i class="fas fa-hand-holding-usd text-warning"></i>
-                            Refund Initiated - {{ order.refund_requested_at|date:"F d, Y H:i" }}
-                            <br><small class="text-muted">Method: {{ order.get_refund_method_display|default:"N/A" }}</small>
+                        <li>
+                            <span class="timeline-icon warning"><i class="fas fa-hand-holding-usd"></i></span>
+                            <div class="timeline-content">
+                                Refund Initiated
+                                <span class="time">{{ order.refund_requested_at|date:"F d, Y H:i" }}</span>
+                                <span class="sub">Method: {{ order.get_refund_method_display|default:"N/A" }}</span>
+                            </div>
                         </li>
                         {% endif %}
                         {% if order.refund_completed %}
-                        <li class="mb-2">
-                            <i class="fas fa-check-circle text-success"></i>
-                            Refund Completed - {{ order.refund_completed_at|date:"F d, Y H:i" }}
-                            <br><small class="text-muted">Amount: ₹{{ order.refund_amount|default:order.total_amount }}</small>
+                        <li>
+                            <span class="timeline-icon success"><i class="fas fa-check"></i></span>
+                            <div class="timeline-content">
+                                Refund Completed
+                                <span class="time">{{ order.refund_completed_at|date:"F d, Y H:i" }}</span>
+                                <span class="sub">Amount: ₹{{ order.refund_amount|default:order.total_amount }}</span>
+                            </div>
                         </li>
                         {% endif %}
                         {% if order.return_completed %}
-                        <li class="mb-2">
-                            <i class="fas fa-flag-checkered text-success"></i>
-                            Return Completed - {{ order.return_completed_at|date:"F d, Y H:i" }}
+                        <li>
+                            <span class="timeline-icon success"><i class="fas fa-flag-checkered"></i></span>
+                            <div class="timeline-content">
+                                Return Completed
+                                <span class="time">{{ order.return_completed_at|date:"F d, Y H:i" }}</span>
+                            </div>
                         </li>
                         {% endif %}
                     </ul>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
 
 <script>
+// Toggle bank details
+function toggleBankDetails() {
+    const el = document.getElementById('bankDetailsCollapse');
+    el.classList.toggle('show');
+}
+
 // Show/hide refund fields based on action
-document.getElementById('id_action').addEventListener('change', function() {
+document.addEventListener('DOMContentLoaded', function() {
+    const actionField = document.getElementById('id_action');
     const refundFields = document.getElementById('refundFields');
     const bankFields = document.getElementById('bankFields');
-    
-    if (this.value === 'initiate_refund') {
-        refundFields.style.display = 'block';
-        // If bank details already exist, pre-fill
-        {% if order.return_bank_details %}
-            const bankDetailsField = document.getElementById('id_bank_details');
-            if (bankDetailsField && !bankDetailsField.value) {
-                bankDetailsField.value = `{{ order.return_bank_details|escapejs }}`;
-            }
-        {% endif %}
-    } else {
-        refundFields.style.display = 'none';
-        bankFields.style.display = 'none';
-    }
-});
+    const refundMethod = document.getElementById('id_refund_method');
 
-// Show/hide bank details based on refund method
-document.getElementById('id_refund_method').addEventListener('change', function() {
-    const bankFields = document.getElementById('bankFields');
-    if (this.value === 'manual') {
-        bankFields.style.display = 'block';
-    } else {
-        bankFields.style.display = 'none';
+    if (actionField) {
+        actionField.addEventListener('change', function() {
+            if (this.value === 'initiate_refund') {
+                refundFields.style.display = 'block';
+                if (refundMethod && refundMethod.value === 'manual') {
+                    bankFields.style.display = 'block';
+                }
+            } else {
+                refundFields.style.display = 'none';
+                bankFields.style.display = 'none';
+            }
+        });
+
+        // Initial check
+        if (actionField.value === 'initiate_refund') {
+            refundFields.style.display = 'block';
+        }
+    }
+
+    if (refundMethod) {
+        refundMethod.addEventListener('change', function() {
+            if (this.value === 'manual') {
+                bankFields.style.display = 'block';
+            } else {
+                bankFields.style.display = 'none';
+            }
+        });
     }
 });
 
 // Quick action buttons
 function quickAction(action) {
     if (action === 'reject') {
-        const reason = prompt('Please enter the reason for rejection:');
+        const reason = prompt('Enter rejection reason:');
         if (reason === null) return;
         if (!reason.trim()) {
             alert('Please provide a reason for rejection.');
@@ -488,14 +1693,25 @@ function quickAction(action) {
         }
         document.getElementById('id_notes').value = reason;
     }
-    
+
     if (action === 'initiate_refund') {
-        const confirmMsg = 'Are you sure you want to initiate refund?';
-        if (!confirm(confirmMsg)) {
-            return;
-        }
+        if (!confirm('Are you sure you want to initiate refund?')) return;
     }
-    
+
+    if (action === 'mark_received') {
+        if (!confirm('Mark items as received? This will restore stock.')) return;
+    }
+
+    if (action === 'complete_return') {
+        if (!confirm('Complete this return? This action cannot be undone.')) return;
+    }
+
+    if (action === 'mark_refund_completed') {
+        if (!confirm('Mark refund as completed? This will notify the customer.')) return;
+    }
+
+    if (action === 'approve' && !confirm('Approve this return?')) return;
+
     document.getElementById('id_action').value = action;
     document.getElementById('returnActionForm').submit();
 }
@@ -503,143 +1719,49 @@ function quickAction(action) {
 // Form validation
 document.getElementById('returnActionForm').addEventListener('submit', function(e) {
     const action = document.getElementById('id_action').value;
+    const notes = document.getElementById('id_notes');
     const refundMethod = document.getElementById('id_refund_method');
     const bankDetails = document.getElementById('id_bank_details');
-    const notes = document.getElementById('id_notes');
     const refundAmount = document.getElementById('id_refund_amount');
-    
+
     if (action === 'reject') {
         if (!notes.value.trim()) {
             e.preventDefault();
-            alert('Please provide a reason for rejection in the notes field.');
+            alert('Please provide a reason for rejection.');
             return false;
         }
     }
-    
+
     if (action === 'initiate_refund') {
         if (!refundMethod.value) {
             e.preventDefault();
             alert('Please select a refund method.');
             return false;
         }
-        
-        // Validate refund amount
         if (refundAmount.value && parseFloat(refundAmount.value) <= 0) {
             e.preventDefault();
             alert('Refund amount must be greater than 0.');
             return false;
         }
-        
         if (refundMethod.value === 'manual') {
             if (!bankDetails.value.trim()) {
                 e.preventDefault();
-                alert('Please enter the customer\'s bank details for manual transfer.');
+                alert('Please enter bank details for manual transfer.');
                 return false;
             }
-            
-            const confirmMsg = 'You are initiating a MANUAL refund. Please confirm the bank details are correct.';
-            if (!confirm(confirmMsg)) {
+            if (!confirm('Confirm bank details are correct for manual refund?')) {
                 e.preventDefault();
                 return false;
             }
         }
-        
         if (refundMethod.value === 'razorpay') {
-            if (!confirm('Are you sure you want to initiate Razorpay auto-refund for this order?')) {
+            if (!confirm('Initiate Razorpay auto-refund?')) {
                 e.preventDefault();
                 return false;
             }
         }
     }
-    
-    if (action === 'mark_received') {
-        if (!confirm('Mark items as received for this return? This will restore stock.')) {
-            e.preventDefault();
-            return false;
-        }
-    }
-    
-    if (action === 'complete_return') {
-        if (!confirm('Complete this return process? This action cannot be undone.')) {
-            e.preventDefault();
-            return false;
-        }
-    }
-    
-    if (action === 'mark_refund_completed') {
-        if (!confirm('Mark refund as completed? This will notify the customer.')) {
-            e.preventDefault();
-            return false;
-        }
-    }
-});
-
-// Auto-fill bank details from customer if available
-document.addEventListener('DOMContentLoaded', function() {
-    {% if order.return_bank_details %}
-        const bankDetailsField = document.getElementById('id_bank_details');
-        if (bankDetailsField && !bankDetailsField.value) {
-            bankDetailsField.value = `{{ order.return_bank_details|escapejs }}`;
-        }
-    {% endif %}
 });
 </script>
 
-<style>
-/* Style improvements */
-.card {
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.card-header {
-    font-weight: 600;
-}
-
-.badge {
-    font-size: 0.8rem;
-    padding: 0.4rem 0.8rem;
-}
-
-.timeline .list-unstyled {
-    margin-bottom: 0;
-}
-
-.timeline .list-unstyled li {
-    padding: 8px 0;
-    border-bottom: 1px solid #f1f3f5;
-}
-
-.timeline .list-unstyled li:last-child {
-    border-bottom: none;
-}
-
-#refundFields .card {
-    border: 1px solid #dee2e6;
-}
-
-#refundFields .card-body {
-    padding: 15px;
-}
-
-/* Quick action buttons */
-.d-grid .btn {
-    margin-bottom: 5px;
-    font-size: 0.9rem;
-}
-
-.d-grid .btn:last-child {
-    margin-bottom: 0;
-}
-
-pre {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
-
-/* Input group styling */
-.input-group-text {
-    background-color: #f8f9fa;
-}
-</style>
 {% endblock %}

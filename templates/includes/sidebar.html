@@ -22,10 +22,14 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
         body {
             background: #f5f3f0;
             font-family: 'Inter', sans-serif;
-            min-height: 100vh;
             display: flex;
         }
 
@@ -33,10 +37,7 @@
             text-decoration: none;
             color: inherit;
         }
-.sidebar-nav::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-}
+
         /* ===== ROOT VARIABLES ===== */
         :root {
             --primary: #5c121f;
@@ -53,12 +54,12 @@
             --shadow-hover: 0 8px 32px rgba(92, 18, 31, 0.12);
             --radius: 10px;
             --transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            --sidebar-width: 240px;
+            --sidebar-width: 260px;
             --header-height: 50px;
         }
 
         /* ============================================================
-           ADMIN SIDEBAR - NO SCROLLBAR VISIBLE
+           ADMIN SIDEBAR - FIXED POSITION
            ============================================================ */
         .admin-sidebar {
             position: fixed;
@@ -75,9 +76,9 @@
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
+            flex-shrink: 0;
         }
 
-        /* --- COMPLETELY REMOVE SCROLLBAR --- */
         .admin-sidebar::-webkit-scrollbar {
             width: 0px;
             height: 0px;
@@ -101,128 +102,130 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            background: var(--bg-white);
+            background: var(--primary);
+            padding: 6px 0;
+            min-height: 50px;
             position: relative;
-                        background:var(--primary);
-                        padding:3px 0;
-
         }
         .sidebar-header::after {
             content: '';
             position: absolute;
             bottom: 0;
-            left: 25%;
-            right: 25%;
+            left: 20%;
+            right: 20%;
             height: 2px;
             background: linear-gradient(90deg, transparent, var(--secondary), transparent);
             opacity: 0.4;
         }
-       .sidebar-header .logo-img img {
-    height: 44px;
-    width: auto;
-    display: block;
-    object-fit: contain;
-    transition: var(--transition);
-
-    filter: brightness(0) invert(1);
-}
-
-.sidebar-header .logo-img img:hover {
-    transform: scale(1.05);
-    filter: brightness(0) invert(1)
-            drop-shadow(0 4px 16px rgba(255, 255, 255, 0.25));
-}
+        .sidebar-header .logo-img img {
+            height: 38px;
+            width: auto;
+            display: block;
+            object-fit: contain;
+            transition: var(--transition);
+            filter: brightness(0) invert(1);
+        }
+        .sidebar-header .logo-img img:hover {
+            transform: scale(1.05);
+            filter: brightness(0) invert(1) drop-shadow(0 4px 16px rgba(255, 255, 255, 0.25));
+        }
 
         /* --- Sidebar Navigation --- */
         .sidebar-nav {
             flex: 1;
-            padding: 12px 14px 12px;
+            padding: 6px 10px 10px;
             overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .sidebar-nav::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+        .sidebar-nav {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
 
         /* --- Section Divider Line --- */
-       .section-divider{
-    position:relative;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    margin:24px 0;
-}
+        .section-divider {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 14px 0;
+        }
+        .section-divider::before {
+            content: "";
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(
+                to right,
+                transparent,
+                rgba(92,18,31,.15),
+                rgba(92,18,31,.35),
+                rgba(92,18,31,.15),
+                transparent
+            );
+        }
+        .section-divider .divider-dot {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border: 1px solid rgba(244,180,0,.3);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 14px rgba(0,0,0,.06);
+        }
+        .section-divider .divider-dot::before {
+            content: "✦";
+            font-size: 10px;
+            color: var(--secondary);
+        }
 
-.section-divider::before{
-    content:"";
-    width:100%;
-    height:1px;
-    background:linear-gradient(
-        to right,
-        transparent,
-        rgba(92,18,31,.18),
-        rgba(92,18,31,.45),
-        rgba(92,18,31,.18),
-        transparent
-    );
-}
-
-.section-divider .divider-dot{
-    position:absolute;
-    width:20px;
-    height:20px;
-    background:#fff;
-    border:1px solid rgba(244,180,0,.35);
-    border-radius:50%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    box-shadow:0 4px 14px rgba(0,0,0,.06);
-}
-
-.section-divider .divider-dot::before{
-    content:"✦";
-    font-size:12px;
-    color:var(--secondary);
-}
-
-        /* --- Section Label - PRIMARY COLOR --- */
+        /* --- Section Label --- */
         .sidebar-nav .nav-section-label {
             font-size: 9px;
             font-weight: 700;
             color: var(--primary);
             text-transform: uppercase;
-            letter-spacing: 1.8px;
-            padding: 8px 12px 4px;
-            opacity: 0.55;
+            letter-spacing: 1.6px;
+            padding: 6px 10px 3px;
+            opacity: 0.5;
             white-space: nowrap;
         }
 
-        /* --- ALL LINKS - SAME STARTING POINT --- */
+        /* --- ALL LINKS - PROPER ALIGNMENT --- */
         .sidebar-nav .nav-item,
         .submenu-item {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 9px 14px;
+            gap: 12px;
+            padding: 8px 12px;
             border-radius: var(--radius);
             color: var(--text-light);
             transition: var(--transition);
             cursor: pointer;
             position: relative;
             white-space: nowrap;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
             font-weight: 500;
             font-size: 13px;
             background: transparent;
             border: 1px solid transparent;
+            width: 100%;
+            text-align: left;
         }
-
         .sidebar-nav .nav-item:hover,
         .submenu-item:hover {
             background: var(--bg-light);
             color: var(--primary);
             border-color: var(--border);
-            transform: translateX(4px);
+            transform: translateX(3px);
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
         }
-
         .sidebar-nav .nav-item.active,
         .submenu-item.active {
             background: var(--primary);
@@ -231,93 +234,95 @@
             box-shadow: 0 4px 20px rgba(92, 18, 31, 0.25);
             transform: translateX(0);
         }
-
         .sidebar-nav .nav-item.active i,
         .submenu-item.active i {
             color: #fff;
         }
-
         .sidebar-nav .nav-item i,
         .submenu-item i {
-            font-size: 17px;
+            font-size: 16px;
             width: 22px;
             text-align: center;
             flex-shrink: 0;
             color: var(--text-light);
             transition: var(--transition);
         }
-
         .sidebar-nav .nav-item:hover i,
         .submenu-item:hover i {
             color: var(--primary);
         }
-
         .sidebar-nav .nav-item.active i,
         .submenu-item.active i {
             color: #fff;
         }
-
         .sidebar-nav .nav-item .nav-text,
         .submenu-item .nav-text {
             font-size: 13px;
             font-weight: 500;
             flex: 1;
             letter-spacing: 0.2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        /* --- Submenu items - SAME PADDING AS MAIN --- */
+        /* --- Submenu items --- */
         .submenu-item {
             font-weight: 400;
             font-size: 13px;
-            padding: 9px 14px;
+            padding: 7px 12px 7px 46px;
         }
-
         .submenu-item i {
-            font-size: 15px;
-            width: 22px;
+            font-size: 14px;
+            width: 20px;
             opacity: 0.6;
+            margin-left: -26px;
         }
-
         .submenu-item.active i {
             opacity: 1;
         }
-
-        /* --- Small accent line for submenu items --- */
-        .submenu-item::before {
-            content: '';
-            position: absolute;
-            left: 8px;
-            top: 50%;
-            transform: translateY(-50%) scaleX(0);
-            width: 2px;
-            height: 16px;
-            border-radius: 2px;
-            transition: var(--transition);
+        .submenu-item .nav-text {
+            font-weight: 400;
         }
 
-        .submenu-item:hover::before {
-            transform: translateY(-50%) scaleX(1);
+        /* ===== BADGE - PROPER ALIGNMENT ===== */
+        .menu-badge {
+            margin-left: auto;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 7px;
+            border-radius: 50px;
+            background: #F4B400;
+            color: #5c121f;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            line-height: 1;
         }
 
-        .submenu-item.active::before {
-            transform: translateY(-50%) scaleX(1);
+        .nav-item.active .menu-badge,
+        .submenu-item.active .menu-badge {
+            background: #fff;
+            color: var(--primary);
         }
 
-        /* ============================================================
-           SIDEBAR FOOTER - ATTRACTIVE LOGOUT
-           ============================================================ */
+        /* --- Sidebar Footer --- */
         .sidebar-footer {
-            padding: 10px 14px 18px;
+            padding: 6px 10px 12px;
             border-top: 1px solid var(--border);
             flex-shrink: 0;
             background: var(--bg-white);
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
         }
-
         .sidebar-footer .logout-wrapper {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 10px 16px;
+            gap: 12px;
+            padding: 9px 14px;
             border-radius: var(--radius);
             background: linear-gradient(135deg, var(--primary), var(--primary-light));
             color: #fff;
@@ -327,8 +332,8 @@
             box-shadow: 0 4px 16px rgba(92, 18, 31, 0.25);
             position: relative;
             overflow: hidden;
+            width: 100%;
         }
-
         .sidebar-footer .logout-wrapper::before {
             content: '';
             position: absolute;
@@ -339,48 +344,41 @@
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
             transition: var(--transition);
         }
-
         .sidebar-footer .logout-wrapper:hover::before {
             left: 100%;
         }
-
         .sidebar-footer .logout-wrapper:hover {
-            transform: translateX(4px);
+            transform: translateX(3px);
             box-shadow: 0 6px 24px rgba(92, 18, 31, 0.35);
         }
-
         .sidebar-footer .logout-wrapper i {
-            font-size: 18px;
-            width: 22px;
+            font-size: 16px;
+            width: 20px;
             text-align: center;
             color: var(--secondary);
             transition: var(--transition);
         }
-
         .sidebar-footer .logout-wrapper:hover i {
             transform: rotate(-15deg) scale(1.1);
         }
-
         .sidebar-footer .logout-wrapper .logout-text {
             font-size: 13px;
             font-weight: 600;
             letter-spacing: 0.3px;
             flex: 1;
         }
-
         .sidebar-footer .logout-wrapper .logout-arrow {
             font-size: 12px;
             opacity: 0.7;
             transition: var(--transition);
         }
-
         .sidebar-footer .logout-wrapper:hover .logout-arrow {
             opacity: 1;
-            transform: translateX(4px);
+            transform: translateX(3px);
         }
 
         /* ============================================================
-           HEADER
+           HEADER - FIXED
            ============================================================ */
         .admin-header {
             position: fixed;
@@ -393,16 +391,15 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 32px;
+            padding: 0 28px;
             box-shadow: 0 2px 20px rgba(92, 18, 31, 0.2);
+            flex-shrink: 0;
         }
-
         .admin-header .header-left {
             display: flex;
             align-items: center;
             gap: 16px;
         }
-
         .admin-header .header-left .page-title {
             color: #fff;
             font-size: 16px;
@@ -414,13 +411,11 @@
             color: var(--secondary);
             margin-right: 10px;
         }
-
         .admin-header .header-right {
             display: flex;
             align-items: center;
             gap: 20px;
         }
-
         .admin-header .header-right .admin-info {
             display: flex;
             align-items: center;
@@ -428,7 +423,6 @@
             color: rgba(255, 255, 255, 0.9);
             font-size: 13px;
         }
-
         .admin-header .header-right .admin-info .admin-avatar {
             width: 30px;
             height: 30px;
@@ -446,16 +440,14 @@
             background: rgba(255, 255, 255, 0.2);
             border-color: var(--secondary);
         }
-
         .admin-header .header-right .admin-info .admin-name {
             font-weight: 500;
         }
-
         .admin-header .header-right .logout-btn {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 18px;
+            padding: 7px 16px;
             background: rgba(255, 255, 255, 0.08);
             color: #fff;
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -475,7 +467,40 @@
             font-size: 14px;
         }
 
-        /* ===== MOBILE OVERLAY ===== */
+        /* ============================================================
+           MAIN CONTENT - SCROLLABLE
+           ============================================================ */
+        .main-content {
+            position: fixed;
+            top: var(--header-height);
+            left: var(--sidebar-width);
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px 20px 30px;
+            background: #f5f3f0;
+            transition: left 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .main-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        .main-content::-webkit-scrollbar-track {
+            background: #f0ece8;
+            border-radius: 3px;
+        }
+        .main-content::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+        .main-content::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-light);
+        }
+
+        /* ============================================================
+           MOBILE OVERLAY
+           ============================================================ */
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -492,7 +517,9 @@
             display: block;
         }
 
-        /* ===== MOBILE HAMBURGER ===== */
+        /* ============================================================
+           MOBILE HAMBURGER
+           ============================================================ */
         .mobile-menu-btn {
             display: none;
             position: fixed;
@@ -515,18 +542,9 @@
             background: rgba(255, 255, 255, 0.22);
         }
 
-        /* ===== MAIN CONTENT ===== */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            margin-top: var(--header-height);
-            padding: 20px 20px 30px;
-            flex: 1;
-            transition: margin-left 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            min-height: calc(100vh - var(--header-height));
-            width: 100%;
-        }
-
-        /* ===== RESPONSIVE ===== */
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
         @media (max-width: 900px) {
             .admin-sidebar {
                 transform: translateX(-100%);
@@ -535,32 +553,26 @@
             .admin-sidebar.mobile-open {
                 transform: translateX(0);
             }
-
             .admin-header {
                 left: 0;
                 padding: 0 16px;
                 height: 54px;
             }
-
             .main-content {
-                margin-left: 0 !important;
-                margin-top: 54px;
+                left: 0;
+                top: 54px;
                 padding: 18px 16px 60px;
             }
-
             .mobile-menu-btn {
                 display: flex !important;
             }
-
             .admin-header .header-left .page-title {
                 margin-left: 44px;
                 font-size: 15px;
             }
-
             .sidebar-overlay.active {
                 display: block;
             }
-
             .admin-header .header-right .admin-info .admin-name {
                 display: none;
             }
@@ -572,6 +584,7 @@
             }
             .main-content {
                 padding: 14px 14px 60px;
+                top: 50px;
             }
             .admin-header {
                 padding: 0 12px;
@@ -603,9 +616,6 @@
                 height: 30px;
                 font-size: 14px;
             }
-            .main-content {
-                margin-top: 50px;
-            }
         }
 
         @media (max-width: 400px) {
@@ -624,20 +634,6 @@
                 padding: 12px 12px 60px;
             }
         }
-        .menu-badge{
-    margin-left:auto;
-    min-width:22px;
-    height:22px;
-    padding:0 6px;
-    border-radius:50px;
-    background:#F4B400;
-    color:#5c121f;
-    font-size:11px;
-    font-weight:700;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
     </style>
 </head>
 <body>
@@ -651,7 +647,7 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- ============================================================
-    ADMIN HEADER
+    ADMIN HEADER - FIXED
     ============================================================ -->
     <header class="admin-header">
         <div class="header-left">
@@ -672,11 +668,11 @@
     </header>
 
     <!-- ============================================================
-    ADMIN SIDEBAR
+    ADMIN SIDEBAR - FIXED WITH PROPER ALIGNMENT
     ============================================================ -->
     <aside class="admin-sidebar" id="adminSidebar">
 
-        <!-- Sidebar Header - Logo -->
+        <!-- Sidebar Header -->
         <div class="sidebar-header">
             <div class="logo-img">
                 <img src="{% static 'images/logonobg.png' %}" alt="ShubhDecor" />
@@ -686,155 +682,163 @@
         <!-- Sidebar Navigation -->
         <nav class="sidebar-nav">
 
-    <div class="nav-section-label">Main</div>
+            <div class="nav-section-label">Main</div>
 
-    <a href="{% url 'Ecom:admin_dashboard' %}"
-       class="nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
-        <i class="fa-solid fa-chart-pie"></i>
-        <span class="nav-text">Dashboard</span>
-    </a>
+            <a href="{% url 'Ecom:admin_dashboard' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span class="nav-text">Dashboard</span>
+            </a>
 
-    
-    <a href="{% url 'Ecom:admin_order_list' %}"
-       class="nav-item {% if request.resolver_match.url_name == 'admin_order_list' %}active{% endif %}">
-        <i class="fa-solid fa-box"></i>
-        <span class="nav-text">Incoming Orders</span>
-    </a>
-    <a href="{% url 'Ecom:orders' %}"
-   class="nav-item {% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
-    <i class="fa-solid fa-cart-shopping"></i>
-    <span class="nav-text">All Orders</span>
-</a>
+            <a href="{% url 'Ecom:orders' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span class="nav-text">All Orders</span>
+            </a>
 
-<a href="{% url 'Ecom:admin_replacement_requests' %}"
-   class="nav-item {% if request.resolver_match.url_name == 'admin_replacement_requests' %}active{% endif %}">
-    <i class="fa-solid fa-right-left"></i>
-    <span class="nav-text">Replacement Requests</span>
-</a>
+            <a href="{% url 'Ecom:admin_order_list' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'admin_order_list' %}active{% endif %}">
+                <i class="fa-solid fa-box"></i>
+                <span class="nav-text">Incoming Orders</span>
+                {% if incoming_orders_count > 0 %}
+                    <span class="menu-badge">{{ incoming_orders_count }}</span>
+                {% endif %}
+            </a>
 
-<a href="{% url 'Ecom:admin_return_requests' %}"
-   class="nav-item {% if request.resolver_match.url_name == 'admin_return_requests' %}active{% endif %}">
-    <i class="fa-solid fa-rotate-left"></i>
-    <span class="nav-text">Return Requests</span>
-</a>
+            <a href="{% url 'Ecom:admin_replacement_requests' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'admin_replacement_requests' %}active{% endif %}">
+                <i class="fa-solid fa-right-left"></i>
+                <span class="nav-text">Replacement Requests</span>
+                {% if replacement_requests_count > 0 %}
+                    <span class="menu-badge">{{ replacement_requests_count }}</span>
+                {% endif %}
+            </a>
 
-<a href="{% url 'Ecom:admin_cancellation_requests' %}"
-   class="nav-item {% if request.resolver_match.url_name == 'admin_cancellation_requests' %}active{% endif %}">
-    <i class="fa-solid fa-ban"></i>
-    <span class="nav-text">Cancellation Requests</span>
-</a>
+            <a href="{% url 'Ecom:admin_return_requests' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'admin_return_requests' %}active{% endif %}">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span class="nav-text">Return Requests</span>
+                {% if return_requests_count > 0 %}
+                    <span class="menu-badge">{{ return_requests_count }}</span>
+                {% endif %}
+            </a>
 
-<a href="{% url 'Ecom:product_list' %}"
-   class="nav-item {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
-    <i class="fa-solid fa-box-open"></i>
-    <span class="nav-text">Products</span>
-</a>
+            <a href="{% url 'Ecom:admin_cancellation_requests' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'admin_cancellation_requests' %}active{% endif %}">
+                <i class="fa-solid fa-ban"></i>
+                <span class="nav-text">Cancellation Requests</span>
+                {% if cancellation_requests_count > 0 %}
+                    <span class="menu-badge">{{ cancellation_requests_count }}</span>
+                {% endif %}
+            </a>
 
-    <a href="{% url 'Ecom:inventory_log' %}"
-       class="nav-item {% if request.resolver_match.url_name == 'inventory_log' %}active{% endif %}">
-        <i class="fa-solid fa-boxes-stacked"></i>
-        <span class="nav-text">Inventory</span>
-    </a>
+            <a href="{% url 'Ecom:product_list' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
+                <i class="fa-solid fa-box-open"></i>
+                <span class="nav-text">Products</span>
+            </a>
 
-    <!-- Section Divider -->
-    <div class="section-divider">
-        <span class="divider-dot"></span>
-        <span class="divider-line"></span>
-    </div>
+            <a href="{% url 'Ecom:inventory_log' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'inventory_log' %}active{% endif %}">
+                <i class="fa-solid fa-boxes-stacked"></i>
+                <span class="nav-text">Inventory</span>
+            </a>
 
-    <div class="nav-section-label">Management</div>
+            <!-- Section Divider -->
+            <div class="section-divider">
+                <span class="divider-dot"></span>
+            </div>
 
-    <a href="{% url 'Ecom:category_list' %}"
-       class="submenu-item {% if request.resolver_match.url_name == 'category_list' %}active{% endif %}">
-        <i class="fa-solid fa-layer-group"></i>
-        <span class="nav-text">Categories</span>
-    </a>
+            <div class="nav-section-label">Management</div>
 
-    <a href="{% url 'Ecom:subcategory_list' %}"
-       class="submenu-item {% if request.resolver_match.url_name == 'subcategory_list' %}active{% endif %}">
-        <i class="fa-solid fa-diagram-project"></i>
-        <span class="nav-text">Sub Categories</span>
-    </a>
+            <a href="{% url 'Ecom:category_list' %}"
+               class="submenu-item {% if request.resolver_match.url_name == 'category_list' %}active{% endif %}">
+                <i class="fa-solid fa-layer-group"></i>
+                <span class="nav-text">Categories</span>
+            </a>
 
-   <a href="{% url 'Ecom:review_list' %}"
-   class="submenu-item {% if request.resolver_match.url_name == 'review_list' %}active{% endif %}">
-    <i class="fa-solid fa-star"></i>
-    <span class="nav-text">Reviews</span>
+            <a href="{% url 'Ecom:subcategory_list' %}"
+               class="submenu-item {% if request.resolver_match.url_name == 'subcategory_list' %}active{% endif %}">
+                <i class="fa-solid fa-diagram-project"></i>
+                <span class="nav-text">Sub Categories</span>
+            </a>
 
-    {% if pending_review_count %}
-        <span class="menu-badge">{{ pending_review_count }}</span>
-    {% endif %}
-</a>
-    <a href="{% url 'Ecom:coupon_list' %}"
-       class="submenu-item {% if request.resolver_match.url_name == 'coupon_list' %}active{% endif %}">
-        <i class="fa-solid fa-ticket"></i>
-        <span class="nav-text">Coupons</span>
-    </a>
-     <a href="{% url 'Ecom:offer_list' %}"
-       class="submenu-item {% if request.resolver_match.url_name == 'offer_list' %}active{% endif %}">
-        <i class="fa-solid fa-tags"></i>
-        <span class="nav-text">Offers</span>
-    </a>
+            <a href="{% url 'Ecom:review_list' %}"
+               class="submenu-item {% if request.resolver_match.url_name == 'review_list' %}active{% endif %}">
+                <i class="fa-solid fa-star"></i>
+                <span class="nav-text">Reviews</span>
+                {% if pending_review_count > 0 %}
+                    <span class="menu-badge">{{ pending_review_count }}</span>
+                {% endif %}
+            </a>
 
-    <a href="{% url 'Ecom:low_stock_alerts' %}"
-       class="submenu-item {% if request.resolver_match.url_name == 'low_stock_alerts' %}active{% endif %}">
-        <i class="fa-solid fa-triangle-exclamation"></i>
+            <a href="{% url 'Ecom:coupon_list' %}"
+               class="submenu-item {% if request.resolver_match.url_name == 'coupon_list' %}active{% endif %}">
+                <i class="fa-solid fa-ticket"></i>
+                <span class="nav-text">Coupons</span>
+            </a>
 
-        <span class="nav-text">
-            Low Stock Items
-        </span>
+            <a href="{% url 'Ecom:offer_list' %}"
+               class="submenu-item {% if request.resolver_match.url_name == 'offer_list' %}active{% endif %}">
+                <i class="fa-solid fa-tags"></i>
+                <span class="nav-text">Offers</span>
+            </a>
 
-        {% if total_low_stock_count %}
-            <span class="menu-badge">{{ total_low_stock_count }}</span>
-        {% endif %}
-    </a>
-     <a href="{% url 'Ecom:banner_list' %}"
-       class="submenu-item {% if request.resolver_match.url_name == 'banner_list' %}active{% endif %}">
-        <i class="fa-solid fa-image"></i>
-        <span class="nav-text">Banners</span>
-    </a>
+            <a href="{% url 'Ecom:low_stock_alerts' %}"
+               class="submenu-item {% if request.resolver_match.url_name == 'low_stock_alerts' %}active{% endif %}">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span class="nav-text">Low Stock Items</span>
+                {% if total_low_stock_count > 0 %}
+                    <span class="menu-badge">{{ total_low_stock_count }}</span>
+                {% endif %}
+            </a>
 
-    <!-- Section Divider -->
-    <div class="section-divider">
-        <span class="divider-dot"></span>
-        <span class="divider-line"></span>
-    </div>
+            <a href="{% url 'Ecom:banner_list' %}"
+               class="submenu-item {% if request.resolver_match.url_name == 'banner_list' %}active{% endif %}">
+                <i class="fa-solid fa-image"></i>
+                <span class="nav-text">Banners</span>
+            </a>
 
-    <div class="nav-section-label">Offline Order Management</div>
+            <!-- Section Divider -->
+            <div class="section-divider">
+                <span class="divider-dot"></span>
+            </div>
 
-    <a href="{% url 'offline_sales:store_settings_list' %}"
-   class="nav-item {% if request.resolver_match.url_name == 'store_settings_list' %}active{% endif %}">
-    <i class="fa-solid fa-store"></i>
-    <span class="nav-text">Store Settings</span>
-</a>
+            <div class="nav-section-label">Offline Order Management</div>
 
-<a href="{% url 'offline_sales:barcode_list' %}"
-   class="nav-item {% if request.resolver_match.url_name == 'barcode_list' %}active{% endif %}">
-    <i class="fa-solid fa-barcode"></i>
-    <span class="nav-text">Barcodes</span>
-</a>
+            <a href="{% url 'offline_sales:store_settings_list' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'store_settings_list' %}active{% endif %}">
+                <i class="fa-solid fa-store"></i>
+                <span class="nav-text">Store Settings</span>
+            </a>
 
-<a href="{% url 'offline_sales:offline_sale' %}"
-   class="nav-item {% if request.resolver_match.url_name == 'offline_sale' %}active{% endif %}">
-    <i class="fa-solid fa-cash-register"></i>
-    <span class="nav-text">Offline Sale</span>
-</a>
+            <a href="{% url 'offline_sales:barcode_list' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'barcode_list' %}active{% endif %}">
+                <i class="fa-solid fa-barcode"></i>
+                <span class="nav-text">Barcodes</span>
+            </a>
 
-<a href="{% url 'offline_sales:customer_list' %}"
-   class="nav-item {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}">
-    <i class="fa-solid fa-users"></i>
-    <span class="nav-text">Offline Customers</span>
-</a>
+            <a href="{% url 'offline_sales:offline_sale' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'offline_sale' %}active{% endif %}">
+                <i class="fa-solid fa-cash-register"></i>
+                <span class="nav-text">Offline Sale</span>
+            </a>
 
-<a href="{% url 'offline_sales:orders_list' %}"
-   class="nav-item {% if request.resolver_match.url_name == 'orders_list' %}active{% endif %}">
-    <i class="fa-solid fa-file-invoice"></i>
-    <span class="nav-text">Offline Orders</span>
-</a>
+            <a href="{% url 'offline_sales:customer_list' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}">
+                <i class="fa-solid fa-users"></i>
+                <span class="nav-text">Offline Customers</span>
+            </a>
 
-</nav>
+            <a href="{% url 'offline_sales:orders_list' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'orders_list' %}active{% endif %}">
+                <i class="fa-solid fa-file-invoice"></i>
+                <span class="nav-text">Offline Orders</span>
+            </a>
 
-        <!-- Sidebar Footer - Attractive Logout -->
+        </nav>
+
+        <!-- Sidebar Footer - Fixed at bottom -->
         <div class="sidebar-footer">
             <a href="{% url 'Ecom:logout' %}" class="logout-wrapper">
                 <i class="fa-solid fa-right-from-bracket"></i>
@@ -845,7 +849,9 @@
 
     </aside>
 
-    <!-- ===== MAIN CONTENT ===== -->
+    <!-- ============================================================
+    MAIN CONTENT - SCROLLABLE AREA
+    ============================================================ -->
     <main class="main-content" id="mainContent">
         {% block content %}
         <!-- Content from child templates will be injected here -->
@@ -874,7 +880,7 @@
                 mobileBtn.querySelector('i').className = 'fa-solid fa-bars';
             });
 
-            // Active link highlighting for main nav items
+            // Active link highlighting
             const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
             navItems.forEach(item => {
                 item.addEventListener('click', function() {
@@ -884,7 +890,6 @@
                 });
             });
 
-            // Active link highlighting for submenu items
             const subItems = document.querySelectorAll('.submenu-item');
             subItems.forEach(item => {
                 item.addEventListener('click', function(e) {

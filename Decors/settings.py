@@ -59,6 +59,7 @@ TEMPLATES = [
                 'Ecom.context_processors.header_categories',
                 'Ecom.admin_context.low_stock_context',
                 "Ecom.context_processor.base_template",
+                'Ecom.custom_context.get_nav_counts',
             ],
         },
     },

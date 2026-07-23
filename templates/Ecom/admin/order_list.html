@@ -1,560 +1,1399 @@
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
 {% block title %}Orders Management - MyStore Admin{% endblock %}
+{% block content %}
 
-{% block extra_css %}
 <style>
-    .stats-card {
-        border-left: 4px solid;
-        padding: 12px 15px;
-        background: #f8f9fa;
-        border-radius: 4px;
-        margin-bottom: 10px;
-        transition: all 0.3s;
+    /* ============================================================
+       ROOT VARIABLES
+       ============================================================ */
+    :root {
+        --om-primary: #5c121f;
+        --om-primary-light: #7a1a2b;
+        --om-primary-gradient: linear-gradient(135deg, #5c121f 0%, #7a1a2b 100%);
+        --om-bg: #f5f0eb;
+        --om-white: #ffffff;
+        --om-border: #e8e4e0;
+        --om-text: #1d1d1d;
+        --om-text-light: #6d6d6d;
+        --om-text-muted: #888888;
+        --om-success: #2e9d57;
+        --om-danger: #d64045;
+        --om-warning: #e8a317;
+        --om-info: #3b8fc2;
+        --om-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        --om-radius: 14px;
+        --om-radius-sm: 8px;
+        --om-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        --om-transition: 0.3s ease;
     }
-    .stats-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+    /* ============================================================
+       MAIN WRAPPER - FULL WIDTH, NO GAP
+       ============================================================ */
+    .om-wrap {
+        background: var(--om-bg);
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        position: relative;
     }
-    .stats-card .label { font-size: 12px; color: #6c757d; }
-    .stats-card .value { font-size: 20px; font-weight: 700; }
-    .stats-card.primary { border-color: #0d6efd; }
-    .stats-card.success { border-color: #28a745; }
-    .stats-card.warning { border-color: #ffc107; }
-    .stats-card.danger { border-color: #dc3545; }
-    .stats-card.info { border-color: #17a2b8; }
-    .stats-card.secondary { border-color: #6c757d; }
-    
-    .filter-bar {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        border: 1px solid #e9ecef;
+
+    /* ============================================================
+       MAIN CARD - Everything in one card, full width
+       ============================================================ */
+    .om-card {
+        background: var(--om-white);
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
+        overflow: hidden;
+        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin: 0;
     }
-    .filter-bar .filter-row {
+
+    /* ============================================================
+       HEADER SECTION
+       ============================================================ */
+    .om-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--om-border);
+        flex-wrap: wrap;
+        gap: 12px;
+        background: var(--om-white);
+        flex-shrink: 0;
+    }
+
+    .om-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .om-header-icon {
+        width: 44px;
+        height: 44px;
+        background: var(--om-primary-gradient);
+        border-radius: var(--om-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--om-white);
+        font-size: 18px;
+        flex-shrink: 0;
+        box-shadow: 0 2px 10px rgba(92,18,31,0.15);
+    }
+
+    .om-header-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--om-text);
+        font-family: var(--om-font);
+        margin: 0;
+        letter-spacing: -0.3px;
+    }
+
+    .om-header-title span {
+        color: var(--om-primary);
+    }
+
+    .om-header-sub {
+        font-size: 12px;
+        color: var(--om-text-muted);
+        font-family: var(--om-font);
+        margin: 0;
+    }
+
+    .om-btn-dashboard {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 18px;
+        background: var(--om-bg);
+        color: var(--om-text);
+        border: 1px solid var(--om-border);
+        border-radius: var(--om-radius-sm);
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 500;
+        font-family: var(--om-font);
+        transition: var(--om-transition);
+        flex-shrink: 0;
+    }
+
+    .om-btn-dashboard:hover {
+        background: var(--om-primary);
+        color: var(--om-white);
+        border-color: var(--om-primary);
+        transform: translateY(-1px);
+    }
+
+    /* ============================================================
+       STATS ROW - WITH SEARCH BAR ON RIGHT
+       ============================================================ */
+    .om-stats {
         display: flex;
         flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
         gap: 10px;
+        padding: 10px 24px;
+        background: #faf8f6;
+        border-bottom: 1px solid var(--om-border);
+        flex-shrink: 0;
+    }
+
+    .om-stats-left {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 12px;
+    }
+
+    .om-stat {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 14px 4px 10px;
+        border-radius: 20px;
+        background: var(--om-white);
+        border: 1px solid var(--om-border);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .om-stat .label {
+        font-size: 10px;
+        color: var(--om-text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        font-family: var(--om-font);
+    }
+
+    .om-stat .value {
+        font-size: 15px;
+        font-weight: 700;
+        font-family: var(--om-font);
+        letter-spacing: -0.2px;
+        padding: 0 2px;
+    }
+
+    /* Different background colors for each stat */
+    .om-stat.stat-total { 
+        background: linear-gradient(135deg, #5c121f, #7a1a2b); 
+        border-color: #5c121f;
+    }
+    .om-stat.stat-total .label,
+    .om-stat.stat-total .value { color: #ffffff; }
+
+    .om-stat.stat-processing { 
+        background: linear-gradient(135deg, #cce5ff, #b0d4f0); 
+        border-color: #3b8fc2;
+    }
+    .om-stat.stat-processing .label,
+    .om-stat.stat-processing .value { color: #004085; }
+
+    .om-stat.stat-shipped { 
+        background: linear-gradient(135deg, #d1ecf1, #b5dce3); 
+        border-color: #0c5460;
+    }
+    .om-stat.stat-shipped .label,
+    .om-stat.stat-shipped .value { color: #0c5460; }
+
+    .om-stat.stat-delivered { 
+        background: linear-gradient(135deg, #d4edda, #b8e0c4); 
+        border-color: #155724;
+    }
+    .om-stat.stat-delivered .label,
+    .om-stat.stat-delivered .value { color: #155724; }
+
+    .om-stat.stat-cancelled { 
+        background: linear-gradient(135deg, #f8d7da, #f0c0c4); 
+        border-color: #721c24;
+    }
+    .om-stat.stat-cancelled .label,
+    .om-stat.stat-cancelled .value { color: #721c24; }
+
+    .om-stat .stat-icon {
+        font-size: 12px;
+        opacity: 0.8;
+    }
+
+    .om-stat.stat-total .stat-icon { color: rgba(255,255,255,0.8); }
+    .om-stat.stat-processing .stat-icon { color: #004085; }
+    .om-stat.stat-shipped .stat-icon { color: #0c5460; }
+    .om-stat.stat-delivered .stat-icon { color: #155724; }
+    .om-stat.stat-cancelled .stat-icon { color: #721c24; }
+
+    /* Search bar in stats row - right side */
+    .om-stats-search {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--om-white);
+        border: 1.5px solid var(--om-border);
+        border-radius: var(--om-radius-sm);
+        padding: 4px 12px 4px 14px;
+        transition: var(--om-transition);
+        min-width: 250px;
+        flex-shrink: 0;
+    }
+
+    .om-stats-search:focus-within {
+        border-color: var(--om-primary);
+        box-shadow: 0 0 0 3px rgba(92,18,31,0.06);
+    }
+
+    .om-stats-search i {
+        color: var(--om-text-muted);
+        font-size: 14px;
+    }
+
+    .om-stats-search input {
+        border: none;
+        background: transparent;
+        padding: 6px 4px;
+        font-size: 13px;
+        font-family: var(--om-font);
+        color: var(--om-text);
+        outline: none;
+        width: 100%;
+        min-width: 100px;
+    }
+
+    .om-stats-search input::placeholder {
+        color: #aaa;
+        font-size: 12px;
+    }
+
+    .om-stats-search .search-btn {
+        padding: 4px 12px;
+        border-radius: var(--om-radius-sm);
+        background: var(--om-primary-gradient);
+        color: var(--om-white);
+        border: none;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--om-transition);
+        font-family: var(--om-font);
+        white-space: nowrap;
+    }
+
+    .om-stats-search .search-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 10px rgba(92,18,31,0.2);
+    }
+
+    .om-stats-search .search-clear {
+        color: var(--om-text-muted);
+        text-decoration: none;
+        font-size: 14px;
+        padding: 0 2px;
+        opacity: 0.5;
+        transition: var(--om-transition);
+    }
+
+    .om-stats-search .search-clear:hover {
+        opacity: 1;
+        color: var(--om-primary);
+    }
+
+    /* ============================================================
+       FILTERS ROW - PROPERLY ALIGNED AND RESPONSIVE
+       ============================================================ */
+    .om-filters-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 24px;
+        background: var(--om-white);
+        border-bottom: 1px solid var(--om-border);
+        flex-shrink: 0;
+    }
+
+    .om-filters-wrap form {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .om-filter-group {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--om-bg);
+        border: 1.5px solid var(--om-border);
+        border-radius: var(--om-radius-sm);
+        padding: 0 10px 0 12px;
+        transition: var(--om-transition);
+        flex: 1 1 140px;
+        min-width: 150px;
+    }
+
+    .om-filter-group:focus-within {
+        border-color: var(--om-primary);
+        background: var(--om-white);
+        box-shadow: 0 0 0 3px rgba(92,18,31,0.06);
+    }
+
+    .om-filter-group i {
+        color: var(--om-text-muted);
+        font-size: 13px;
+        flex-shrink: 0;
+    }
+
+    .om-filter-group select,
+    .om-filter-group input {
+        border: none;
+        background: transparent;
+        padding: 8px 4px;
+        font-size: 13px;
+        font-family: var(--om-font);
+        color: var(--om-text);
+        outline: none;
+        width: 100%;
+        min-width: 50px;
+    }
+
+    .om-filter-group select {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 4px center;
+        padding-right: 20px;
+    }
+
+    .om-filter-group input[type="date"] {
+        min-width: 90px;
+        padding: 8px 2px;
+    }
+
+    .om-filter-group input[type="date"]::-webkit-calendar-picker-indicator {
+        opacity: 0.5;
+        cursor: pointer;
+    }
+
+    /* Filter Actions */
+    .om-filter-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+
+    .om-btn {
+        padding: 6px 16px;
+        border-radius: var(--om-radius-sm);
+        font-size: 12px;
+        font-weight: 600;
+        font-family: var(--om-font);
+        border: none;
+        cursor: pointer;
+        transition: var(--om-transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+    }
+
+    .om-btn-primary {
+        background: var(--om-primary-gradient);
+        color: var(--om-white);
+        box-shadow: 0 2px 8px rgba(92,18,31,0.12);
+    }
+
+    .om-btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(92,18,31,0.2);
+    }
+
+    .om-btn-outline {
+        background: transparent;
+        color: var(--om-text-light);
+        border: 1.5px solid var(--om-border);
+    }
+
+    .om-btn-outline:hover {
+        border-color: var(--om-primary);
+        color: var(--om-primary);
+        background: var(--om-bg);
+    }
+
+    .om-btn-sm {
+        padding: 4px 12px;
+        font-size: 11px;
+    }
+
+    .om-results-badge {
+        font-size: 12px;
+        color: var(--om-text-muted);
+        padding: 4px 14px;
+        background: var(--om-bg);
+        border-radius: 20px;
+        border: 1px solid var(--om-border);
+        font-weight: 500;
+        font-family: var(--om-font);
+        white-space: nowrap;
+    }
+
+    .om-results-badge strong {
+        color: var(--om-text);
+        font-weight: 700;
+    }
+
+    /* ============================================================
+       BULK ACTIONS - TOP OF TABLE
+       ============================================================ */
+    .om-bulk {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 24px;
+        border-bottom: 1px solid var(--om-border);
+        background: #faf8f6;
+        flex-shrink: 0;
+    }
+
+    .om-bulk select {
+        padding: 5px 14px;
+        border: 1.5px solid var(--om-border);
+        border-radius: var(--om-radius-sm);
+        font-size: 12px;
+        font-family: var(--om-font);
+        background: var(--om-white);
+        outline: none;
+        min-width: 140px;
+        cursor: pointer;
+        transition: var(--om-transition);
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 32px;
+    }
+
+    .om-bulk select:focus {
+        border-color: var(--om-primary);
+        box-shadow: 0 0 0 3px rgba(92,18,31,0.06);
+    }
+
+    .om-bulk .selected-count {
+        font-size: 12px;
+        color: var(--om-text-muted);
+        font-family: var(--om-font);
+        padding: 2px 12px;
+        background: var(--om-white);
+        border-radius: 16px;
+        border: 1px solid var(--om-border);
+    }
+
+    /* ============================================================
+       TABLE WRAPPER - ONLY THIS SCROLLS
+       ============================================================ */
+    .om-table-wrap {
+        overflow-x: auto;
+        overflow-y: visible;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        background: var(--om-white);
+        -webkit-overflow-scrolling: touch;
+        flex: 1;
+        min-height: 0;
+    }
+
+    .om-table-wrap::-webkit-scrollbar {
+        height: 5px;
+    }
+
+    .om-table-wrap::-webkit-scrollbar-track {
+        background: var(--om-bg);
+        border-radius: 3px;
+    }
+
+    .om-table-wrap::-webkit-scrollbar-thumb {
+        background: var(--om-border);
+        border-radius: 3px;
+    }
+
+    .om-table-wrap::-webkit-scrollbar-thumb:hover {
+        background: var(--om-primary);
+    }
+
+    /* ============================================================
+       TABLE
+       ============================================================ */
+    .om-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: var(--om-font);
+        font-size: 13px;
+        min-width: 850px;
+        margin: 0;
+    }
+
+    .om-table thead {
+        background: var(--om-bg);
+        border-bottom: 2px solid var(--om-border);
+    }
+
+    .om-table thead th {
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 600;
+        color: var(--om-text-light);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background: var(--om-bg);
+    }
+
+    .om-table tbody tr {
+        border-bottom: 1px solid var(--om-border);
+        transition: var(--om-transition);
+    }
+
+    .om-table tbody tr:hover {
+        background: #faf8f6;
+    }
+
+    .om-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .om-table tbody td {
+        padding: 12px 16px;
+        vertical-align: middle;
+    }
+
+    /* ----- Checkbox ----- */
+    .om-checkbox {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--om-primary);
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    /* ----- Order ----- */
+    .om-order {
+        font-weight: 700;
+        color: var(--om-primary);
+        font-size: 13px;
+        text-decoration: none;
+        font-family: var(--om-font);
+        transition: var(--om-transition);
+        display: inline-block;
+    }
+
+    .om-order:hover {
+        color: var(--om-primary-light);
+        text-decoration: underline;
+    }
+
+    /* ----- Customer ----- */
+    .om-customer {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .om-customer .name {
+        font-weight: 600;
+        color: var(--om-text);
+        font-size: 13px;
+        font-family: var(--om-font);
+    }
+
+    .om-customer .email {
+        font-size: 11px;
+        color: var(--om-text-muted);
+        font-family: var(--om-font);
+    }
+
+    /* ----- Products ----- */
+    .om-products {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
         align-items: center;
     }
-    .filter-bar .filter-row .form-control,
-    .filter-bar .filter-row .form-select {
-        font-size: 13px;
-        min-width: 140px;
-    }
-    .filter-bar .filter-row .form-control {
-        min-width: 180px;
-    }
-    .filter-bar .filter-actions {
+
+    .om-thumb {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--om-radius-sm);
+        overflow: hidden;
+        border: 2px solid var(--om-border);
+        flex-shrink: 0;
+        background: var(--om-bg);
         display: flex;
-        gap: 8px;
+        align-items: center;
+        justify-content: center;
+        transition: var(--om-transition);
+        position: relative;
+    }
+
+    .om-thumb:hover {
+        transform: scale(1.12);
+        border-color: var(--om-primary);
+        z-index: 2;
+        box-shadow: 0 4px 12px rgba(92,18,31,0.12);
+    }
+
+    .om-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .om-thumb .icon {
+        font-size: 13px;
+        color: var(--om-text-muted);
+    }
+
+    .om-more {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--om-radius-sm);
+        background: var(--om-primary-gradient);
+        color: var(--om-white);
+        font-size: 10px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--om-primary);
+        flex-shrink: 0;
+        font-family: var(--om-font);
+    }
+
+    /* ----- Amount ----- */
+    .om-amount {
+        font-weight: 700;
+        color: var(--om-text);
+        font-size: 14px;
+        font-family: var(--om-font);
+        white-space: nowrap;
+    }
+
+    .om-amount .cur {
+        font-weight: 400;
+        color: var(--om-text-muted);
+        font-size: 11px;
+    }
+
+    .om-saved {
+        font-size: 10px;
+        color: var(--om-success);
+        display: block;
+        font-weight: 500;
+        font-family: var(--om-font);
+        white-space: nowrap;
+    }
+
+    /* ============================================================
+       BADGES
+       ============================================================ */
+    .om-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        text-transform: capitalize;
+        font-family: var(--om-font);
+        white-space: nowrap;
+    }
+
+    .om-badge .dot {
+        font-size: 5px;
+        opacity: 0.7;
+    }
+
+    .om-badge.pending { background: #fff3cd; color: #856404; }
+    .om-badge.processing { background: #cce5ff; color: #004085; }
+    .om-badge.shipped { background: #d1ecf1; color: #0c5460; }
+    .om-badge.delivered { background: #d4edda; color: #155724; }
+    .om-badge.cancelled { background: #e2e3e5; color: #383d41; }
+    .om-badge.failed { background: #f8d7da; color: #721c24; }
+    .om-badge.refunded { background: #f8d7da; color: #721c24; }
+
+    .om-badge.paid { background: #d4edda; color: #155724; }
+    .om-badge.pending_payment { background: #fff3cd; color: #856404; }
+    .om-badge.failed_payment { background: #f8d7da; color: #721c24; }
+    .om-badge.refunded_payment { background: #e2e3e5; color: #383d41; }
+
+    /* ----- Date ----- */
+    .om-date {
+        font-size: 11px;
+        color: var(--om-text-light);
+        line-height: 1.4;
+        font-family: var(--om-font);
+        white-space: nowrap;
+    }
+
+    .om-date .time {
+        font-size: 10px;
+        color: var(--om-text-muted);
+    }
+
+    /* ----- Actions ----- */
+    .om-actions {
+        display: flex;
+        gap: 5px;
         flex-wrap: wrap;
     }
-    .filter-bar .results-count {
-        font-size: 13px;
-        color: #6c757d;
-        margin-left: auto;
-        padding: 5px 10px;
-        background: white;
-        border-radius: 4px;
-        border: 1px solid #e9ecef;
-    }
-    
-    .order-row:hover {
-        background-color: #f8f9fa;
-    }
-    .order-row .order-number {
+
+    .om-action {
+        padding: 4px 12px;
+        border-radius: var(--om-radius-sm);
+        font-size: 11px;
         font-weight: 600;
+        font-family: var(--om-font);
+        border: none;
+        cursor: pointer;
+        transition: var(--om-transition);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--om-info);
+        color: var(--om-white);
+        white-space: nowrap;
     }
-    .order-row .order-actions {
+
+    .om-action:hover {
+        background: #2a6f9a;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59,143,194,0.25);
+    }
+
+    /* ============================================================
+       PAGINATION - BOTTOM
+       ============================================================ */
+    .om-pagination-wrap {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        padding: 12px 24px;
+        border-top: 1px solid var(--om-border);
+        flex-wrap: wrap;
+        gap: 10px;
+        background: #faf8f6;
+        flex-shrink: 0;
+    }
+
+    .om-pagination {
         display: flex;
         gap: 4px;
         flex-wrap: wrap;
     }
-    
-    .status-badge {
-        padding: 4px 12px;
-        border-radius: 12px;
+
+    .om-pagination a,
+    .om-pagination span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px 12px;
+        border: 1.5px solid var(--om-border);
+        border-radius: var(--om-radius-sm);
         font-size: 12px;
-        font-weight: 600;
-        display: inline-block;
+        font-weight: 500;
+        font-family: var(--om-font);
+        color: var(--om-text);
+        text-decoration: none;
+        transition: var(--om-transition);
+        min-width: 34px;
+        background: var(--om-white);
     }
-    .status-badge.pending { background: #fff3cd; color: #856404; }
-    .status-badge.processing { background: #cce5ff; color: #004085; }
-    .status-badge.shipped { background: #d1ecf1; color: #0c5460; }
-    .status-badge.delivered { background: #d4edda; color: #155724; }
-    .status-badge.cancelled { background: #e2e3e5; color: #383d41; }
-    .status-badge.failed { background: #f8d7da; color: #721c24; }
-    .status-badge.paid { background: #d4edda; color: #155724; }
-    .status-badge.refunded { background: #f8d7da; color: #721c24; }
-    
-    @media (max-width: 768px) {
-        .filter-bar .filter-row {
+
+    .om-pagination a:hover {
+        border-color: var(--om-primary);
+        color: var(--om-primary);
+        transform: translateY(-1px);
+    }
+
+    .om-pagination .active {
+        background: var(--om-primary-gradient);
+        border-color: var(--om-primary);
+        color: var(--om-white);
+        box-shadow: 0 2px 10px rgba(92,18,31,0.15);
+    }
+
+    .om-pagination .disabled {
+        opacity: 0.4;
+        pointer-events: none;
+    }
+
+    /* ============================================================
+       EMPTY STATE
+       ============================================================ */
+    .om-empty {
+        text-align: center;
+        padding: 50px 20px;
+    }
+
+    .om-empty .icon {
+        font-size: 48px;
+        color: var(--om-border);
+        margin-bottom: 14px;
+    }
+
+    .om-empty h4 {
+        font-size: 18px;
+        color: var(--om-text);
+        font-family: var(--om-font);
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .om-empty p {
+        font-size: 13px;
+        color: var(--om-text-muted);
+        font-family: var(--om-font);
+    }
+
+    /* ============================================================
+       RESPONSIVE - PERFECT ON ALL DEVICES
+       ============================================================ */
+
+    @media (max-width: 992px) {
+        .om-stats {
             flex-direction: column;
             align-items: stretch;
+            gap: 8px;
+            padding: 10px 16px;
         }
-        .filter-bar .filter-row .form-control,
-        .filter-bar .filter-row .form-select {
-            min-width: 100%;
+        .om-stats-left {
+            justify-content: center;
+            gap: 6px 10px;
+        }
+        .om-stats-search {
             width: 100%;
+            min-width: unset;
         }
-        .filter-bar .results-count {
+        .om-stats-search input {
+            min-width: unset;
+        }
+        .om-filters-wrap {
+            padding: 8px 16px;
+        }
+        .om-filter-group {
+            flex: 1 1 100px;
+            min-width: 80px;
+        }
+        .om-filter-actions {
             margin-left: 0;
+            width: 100%;
+            justify-content: stretch;
+        }
+        .om-filter-actions .om-btn {
+            flex: 1;
+            justify-content: center;
+        }
+        .om-results-badge {
+            flex: 1;
             text-align: center;
         }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+        .om-header {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 12px 16px;
         }
+        .om-header-left { gap: 12px; }
+        .om-header-title { font-size: 20px; }
+        .om-btn-dashboard { justify-content: center; }
+        .om-bulk { padding: 8px 16px; }
+        .om-table { min-width: 700px; font-size: 12px; }
+        .om-pagination-wrap { padding: 10px 16px; flex-direction: column; align-items: stretch; }
+        .om-pagination { justify-content: center; }
     }
-    @media (max-width: 480px) {
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
+
+    @media (max-width: 768px) {
+        .om-stats { padding: 8px 12px; gap: 6px; }
+        .om-stats-left { gap: 4px 8px; flex-wrap: wrap; justify-content: center; }
+        .om-stat { padding: 2px 10px 2px 8px; }
+        .om-stat .label { font-size: 8px; }
+        .om-stat .value { font-size: 13px; }
+        .om-stat .stat-icon { font-size: 10px; }
+        .om-stats-search { padding: 3px 10px 3px 12px; }
+        .om-stats-search input { font-size: 12px; padding: 5px 2px; }
+        .om-stats-search .search-btn { font-size: 11px; padding: 3px 10px; }
+        .om-filters-wrap { padding: 6px 12px; gap: 6px; }
+        .om-filter-group { flex: 1 1 70px; min-width: 60px; padding: 0 6px 0 8px; }
+        .om-filter-group select,
+        .om-filter-group input { font-size: 11px; padding: 6px 2px; }
+        .om-filter-group input[type="date"] { min-width: 70px; }
+        .om-btn { font-size: 11px; padding: 5px 12px; }
+        .om-results-badge { font-size: 11px; padding: 3px 10px; }
+        .om-header { padding: 10px 12px; }
+        .om-header-icon { width: 38px; height: 38px; font-size: 16px; }
+        .om-header-title { font-size: 18px; }
+        .om-bulk { padding: 6px 12px; }
+        .om-bulk select { font-size: 11px; padding: 4px 12px; min-width: 100px; }
+        .om-table { min-width: 600px; font-size: 11px; }
+        .om-table thead th { padding: 8px 10px; font-size: 8px; }
+        .om-table tbody td { padding: 8px 10px; }
+        .om-thumb { width: 28px; height: 28px; }
+        .om-more { width: 28px; height: 28px; font-size: 8px; }
+        .om-badge { font-size: 9px; padding: 2px 10px; }
+        .om-pagination-wrap { padding: 8px 12px; }
+        .om-pagination a,
+        .om-pagination span { font-size: 11px; padding: 4px 10px; min-width: 30px; }
+    }
+
+    @media (max-width: 576px) {
+        .om-stats { padding: 6px 10px; gap: 4px; }
+        .om-stats-left { gap: 4px 6px; }
+        .om-stat { padding: 2px 8px 2px 6px; }
+        .om-stat .label { font-size: 7px; }
+        .om-stat .value { font-size: 11px; }
+        .om-stat .stat-icon { font-size: 9px; }
+        .om-stats-search { padding: 2px 8px 2px 10px; }
+        .om-stats-search input { font-size: 11px; padding: 4px 2px; min-width: 50px; }
+        .om-stats-search .search-btn { font-size: 10px; padding: 2px 8px; }
+        .om-stats-search .search-clear { font-size: 12px; }
+        .om-filters-wrap { padding: 4px 10px; gap: 4px; }
+        .om-filter-group { flex: 1 1 50px; min-width: 45px; padding: 0 4px 0 6px; }
+        .om-filter-group select,
+        .om-filter-group input { font-size: 10px; padding: 5px 2px; min-width: 30px; }
+        .om-filter-group input[type="date"] { min-width: 60px; }
+        .om-filter-group i { font-size: 11px; }
+        .om-btn { font-size: 10px; padding: 3px 10px; }
+        .om-btn i { font-size: 10px; }
+        .om-results-badge { font-size: 10px; padding: 2px 8px; }
+        .om-header { padding: 8px 10px; }
+        .om-header-icon { width: 34px; height: 34px; font-size: 14px; }
+        .om-header-title { font-size: 16px; }
+        .om-header-sub { font-size: 10px; }
+        .om-bulk { padding: 4px 10px; gap: 6px; }
+        .om-bulk select { font-size: 10px; padding: 3px 10px; min-width: 80px; }
+        .om-bulk .selected-count { font-size: 10px; padding: 1px 8px; }
+        .om-table { min-width: 480px; font-size: 10px; }
+        .om-table thead th { padding: 6px 8px; font-size: 7px; }
+        .om-table tbody td { padding: 6px 8px; }
+        .om-order { font-size: 11px; }
+        .om-customer .name { font-size: 11px; }
+        .om-customer .email { font-size: 9px; }
+        .om-amount { font-size: 12px; }
+        .om-thumb { width: 24px; height: 24px; }
+        .om-more { width: 24px; height: 24px; font-size: 7px; }
+        .om-badge { font-size: 8px; padding: 2px 8px; }
+        .om-date { font-size: 9px; }
+        .om-action { font-size: 9px; padding: 2px 8px; }
+        .om-pagination-wrap { padding: 6px 10px; }
+        .om-pagination a,
+        .om-pagination span { font-size: 10px; padding: 3px 8px; min-width: 26px; }
+    }
+
+    @media (max-width: 400px) {
+        .om-stats-left { gap: 3px 4px; }
+        .om-stat { padding: 1px 6px 1px 4px; }
+        .om-stat .label { font-size: 6px; letter-spacing: 0.2px; }
+        .om-stat .value { font-size: 10px; }
+        .om-filter-group { flex: 1 1 40px; min-width: 35px; padding: 0 2px 0 4px; }
+        .om-filter-group select,
+        .om-filter-group input { font-size: 9px; padding: 4px 1px; min-width: 20px; }
+        .om-filter-group input[type="date"] { min-width: 50px; }
+        .om-filter-group i { font-size: 10px; }
+        .om-table { min-width: 400px; font-size: 9px; }
+        .om-table thead th { padding: 4px 6px; font-size: 6px; }
+        .om-table tbody td { padding: 4px 6px; }
+        .om-order { font-size: 10px; }
+        .om-amount { font-size: 11px; }
+        .om-thumb { width: 20px; height: 20px; }
+        .om-more { width: 20px; height: 20px; font-size: 6px; }
+        .om-badge { font-size: 7px; padding: 1px 6px; }
+        .om-action { font-size: 8px; padding: 2px 6px; }
+        .om-pagination a,
+        .om-pagination span { font-size: 9px; padding: 2px 6px; min-width: 22px; }
     }
 </style>
-{% endblock %}
 
-{% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <h2><i class="fas fa-boxes text-primary"></i> Order Management</h2>
-        <a href="{% url 'Ecom:admin_dashboard' %}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Dashboard
-        </a>
-    </div>
+<!-- ============================================================
+   HTML STRUCTURE
+   ============================================================ -->
+<div class="om-wrap">
 
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 col-6">
-            <div class="stats-card primary">
-                <div class="label">Total Orders</div>
-                <div class="value">{{ stats.total }}</div>
-            </div>
-        </div>
-       
-        <div class="col-md-3 col-6">
-            <div class="stats-card info">
-                <div class="label">Processing</div>
-                <div class="value">{{ stats.processing }}</div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6">
-            <div class="stats-card success">
-                <div class="label">Delivered</div>
-                <div class="value">{{ stats.delivered }}</div>
-            </div>
-        </div>
-    </div>
+    <div class="om-card">
 
-    <!-- Filter Bar -->
-    <div class="filter-bar">
-        <form method="GET" id="orderFilterForm">
-            <div class="filter-row">
-                <!-- Search -->
-                <input type="text" name="search" class="form-control form-control-sm" 
-                       placeholder="Search orders..." value="{{ search_query }}">
-                
-                <!-- Status Filter - Exclude Pending and Failed -->
-                <select name="status" class="form-select form-select-sm">
-                    <option value="">All Status</option>
-                    {% for status_code, status_label in status_choices %}
-                        {% if status_code != 'pending' and status_code != 'failed' %}
-                            <option value="{{ status_code }}" {% if status_filter == status_code %}selected{% endif %}>
-                                {{ status_label }}
-                            </option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
-                
-                <!-- Payment Status Filter - Exclude Pending -->
-                <select name="payment_status" class="form-select form-select-sm">
-                    <option value="">All Payment</option>
-                    {% for status_code, status_label in payment_status_choices %}
-                        {% if status_code != 'pending' %}
-                            <option value="{{ status_code }}" {% if payment_filter == status_code %}selected{% endif %}>
-                                {{ status_label }}
-                            </option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
-                
-                <!-- Date Range -->
-                <input type="date" name="date_from" class="form-control form-control-sm" 
-                       value="{{ date_from }}" placeholder="From">
-                <input type="date" name="date_to" class="form-control form-control-sm" 
-                       value="{{ date_to }}" placeholder="To">
-                
-                <!-- Sort -->
-                <select name="sort" class="form-select form-select-sm">
-                    <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
-                    <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Oldest First</option>
-                    <option value="-total_amount" {% if sort_by == '-total_amount' %}selected{% endif %}>Highest Amount</option>
-                    <option value="total_amount" {% if sort_by == 'total_amount' %}selected{% endif %}>Lowest Amount</option>
-                    <option value="order_number" {% if sort_by == 'order_number' %}selected{% endif %}>Order # A-Z</option>
-                    <option value="-order_number" {% if sort_by == '-order_number' %}selected{% endif %}>Order # Z-A</option>
-                </select>
-                
-                <!-- Actions -->
-                <div class="filter-actions">
-                    <button type="submit" class="btn btn-sm btn-primary">
-                        <i class="fas fa-search"></i> Filter
+        <!-- ===== HEADER ===== -->
+        <div class="om-header">
+            <div class="om-header-left">
+                <div class="om-header-icon">
+                    <i class="fas fa-boxes"></i>
+                </div>
+                <div>
+                    <h1 class="om-header-title">Order <span>Management</span></h1>
+                    <p class="om-header-sub">Track and manage all customer orders</p>
+                </div>
+            </div>
+            <a href="{% url 'Ecom:admin_dashboard' %}" class="om-btn-dashboard">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+        </div>
+
+        <!-- ===== STATS ROW WITH SEARCH BAR ===== -->
+        <div class="om-stats">
+            <div class="om-stats-left">
+                <div class="om-stat stat-total">
+                    <i class="fas fa-chart-simple stat-icon"></i>
+                    <span class="label">Total</span>
+                    <span class="value">{{ stats.total|default:"0" }}</span>
+                </div>
+                <div class="om-stat stat-processing">
+                    <i class="fas fa-spinner stat-icon"></i>
+                    <span class="label">Processing</span>
+                    <span class="value">{{ stats.processing|default:"0" }}</span>
+                </div>
+                <div class="om-stat stat-shipped">
+                    <i class="fas fa-truck stat-icon"></i>
+                    <span class="label">Shipped</span>
+                    <span class="value">{{ stats.shipped|default:"0" }}</span>
+                </div>
+                <div class="om-stat stat-delivered">
+                    <i class="fas fa-check-circle stat-icon"></i>
+                    <span class="label">Delivered</span>
+                    <span class="value">{{ stats.delivered|default:"0" }}</span>
+                </div>
+                <div class="om-stat stat-cancelled">
+                    <i class="fas fa-ban stat-icon"></i>
+                    <span class="label">Cancelled</span>
+                    <span class="value">{{ stats.cancelled|default:"0" }}</span>
+                </div>
+            </div>
+
+            <!-- Search Bar in Stats Row -->
+            <form method="GET" class="om-stats-search" action="">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" placeholder="Quick search..." value="{{ search_query|default:'' }}">
+                {% if search_query %}
+                    <a href="?{% for key, value in request.GET.items %}{% if key != 'search' and key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="search-clear" title="Clear search">
+                        <i class="fas fa-times-circle"></i>
+                    </a>
+                {% endif %}
+                <button type="submit" class="search-btn"><i class="fas fa-arrow-right" style="color: #fff;"></i></button>
+            </form>
+        </div>
+
+        <!-- ===== FILTERS ROW ===== -->
+        <div class="om-filters-wrap">
+            <form method="GET">
+                <div class="om-filter-group">
+                    <i class="fas fa-tag"></i>
+                    <select name="status">
+                        <option value="">All Status</option>
+                        {% for code, label in status_choices %}
+                            <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="om-filter-group">
+                    <i class="fas fa-credit-card"></i>
+                    <select name="payment_status">
+                        <option value="">All Payment</option>
+                        {% for code, label in payment_status_choices %}
+                            <option value="{{ code }}" {% if payment_filter == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="om-filter-group" style="flex:0 1 110px;">
+                    <i class="fas fa-calendar"></i>
+                    <input type="date" name="date_from" value="{{ date_from|default:'' }}">
+                </div>
+
+                <div class="om-filter-group" style="flex:0 1 110px;">
+                    <i class="fas fa-calendar-check"></i>
+                    <input type="date" name="date_to" value="{{ date_to|default:'' }}">
+                </div>
+
+                <div class="om-filter-group" style="flex:0 1 130px;">
+                    <i class="fas fa-sort"></i>
+                    <select name="sort">
+                        <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
+                        <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Oldest First</option>
+                        <option value="-total_amount" {% if sort_by == '-total_amount' %}selected{% endif %}>Highest Amount</option>
+                        <option value="total_amount" {% if sort_by == 'total_amount' %}selected{% endif %}>Lowest Amount</option>
+                    </select>
+                </div>
+
+                <div class="om-filter-actions">
+                    <button type="submit" class="om-btn om-btn-primary">
+                        <i class="fas fa-filter"></i> Filter
                     </button>
                     {% if search_query or status_filter or payment_filter or date_from or date_to %}
-                        <a href="?{% if sort_by %}sort={{ sort_by }}{% endif %}" class="btn btn-sm btn-outline-secondary">
-                            <i class="fas fa-times"></i> Clear
+                        <a href="?{% if sort_by %}sort={{ sort_by }}{% endif %}" class="om-btn om-btn-outline om-btn-sm">
+                            <i class="fas fa-undo"></i> Reset
                         </a>
                     {% endif %}
+                    <span class="om-results-badge">
+                        <i class="fas fa-list-ul" style="margin-right:4px;"></i> <strong>{{ total_count|default:"0" }}</strong>
+                    </span>
                 </div>
-                
-                <div class="results-count">
-                    <strong>{{ total_count }}</strong> orders found
-                </div>
-            </div>
-        </form>
-    </div>
+            </form>
+        </div>
 
-    <!-- Orders Table -->
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>
-                                <input type="checkbox" id="selectAll" onclick="toggleAllOrders()">
-                            </th>
-                            <th>Order #</th>
-                            <th>Customer</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Payment</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for order in orders %}
-                        <tr class="order-row">
-                            <td>
-                                <input type="checkbox" class="order-checkbox" value="{{ order.id }}">
-                            </td>
-                            <td>
-                                <span class="order-number">#{{ order.order_number }}</span>
-                            </td>
-                            <td>
-                                <div>{{ order.user.full_name }}</div>
-                                <small class="text-muted">{{ order.user.email }}</small>
-                            </td>
-                            <td>
-                                <strong>₹{{ order.total_amount|floatformat:2 }}</strong>
-                                {% if order.total_discount > 0 %}
-                                    <br><small class="text-success">Saved ₹{{ order.total_discount|floatformat:2 }}</small>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="status-badge {{ order.status }}">
-                                    {{ order.get_status_display }}
+        <!-- ===== BULK ACTIONS ===== -->
+        {% if orders %}
+        <div class="om-bulk">
+            <select id="bulkAction">
+                <option value="">Bulk Actions</option>
+                <option value="mark_processing">Mark Processing</option>
+                <option value="mark_shipped">Mark Shipped</option>
+                <option value="mark_delivered">Mark Delivered</option>
+                <option value="mark_cancelled">Mark Cancelled</option>
+            </select>
+            <button onclick="bulkUpdate()" class="om-btn om-btn-primary om-btn-sm">
+                <i class="fas fa-check"></i> Apply
+            </button>
+            <span class="selected-count" id="selectedCount">0 selected</span>
+        </div>
+        {% endif %}
+
+        <!-- ===== TABLE WRAPPER ===== -->
+        <div class="om-table-wrap">
+            <table class="om-table">
+                <thead>
+                    <tr>
+                        <th style="width:36px;">
+                            <input type="checkbox" class="om-checkbox" id="selectAll" onclick="toggleAll()">
+                        </th>
+                        <th>Order #</th>
+                        <th>Customer</th>
+                        <th>Products</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                        <th style="min-width:80px;">Date</th>
+                        <th style="min-width:60px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="om-checkbox order-cb" value="{{ order.id }}">
+                        </td>
+                        <td>
+                            <a href="{% url 'Ecom:admin_order_detail' order.id %}" class="om-order">
+                                {{ order.order_number }}
+                            </a>
+                        </td>
+                        <td>
+                            <div class="om-customer">
+                                <span class="name">{{ order.user.full_name|default:"Guest" }}</span>
+                                <span class="email">{{ order.user.email|default:"No email" }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="om-products">
+                                {% with items=order.items.all %}
+                                    {% for item in items|slice:":4" %}
+                                        <div class="om-thumb" title="{{ item.product.name|default:'Product' }}">
+                                            {% if item.product and item.product.images.all %}
+                                                {% with img=item.product.images.all|first %}
+                                                    {% if img.image %}
+                                                        <img src="{{ img.image.url }}" alt="{{ item.product.name }}">
+                                                    {% else %}
+                                                        <span class="icon"><i class="fas fa-box"></i></span>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            {% elif item.variant and item.variant.images.all %}
+                                                {% with img=item.variant.images.all|first %}
+                                                    {% if img.image %}
+                                                        <img src="{{ img.image.url }}" alt="{{ item.variant.name|default:'Variant' }}">
+                                                    {% else %}
+                                                        <span class="icon"><i class="fas fa-box"></i></span>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            {% else %}
+                                                <span class="icon"><i class="fas fa-box"></i></span>
+                                            {% endif %}
+                                        </div>
+                                    {% empty %}
+                                        <span style="font-size:10px;color:#bbb;">No items</span>
+                                    {% endfor %}
+                                    {% if items|length > 4 %}
+                                        <div class="om-more">+{{ items|length|add:"-4" }}</div>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="om-amount">
+                                <span class="cur">₹</span>{{ order.total_amount|floatformat:2 }}
+                            </div>
+                            {% if order.total_discount > 0 %}
+                                <span class="om-saved">
+                                    <i class="fas fa-tag"></i> ₹{{ order.total_discount|floatformat:2 }}
                                 </span>
-                            </td>
-                            <td>
-                                <span class="status-badge {{ order.payment_status }}">
-                                    {{ order.get_payment_status_display }}
-                                </span>
-                            </td>
-                            <td>
-                                <small>{{ order.created_at|date:"M d, Y H:i" }}</small>
-                            </td>
-                            <td>
-                                <div class="order-actions">
-                                    <a href="{% url 'Ecom:admin_order_detail' order.id %}" 
-                                       class="btn btn-sm btn-info" title="View Details">
-                                        <i class="fas fa-eye"></i> Detail
-                                    </a>
-                                    <button onclick="updateOrderStatus({{ order.id }})" 
-                                            class="btn btn-sm btn-primary" title="Update Status">
-                                        <i class="fas fa-edit"></i> Update
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="8" class="text-center py-4">
-                                <i class="fas fa-box fa-3x text-muted"></i>
-                                <p class="mt-2">No orders found.</p>
-                                {% if search_query or status_filter or payment_filter %}
-                                    <p class="text-muted">Try adjusting your filters.</p>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Bulk Actions -->
-            {% if orders %}
-            <div class="row mt-3 align-items-center">
-                <div class="col-md-6">
-                    <div class="d-flex gap-2 flex-wrap">
-                        <select id="bulkAction" class="form-select form-select-sm" style="width:180px;">
-                            <option value="">Bulk Actions</option>
-                            <option value="mark_processing">Mark as Processing</option>
-                            <option value="mark_shipped">Mark as Shipped</option>
-                            <option value="mark_delivered">Mark as Delivered</option>
-                            <option value="mark_cancelled">Mark as Cancelled</option>
-                        </select>
-                        <button onclick="bulkUpdate()" class="btn btn-sm btn-primary">
-                            <i class="fas fa-check"></i> Apply
-                        </button>
-                        <span id="selectedCount" class="text-muted small align-self-center">0 selected</span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <!-- Pagination -->
-                    {% if orders.has_other_pages %}
-                    <nav>
-                        <ul class="pagination justify-content-end mb-0 flex-wrap">
-                            {% if orders.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ orders.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
-                                        Previous
-                                    </a>
-                                </li>
                             {% endif %}
-                            {% for i in orders.paginator.page_range %}
-                                <li class="page-item {% if orders.number == i %}active{% endif %}">
-                                    <a class="page-link" href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
-                                        {{ i }}
-                                    </a>
-                                </li>
-                            {% endfor %}
-                            {% if orders.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ orders.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
-                                        Next
-                                    </a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
+                        </td>
+                        <td>
+                            <span class="om-badge {{ order.status }}">
+                                <span class="dot">●</span> {{ order.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="om-badge {{ order.payment_status }}">
+                                <span class="dot">●</span> {{ order.get_payment_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="om-date">
+                                {{ order.created_at|date:"M d" }}
+                                <br>
+                                <span class="time">{{ order.created_at|date:"H:i" }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{% url 'Ecom:admin_order_detail' order.id %}" class="om-action">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9">
+                            <div class="om-empty">
+                                <div class="icon"><i class="fas fa-inbox"></i></div>
+                                <h4>No orders found</h4>
+                                <p>Orders will appear here once customers place them.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== PAGINATION ===== -->
+        {% if orders and orders.has_other_pages %}
+        <div class="om-pagination-wrap">
+            <div class="om-pagination">
+                {% if orders.has_previous %}
+                    <a href="?page={{ orders.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                {% else %}
+                    <span class="disabled"><i class="fas fa-chevron-left"></i></span>
+                {% endif %}
+
+                {% for i in orders.paginator.page_range %}
+                    {% if orders.number == i %}
+                        <span class="active">{{ i }}</span>
+                    {% elif i > orders.number|add:"-3" and i < orders.number|add:"3" %}
+                        <a href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            {{ i }}
+                        </a>
                     {% endif %}
-                </div>
+                {% endfor %}
+
+                {% if orders.has_next %}
+                    <a href="?page={{ orders.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                {% else %}
+                    <span class="disabled"><i class="fas fa-chevron-right"></i></span>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
+        {% endif %}
+
     </div>
 </div>
 
-<!-- ============================================ -->
-<!-- UPDATE STATUS MODAL                          -->
-<!-- ============================================ -->
-<div class="modal fade" id="updateStatusModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Update Order Status</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="updateStatusForm" method="POST" action="#">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">Order</label>
-                        <input type="text" class="form-control" id="modalOrderNumber" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Status</label>
-                        <select name="status" class="form-select" id="modalStatus">
-                            {% for status_code, status_label in status_choices %}
-                                {% if status_code != 'pending' and status_code != 'failed' %}
-                                    <option value="{{ status_code }}">{{ status_label }}</option>
-                                {% endif %}
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Tracking Number</label>
-                        <input type="text" name="tracking_number" class="form-control" 
-                               placeholder="Enter tracking number">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Tracking URL</label>
-                        <input type="url" name="tracking_url" class="form-control" 
-                               placeholder="https://track.example.com/12345">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Delivery Date</label>
-                        <input type="datetime-local" name="delivery_date" class="form-control">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Notes</label>
-                        <textarea name="notes" class="form-control" rows="2" 
-                                  placeholder="Add notes about this order"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="submitStatusUpdate()">
-                    <i class="fas fa-save"></i> Update Order
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ============================================ -->
-<!-- JAVASCRIPT                                  -->
-<!-- ============================================ -->
+<!-- ============================================================
+   JAVASCRIPT
+   ============================================================ -->
 <script>
-    let currentOrderId = null;
-    
-    // ============================================
-    // TOGGLE ALL ORDERS
-    // ============================================
-    function toggleAllOrders() {
-        const selectAll = document.getElementById('selectAll');
-        const checkboxes = document.querySelectorAll('.order-checkbox');
-        checkboxes.forEach(cb => cb.checked = selectAll.checked);
-        updateSelectedCount();
-    }
-    
-    // ============================================
-    // UPDATE SELECTED COUNT
-    // ============================================
-    function updateSelectedCount() {
-        const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-        document.getElementById('selectedCount').textContent = checkboxes.length + ' selected';
-    }
-    
-    document.querySelectorAll('.order-checkbox').forEach(cb => {
-        cb.addEventListener('change', updateSelectedCount);
-    });
-    
-    // ============================================
-    // BULK UPDATE
-    // ============================================
-    function bulkUpdate() {
-        const action = document.getElementById('bulkAction').value;
-        const checkboxes = document.querySelectorAll('.order-checkbox:checked');
-        
-        if (!action) {
-            alert('Please select an action.');
-            return;
-        }
-        
-        if (checkboxes.length === 0) {
-            alert('Please select at least one order.');
-            return;
-        }
-        
-        if (!confirm(`Are you sure you want to ${action.replace('_', ' ')} ${checkboxes.length} orders?`)) {
-            return;
-        }
-        
-        const orderIds = Array.from(checkboxes).map(cb => cb.value);
-        
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '{% url "Ecom:admin_order_bulk_update" %}';
-        
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = 'csrfmiddlewaretoken';
-        csrfInput.value = getCookie('csrftoken');
-        form.appendChild(csrfInput);
-        
-        const actionInput = document.createElement('input');
-        actionInput.type = 'hidden';
-        actionInput.name = 'action';
-        actionInput.value = action;
-        form.appendChild(actionInput);
-        
-        orderIds.forEach(id => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'order_ids';
-            input.value = id;
-            form.appendChild(input);
-        });
-        
-        document.body.appendChild(form);
-        form.submit();
-    }
-    
-    // ============================================
-    // UPDATE ORDER STATUS (Modal)
-    // ============================================
-    function updateOrderStatus(orderId) {
-        currentOrderId = orderId;
-        
-        fetch(`/admin/orders/${orderId}/`)
-            .then(response => response.text())
-            .then(html => {
-                // Parse order number from the page
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const orderNumber = doc.querySelector('.order-number')?.textContent || `#${orderId}`;
-                document.getElementById('modalOrderNumber').value = orderNumber;
-                
-                const modal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
-                modal.show();
-            })
-            .catch(() => {
-                document.getElementById('modalOrderNumber').value = `#${orderId}`;
-                const modal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
-                modal.show();
-            });
-    }
-    
-    // ============================================
-    // SUBMIT STATUS UPDATE
-    // ============================================
-    function submitStatusUpdate() {
-        const form = document.getElementById('updateStatusForm');
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData);
-        
-        fetch(`/admin/orders/${currentOrderId}/update/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams(data)
-        })
-        .then(response => {
-            if (response.redirected) {
-                window.location.href = response.url;
-            } else {
-                location.reload();
-            }
-        })
-        .catch(error => {
-            alert('Error updating order. Please try again.');
-        });
-    }
-    
-    // ============================================
-    // CSRF TOKEN HELPER
-    // ============================================
     function getCookie(name) {
-        let cookieValue = null;
+        let v = null;
         if (document.cookie && document.cookie !== '') {
             const cookies = document.cookie.split(';');
             for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                const c = cookies[i].trim();
+                if (c.substring(0, name.length + 1) === (name + '=')) {
+                    v = decodeURIComponent(c.substring(name.length + 1));
                     break;
                 }
             }
         }
-        return cookieValue;
+        return v;
+    }
+
+    function toggleAll() {
+        const sel = document.getElementById('selectAll');
+        document.querySelectorAll('.order-cb').forEach(cb => cb.checked = sel.checked);
+        updateCount();
+    }
+
+    function updateCount() {
+        const count = document.querySelectorAll('.order-cb:checked').length;
+        document.getElementById('selectedCount').textContent = count + ' selected';
+    }
+
+    document.querySelectorAll('.order-cb').forEach(cb => cb.addEventListener('change', updateCount));
+
+    function bulkUpdate() {
+        const action = document.getElementById('bulkAction').value;
+        const cbs = document.querySelectorAll('.order-cb:checked');
+        if (!action) { alert('Please select an action.'); return; }
+        if (!cbs.length) { alert('Please select at least one order.'); return; }
+        if (!confirm(`Apply "${action.replace(/_/g, ' ')}" to ${cbs.length} orders?`)) return;
+
+        const ids = Array.from(cbs).map(cb => cb.value);
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{% url "Ecom:admin_order_bulk_update" %}';
+
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = 'csrfmiddlewaretoken';
+        csrf.value = getCookie('csrftoken');
+        form.appendChild(csrf);
+
+        const act = document.createElement('input');
+        act.type = 'hidden';
+        act.name = 'action';
+        act.value = action;
+        form.appendChild(act);
+
+        ids.forEach(id => {
+            const inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = 'order_ids';
+            inp.value = id;
+            form.appendChild(inp);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
     }
 </script>
+
 {% endblock %}

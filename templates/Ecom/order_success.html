@@ -1,100 +1,1002 @@
+{% extends 'base.html' %}
+
 {% load static %}
 
 {% block title %}Order Success - MyStore{% endblock %}
 
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm border-success">
-                <div class="card-body text-center py-5">
-                    <i class="fas fa-check-circle fa-5x text-success mb-4"></i>
-                    <h2 class="mb-3">Order Placed Successfully! 🎉</h2>
-                    <h5 class="text-muted">Order #{{ order.order_number }}</h5>
-                    
-                    <div class="row mt-4">
-                        <div class="col-md-4">
-                            <div class="border rounded p-3">
-                                <small class="text-muted">Order Total</small>
-                                <h4 class="text-success">₹{{ order.total_amount|floatformat:2 }}</h4>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="border rounded p-3">
-                                <small class="text-muted">Status</small>
-                                <h4 class="text-primary">{{ order.get_status_display }}</h4>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="border rounded p-3">
-                                <small class="text-muted">Total Savings</small>
-                                <h4 class="text-success">₹{{ order.total_discount|floatformat:2 }}</h4>
-                            </div>
-                        </div>
+<style>
+/* ============================================================ */
+/*  PERFECT TWO-COLUMN SUCCESS PAGE                            */
+/*  THANK YOU + ORDER CONFIRMED - EXACTLY MIDDLE              */
+/* ============================================================ */
+
+:root {
+    --maroon: #5c121f;
+    --maroon-light: #7a1a2b;
+    --maroon-gradient: linear-gradient(145deg, #5c121f, #8B2336);
+    --gold: #c9a84c;
+    --green: #1a8a4d;
+    --green-light: #e8f5ee;
+    --green-gradient: linear-gradient(145deg, #1a8a4d, #2d8a5a);
+    --white: #ffffff;
+    --cream: #faf8f6;
+    --text-dark: #1a1410;
+    --text-medium: #5a4f45;
+    --text-light: #8a7f75;
+    --shadow-sm: 0 4px 30px rgba(0,0,0,0.02);
+    --shadow-md: 0 8px 50px rgba(0,0,0,0.04);
+    --shadow-lg: 0 16px 70px rgba(0,0,0,0.06);
+    --shadow-xl: 0 24px 90px rgba(0,0,0,0.08);
+    --radius-card: 24px;
+    --radius-box: 14px;
+    --radius-sm: 10px;
+    --radius-pill: 50px;
+}
+
+.dual-page * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.dual-page {
+    min-height: 100vh;
+    background: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    position: relative;
+}
+
+/* ============================================================ */
+/*  BACKGROUND                                                  */
+/* ============================================================ */
+
+.dual-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.dual-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(150px);
+    opacity: 0.03;
+    animation: orbFloat 25s ease-in-out infinite;
+}
+
+.dual-orb--maroon {
+    width: 400px;
+    height: 400px;
+    top: -100px;
+    right: -80px;
+    background: var(--maroon);
+    animation-delay: 0s;
+}
+
+.dual-orb--green {
+    width: 350px;
+    height: 350px;
+    bottom: -80px;
+    left: -60px;
+    background: var(--green);
+    animation-delay: -10s;
+}
+
+@keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(40px, -30px) scale(1.1); }
+}
+
+/* ============================================================ */
+/*  MAIN CARD - TWO COLUMN                                     */
+/* ============================================================ */
+
+.dual-wrapper {
+    max-width: 1100px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.dual-card {
+    background: var(--white);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    animation: dualReveal 1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 520px;
+    border: 1px solid rgba(255,255,255,0.5);
+}
+
+.dual-card:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-4px) scale(1.002);
+}
+
+@keyframes dualReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ============================================================ */
+/*  LEFT COLUMN - IMAGE FULL COVER                             */
+/* ============================================================ */
+
+.dual-image {
+    position: relative;
+    overflow: hidden;
+    min-height: 520px;
+    background: var(--cream);
+}
+
+.dual-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.dual-image::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, 
+        rgba(92,18,31,0.02) 0%,
+        rgba(26,138,77,0.01) 50%,
+        rgba(92,18,31,0.02) 100%
+    );
+    z-index: 1;
+}
+
+.dual-image-badge {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    z-index: 2;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 8px 20px;
+    border-radius: var(--radius-pill);
+    color: rgba(255,255,255,0.3);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+.dual-image-badge i {
+    margin-right: 6px;
+    color: var(--gold);
+    opacity: 0.3;
+}
+
+/* ============================================================ */
+/*  RIGHT COLUMN - PERFECT CENTER ALIGNMENT                    */
+/* ============================================================ */
+
+.dual-content {
+    padding: 44px 42px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--white);
+    align-items: center;
+    text-align: center;
+}
+
+/* --- Top Section: Thank You + Order Confirmed (Exactly Middle) --- */
+.dual-top-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.dual-tick {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--green-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 20px rgba(26,138,77,0.12);
+    animation: tickPop 0.8s ease forwards;
+}
+
+@keyframes tickPop {
+    0% {
+        transform: scale(0) rotate(-20deg);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.15) rotate(5deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.dual-tick i {
+    font-size: 22px;
+    color: var(--white);
+}
+
+.dual-thankyou {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1.1;
+}
+
+.dual-thankyou .maroon-text {
+    color: var(--maroon);
+}
+
+.dual-thankyou .green-text {
+    color: var(--green);
+}
+
+.dual-thankyou .gold-star {
+    color: var(--gold);
+    display: inline-block;
+    animation: starSpin 8s linear infinite;
+}
+
+@keyframes starSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.dual-confirmed-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green-light);
+    padding: 5px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    border: 1px solid rgba(26,138,77,0.04);
+}
+
+.dual-confirmed-badge i {
+    font-size: 13px;
+}
+
+/* --- Order Info --- */
+.dual-order {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-medium);
+    letter-spacing: 2px;
+    background: var(--cream);
+    padding: 4px 20px;
+    border-radius: var(--radius-pill);
+    display: inline-block;
+    margin: 4px 0 6px;
+}
+
+.dual-order span {
+    color: var(--maroon);
+    font-weight: 600;
+}
+
+.dual-message {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 24px;
+}
+
+.dual-message .dot-divider {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--green);
+    opacity: 0.08;
+    margin: 0 8px;
+    vertical-align: middle;
+}
+
+/* ============================================================ */
+/*  STATS                                                      */
+/* ============================================================ */
+
+.dual-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.dual-stat {
+    background: var(--cream);
+    border-radius: var(--radius-box);
+    padding: 16px 12px;
+    transition: all 0.3s ease;
+    cursor: default;
+    text-align: center;
+}
+
+.dual-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.dual-stat-icon {
+    font-size: 14px;
+    display: block;
+    margin-bottom: 2px;
+    opacity: 0.04;
+}
+
+.dual-stat-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-light);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.dual-stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.dual-stat-value .currency {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-light);
+}
+
+.dual-stat-value--green { color: var(--green); }
+.dual-stat-value--maroon { color: var(--maroon); }
+.dual-stat-value--gold { color: var(--gold); }
+
+.dual-stat--highlight {
+    background: var(--green-light);
+}
+
+/* ============================================================ */
+/*  BADGES                                                     */
+/* ============================================================ */
+
+.dual-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    justify-content: center;
+    width: 100%;
+}
+
+.dual-badge {
+    padding: 4px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+}
+
+.dual-badge--offer {
+    background: rgba(92,18,31,0.02);
+    border: 1px solid rgba(92,18,31,0.03);
+    color: var(--text-medium);
+}
+
+.dual-badge--offer i {
+    color: var(--maroon);
+    opacity: 0.2;
+}
+
+.dual-badge--coupon {
+    background: var(--green-light);
+    border: 1px solid rgba(26,138,77,0.04);
+    color: var(--green);
+}
+
+.dual-badge--coupon i {
+    color: var(--green);
+}
+
+.dual-badge-saved {
+    font-weight: 400;
+    opacity: 0.3;
+    font-size: 11px;
+}
+
+/* ============================================================ */
+/*  DISCOUNT                                                   */
+/* ============================================================ */
+
+.dual-discount {
+    background: var(--cream);
+    border-radius: var(--radius-box);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    text-align: left;
+    border-left: 3px solid var(--green);
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.dual-discount:hover {
+    border-left-color: var(--gold);
+    box-shadow: var(--shadow-sm);
+}
+
+.dual-discount-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-medium);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dual-discount-title i {
+    color: var(--green);
+}
+
+.dual-discount-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 16px;
+}
+
+.dual-discount-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+    font-size: 12px;
+    color: var(--text-medium);
+    border-bottom: 1px solid rgba(0,0,0,0.02);
+}
+
+.dual-discount-item .amount {
+    font-weight: 600;
+    color: var(--green);
+}
+
+.dual-discount-item .amount--negative {
+    color: var(--maroon);
+    opacity: 0.3;
+}
+
+.dual-discount-item--total {
+    border-bottom: none;
+    padding-top: 6px;
+    margin-top: 3px;
+    border-top: 2px solid rgba(26,138,77,0.04);
+    font-weight: 700;
+    color: var(--text-dark);
+    font-size: 13px;
+}
+
+.dual-discount-item--total .amount {
+    color: var(--maroon);
+    font-size: 16px;
+    font-weight: 800;
+}
+
+/* ============================================================ */
+/*  BUTTONS                                                    */
+/* ============================================================ */
+
+.dual-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+}
+
+.dual-btn {
+    padding: 12px 28px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.dual-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+    transition: all 0.6s ease;
+}
+
+.dual-btn:hover::after {
+    left: 100%;
+}
+
+.dual-btn--maroon {
+    background: var(--maroon-gradient);
+    color: var(--white);
+    box-shadow: 0 4px 16px rgba(92,18,31,0.06);
+}
+
+.dual-btn--maroon:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(92,18,31,0.12);
+    color: var(--white);
+}
+
+.dual-btn--green {
+    background: var(--green-gradient);
+    color: var(--white);
+    box-shadow: 0 4px 16px rgba(26,138,77,0.06);
+}
+
+.dual-btn--green:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(26,138,77,0.12);
+    color: var(--white);
+}
+
+/* ============================================================ */
+/*  CELEBRATE                                                  */
+/* ============================================================ */
+
+.dual-celebrate {
+    margin-top: 14px;
+    width: 100%;
+    text-align: center;
+}
+
+.dual-celebrate-btn {
+    background: transparent;
+    border: none;
+    color: #1a1410 !important;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+    padding: 4px 14px;
+    border-radius: var(--radius-pill);
+    border: 1px solid transparent;
+    opacity: 0.1;
+}
+
+.dual-celebrate-btn:hover {
+    border-color: rgba(26,138,77,0.04);
+    color: var(--green);
+    opacity: 1;
+}
+
+/* ============================================================ */
+/*  CONFETTI                                                    */
+/* ============================================================ */
+
+.dual-confetti {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.dual-confetti-piece {
+    position: absolute;
+    font-family: serif;
+    animation: dualDrop cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    opacity: 0;
+}
+
+@keyframes dualDrop {
+    0% {
+        transform: translateY(-30px) rotate(0deg) scale(0);
+        opacity: 0;
+    }
+    15% {
+        opacity: 1;
+        transform: translateY(20px) rotate(60deg) scale(0.7);
+    }
+    50% {
+        transform: translateY(45vh) rotate(300deg) scale(1);
+        opacity: 1;
+    }
+    85% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(110vh) rotate(720deg) scale(0.2);
+        opacity: 0;
+    }
+}
+
+/* ============================================================ */
+/*  RESPONSIVE                                                  */
+/* ============================================================ */
+
+@media (max-width: 820px) {
+    .dual-card {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+    .dual-image {
+        min-height: 280px;
+        order: -1;
+    }
+    .dual-image-badge {
+        bottom: 20px;
+        left: 20px;
+        font-size: 10px;
+        padding: 6px 16px;
+    }
+    .dual-content {
+        padding: 32px 28px 36px;
+    }
+    .dual-top-section {
+        gap: 10px;
+    }
+    .dual-thankyou {
+        font-size: 28px;
+    }
+    .dual-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+    .dual-discount-grid {
+        grid-template-columns: 1fr;
+    }
+    .dual-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    .dual-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .dual-page { padding: 12px; }
+    .dual-image { min-height: 200px; }
+    .dual-image-badge {
+        bottom: 14px;
+        left: 14px;
+        font-size: 9px;
+        padding: 4px 12px;
+    }
+    .dual-content { 
+        padding: 24px 16px 28px;
+    }
+    .dual-top-section {
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .dual-thankyou { 
+        font-size: 22px;
+    }
+    .dual-tick { width: 40px; height: 40px; }
+    .dual-tick i { font-size: 18px; }
+    .dual-confirmed-badge { 
+        font-size: 10px; 
+        padding: 4px 12px;
+    }
+    .dual-order { 
+        font-size: 13px; 
+        letter-spacing: 1px; 
+        padding: 3px 16px;
+    }
+    .dual-message { 
+        font-size: 13px; 
+        margin-bottom: 18px;
+    }
+    .dual-stats { 
+        grid-template-columns: 1fr; 
+        gap: 6px;
+    }
+    .dual-stat { padding: 12px 10px; }
+    .dual-stat-value { font-size: 18px; }
+    .dual-badges { 
+        flex-direction: column; 
+        align-items: center;
+    }
+    .dual-badge { 
+        justify-content: center;
+        width: 100%;
+    }
+    .dual-discount { 
+        padding: 12px 14px;
+    }
+    .dual-discount-item { font-size: 11px; }
+    .dual-discount-item--total .amount { font-size: 15px; }
+    .dual-btn { 
+        font-size: 13px; 
+        padding: 10px 16px;
+    }
+}
+</style>
+
+<!-- ============================================================ -->
+<!--  HTML STRUCTURE                                              -->
+<!-- ============================================================ -->
+
+<div class="dual-page">
+
+    <div class="dual-bg">
+        <div class="dual-orb dual-orb--maroon"></div>
+        <div class="dual-orb dual-orb--green"></div>
+    </div>
+
+    <div class="dual-wrapper">
+        <div class="dual-card">
+
+            <!-- LEFT COLUMN - IMAGE -->
+            <div class="dual-image">
+                <img src="{% static 'images/ordersuccess.png' %}" alt="Order Success" />
+                <div class="dual-image-badge">
+                    <i class="fas fa-check-circle"></i>
+                    Success
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN - CONTENT (PERFECTLY CENTERED) -->
+            <div class="dual-content">
+
+                <!-- Thank You + Order Confirmed - EXACTLY MIDDLE -->
+                <div class="dual-top-section">
+                    <div class="dual-tick">
+                        <i class="fas fa-check"></i>
                     </div>
-                    
-                    <!-- Offer Details -->
-                    {% if order.offer %}
-                        <div class="alert alert-success mt-3">
-                            <i class="fas fa-gift"></i>
-                            <strong>Offer Applied:</strong> {{ order.offer.name }}
-                            <span class="ms-2">(Saved ₹{{ order.offer_discount|floatformat:2 }})</span>
-                        </div>
-                    {% endif %}
-                    
-                    {% if order.coupon %}
-                        <div class="alert alert-info mt-2">
-                            <i class="fas fa-ticket-alt"></i>
-                            <strong>Coupon Applied:</strong> {{ order.coupon.code }}
-                            <span class="ms-2">(Saved ₹{{ order.coupon_discount|floatformat:2 }})</span>
-                        </div>
-                    {% endif %}
-                    
-                    <!-- Discount Breakdown -->
-                    {% if order.product_discount_total > 0 or order.offer_discount > 0 or order.coupon_discount > 0 %}
-                        <div class="mt-3 text-start">
-                            <h6>Discount Breakdown</h6>
-                            <div class="table-responsive">
-                                <table class="table table-sm table-bordered">
-                                    <tr>
-                                        <td>Product Discounts</td>
-                                        <td class="text-success">-₹{{ order.product_discount_total|floatformat:2 }}</td>
-                                    </tr>
-                                    {% if order.offer_discount > 0 %}
-                                    <tr>
-                                        <td>Offer Discounts</td>
-                                        <td class="text-success">-₹{{ order.offer_discount|floatformat:2 }}</td>
-                                    </tr>
-                                    {% endif %}
-                                    {% if order.coupon_discount > 0 %}
-                                    <tr>
-                                        <td>Coupon Discount</td>
-                                        <td class="text-success">-₹{{ order.coupon_discount|floatformat:2 }}</td>
-                                    </tr>
-                                    {% endif %}
-                                    <tr class="fw-bold">
-                                        <td>Total Savings</td>
-                                        <td class="text-success">₹{{ order.total_discount|floatformat:2 }}</td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                    {% endif %}
-                    
-                    <div class="mt-4">
-                        <p class="text-muted">We'll send you a confirmation email shortly.</p>
-                        <div class="d-flex justify-content-center gap-3 flex-wrap">
-                            <a href="{% url 'Ecom:order_detail' order.id %}" class="btn btn-primary">
-                                <i class="fas fa-eye"></i> View Order
-                            </a>
-                            <a href="{% url 'Ecom:shop' %}" class="btn btn-outline-primary">
-                                <i class="fas fa-store"></i> Continue Shopping
-                            </a>
-                        </div>
+                    <h1 class="dual-thankyou">
+                        <span class="maroon-text">Thank</span>
+                        <span class="green-text">You</span>
+                        <span class="gold-star">✦</span>
+                    </h1>
+                    <span class="dual-confirmed-badge">
+                        <i class="fas fa-check-circle"></i>
+                        Order Confirmed
+                    </span>
+                </div>
+
+                <div class="dual-order">
+                    Order # <span>{{ order.order_number }}</span>
+                </div>
+                <p class="dual-message">
+                    <span class="dot-divider"></span>
+                    Confirmation sent to your email
+                    <span class="dot-divider"></span>
+                </p>
+
+                <!-- Stats -->
+                <div class="dual-stats">
+                    <div class="dual-stat">
+                        <span class="dual-stat-icon">✦</span>
+                        <span class="dual-stat-label">Total</span>
+                        <span class="dual-stat-value">
+                            <span class="currency">₹</span>{{ order.total_amount|floatformat:2 }}
+                        </span>
+                    </div>
+                    <div class="dual-stat dual-stat--highlight">
+                        <span class="dual-stat-icon">◈</span>
+                        <span class="dual-stat-label">Status</span>
+                        <span class="dual-stat-value dual-stat-value--green">
+                            {{ order.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="dual-stat">
+                        <span class="dual-stat-icon">◆</span>
+                        <span class="dual-stat-label">Savings</span>
+                        <span class="dual-stat-value dual-stat-value--gold">
+                            <span class="currency">₹</span>{{ order.total_discount|floatformat:2 }}
+                        </span>
                     </div>
                 </div>
+
+                <!-- Badges -->
+                <div class="dual-badges">
+                    {% if order.offer %}
+                        <span class="dual-badge dual-badge--offer">
+                            <i class="fas fa-gift"></i>
+                            {{ order.offer.name }}
+                            <span class="dual-badge-saved">−₹{{ order.offer_discount|floatformat:2 }}</span>
+                        </span>
+                    {% endif %}
+                    {% if order.coupon %}
+                        <span class="dual-badge dual-badge--coupon">
+                            <i class="fas fa-ticket-alt"></i>
+                            {{ order.coupon.code }}
+                            <span class="dual-badge-saved">−₹{{ order.coupon_discount|floatformat:2 }}</span>
+                        </span>
+                    {% endif %}
+                </div>
+
+                <!-- Discount -->
+                {% if order.product_discount_total > 0 or order.offer_discount > 0 or order.coupon_discount > 0 %}
+                    <div class="dual-discount">
+                        <div class="dual-discount-title">
+                            <i class="fas fa-chart-simple"></i>
+                            Savings Breakdown
+                        </div>
+                        <div class="dual-discount-grid">
+                            <div class="dual-discount-item">
+                                <span>Product Discounts</span>
+                                <span class="amount amount--negative">−₹{{ order.product_discount_total|floatformat:2 }}</span>
+                            </div>
+                            {% if order.offer_discount > 0 %}
+                            <div class="dual-discount-item">
+                                <span>Offer Discount</span>
+                                <span class="amount amount--negative">−₹{{ order.offer_discount|floatformat:2 }}</span>
+                            </div>
+                            {% endif %}
+                            {% if order.coupon_discount > 0 %}
+                            <div class="dual-discount-item">
+                                <span>Coupon Discount</span>
+                                <span class="amount amount--negative">−₹{{ order.coupon_discount|floatformat:2 }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="dual-discount-item dual-discount-item--total">
+                                <span>Total Savings</span>
+                                <span class="amount">₹{{ order.total_discount|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Buttons -->
+                <div class="dual-actions">
+                    <a href="{% url 'Ecom:order_detail' order.id %}" class="dual-btn dual-btn--maroon">
+                        <i class="fas fa-eye"></i> View Order
+                    </a>
+                    <a href="{% url 'Ecom:shop' %}" class="dual-btn dual-btn--green">
+                        <i class="fas fa-store"></i> Continue Shopping
+                    </a>
+                </div>
+
+                <div class="dual-celebrate">
+                    <button  onclick="launchCelebration()">
+                        <i class="fas fa-sparkles"></i> Celebrate
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>
 </div>
+
+<!-- ============================================================ -->
+<!--  JAVASCRIPT                                                  -->
+<!-- ============================================================ -->
+<script>
+function createDualConfetti() {
+    const container = document.createElement('div');
+    container.className = 'dual-confetti';
+    document.body.appendChild(container);
+    
+    const symbols = ['◆', '✦', '◈', '•', '▪', '▸', '♢'];
+    const colors = ['#1a8a4d', '#c9a84c', '#5c121f', '#2d8a5a', '#b8942a', '#7a1a2b'];
+    
+    for (let i = 0; i < 50; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'dual-confetti-piece';
+        const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const size = 10 + Math.random() * 12;
+        const left = Math.random() * 100;
+        const duration = 2.5 + Math.random() * 2.5;
+        const delay = Math.random() * 0.5;
+        
+        piece.style.cssText = `
+            left: ${left}%;
+            font-size: ${size}px;
+            color: ${color};
+            animation-duration: ${duration}s;
+            animation-delay: ${delay}s;
+            transform: rotate(${Math.random() * 360}deg);
+            opacity: 0.3;
+        `;
+        piece.textContent = symbol;
+        container.appendChild(piece);
+    }
+    
+    setTimeout(() => container.remove(), 4000);
+}
+
+function playDualSound() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [
+            { freq: 523.25, duration: 0.1 },
+            { freq: 659.25, duration: 0.1 },
+            { freq: 783.99, duration: 0.12 },
+            { freq: 1046.50, duration: 0.15 },
+        ];
+        notes.forEach((n, i) => {
+            setTimeout(() => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.value = n.freq;
+                gain.gain.setValueAtTime(0.04, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + n.duration);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + n.duration);
+            }, i * 150);
+        });
+    } catch (e) {}
+}
+
+function launchCelebration() {
+    createDualConfetti();
+    setTimeout(createDualConfetti, 400);
+    playDualSound();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(launchCelebration, 700);
+});
+</script>
 {% endblock %}

@@ -1,296 +1,1349 @@
 <!-- templates/Ecom/orders/request_return.html -->
-
+{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Request Return - Order #{{ order.order_number }}{% endblock %}
+{% block title %}Request Return - #{{ order.order_number }}{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'Ecom:orders' %}">My Orders</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'Ecom:order_detail' order.id %}">Order #{{ order.order_number }}</a></li>
-            <li class="breadcrumb-item active">Request Return</li>
-        </ol>
-    </nav>
+<style>
+/* ============================================================
+   UNIQUE ROOT VARIABLES - RT PREFIX
+   ============================================================ */
+:root {
+    --rt-crimson: #5c121f;
+    --rt-crimson-light: #7a1a2b;
+    --rt-crimson-dark: #3d0c14;
+    --rt-gold: #F4B400;
+    --rt-gold-soft: #fef7ed;
+    --rt-sand: #f7f5f2;
+    --rt-white: #ffffff;
+    --rt-border: #e8e3de;
+    --rt-ink: #1a1a1a;
+    --rt-ink-light: #6b6b6b;
+    --rt-ink-faint: #999999;
+    --rt-emerald: #10b981;
+    --rt-error: #ef4444;
+    --rt-shadow: 0 2px 16px rgba(0,0,0,0.04);
+    --rt-shadow-hover: 0 8px 40px rgba(92,18,31,0.08);
+    --rt-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --rt-radius: 0px;
+}
 
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <div class="card shadow">
-                <div class="card-header bg-warning text-dark">
-                    <h4 class="mb-0"><i class="fas fa-undo"></i> Request Return</h4>
-                </div>
-                <div class="card-body">
-                    <!-- Window Reminder -->
-                    <div class="alert {% if return_window_days > 0 %}alert-info{% else %}alert-danger{% endif %}">
-                        <i class="fas fa-clock"></i>
-                        {% if return_window_days > 0 %}
-                            You have <strong>{{ return_window_days }}</strong> day{{ return_window_days|pluralize }} left to request a return.
-                        {% else %}
-                            <strong>Return window has expired!</strong> You can no longer request a return for this order.
-                        {% endif %}
-                    </div>
+/* ============================================================
+   RESET - NO BORDER RADIUS VISIBLE
+   ============================================================ */
+* {
+    box-sizing: border-box;
+}
 
-                    <!-- Order Summary -->
-                    <div class="card mb-4">
-                        <div class="card-header bg-light">
-                            <h6 class="mb-0">Order Summary</h6>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-sm mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>Product</th>
-                                            <th>SKU</th>
-                                            <th>Quantity</th>
-                                            <th>Price</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for item in order_items %}
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    {% if item.product and item.product.main_image %}
-                                                    <img src="{{ item.product.main_image }}" class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;">
-                                                    {% endif %}
-                                                    <span>{{ item.product_name }}</span>
-                                                </div>
-                                            </td>
-                                            <td>{{ item.sku }}</td>
-                                            <td>{{ item.quantity }}</td>
-                                            <td>₹{{ item.final_price }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                    <tfoot>
-                                        <tr class="table-active">
-                                            <td colspan="3" class="text-end"><strong>Total:</strong></td>
-                                            <td><strong>₹{{ order.total_amount }}</strong></td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+/* ============================================================
+   ALL UNIQUE RT- CLASSES
+   ============================================================ */
+.rt-page-wrap {
+    max-width: 1350px;
+    margin: 0 auto;
+    padding: 30px 24px 50px;
+    
+}
 
-                    <!-- Return Form -->
-                    <form method="post" enctype="multipart/form-data" id="returnForm">
-                        {% csrf_token %}
-                        
-                        <div class="mb-3">
-                            <label for="{{ form.reason.id_for_label }}" class="form-label">
-                                Reason for Return <span class="text-danger">*</span>
-                            </label>
-                            {{ form.reason }}
-                            {% if form.reason.errors %}
-                            <div class="text-danger">{{ form.reason.errors }}</div>
-                            {% endif %}
-                        </div>
+/* ===== HERO ===== */
+.rt-hero-block {
+    background: var(--rt-white);
+    padding: 28px 36px;
+    margin-bottom: 30px;
+    box-shadow: var(--rt-shadow);
+    border: 1px solid var(--rt-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+        border-radius: 14px;
 
-                        <div class="mb-3">
-                            <label for="{{ form.description.id_for_label }}" class="form-label">
-                                Detailed Description <span class="text-danger">*</span>
-                            </label>
-                            {{ form.description }}
-                            {% if form.description.errors %}
-                            <div class="text-danger">{{ form.description.errors }}</div>
-                            {% endif %}
-                            <small class="text-muted">Please describe the issue in detail. This helps us process your return faster.</small>
-                        </div>
+}
 
-                        <!-- Bank Details Section - Always shown -->
-                        <div class="mb-3">
-                            <label class="form-label">
-                                Bank Details for Refund <span class="text-danger">*</span>
-                            </label>
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label for="account_holder" class="form-label small">Account Holder Name</label>
-                                            <input type="text" class="form-control form-control-sm" id="account_holder" 
-                                                   placeholder="Enter account holder name" required>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="bank_name" class="form-label small">Bank Name</label>
-                                            <input type="text" class="form-control form-control-sm" id="bank_name" 
-                                                   placeholder="Enter bank name" required>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="account_number" class="form-label small">Account Number</label>
-                                            <input type="text" class="form-control form-control-sm" id="account_number" 
-                                                   placeholder="Enter account number" required>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="ifsc_code" class="form-label small">IFSC Code</label>
-                                            <input type="text" class="form-control form-control-sm" id="ifsc_code" 
-                                                   placeholder="Enter IFSC code" required>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label for="upi_id" class="form-label small">UPI ID (Optional)</label>
-                                            <input type="text" class="form-control form-control-sm" id="upi_id" 
-                                                   placeholder="Enter UPI ID (optional)">
-                                        </div>
-                                    </div>
-                                    <small class="text-muted mt-2 d-block">
-                                        <i class="fas fa-info-circle"></i> 
-                                        Please provide your bank details for refund processing. This information is securely stored.
-                                    </small>
-                                </div>
-                            </div>
-                            <!-- Hidden field to store combined bank details -->
-                            <textarea id="bank_details" name="bank_details" style="display:none;"></textarea>
-                            {% if form.bank_details.errors %}
-                            <div class="text-danger">{{ form.bank_details.errors }}</div>
-                            {% endif %}
-                        </div>
+.rt-hero-block::before {
+    content: '';
+    position: absolute;
+    top: -60%;
+    right: -5%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(244,180,0,0.04) 0%, transparent 70%);
+}
 
-                        <div class="mb-3">
-                            <label for="{{ form.images.id_for_label }}" class="form-label">
-                                Upload Images <span class="text-danger">*</span>
-                            </label>
-                            {{ form.images }}
-                            {% if form.images.errors %}
-                            <div class="text-danger">{{ form.images.errors }}</div>
-                            {% endif %}
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle"></i> 
-                                Please upload clear images showing the issue. Max 5 images (JPG, PNG, GIF, WEBP, BMP), max 5MB each.
-                                <span class="text-danger">Images are mandatory for return requests.</span>
-                            </small>
-                            <div id="imagePreview" class="row mt-3"></div>
-                        </div>
+.rt-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+    z-index: 1;
+}
 
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <strong>Return Policy:</strong>
-                            <ul class="mb-0 mt-2">
-                                <li>Return must be requested within 7 days of delivery</li>
-                                <li>Items must be in original condition with packaging</li>
-                                <li>Return shipping charges are borne by the customer</li>
-                                <li>Refund will be processed after items are received and inspected</li>
-                            </ul>
-                        </div>
+.rt-hero-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--rt-crimson), var(--rt-crimson-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--rt-gold);
+    font-size: 26px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 20px rgba(92,18,31,0.15);
+}
 
-                        <div class="d-flex justify-content-between">
-                            <a href="{% url 'Ecom:order_detail' order.id %}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Back
-                            </a>
-                            <button type="submit" class="btn btn-warning" id="submitBtn">
-                                <i class="fas fa-paper-plane"></i> Submit Return Request
-                            </button>
-                        </div>
-                    </form>
+.rt-hero-title h1 {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0;
+    color: var(--rt-ink);
+    letter-spacing: -0.5px;
+}
+
+.rt-hero-title h1 .rt-gold-text {
+    color: var(--rt-gold);
+}
+
+.rt-hero-title .rt-meta {
+    font-size: 13px;
+    color: var(--rt-ink-faint);
+    margin: 2px 0 0 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.rt-hero-title .rt-meta .rt-dot {
+    color: var(--rt-border);
+}
+
+.rt-hero-right {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+}
+
+.rt-pill {
+    background: var(--rt-sand);
+    padding: 8px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--rt-ink-light);
+    border: 1px solid var(--rt-border);
+    transition: var(--rt-transition);
+}
+
+.rt-pill:hover {
+    border-color: var(--rt-gold);
+    background: var(--rt-gold-soft);
+}
+
+.rt-pill i {
+    color: var(--rt-gold);
+}
+
+.rt-pill strong {
+    color: var(--rt-ink);
+    font-weight: 700;
+}
+
+/* ===== GRID ===== */
+.rt-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: stretch;
+}
+
+/* ===== LEFT PANEL ===== */
+.rt-panel-left {
+    background: var(--rt-white);
+    border: 1px solid var(--rt-border);
+    overflow: hidden;
+    box-shadow: var(--rt-shadow);
+    transition: var(--rt-transition);
+    display: flex;
+    flex-direction: column;
+    border-radius: 14px;
+}
+
+.rt-panel-left:hover {
+    box-shadow: var(--rt-shadow-hover);
+    transform: translateY(-3px);
+}
+
+.rt-panel-head {
+    padding: 18px 24px;
+    background: linear-gradient(135deg, var(--rt-crimson), var(--rt-crimson-dark));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rt-panel-head h3 {
+    color: var(--rt-white);
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rt-panel-head .rt-order-tag {
+    background: rgba(255,255,255,0.1);
+    padding: 3px 14px;
+    color: rgba(255,255,255,0.7);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.rt-panel-body {
+    padding: 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== STATS ===== */
+.rt-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.rt-stats .rt-stat {
+    background: var(--rt-sand);
+    padding: 10px 12px;
+    text-align: center;
+}
+
+.rt-stats .rt-stat .rt-label {
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--rt-ink-faint);
+    font-weight: 600;
+}
+
+.rt-stats .rt-stat .rt-value {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--rt-ink);
+    margin-top: 2px;
+}
+
+.rt-stats .rt-stat .rt-value.rt-accent {
+    color: var(--rt-crimson);
+}
+
+/* ===== PRODUCT SCROLL ===== */
+.rt-product-scroll {
+    max-height: 120px;
+    overflow-y: auto;
+    padding-right: 4px;
+    margin-bottom: 16px;
+}
+
+.rt-product-scroll::-webkit-scrollbar {
+    width: 3px;
+}
+
+.rt-product-scroll::-webkit-scrollbar-track {
+    background: var(--rt-sand);
+}
+
+.rt-product-scroll::-webkit-scrollbar-thumb {
+    background: var(--rt-crimson);
+}
+
+.rt-product-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 12px;
+    background: var(--rt-sand);
+    margin-bottom: 4px;
+    transition: var(--rt-transition);
+    border: 1px solid transparent;
+}
+
+.rt-product-row:hover {
+    border-color: var(--rt-border);
+    background: var(--rt-white);
+}
+
+.rt-product-row .rt-prod-img {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border: 1px solid var(--rt-border);
+    flex-shrink: 0;
+    background: var(--rt-white);
+}
+
+.rt-product-row .rt-prod-placeholder {
+    width: 32px;
+    height: 32px;
+    background: var(--rt-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--rt-ink-faint);
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.rt-product-row .rt-prod-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.rt-product-row .rt-prod-info .rt-prod-name {
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--rt-ink);
+    margin: 0;
+}
+
+.rt-product-row .rt-prod-info .rt-prod-sku {
+    font-size: 9px;
+    color: var(--rt-ink-faint);
+    margin: 0;
+}
+
+.rt-product-row .rt-prod-price {
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--rt-crimson);
+    flex-shrink: 0;
+}
+
+.rt-product-row .rt-prod-qty {
+    font-size: 10px;
+    color: var(--rt-ink-faint);
+    flex-shrink: 0;
+    margin-left: 4px;
+}
+
+/* ===== STEPS - 2 PER ROW ===== */
+.rt-steps-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 12px 0 14px 0;
+}
+
+.rt-step-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--rt-sand);
+    border-left: 3px solid var(--rt-gold);
+    transition: var(--rt-transition);
+}
+
+.rt-step-card:hover {
+    background: var(--rt-gold-soft);
+    transform: translateX(4px);
+}
+
+.rt-step-card .rt-step-num {
+    width: 28px;
+    height: 28px;
+    background: var(--rt-gold);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.rt-step-card .rt-step-content {
+    flex: 1;
+}
+
+.rt-step-card .rt-step-content .rt-step-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--rt-ink);
+    margin: 0;
+}
+
+.rt-step-card .rt-step-content .rt-step-desc {
+    font-size: 11px;
+    color: var(--rt-ink-light);
+    margin: 2px 0 0 0;
+    line-height: 1.3;
+}
+
+/* ===== POLICY TAGS ===== */
+.rt-policy-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.rt-policy-tags .rt-tag {
+    background: var(--rt-gold-soft);
+    border: 1px solid #fcd34d;
+    padding: 3px 12px;
+    font-size: 9px;
+    color: #92400e;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ============================================================
+   IMAGE SECTION - RIGHT AFTER POLICY TAGS
+   ============================================================ */
+.rt-image-section {
+    margin: 0 0 14px 0;
+    border: 1px solid var(--rt-border);
+    overflow: hidden;
+    background: var(--rt-sand);
+}
+
+.rt-image-section .rt-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+}
+
+.rt-image-section .rt-image-caption {
+    padding: 8px 14px;
+    background: var(--rt-white);
+    font-size: 11px;
+    color: var(--rt-ink-light);
+    text-align: center;
+    border-top: 1px solid var(--rt-border);
+}
+
+.rt-image-section .rt-image-caption i {
+    color: var(--rt-gold);
+    margin-right: 6px;
+}
+
+/* ===== TIME WINDOW ===== */
+.rt-time-window {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 18px;
+    margin-top: auto;
+}
+
+.rt-time-window.rt-active {
+    background: #f0f7ff;
+    border: 1px solid #bfdbfe;
+}
+
+.rt-time-window.rt-expired {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+}
+
+.rt-time-window .rt-window-icon {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.rt-time-window.rt-active .rt-window-icon {
+    background: #bfdbfe;
+    color: #1e40af;
+}
+
+.rt-time-window.rt-expired .rt-window-icon {
+    background: #fca5a5;
+    color: #991b1b;
+}
+
+.rt-time-window .rt-window-text {
+    flex: 1;
+}
+
+.rt-time-window .rt-window-text .rt-window-title {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.rt-time-window.rt-active .rt-window-text .rt-window-title {
+    color: #1e40af;
+}
+
+.rt-time-window.rt-expired .rt-window-text .rt-window-title {
+    color: #991b1b;
+}
+
+.rt-time-window .rt-window-text .rt-window-title .rt-days {
+    font-size: 18px;
+}
+
+.rt-time-window .rt-window-text .rt-window-desc {
+    font-size: 11px;
+    color: var(--rt-ink-light);
+}
+
+/* ===== RIGHT PANEL - FORM ===== */
+.rt-panel-right {
+    background: var(--rt-white);
+    border: 1px solid var(--rt-border);
+    overflow: hidden;
+    box-shadow: var(--rt-shadow);
+    transition: var(--rt-transition);
+    display: flex;
+    flex-direction: column;
+        border-radius: 14px;
+
+}
+
+.rt-panel-right:hover {
+    box-shadow: var(--rt-shadow-hover);
+    transform: translateY(-3px);
+}
+
+.rt-form-head {
+    padding: 18px 24px;
+    background: linear-gradient(135deg, var(--rt-gold), #d97706);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.rt-form-head .rt-form-icon {
+    width: 38px;
+    height: 38px;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+}
+
+.rt-form-head h4 {
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.rt-form-head h4 small {
+    display: block;
+    font-weight: 400;
+    font-size: 11px;
+    opacity: 0.85;
+}
+
+.rt-form-body {
+    padding: 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== FORM ===== */
+.rt-field {
+    margin-bottom: 16px;
+}
+
+.rt-field:last-child {
+    margin-bottom: 0;
+}
+
+.rt-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--rt-ink);
+    margin-bottom: 4px;
+}
+
+.rt-field label .rt-required {
+    color: var(--rt-error);
+}
+
+.rt-field select,
+.rt-field textarea,
+.rt-field input[type="text"] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--rt-border);
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--rt-ink);
+    background: var(--rt-sand);
+    transition: var(--rt-transition);
+    outline: none;
+}
+
+.rt-field select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235c121f' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+}
+
+.rt-field textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+
+.rt-field select:focus,
+.rt-field textarea:focus,
+.rt-field input[type="text"]:focus {
+    border-color: var(--rt-gold);
+    background: var(--rt-white);
+    box-shadow: 0 0 0 4px rgba(244,180,0,0.06);
+}
+
+.rt-field .rt-help {
+    font-size: 11px;
+    color: var(--rt-ink-faint);
+    margin-top: 3px;
+}
+
+/* ===== BANK ===== */
+.rt-bank-wrap {
+    background: var(--rt-sand);
+    padding: 14px 16px;
+    border: 2px solid var(--rt-border);
+    transition: var(--rt-transition);
+}
+
+.rt-bank-wrap:focus-within {
+    border-color: var(--rt-gold);
+}
+
+.rt-bank-wrap .rt-bank-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 14px;
+}
+
+.rt-bank-wrap .rt-bank-grid .rt-bank-field label {
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--rt-ink-faint);
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.rt-bank-wrap .rt-bank-grid .rt-bank-field input {
+    width: 100%;
+    padding: 6px 12px;
+    border: 2px solid var(--rt-border);
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--rt-ink);
+    background: var(--rt-white);
+    transition: var(--rt-transition);
+    outline: none;
+}
+
+.rt-bank-wrap .rt-bank-grid .rt-bank-field input:focus {
+    border-color: var(--rt-gold);
+}
+
+.rt-bank-wrap .rt-bank-grid .rt-bank-field input.rt-valid {
+    border-color: var(--rt-emerald);
+}
+
+.rt-bank-wrap .rt-bank-grid .rt-bank-field input.rt-invalid {
+    border-color: var(--rt-error);
+}
+
+.rt-bank-wrap .rt-bank-note {
+    font-size: 10px;
+    color: var(--rt-ink-faint);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rt-bank-wrap .rt-bank-note i {
+    color: var(--rt-emerald);
+}
+
+/* ===== UPLOAD ===== */
+.rt-upload {
+    border: 2px dashed var(--rt-border);
+    padding: 14px;
+    text-align: center;
+    transition: var(--rt-transition);
+    cursor: pointer;
+    background: var(--rt-sand);
+}
+
+.rt-upload:hover {
+    border-color: var(--rt-gold);
+    background: var(--rt-gold-soft);
+}
+
+.rt-upload .rt-upload-icon {
+    font-size: 26px;
+    color: var(--rt-ink-faint);
+}
+
+.rt-upload .rt-upload-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--rt-ink);
+    margin: 3px 0 2px;
+}
+
+.rt-upload .rt-upload-hint {
+    font-size: 10px;
+    color: var(--rt-ink-faint);
+}
+
+.rt-upload input[type="file"] {
+    display: none;
+}
+
+.rt-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.rt-preview-grid .rt-preview-item {
+    position: relative;
+    overflow: hidden;
+    border: 2px solid var(--rt-border);
+    aspect-ratio: 1;
+}
+
+.rt-preview-grid .rt-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.rt-preview-grid .rt-preview-item .rt-count {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    font-size: 7px;
+    padding: 1px 7px;
+}
+
+/* ===== BUTTONS ===== */
+.rt-btn-group {
+    display: flex;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 6px;
+}
+
+.rt-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--rt-transition);
+    text-decoration: none;
+    flex: 1;
+}
+
+.rt-btn-secondary {
+    background: var(--rt-sand);
+    color: var(--rt-ink);
+    border: 2px solid var(--rt-border);
+}
+
+.rt-btn-secondary:hover {
+    background: var(--rt-border);
+    transform: translateY(-2px);
+}
+
+.rt-btn-primary {
+    background: linear-gradient(135deg, var(--rt-gold), #d97706);
+    color: white;
+    box-shadow: 0 4px 20px rgba(245,158,11,0.2);
+}
+
+.rt-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(245,158,11,0.3);
+    color: white;
+}
+
+.rt-btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 992px) {
+    .rt-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    .rt-stats {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .rt-page-wrap {
+        padding: 16px 12px 32px;
+    }
+    .rt-hero-block {
+        padding: 20px 22px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .rt-hero-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+    .rt-hero-title h1 {
+        font-size: 20px;
+    }
+    .rt-hero-right {
+        width: 100%;
+    }
+    .rt-pill {
+        flex: 1;
+        justify-content: center;
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+    .rt-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+    .rt-steps-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    .rt-bank-wrap .rt-bank-grid {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+    .rt-btn-group {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .rt-panel-body {
+        padding: 18px;
+    }
+    .rt-form-body {
+        padding: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .rt-page-wrap {
+        padding: 10px 8px 24px;
+    }
+    .rt-hero-block {
+        padding: 14px 16px;
+    }
+    .rt-hero-left {
+        gap: 14px;
+    }
+    .rt-hero-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    .rt-hero-title h1 {
+        font-size: 17px;
+    }
+    .rt-hero-title .rt-meta {
+        font-size: 11px;
+    }
+    .rt-pill {
+        font-size: 10px;
+        padding: 4px 10px;
+    }
+    .rt-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+    }
+    .rt-stats .rt-stat {
+        padding: 6px 8px;
+    }
+    .rt-stats .rt-stat .rt-value {
+        font-size: 13px;
+    }
+    .rt-step-card {
+        padding: 10px 12px;
+        gap: 10px;
+    }
+    .rt-step-card .rt-step-content .rt-step-title {
+        font-size: 12px;
+    }
+    .rt-step-card .rt-step-content .rt-step-desc {
+        font-size: 10px;
+    }
+    .rt-product-row {
+        padding: 4px 8px;
+    }
+    .rt-product-row .rt-prod-img {
+        width: 28px;
+        height: 28px;
+    }
+    .rt-product-row .rt-prod-info .rt-prod-name {
+        font-size: 10px;
+    }
+    .rt-product-row .rt-prod-price {
+        font-size: 10px;
+    }
+    .rt-panel-head h3 {
+        font-size: 13px;
+    }
+    .rt-form-head h4 {
+        font-size: 14px;
+    }
+    .rt-field select,
+    .rt-field textarea,
+    .rt-field input[type="text"] {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+    .rt-preview-grid {
+        grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    }
+    .rt-time-window {
+        padding: 10px 14px;
+    }
+    .rt-time-window .rt-window-text .rt-window-title {
+        font-size: 13px;
+    }
+    .rt-product-scroll {
+        max-height: 100px;
+    }
+    .rt-image-section .rt-image {
+        max-height: 100px;
+    }
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes rtFadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.rt-hero-block { animation: rtFadeUp 0.5s ease both; }
+.rt-panel-left { animation: rtFadeUp 0.5s ease 0.08s both; }
+.rt-panel-right { animation: rtFadeUp 0.5s ease 0.16s both; }
+
+
+</style>
+
+<!-- ============================================================
+   PAGE CONTENT
+   ============================================================ -->
+<div class="rt-page-wrap">
+
+    <!-- ===== HERO ===== -->
+    <div class="rt-hero-block">
+        <div class="rt-hero-left">
+            <div class="rt-hero-icon">
+                <i class="fas fa-undo-alt"></i>
+            </div>
+            <div class="rt-hero-title">
+                <h1>Request <span class="rt-gold-text">Return</span></h1>
+                <div class="rt-meta">
+                    <span>Order #{{ order.order_number }}</span>
+                    <span class="rt-dot">•</span>
+                    <span>{{ order.created_at|date:"M d, Y" }}</span>
+                    <span class="rt-dot">•</span>
+                    <span style="color:var(--rt-ink-faint);">Return request</span>
                 </div>
             </div>
         </div>
+        <div class="rt-hero-right">
+            <div class="rt-pill">
+                <i class="fas fa-box"></i>
+                <strong>{{ order_items|length }}</strong> Items
+            </div>
+            <div class="rt-pill">
+                <i class="fas fa-tag"></i>
+                ₹<strong>{{ order.total_amount|floatformat:2 }}</strong>
+            </div>
+            <div class="rt-pill">
+                <i class="fas fa-credit-card"></i>
+                {{ order.get_payment_status_display }}
+            </div>
+        </div>
     </div>
+
+    <!-- ===== GRID ===== -->
+    <div class="rt-grid">
+
+        <!-- ===== LEFT PANEL ===== -->
+        <div class="rt-panel-left">
+            <div class="rt-panel-head">
+                <h3>
+                    <i class="fas fa-info-circle"></i> Instructions
+                </h3>
+                <span class="rt-order-tag">#{{ order.order_number }}</span>
+            </div>
+            <div class="rt-panel-body">
+
+                <!-- Stats -->
+                <div class="rt-stats">
+                    <div class="rt-stat">
+                        <div class="rt-label">Order Date</div>
+                        <div class="rt-value">{{ order.created_at|date:"M d" }}</div>
+                    </div>
+                    <div class="rt-stat">
+                        <div class="rt-label">Total</div>
+                        <div class="rt-value rt-accent">₹{{ order.total_amount|floatformat:2 }}</div>
+                    </div>
+                    <div class="rt-stat">
+                        <div class="rt-label">Items</div>
+                        <div class="rt-value">{{ order_items|length }}</div>
+                    </div>
+                    <div class="rt-stat">
+                        <div class="rt-label">Status</div>
+                        <div class="rt-value" style="font-size:12px;color:var(--rt-ink-light);">{{ order.get_status_display }}</div>
+                    </div>
+                </div>
+
+                <!-- Products -->
+                <div class="rt-product-scroll">
+                    {% for item in order_items %}
+                    <div class="rt-product-row">
+                        {% if item.product and item.product.main_image %}
+                        <img src="{{ item.product.main_image }}" class="rt-prod-img" alt="{{ item.product_name }}">
+                        {% else %}
+                        <div class="rt-prod-placeholder">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        {% endif %}
+                        <div class="rt-prod-info">
+                            <p class="rt-prod-name">{{ item.product_name|truncatechars:20 }}</p>
+                            <p class="rt-prod-sku">SKU: {{ item.sku }}</p>
+                        </div>
+                        <div class="rt-prod-price">₹{{ item.final_price|floatformat:2 }}</div>
+                        <div class="rt-prod-qty">×{{ item.quantity }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Steps - 2 Per Row -->
+                <div class="rt-steps-grid">
+                    <div class="rt-step-card">
+                        <div class="rt-step-num">1</div>
+                        <div class="rt-step-content">
+                            <p class="rt-step-title">Select Reason</p>
+                            <p class="rt-step-desc">Choose the appropriate reason</p>
+                        </div>
+                    </div>
+                    <div class="rt-step-card">
+                        <div class="rt-step-num">2</div>
+                        <div class="rt-step-content">
+                            <p class="rt-step-title">Describe Issue</p>
+                            <p class="rt-step-desc">Detailed description of problem</p>
+                        </div>
+                    </div>
+                    <div class="rt-step-card">
+                        <div class="rt-step-num">3</div>
+                        <div class="rt-step-content">
+                            <p class="rt-step-title">Bank Details</p>
+                            <p class="rt-step-desc">For refund processing</p>
+                        </div>
+                    </div>
+                    <div class="rt-step-card">
+                        <div class="rt-step-num">4</div>
+                        <div class="rt-step-content">
+                            <p class="rt-step-title">Upload Images</p>
+                            <p class="rt-step-desc">Clear photos of the issue</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Policy Tags -->
+                <div class="rt-policy-tags">
+                    <span class="rt-tag"><i class="fas fa-calendar-alt"></i> 7 Days</span>
+                    <span class="rt-tag"><i class="fas fa-box"></i> Original Condition</span>
+                    <span class="rt-tag"><i class="fas fa-truck"></i> Customer Returns</span>
+                    <span class="rt-tag"><i class="fas fa-check-circle"></i> Quality Check</span>
+                </div>
+
+                <!-- ============================================================
+                     IMAGE SECTION - RIGHT AFTER POLICY TAGS
+                     ============================================================ -->
+                <div class="rt-image-section">
+                    <img src="{% static 'images/return.png' %}" alt="Return Process Guide" class="rt-image" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                    <div class="rt-image-caption">
+                        <i class="fas fa-image"></i> Return process guide - Follow the steps above
+                    </div>
+                </div>
+
+                <!-- Time Window -->
+                <div class="rt-time-window {% if return_window_days > 0 %}rt-active{% else %}rt-expired{% endif %}">
+                    <div class="rt-window-icon">
+                        <i class="fas {% if return_window_days > 0 %}fa-clock{% else %}fa-exclamation-triangle{% endif %}"></i>
+                    </div>
+                    <div class="rt-window-text">
+                        <div class="rt-window-title">
+                            {% if return_window_days > 0 %}
+                                <span class="rt-days">{{ return_window_days }}</span> day{{ return_window_days|pluralize }} remaining
+                            {% else %}
+                                Return window expired
+                            {% endif %}
+                        </div>
+                        <div class="rt-window-desc">
+                            {% if return_window_days > 0 %}
+                                Submit before the 7-day window closes
+                            {% else %}
+                                Please contact support for assistance
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ===== RIGHT PANEL - FORM ===== -->
+        <div class="rt-panel-right">
+            <div class="rt-form-head">
+                <div class="rt-form-icon">
+                    <i class="fas fa-pen-fancy"></i>
+                </div>
+                <h4>
+                    Submit Return
+                    <small>Fill in the details below</small>
+                </h4>
+            </div>
+            <div class="rt-form-body">
+
+                <form method="post" enctype="multipart/form-data" id="rtReturnForm">
+                    {% csrf_token %}
+
+                    <div class="rt-field">
+                        <label for="{{ form.reason.id_for_label }}">
+                            Reason <span class="rt-required">*</span>
+                        </label>
+                        {{ form.reason }}
+                        {% if form.reason.errors %}
+                        <div style="color:var(--rt-error);font-size:12px;margin-top:4px;">{{ form.reason.errors }}</div>
+                        {% endif %}
+                        <span class="rt-help">Select the primary reason for returning</span>
+                    </div>
+
+                    <div class="rt-field">
+                        <label for="{{ form.description.id_for_label }}">
+                            Description <span class="rt-required">*</span>
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <div style="color:var(--rt-error);font-size:12px;margin-top:4px;">{{ form.description.errors }}</div>
+                        {% endif %}
+                        <span class="rt-help">Describe the issue in detail</span>
+                    </div>
+
+                    <div class="rt-field">
+                        <label>Bank Details <span class="rt-required">*</span></label>
+                        <div class="rt-bank-wrap">
+                            <div class="rt-bank-grid">
+                                <div class="rt-bank-field">
+                                    <label>Account Holder</label>
+                                    <input type="text" id="rt_account_holder" placeholder="Full name" required>
+                                </div>
+                                <div class="rt-bank-field">
+                                    <label>Bank Name</label>
+                                    <input type="text" id="rt_bank_name" placeholder="Bank name" required>
+                                </div>
+                                <div class="rt-bank-field">
+                                    <label>Account Number</label>
+                                    <input type="text" id="rt_account_number" placeholder="Account number" required>
+                                </div>
+                                <div class="rt-bank-field">
+                                    <label>IFSC Code</label>
+                                    <input type="text" id="rt_ifsc_code" placeholder="IFSC code" required>
+                                </div>
+                                <div class="rt-bank-field" style="grid-column:1/-1;">
+                                    <label>UPI ID <span style="font-weight:400;color:var(--rt-ink-faint);">(Optional)</span></label>
+                                    <input type="text" id="rt_upi_id" placeholder="Enter UPI ID">
+                                </div>
+                            </div>
+                            <div class="rt-bank-note">
+                                <i class="fas fa-lock"></i>
+                                Securely stored • Used only for refund
+                            </div>
+                            <textarea id="rt_bank_details" name="bank_details" style="display:none;"></textarea>
+                        </div>
+                        {% if form.bank_details.errors %}
+                        <div style="color:var(--rt-error);font-size:12px;margin-top:4px;">{{ form.bank_details.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="rt-field">
+                        <label>Images <span class="rt-required">*</span></label>
+                        <div class="rt-upload" onclick="document.getElementById('rt_id_images').click();">
+                            <div class="rt-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                            <div class="rt-upload-text">Click to upload images</div>
+                            <div class="rt-upload-hint">JPG, PNG, GIF, WEBP • Max 5 • 5MB each</div>
+                            {{ form.images }}
+                        </div>
+                        {% if form.images.errors %}
+                        <div style="color:var(--rt-error);font-size:12px;margin-top:4px;">{{ form.images.errors }}</div>
+                        {% endif %}
+                        <div id="rtImagePreview" class="rt-preview-grid"></div>
+                        <span class="rt-help">
+                            <i class="fas fa-info-circle"></i>
+                            Upload clear images <strong>(mandatory)</strong>
+                        </span>
+                    </div>
+
+                    <div class="rt-btn-group">
+                        <a href="{% url 'Ecom:order_detail' order.id %}" class="rt-btn rt-btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                        <button type="submit" class="rt-btn rt-btn-primary" id="rtSubmitBtn">
+                            <i class="fas fa-paper-plane"></i> Submit Return
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+
 </div>
 
+<!-- ============================================================
+   SCRIPTS
+   ============================================================ -->
 <script>
-// Update hidden bank details field before form submission
-document.getElementById('returnForm').addEventListener('submit', function(e) {
-    const accountHolder = document.getElementById('account_holder').value.trim();
-    const bankName = document.getElementById('bank_name').value.trim();
-    const accountNumber = document.getElementById('account_number').value.trim();
-    const ifscCode = document.getElementById('ifsc_code').value.trim();
-    const upiId = document.getElementById('upi_id').value.trim();
+document.getElementById('rtReturnForm').addEventListener('submit', function(e) {
+    const fields = ['rt_account_holder', 'rt_bank_name', 'rt_account_number', 'rt_ifsc_code'];
+    let valid = true;
     
-    // Validate bank details
-    if (!accountHolder || !bankName || !accountNumber || !ifscCode) {
+    fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el.value.trim()) {
+            el.classList.add('rt-invalid');
+            valid = false;
+        } else {
+            el.classList.remove('rt-invalid');
+            el.classList.add('rt-valid');
+        }
+    });
+    
+    if (!valid) {
         e.preventDefault();
-        alert('Please fill in all required bank details (Account Holder Name, Bank Name, Account Number, IFSC Code).');
+        alert('Please fill in all required bank details.');
         return false;
     }
     
-    // Combine bank details into a formatted string
-    let bankDetails = '';
-    bankDetails += `Account Holder Name: ${accountHolder}\n`;
-    bankDetails += `Bank Name: ${bankName}\n`;
-    bankDetails += `Account Number: ${accountNumber}\n`;
-    bankDetails += `IFSC Code: ${ifscCode}\n`;
-    if (upiId) bankDetails += `UPI ID: ${upiId}`;
+    document.getElementById('rt_bank_details').value = 
+        `Account Holder: ${document.getElementById('rt_account_holder').value.trim()}\n` +
+        `Bank: ${document.getElementById('rt_bank_name').value.trim()}\n` +
+        `Account: ${document.getElementById('rt_account_number').value.trim()}\n` +
+        `IFSC: ${document.getElementById('rt_ifsc_code').value.trim()}\n` +
+        `UPI: ${document.getElementById('rt_upi_id').value.trim() || 'N/A'}`;
     
-    document.getElementById('bank_details').value = bankDetails;
-    
-    // Validate images
-    const images = document.getElementById('id_images');
-    if (images.files.length === 0) {
+    if (document.getElementById('rt_id_images').files.length === 0) {
         e.preventDefault();
-        alert('Please upload at least one image showing the issue.');
+        alert('Please upload at least one image.');
         return false;
     }
     
-    // Disable button to prevent double submission
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    if (!confirm('Submit this return request?')) {
+        e.preventDefault();
+        return false;
+    }
+    
+    const btn = document.getElementById('rtSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
 });
 
-// Image preview
-document.getElementById('id_images').addEventListener('change', function(e) {
-    const preview = document.getElementById('imagePreview');
+document.getElementById('rt_id_images').addEventListener('change', function(e) {
+    const preview = document.getElementById('rtImagePreview');
     preview.innerHTML = '';
     
     const files = e.target.files;
-    if (files.length === 0) {
-        preview.innerHTML = '<div class="col-12 text-muted">No images selected</div>';
-        return;
-    }
+    if (files.length === 0) return;
     
     if (files.length > 5) {
-        alert('You can upload a maximum of 5 images.');
+        alert('Maximum 5 images allowed.');
         this.value = '';
-        preview.innerHTML = '<div class="col-12 text-danger">Please select up to 5 images only.</div>';
         return;
     }
     
     for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (file.size > 5 * 1024 * 1024) {
-            alert(`Image "${file.name}" exceeds 5MB limit.`);
+        if (files[i].size > 5 * 1024 * 1024) {
+            alert(`"${files[i].name}" exceeds 5MB.`);
             this.value = '';
-            preview.innerHTML = '<div class="col-12 text-danger">One or more images exceed 5MB limit.</div>';
+            preview.innerHTML = '';
             return;
         }
         
         const reader = new FileReader();
         reader.onload = function(e) {
-            const col = document.createElement('div');
-            col.className = 'col-4 col-md-3 mb-3';
-            col.innerHTML = `
-                <div class="position-relative">
-                    <img src="${e.target.result}" class="img-fluid rounded border" style="height: 120px; width: 100%; object-fit: cover;">
-                    <span class="badge bg-dark position-absolute top-0 end-0 m-1">${i + 1}</span>
-                    <div class="text-center small mt-1 text-truncate">${file.name}</div>
-                </div>
+            const div = document.createElement('div');
+            div.className = 'rt-preview-item';
+            div.innerHTML = `
+                <img src="${e.target.result}" alt="Preview">
+                <span class="rt-count">${i + 1}</span>
             `;
-            preview.appendChild(col);
+            preview.appendChild(div);
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(files[i]);
     }
 });
 
-// Real-time validation styling
-document.querySelectorAll('#account_holder, #bank_name, #account_number, #ifsc_code').forEach(input => {
-    input.addEventListener('blur', function() {
+document.querySelectorAll('#rt_account_holder, #rt_bank_name, #rt_account_number, #rt_ifsc_code').forEach(input => {
+    input.addEventListener('input', function() {
         if (this.value.trim()) {
-            this.classList.remove('is-invalid');
-            this.classList.add('is-valid');
+            this.classList.remove('rt-invalid');
+            this.classList.add('rt-valid');
         } else {
-            this.classList.remove('is-valid');
-            this.classList.add('is-invalid');
+            this.classList.remove('rt-valid');
+            this.classList.add('rt-invalid');
         }
     });
 });
 </script>
-
-<style>
-/* Optional: Add some spacing and styling */
-#bankDetailsSection .form-control-sm {
-    font-size: 0.9rem;
-}
-</style>
 {% endblock %}

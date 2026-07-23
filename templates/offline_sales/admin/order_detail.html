@@ -1,199 +1,1121 @@
 <!-- templates/offline_sales/admin/order_detail.html -->
-
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
 {% block title %}Order #{{ order.order_number }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'offline_sales:orders_list' %}">Orders</a></li>
-            <li class="breadcrumb-item active">Order #{{ order.order_number }}</li>
-        </ol>
-    </nav>
+<style>
+:root {
+    --primary: #5c121f;
+    --primary-light: #7a1a2b;
+    --primary-dark: #3d0c14;
+    --secondary: #F4B400;
+    --secondary-light: #f7c948;
+    --bg: #f6f4f2;
+    --white: #ffffff;
+    --border: #ebe7e3;
+    --text: #1d1d1d;
+    --text-light: #6d6d6d;
+    --text-muted: #888888;
+    --success: #2e9d57;
+    --danger: #d64045;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --shadow: 0 10px 28px rgba(0,0,0,0.06);
+    --shadow-hover: 0 18px 40px rgba(92,18,31,0.12);
+    --transition: 0.35s ease;
+    --radius: 14px;
+    --radius-sm: 10px;
+    --radius-xs: 8px;
+}
 
-    <div class="row">
-        <div class="col-md-8">
-            <!-- Order Details -->
-            <div class="card shadow mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Order Details</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Order Number:</strong> {{ order.order_number }}</p>
-                            <p><strong>Invoice Number:</strong> {{ order.invoice_number|default:"-" }}</p>
-                            <p><strong>Date:</strong> {{ order.created_at|date:"F d, Y H:i" }}</p>
-                            <p><strong>Status:</strong> 
-                                <span class="badge bg-{% if order.status == 'completed' %}success{% elif order.status == 'pending' %}warning{% else %}secondary{% endif %}">
-                                    {{ order.get_status_display }}
-                                </span>
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Customer:</strong> {{ order.customer_name }}</p>
-                            <p><strong>Phone:</strong> {{ order.customer_phone }}</p>
-                            <p><strong>Email:</strong> {{ order.customer_email|default:"-" }}</p>
-                            <p><strong>Address:</strong></p>
-                            <p class="text-muted small">{{ order.customer_address|linebreaks|default:"No address provided" }}</p>
-                        </div>
-                    </div>
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(92,18,31,0.12); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(92,18,31,0.25); }
+* { scrollbar-width: thin; scrollbar-color: rgba(92,18,31,0.12) transparent; }
 
-                    <div class="mt-3">
-                        <h6>Payment Details</h6>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <p><strong>Method:</strong> {{ order.get_payment_method_display }}</p>
-                            </div>
-                            <div class="col-md-4">
-                                <p><strong>Status:</strong> 
-                                    <span class="badge bg-{% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'pending' %}warning{% else %}danger{% endif %}">
-                                        {{ order.get_payment_status_display }}
-                                    </span>
-                                </p>
-                            </div>
-                            <div class="col-md-4">
-                                <p><strong>Reference:</strong> {{ order.payment_reference|default:"-" }}</p>
-                            </div>
-                        </div>
-                    </div>
+/* ============================================================
+   UNIQUE MODERN DESIGN
+   ============================================================ */
 
-                    <!-- Order Items -->
-                    <div class="mt-4">
-                        <h6>Items</h6>
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>SKU</th>
-                                        <th>Qty</th>
-                                        <th>Price</th>
-                                        <th>Discount</th>
-                                        <th>Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for item in items %}
-                                    <tr>
-                                        <td>
-                                            {{ item.product_name }}
-                                            {% if item.barcode_text %}
-                                                <br><small class="text-muted">Barcode: {{ item.barcode_text }}</small>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ item.sku }}</td>
-                                        <td>{{ item.quantity }}</td>
-                                        <td>₹{{ item.original_price|floatformat:2 }}</td>
-                                        <td>
-                                            {% if item.discount > 0 %}
-                                                ₹{{ item.discount|floatformat:2 }}
-                                            {% else %}
-                                                -
-                                            {% endif %}
-                                        </td>
-                                        <td><strong>₹{{ item.total|floatformat:2 }}</strong></td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="5" class="text-end"><strong>Subtotal:</strong></td>
-                                        <td>₹{{ order.subtotal|floatformat:2 }}</td>
-                                    </tr>
-                                    {% if order.product_discount_total > 0 %}
-                                    <tr>
-                                        <td colspan="5" class="text-end text-success"><strong>Product Discount:</strong></td>
-                                        <td class="text-success">-₹{{ order.product_discount_total|floatformat:2 }}</td>
-                                    </tr>
-                                    {% endif %}
-                                    {% if order.offer_discount > 0 %}
-                                    <tr>
-                                        <td colspan="5" class="text-end text-success"><strong>Offer Discount:</strong></td>
-                                        <td class="text-success">-₹{{ order.offer_discount|floatformat:2 }}</td>
-                                    </tr>
-                                    {% endif %}
-                                    <tr class="table-active">
-                                        <td colspan="5" class="text-end"><strong>Grand Total:</strong></td>
-                                        <td><strong>₹{{ order.total_amount|floatformat:2 }}</strong></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
+/* ===== TOP BAR ===== */
+.top-bar {
+    background: var(--white);
+    padding: 14px 28px;
+    border-bottom: 3px solid var(--secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-radius: var(--radius) var(--radius) 0 0;
+}
 
-                    {% if order.created_by %}
-                    <div class="mt-3">
-                        <p><strong>Created By:</strong> {{ order.created_by.get_full_name|default:order.created_by.email }}</p>
-                    </div>
-                    {% endif %}
-                </div>
+.top-bar .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.top-bar .brand .icon {
+    width: 44px;
+    height: 44px;
+    background: var(--primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary);
+    font-size: 18px;
+}
+
+.top-bar .brand .text .title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.top-bar .brand .text .title .gold {
+    color: var(--secondary);
+}
+
+.top-bar .brand .text .sub {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.top-bar .actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: var(--bg);
+    color: var(--text);
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.btn-back:hover {
+    background: var(--border);
+    transform: translateY(-2px);
+}
+
+.btn-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+}
+
+.btn-status .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.btn-status.completed { background: #d1fae5; color: #065f46; }
+.btn-status.completed .dot { background: var(--success); }
+
+.btn-status.pending { background: #fef3c7; color: #92400e; }
+.btn-status.pending .dot { background: var(--warning); animation: blink 1.5s ease-in-out infinite; }
+
+.btn-status.cancelled { background: #fee2e2; color: #991b1b; }
+.btn-status.cancelled .dot { background: var(--danger); }
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* ===== MAIN WRAPPER ===== */
+.main-wrap {
+    padding: 16px 0px 20px 0px;
+    background: var(--bg);
+}
+
+/* ===== STATS ROW ===== */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.stat-box {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.stat-box:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+}
+
+.stat-box .ico {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.stat-box .ico.primary { background: var(--primary); color: var(--white); }
+.stat-box .ico.gold { background: var(--secondary); color: var(--primary-dark); }
+.stat-box .ico.green { background: #d1fae5; color: #065f46; }
+.stat-box .ico.blue { background: #dbeafe; color: #1e40af; }
+
+.stat-box .info .num {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.stat-box .info .lbl {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ===== CONTENT GRID ===== */
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+}
+
+/* ===== CARDS ===== */
+.card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 16px;
+    transition: var(--transition);
+}
+
+.card:last-child {
+    margin-bottom: 0;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-hover);
+}
+
+.card-header {
+    padding: 12px 16px;
+    background: #faf8f6;
+    border-bottom: 2px solid var(--secondary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-header .icon {
+    color: var(--secondary);
+    font-size: 15px;
+    width: 18px;
+}
+
+.card-header h5 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.card-body {
+    padding: 14px 16px;
+}
+
+/* ===== INFO ===== */
+.info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 16px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-item .label {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-item .value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+/* ===== DETAIL BOX ===== */
+.detail-box {
+    background: var(--bg);
+    border-radius: var(--radius-xs);
+    padding: 10px 14px;
+    border-left: 3px solid var(--secondary);
+}
+
+.detail-box p {
+    font-size: 13px;
+    color: var(--text-light);
+    margin: 0;
+    white-space: pre-line;
+}
+
+/* ===== PAYMENT GRID ===== */
+.payment-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    background: var(--bg);
+    border-radius: var(--radius-xs);
+    padding: 10px 14px;
+}
+
+.payment-grid .item .lbl {
+    font-size: 9px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.payment-grid .item .val {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+/* ===== TABLE ===== */
+.table-wrap {
+    overflow-x: auto;
+    margin-top: 4px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.table thead {
+    background: #faf8f6;
+}
+
+.table thead th {
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--border);
+    border-right: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.table thead th:last-child {
+    border-right: none;
+}
+
+.table tbody td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.table tbody td:last-child {
+    border-right: none;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background: var(--bg);
+}
+
+.table tfoot td {
+    padding: 8px 12px;
+    font-weight: 700;
+    border-top: 2px solid var(--border);
+}
+
+.table tfoot tr {
+    background: var(--bg);
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar-card .card-body {
+    padding: 12px 14px;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius-xs);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    width: 100%;
+}
+
+.btn-action-success {
+    background: var(--success);
+    color: var(--white);
+}
+.btn-action-success:hover {
+    background: #1e7e3a;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(46,157,87,0.2);
+    color: var(--white);
+}
+
+.btn-action-primary {
+    background: var(--primary);
+    color: var(--white);
+}
+.btn-action-primary:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(92,18,31,0.2);
+    color: var(--white);
+}
+
+.btn-action-secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 2px solid var(--border);
+}
+.btn-action-secondary:hover {
+    background: var(--border);
+    transform: translateY(-2px);
+}
+
+.btn-action-gold {
+    background: var(--secondary);
+    color: var(--primary-dark);
+}
+.btn-action-gold:hover {
+    background: var(--secondary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(244,180,0,0.2);
+    color: var(--primary-dark);
+}
+
+/* ===== TIMELINE ===== */
+.timeline {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: var(--border);
+}
+
+.timeline li {
+    padding: 0 0 10px 24px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+}
+
+.timeline li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.timeline li .tl-icon {
+    position: absolute;
+    left: 0;
+    top: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7px;
+    color: var(--white);
+}
+
+.timeline li .tl-icon.success { background: var(--success); }
+.timeline li .tl-icon.warning { background: var(--warning); }
+.timeline li .tl-icon.info { background: var(--info); }
+.timeline li .tl-icon.primary { background: var(--primary); }
+.timeline li .tl-icon.danger { background: var(--danger); }
+
+.timeline li .tl-content {
+    font-size: 13px;
+    color: var(--text);
+}
+
+.timeline li .tl-content .time {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1200px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    .main-wrap {
+        padding: 14px 20px 16px 20px;
+    }
+    .top-bar {
+        padding: 12px 20px;
+    }
+}
+
+@media (max-width: 992px) {
+    .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .main-wrap {
+        padding: 12px 16px 14px 16px;
+    }
+    .top-bar {
+        padding: 10px 16px;
+    }
+    .info-row {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .top-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    }
+    .top-bar .brand .icon {
+        width: 38px;
+        height: 38px;
+        font-size: 16px;
+    }
+    .top-bar .brand .text .title {
+        font-size: 16px;
+    }
+    .top-bar .brand .text .sub {
+        font-size: 11px;
+    }
+    .top-bar .actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    .top-bar .actions .btn-back,
+    .top-bar .actions .btn-status {
+        width: 100%;
+        justify-content: center;
+    }
+    .main-wrap {
+        padding: 10px 12px 12px 12px;
+    }
+    .stats-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .stat-box {
+        padding: 10px 12px;
+    }
+    .stat-box .info .num {
+        font-size: 18px;
+    }
+    .stat-box .ico {
+        width: 34px;
+        height: 34px;
+        font-size: 14px;
+    }
+    .content-grid {
+        gap: 12px;
+    }
+    .info-row {
+        grid-template-columns: 1fr;
+        gap: 2px;
+    }
+    .info-item {
+        padding: 3px 0;
+    }
+    .info-item .value {
+        font-size: 12px;
+    }
+    .payment-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .card-header {
+        padding: 10px 12px;
+    }
+    .card-header h5 {
+        font-size: 13px;
+    }
+    .card-body {
+        padding: 10px 12px;
+    }
+    .table {
+        font-size: 12px;
+        min-width: 600px;
+    }
+    .table thead th,
+    .table tbody td {
+        padding: 6px 8px;
+    }
+    .sidebar-card .card-body {
+        padding: 10px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .top-bar {
+        padding: 10px 10px;
+    }
+    .top-bar .brand .icon {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        border-radius: 8px;
+    }
+    .top-bar .brand .text .title {
+        font-size: 14px;
+    }
+    .top-bar .brand .text .sub {
+        font-size: 10px;
+    }
+    .main-wrap {
+        padding: 6px 8px 8px 8px;
+    }
+    .stats-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+    }
+    .stat-box {
+        padding: 8px 8px;
+        border-radius: var(--radius-xs);
+    }
+    .stat-box .info .num {
+        font-size: 15px;
+    }
+    .stat-box .info .lbl {
+        font-size: 8px;
+        letter-spacing: 0.3px;
+    }
+    .stat-box .ico {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+        border-radius: 6px;
+    }
+    .payment-grid {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+    .payment-grid .item .val {
+        font-size: 12px;
+    }
+    .table {
+        font-size: 11px;
+        min-width: 500px;
+    }
+    .table thead th,
+    .table tbody td {
+        padding: 4px 6px;
+    }
+    .btn-action {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+    .card-header {
+        padding: 8px 10px;
+    }
+    .card-header h5 {
+        font-size: 12px;
+    }
+    .card-body {
+        padding: 8px 10px;
+    }
+    .detail-box p {
+        font-size: 12px;
+    }
+    .timeline li .tl-content {
+        font-size: 12px;
+    }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.top-bar { animation: fadeUp 0.45s ease both; }
+.stat-box { animation: fadeUp 0.35s ease both; }
+.stat-box:nth-child(1) { animation-delay: 0.05s; }
+.stat-box:nth-child(2) { animation-delay: 0.09s; }
+.stat-box:nth-child(3) { animation-delay: 0.13s; }
+.stat-box:nth-child(4) { animation-delay: 0.17s; }
+.card { animation: fadeUp 0.35s ease both; }
+.card:nth-child(1) { animation-delay: 0.06s; }
+.card:nth-child(2) { animation-delay: 0.1s; }
+.sidebar-card { animation: fadeUp 0.35s ease both; }
+.sidebar-card:nth-child(1) { animation-delay: 0.08s; }
+.sidebar-card:nth-child(2) { animation-delay: 0.12s; }
+/* ============================
+   BELOW 700px FIX
+=============================*/
+@media (max-width:700px){
+
+    *,
+    *::before,
+    *::after{
+        box-sizing:border-box;
+    }
+
+    html,
+    body{
+        overflow-x:hidden;
+    }
+
+    .main-wrap{
+        width:100%;
+        max-width:100%;
+        padding:10px;
+    }
+
+    .content-grid{
+        display:block;
+        width:100%;
+    }
+
+    .left-col,
+    .right-col{
+        width:100%;
+        max-width:100%;
+        min-width:0;
+        padding:0;
+        margin:0 0 15px;
+    }
+
+    .card,
+    .sidebar-card{
+        width:100%;
+        max-width:100%;
+        min-width:0;
+        margin-bottom:12px;
+    }
+
+    /* 4 cards */
+    .stats-row{
+        display:grid;
+        grid-template-columns:1fr;
+        gap:10px;
+        width:100%;
+    }
+
+    .stat-box{
+        width:100%;
+        min-width:0;
+    }
+
+    /* Information sections */
+    .info-row{
+        grid-template-columns:1fr;
+    }
+
+    .payment-grid{
+        grid-template-columns:1fr;
+    }
+
+    .detail-box,
+    .info-item,
+    .card-body{
+        min-width:0;
+        overflow-wrap:anywhere;
+        word-break:break-word;
+    }
+
+    /* Header */
+    .top-bar{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .brand,
+    .actions{
+        width:100%;
+    }
+
+    .actions .btn-back,
+    .actions .btn-status,
+    .btn-action{
+        width:100%;
+    }
+
+    /* Table */
+    .table-wrap{
+        overflow-x:auto;
+    }
+
+    .table{
+        min-width:650px;
+    }
+}
+</style>
+
+<!-- ============================================================
+   TOP BAR
+   ============================================================ -->
+<div class="top-bar">
+    <div class="brand">
+        <div class="icon">
+            <i class="fas fa-receipt"></i>
+        </div>
+        <div class="text">
+            <div class="title">Order <span class="gold">#{{ order.order_number }}</span></div>
+            <div class="sub">Manage offline order details</div>
+        </div>
+    </div>
+    <div class="actions">
+        <a href="{% url 'offline_sales:orders_list' %}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+        <span class="btn-status {% if order.status == 'completed' %}completed{% elif order.status == 'pending' %}pending{% else %}cancelled{% endif %}">
+            <span class="dot"></span> {{ order.get_status_display }}
+        </span>
+    </div>
+</div>
+
+<!-- ============================================================
+   MAIN WRAPPER
+   ============================================================ -->
+<div class="main-wrap">
+
+    <!-- ===== STATS ===== -->
+    <div class="stats-row">
+        <div class="stat-box">
+            <div class="ico primary"><i class="fas fa-shopping-bag"></i></div>
+            <div class="info">
+                <div class="num">{{ order.total_amount|floatformat:0 }}</div>
+                <div class="lbl">Total Amount</div>
             </div>
         </div>
+        <div class="stat-box">
+            <div class="ico green"><i class="fas fa-box"></i></div>
+            <div class="info">
+                <div class="num">{{ order.item_count }}</div>
+                <div class="lbl">Items</div>
+            </div>
+        </div>
+        <div class="stat-box">
+            <div class="ico gold"><i class="fas fa-credit-card"></i></div>
+            <div class="info">
+                <div class="num">{{ order.get_payment_method_display }}</div>
+                <div class="lbl">Payment Method</div>
+            </div>
+        </div>
+        <div class="stat-box">
+            <div class="ico blue"><i class="fas fa-calendar"></i></div>
+            <div class="info">
+                <div class="num">{{ order.created_at|date:"d M Y" }}</div>
+                <div class="lbl">Order Date</div>
+            </div>
+        </div>
+    </div>
 
-        <div class="col-md-4">
-            <!-- Quick Actions -->
-            <div class="card shadow">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">Quick Actions</h5>
+    <!-- ===== CONTENT GRID ===== -->
+    <div class="content-grid">
+
+        <!-- ===== LEFT COLUMN ===== -->
+        <div class="left-col">
+
+            <!-- ===== ORDER INFO CARD ===== -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="icon"><i class="fas fa-info-circle"></i></span>
+                    <h5>Order Information</h5>
                 </div>
                 <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'offline_sales:download_invoice' order.id %}" class="btn btn-success" target="_blank">
+                    <div class="info-row">
+                        <div class="info-item">
+                            <span class="label">Order Number</span>
+                            <span class="value">{{ order.order_number }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Invoice Number</span>
+                            <span class="value">{{ order.invoice_number|default:"—" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Customer</span>
+                            <span class="value">{{ order.customer_name }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Phone</span>
+                            <span class="value">{{ order.customer_phone }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Email</span>
+                            <span class="value">{{ order.customer_email|default:"—" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Created By</span>
+                            <span class="value">{{ order.created_by.get_full_name|default:order.created_by.email|default:"—" }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Address -->
+                    {% if order.customer_address %}
+                    <div style="margin-top:12px;">
+                        <div style="font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
+                            <i class="fas fa-map-marker-alt" style="color:var(--secondary);"></i> Shipping Address
+                        </div>
+                        <div class="detail-box">
+                            <p>{{ order.customer_address }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Payment Details -->
+                    <div style="margin-top:12px;">
+                        <div style="font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
+                            <i class="fas fa-credit-card" style="color:var(--secondary);"></i> Payment Details
+                        </div>
+                        <div class="payment-grid">
+                            <div class="item">
+                                <div class="lbl">Method</div>
+                                <div class="val">{{ order.get_payment_method_display }}</div>
+                            </div>
+                            <div class="item">
+                                <div class="lbl">Status</div>
+                                <div class="val">
+                                    <span class="badge-status {% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'pending' %}warning{% else %}danger{% endif %}">
+                                        <span class="dot"></span> {{ order.get_payment_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="lbl">Reference</div>
+                                <div class="val">{{ order.payment_reference|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ORDER ITEMS CARD ===== -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="icon"><i class="fas fa-box"></i></span>
+                    <h5>Order Items</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-wrap">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th style="text-align:center;">Qty</th>
+                                    <th style="text-align:right;">Price</th>
+                                    <th style="text-align:right;">Discount</th>
+                                    <th style="text-align:right;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>
+                                        {{ item.product_name }}
+                                        {% if item.barcode_text %}
+                                            <br><small style="color:var(--text-muted);font-size:11px;">Barcode: {{ item.barcode_text }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ item.sku }}</td>
+                                    <td style="text-align:center;">{{ item.quantity }}</td>
+                                    <td style="text-align:right;">₹{{ item.original_price|floatformat:2 }}</td>
+                                    <td style="text-align:right;">
+                                        {% if item.discount > 0 %}
+                                            <span style="color:var(--success);">-₹{{ item.discount|floatformat:2 }}</span>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align:right;font-weight:600;color:var(--primary);">₹{{ item.total|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="5" style="text-align:right;"><strong>Subtotal</strong></td>
+                                    <td style="text-align:right;">₹{{ order.subtotal|floatformat:2 }}</td>
+                                </tr>
+                                {% if order.product_discount_total > 0 %}
+                                <tr>
+                                    <td colspan="5" style="text-align:right;color:var(--success);"><strong>Product Discount</strong></td>
+                                    <td style="text-align:right;color:var(--success);">-₹{{ order.product_discount_total|floatformat:2 }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if order.offer_discount > 0 %}
+                                <tr>
+                                    <td colspan="5" style="text-align:right;color:var(--success);"><strong>Offer Discount</strong></td>
+                                    <td style="text-align:right;color:var(--success);">-₹{{ order.offer_discount|floatformat:2 }}</td>
+                                </tr>
+                                {% endif %}
+                                <tr style="background:var(--bg);border-top:2px solid var(--border);">
+                                    <td colspan="5" style="text-align:right;font-weight:700;font-size:14px;"><strong>Grand Total</strong></td>
+                                    <td style="text-align:right;font-weight:700;color:var(--primary);font-size:16px;">₹{{ order.total_amount|floatformat:2 }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===== RIGHT COLUMN ===== -->
+        <div class="right-col">
+
+            <!-- ===== QUICK ACTIONS ===== -->
+            <div class="sidebar-card card">
+                <div class="card-header">
+                    <span class="icon"><i class="fas fa-bolt"></i></span>
+                    <h5>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <a href="{% url 'offline_sales:download_invoice' order.id %}" class="btn-action btn-action-success" target="_blank">
                             <i class="fas fa-download"></i> Download Invoice PDF
                         </a>
                         {% if order.offline_customer %}
-                            <a href="{% url 'offline_sales:customer_edit' order.offline_customer.id %}" class="btn btn-secondary">
+                            <a href="{% url 'offline_sales:customer_edit' order.offline_customer.id %}" class="btn-action btn-action-primary">
                                 <i class="fas fa-user"></i> View Customer
                             </a>
                         {% elif order.customer %}
-                            <!-- If it's an online user, maybe link to admin or profile -->
-                            <a href="#" class="btn btn-secondary" onclick="alert('This is an online user. View in admin panel.')">
-                                <i class="fas fa-user"></i> Online User ({{ order.customer.email }})
-                            </a>
+                            <button class="btn-action btn-action-secondary" onclick="alert('This is an online user. View in admin panel.')">
+                                <i class="fas fa-user"></i> Online User
+                            </button>
                         {% else %}
-                            <a href="#" class="btn btn-secondary disabled">
-                                <i class="fas fa-user"></i> No Customer Found
-                            </a>
+                            <button class="btn-action btn-action-secondary" disabled>
+                                <i class="fas fa-user"></i> No Customer
+                            </button>
                         {% endif %}
-                        <a href="{% url 'offline_sales:offline_sale' %}" class="btn btn-primary">
+                        <a href="{% url 'offline_sales:offline_sale' %}" class="btn-action btn-action-gold">
                             <i class="fas fa-plus"></i> New Sale
-                        </a>
-                        <a href="{% url 'offline_sales:orders_list' %}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Back to Orders
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Order Timeline -->
-            <div class="card shadow mt-3">
+            <!-- ===== TIMELINE ===== -->
+            <div class="sidebar-card card">
                 <div class="card-header">
-                    <h5 class="mb-0">Order Timeline</h5>
+                    <span class="icon"><i class="fas fa-history"></i></span>
+                    <h5>Order Timeline</h5>
                 </div>
-                <div class="card-body">
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <i class="fas fa-check-circle text-success"></i>
-                            Order Placed - {{ order.created_at|date:"F d, Y H:i" }}
+                <div class="card-body" style="padding:10px 12px;">
+                    <ul class="timeline">
+                        <li>
+                            <span class="tl-icon success"><i class="fas fa-check"></i></span>
+                            <div class="tl-content">
+                                Order Placed
+                                <span class="time">{{ order.created_at|date:"F d, Y H:i" }}</span>
+                            </div>
                         </li>
                         {% if order.paid_at %}
-                        <li class="mb-2">
-                            <i class="fas fa-credit-card text-primary"></i>
-                            Payment Received - {{ order.paid_at|date:"F d, Y H:i" }}
+                        <li>
+                            <span class="tl-icon info"><i class="fas fa-credit-card"></i></span>
+                            <div class="tl-content">
+                                Payment Received
+                                <span class="time">{{ order.paid_at|date:"F d, Y H:i" }}</span>
+                            </div>
                         </li>
                         {% endif %}
                         {% if order.status == 'completed' %}
-                        <li class="mb-2">
-                            <i class="fas fa-check-circle text-success"></i>
-                            Completed - {{ order.updated_at|date:"F d, Y H:i" }}
+                        <li>
+                            <span class="tl-icon success"><i class="fas fa-check-circle"></i></span>
+                            <div class="tl-content">
+                                Completed
+                                <span class="time">{{ order.updated_at|date:"F d, Y H:i" }}</span>
+                            </div>
+                        </li>
+                        {% endif %}
+                        {% if order.status == 'cancelled' %}
+                        <li>
+                            <span class="tl-icon danger"><i class="fas fa-times"></i></span>
+                            <div class="tl-content">
+                                Cancelled
+                                <span class="time">{{ order.updated_at|date:"F d, Y H:i" }}</span>
+                            </div>
                         </li>
                         {% endif %}
                     </ul>
                 </div>
             </div>
+
         </div>
     </div>
 </div>

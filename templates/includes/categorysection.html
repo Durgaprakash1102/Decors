@@ -1,0 +1,858 @@
+<!-- ============================================ -->
+<!-- CATEGORY SECTION - Carousel Only When Needed -->
+<!-- ============================================ -->
+<style>
+    /* ============================================ */
+    /* CATEGORY SECTION                            */
+    /* ============================================ */
+    .category-section {
+        position: relative;
+        padding: 0 15px;
+        margin: 0 0 0px 0;
+    }
+
+    /* Hide section completely when no categories */
+    .category-section.no-categories {
+        display: none !important;
+    }
+
+    /* ============================================ */
+    /* CATEGORY CAROUSEL WRAPPER                   */
+    /* ============================================ */
+    .category-carousel-wrapper {
+        position: relative;
+        overflow: hidden;
+        padding: 15px 0 10px;
+        max-width: 1320px;
+        margin: 0 auto;
+    }
+
+    .category-carousel-track {
+        display: flex;
+        gap: 20px;
+        transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        will-change: transform;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        padding: 0 4px;
+    }
+
+    /* When categories fit in one row - NO CAROUSEL */
+    .category-carousel-track.centered {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        transform: none !important;
+    }
+
+    /* ============================================ */
+    /* CATEGORY CARD - Premium Design              */
+    /* ============================================ */
+    .category-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        padding: 0;
+        position: relative;
+        cursor: pointer;
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 115px;
+        min-width: 85px;
+        padding-bottom: 8px;
+    }
+
+    .category-card:hover {
+        transform: translateY(-6px);
+    }
+
+    /* ============================================ */
+    /* ROUND BACKGROUND - THICK PRIMARY BORDER     */
+    /* ============================================ */
+    .category-card .category-bg {
+        border-radius: 50%;
+        background: linear-gradient(145deg, #f4e0e4, #e8dcd7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+        border: 1px solid #e7c4ca !important;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 20px rgba(92, 18, 31, 0.04);
+        width: 100%;
+        aspect-ratio: 1/1;
+        max-width: 100px;
+        padding: 8px;
+    }
+
+    /* Border hover glow effect */
+    .category-card .category-bg::before {
+        content: '';
+        position: absolute;
+        inset: -6px;
+        border-radius: 50%;
+        border: 3px solid transparent;
+        transition: all 0.6s ease;
+        pointer-events: none;
+    }
+
+    .category-card:hover .category-bg::before {
+        border-color: #F4B400;
+        box-shadow: 0 0 40px rgba(244, 180, 0, 0.15);
+        animation: borderPulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes borderPulse {
+        0%, 100% { transform: scale(1); opacity: 0.6; }
+        50% { transform: scale(1.05); opacity: 1; }
+    }
+
+    .category-card:hover .category-bg {
+        background: linear-gradient(145deg, #e8dcd7, #dfcec7);
+        border-color: #3d0c14;
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 8px 35px rgba(92, 18, 31, 0.08);
+    }
+
+    /* ============================================ */
+    /* SMALL ROUND IMAGE                           */
+    /* ============================================ */
+    .category-card .category-image-wrapper {
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.6s ease;
+        background: rgba(255, 255, 255, 0.5);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        width: 90% !important;
+        aspect-ratio: 1/1;
+    }
+
+    .category-card:hover .category-image-wrapper {
+        transform: scale(1.1);
+        border-color: rgba(92, 18, 31, 0.08);
+    }
+
+    .category-card .category-image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.6s ease;
+    }
+
+    .category-card:hover .category-image-wrapper img {
+        transform: scale(1.12);
+    }
+
+    /* ============================================ */
+    /* CATEGORY ICON - No image                    */
+    /* ============================================ */
+    .category-card .category-icon {
+        color: #5c121f;
+        opacity: 0.15;
+        transition: all 0.4s ease;
+        font-size: 26px;
+    }
+
+    .category-card:hover .category-icon {
+        opacity: 0.35;
+        transform: scale(1.05);
+    }
+
+    /* ============================================ */
+    /* CATEGORY NAME - Single Line                 */
+    /* ============================================ */
+    .category-card .category-name {
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        color: #1e1e1e;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0;
+        width: 100%;
+        font-size: 12px;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.3;
+    }
+
+    .category-card:hover .category-name {
+        color: #5c121f;
+    }
+
+    /* ============================================ */
+    /* CATEGORY COUNT - Subtle                     */
+    /* ============================================ */
+    .category-card .category-count {
+        font-family: 'Inter', sans-serif;
+        color: #9a9a9a;
+        text-align: center;
+        font-weight: 400;
+        margin-top: 2px;
+        background: transparent !important;
+        padding: 0 !important;
+        transition: color 0.3s ease;
+        font-size: 9px;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+    }
+
+    .category-card:hover .category-count {
+        color: #5c121f;
+    }
+
+    /* ============================================ */
+    /* NAVIGATION ARROWS - ONLY WHEN CAROUSEL NEEDED */
+    /* ============================================ */
+    .category-nav {
+        position: absolute;
+        top: 45%;
+        transform: translateY(-50%);
+        z-index: 10;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 2px solid #5c121f;
+        color: #5c121f;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
+        width: 38px;
+        height: 38px;
+        font-size: 14px;
+    }
+
+    /* Only show arrows when carousel is active */
+    .category-carousel-wrapper.has-carousel .category-nav {
+        display: flex;
+    }
+
+    @media (min-width: 768px) {
+        .category-carousel-wrapper.has-carousel .category-nav {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .category-carousel-wrapper.has-carousel:hover .category-nav {
+            opacity: 1;
+            pointer-events: all;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .category-carousel-wrapper.has-carousel .category-nav {
+            opacity: 1;
+            pointer-events: all;
+            width: 32px;
+            height: 32px;
+            font-size: 12px;
+        }
+    }
+
+    .category-nav:hover {
+        background: #5c121f;
+        color: #ffffff;
+        transform: translateY(-50%) scale(1.08);
+        border-color: #F4B400;
+        box-shadow: 0 4px 25px rgba(92, 18, 31, 0.12);
+    }
+
+    .category-nav.prev {
+        left: 0px;
+    }
+
+    .category-nav.next {
+        right: 0px;
+    }
+
+    /* ============================================ */
+    /* DOTS INDICATORS - ONLY WHEN CAROUSEL NEEDED */
+    /* ============================================ */
+    .category-dots {
+        display: none;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 18px;
+        padding-bottom: 5px;
+    }
+
+    .category-carousel-wrapper.has-carousel .category-dots {
+        display: flex;
+    }
+
+    .category-dots .dot {
+        border-radius: 50%;
+        background: rgba(92, 18, 31, 0.08);
+        cursor: pointer;
+        transition: all 0.4s ease;
+        border: none;
+        padding: 0;
+        width: 8px;
+        height: 8px;
+    }
+
+    .category-dots .dot.active {
+        background: #5c121f;
+        transform: scale(1.3);
+        box-shadow: 0 0 20px rgba(92, 18, 31, 0.10);
+    }
+
+    .category-dots .dot:hover {
+        background: rgba(92, 18, 31, 0.25);
+        transform: scale(1.15);
+    }
+
+    .category-dots .dot.active:hover {
+        background: #5c121f;
+        transform: scale(1.3);
+    }
+
+    /* ============================================ */
+    /* EMPTY STATE - Hidden completely             */
+    /* ============================================ */
+    .empty-state {
+        display: none !important;
+    }
+
+    /* ============================================ */
+    /* RESPONSIVE                                  */
+    /* ============================================ */
+
+    @media (min-width: 1200px) {
+        .category-card {
+            max-width: 115px;
+            min-width: 95px;
+            padding-bottom: 8px;
+        }
+        .category-card .category-bg {
+            max-width: 105px;
+            padding: 10px;
+            border-width: 4px;
+        }
+        .category-card .category-image-wrapper {
+            width: 72%;
+        }
+        .category-card .category-name {
+            font-size: 13px;
+        }
+        .category-card .category-count {
+            font-size: 10px;
+        }
+        .category-card .category-icon {
+            font-size: 26px;
+        }
+        .category-carousel-track {
+            gap: 20px;
+        }
+        .category-carousel-track.centered {
+            gap: 20px;
+        }
+        .category-section {
+            padding: 0 20px;
+        }
+    }
+
+    @media (max-width: 1199px) and (min-width: 992px) {
+        .category-card {
+            max-width: 105px;
+            min-width: 88px;
+            padding-bottom: 6px;
+        }
+        .category-card .category-bg {
+            max-width: 95px;
+            padding: 8px;
+            border-width: 4px;
+        }
+        .category-card .category-image-wrapper {
+            width: 70%;
+        }
+        .category-card .category-name {
+            font-size: 12px;
+        }
+        .category-card .category-count {
+            font-size: 9px;
+        }
+        .category-card .category-icon {
+            font-size: 22px;
+        }
+        .category-carousel-track {
+            gap: 18px;
+        }
+        .category-carousel-track.centered {
+            gap: 18px;
+        }
+        .category-nav {
+            width: 36px;
+            height: 36px;
+            font-size: 14px;
+        }
+        .category-section {
+            padding: 0 15px;
+        }
+    }
+
+    @media (max-width: 991px) and (min-width: 768px) {
+        .category-card {
+            max-width: 95px;
+            min-width: 80px;
+            padding-bottom: 6px;
+        }
+        .category-card .category-bg {
+            max-width: 85px;
+            padding: 7px;
+            border-width: 4px;
+        }
+        .category-card .category-image-wrapper {
+            width: 68%;
+        }
+        .category-card .category-name {
+            font-size: 11px;
+        }
+        .category-card .category-count {
+            font-size: 8px;
+        }
+        .category-card .category-icon {
+            font-size: 20px;
+        }
+        .category-carousel-track {
+            gap: 16px;
+        }
+        .category-carousel-track.centered {
+            gap: 16px;
+        }
+        .category-nav {
+            width: 34px;
+            height: 34px;
+            font-size: 13px;
+        }
+        .category-dots {
+            gap: 6px;
+            margin-top: 14px;
+        }
+        .category-dots .dot {
+            width: 7px;
+            height: 7px;
+        }
+        .category-section {
+            padding: 0 12px;
+        }
+    }
+
+    @media (max-width: 767px) and (min-width: 576px) {
+        .category-card {
+            max-width: 85px;
+            min-width: 72px;
+            padding-bottom: 4px;
+        }
+        .category-card .category-bg {
+            max-width: 78px;
+            padding: 6px;
+            border-width: 4px;
+        }
+        .category-card .category-image-wrapper {
+            width: 66%;
+        }
+        .category-card .category-name {
+            font-size: 10px;
+        }
+        .category-card .category-count {
+            font-size: 8px;
+        }
+        .category-card .category-icon {
+            font-size: 18px;
+        }
+        .category-carousel-track {
+            gap: 14px;
+        }
+        .category-carousel-track.centered {
+            gap: 14px;
+        }
+        .category-nav {
+            width: 30px;
+            height: 30px;
+            font-size: 12px;
+        }
+        .category-dots {
+            gap: 5px;
+            margin-top: 12px;
+        }
+        .category-dots .dot {
+            width: 6px;
+            height: 6px;
+        }
+        .category-section {
+            padding: 0 10px;
+        }
+    }
+
+    @media (max-width: 575px) and (min-width: 401px) {
+        .category-card {
+            max-width: 75px;
+            min-width: 65px;
+            padding-bottom: 4px;
+        }
+        .category-card .category-bg {
+            max-width: 68px;
+            padding: 5px;
+            border-width: 3px;
+        }
+        .category-card .category-image-wrapper {
+            width: 64%;
+        }
+        .category-card .category-name {
+            font-size: 9px;
+        }
+        .category-card .category-count {
+            font-size: 7px;
+        }
+        .category-card .category-icon {
+            font-size: 16px;
+        }
+        .category-carousel-track {
+            gap: 12px;
+        }
+        .category-carousel-track.centered {
+            gap: 12px;
+        }
+        .category-nav {
+            width: 26px;
+            height: 26px;
+            font-size: 11px;
+        }
+        .category-dots {
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .category-dots .dot {
+            width: 5px;
+            height: 5px;
+        }
+        .category-section {
+            padding: 0 8px;
+        }
+    }
+
+    @media (max-width: 400px) and (min-width: 321px) {
+        .category-card {
+            max-width: 65px;
+            min-width: 55px;
+            padding-bottom: 4px;
+        }
+        .category-card .category-bg {
+            max-width: 60px;
+            padding: 4px;
+            border-width: 3px;
+        }
+        .category-card .category-image-wrapper {
+            width: 62%;
+        }
+        .category-card .category-name {
+            font-size: 8px;
+        }
+        .category-card .category-count {
+            font-size: 6px;
+        }
+        .category-card .category-icon {
+            font-size: 14px;
+        }
+        .category-carousel-track {
+            gap: 10px;
+        }
+        .category-carousel-track.centered {
+            gap: 10px;
+        }
+        .category-nav {
+            width: 24px;
+            height: 24px;
+            font-size: 10px;
+        }
+        .category-dots {
+            gap: 4px;
+            margin-top: 8px;
+        }
+        .category-dots .dot {
+            width: 4px;
+            height: 4px;
+        }
+        .category-section {
+            padding: 0 6px;
+        }
+    }
+
+    @media (max-width: 320px) {
+        .category-card {
+            max-width: 55px;
+            min-width: 45px;
+            padding-bottom: 3px;
+        }
+        .category-card .category-bg {
+            max-width: 50px;
+            padding: 3px;
+            border-width: 3px;
+        }
+        .category-card .category-image-wrapper {
+            width: 60%;
+        }
+        .category-card .category-name {
+            font-size: 7px;
+        }
+        .category-card .category-count {
+            font-size: 5px;
+        }
+        .category-card .category-icon {
+            font-size: 12px;
+        }
+        .category-carousel-track {
+            gap: 8px;
+        }
+        .category-carousel-track.centered {
+            gap: 8px;
+        }
+        .category-nav {
+            display: none !important;
+        }
+        .category-dots {
+            gap: 3px;
+            margin-top: 6px;
+        }
+        .category-dots .dot {
+            width: 3px;
+            height: 3px;
+        }
+        .category-section {
+            padding: 0 4px;
+        }
+    }
+
+    /* ============================================ */
+    /* TOUCH DEVICE OPTIMIZATION                   */
+    /* ============================================ */
+    @media (hover: none) {
+        .category-nav {
+            opacity: 1 !important;
+            pointer-events: all !important;
+        }
+        .category-card:hover {
+            transform: none;
+        }
+        .category-card:hover .category-bg {
+            transform: none;
+        }
+        .category-card:hover .category-image-wrapper {
+            transform: none;
+        }
+    }
+</style>
+
+<!-- ============================================ -->
+<!-- CATEGORY SECTION HTML                        -->
+<!-- ============================================ -->
+{% if categories %}
+    <div class="category-section">
+        {% with cat_count=categories|length %}
+        <div class="category-carousel-wrapper {% if cat_count > 8 %}has-carousel{% endif %}" id="categoryCarousel">
+            <div class="category-carousel-track {% if cat_count <= 8 %}centered{% endif %}" id="categoryTrack">
+                {% for category in categories %}
+                    <a href="{% url 'Ecom:category_shop' category.slug %}" class="category-card">
+                        <div class="category-bg">
+                            <div class="category-image-wrapper">
+                                {% if category.image %}
+                                    <img src="{{ category.image.url }}" alt="{{ category.name }}" loading="lazy">
+                                {% else %}
+                                    <span class="category-icon"><i class="fas fa-folder"></i></span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="category-name" title="{{ category.name }}">{{ category.name }}</div>
+                        <div class="category-count">{{ category.product_count }} items</div>
+                    </a>
+                {% endfor %}
+            </div>
+
+            <!-- Navigation Arrows - ONLY when more than 8 categories -->
+            {% if cat_count > 8 %}
+                <button class="category-nav prev" onclick="slideCategories(-1)" aria-label="Previous">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="category-nav next" onclick="slideCategories(1)" aria-label="Next">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+
+                <!-- Dots Indicators -->
+                <div class="category-dots" id="categoryDots"></div>
+            {% endif %}
+        </div>
+        {% endwith %}
+    </div>
+{% endif %}
+
+<!-- ============================================ -->
+<!-- JAVASCRIPT - Carousel Logic                  -->
+<!-- ============================================ -->
+<script>
+    (function() {
+        var track = document.getElementById('categoryTrack');
+        if (!track) return;
+
+        var cards = track.querySelectorAll('.category-card');
+        var totalCards = cards.length;
+        var currentSlide = 0;
+        var cardsPerSlide = 8;
+        var totalSlides = Math.ceil(totalCards / cardsPerSlide);
+
+        function getCardsPerSlide() {
+            var w = window.innerWidth;
+            if (w >= 1200) return 8;
+            if (w >= 992) return 6;
+            if (w >= 768) return 5;
+            if (w >= 576) return 4;
+            if (w >= 401) return 3;
+            if (w >= 321) return 3;
+            return 2;
+        }
+
+        function getGap() {
+            var w = window.innerWidth;
+            if (w >= 1200) return 20;
+            if (w >= 992) return 18;
+            if (w >= 768) return 16;
+            if (w >= 576) return 14;
+            if (w >= 401) return 12;
+            if (w >= 321) return 10;
+            return 8;
+        }
+
+        function updateSlide() {
+            cardsPerSlide = getCardsPerSlide();
+            
+            // If categories fit in one row - NO CAROUSEL
+            if (totalCards <= cardsPerSlide) {
+                track.classList.add('centered');
+                track.style.transform = 'translateX(0px)';
+                document.querySelectorAll('.category-nav').forEach(function(el) { 
+                    el.style.display = 'none'; 
+                });
+                var dotsContainer = document.getElementById('categoryDots');
+                if (dotsContainer) {
+                    dotsContainer.innerHTML = '';
+                    dotsContainer.style.display = 'none';
+                }
+                var wrapper = document.getElementById('categoryCarousel');
+                if (wrapper) wrapper.classList.remove('has-carousel');
+                return;
+            }
+
+            // Carousel mode - categories don't fit in one row
+            totalSlides = Math.ceil(totalCards / cardsPerSlide);
+            if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+            if (currentSlide < 0) currentSlide = 0;
+
+            track.classList.remove('centered');
+            
+            var wrapper = document.getElementById('categoryCarousel');
+            if (wrapper) wrapper.classList.add('has-carousel');
+
+            var gap = getGap();
+            var cardWidth = cards[0].offsetWidth + gap;
+            
+            var offset = currentSlide * cardWidth;
+            track.style.transform = 'translateX(-' + offset + 'px)';
+
+            var dots = document.querySelectorAll('#categoryDots .dot');
+            dots.forEach(function(dot, index) {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+
+            var prevBtn = document.querySelector('.category-nav.prev');
+            var nextBtn = document.querySelector('.category-nav.next');
+            if (prevBtn) prevBtn.style.display = currentSlide === 0 ? 'none' : 'flex';
+            if (nextBtn) nextBtn.style.display = currentSlide >= totalSlides - 1 ? 'none' : 'flex';
+        }
+
+        window.slideCategories = function(direction) {
+            var newSlide = currentSlide + direction;
+            if (newSlide >= 0 && newSlide < totalSlides) {
+                currentSlide = newSlide;
+                updateSlide();
+            }
+        };
+
+        window.goToCategorySlide = function(index) {
+            if (index >= 0 && index < totalSlides) {
+                currentSlide = index;
+                updateSlide();
+            }
+        };
+
+        function createDots() {
+            var dotsContainer = document.getElementById('categoryDots');
+            if (!dotsContainer) return;
+            dotsContainer.innerHTML = '';
+            
+            cardsPerSlide = getCardsPerSlide();
+            
+            if (totalCards <= cardsPerSlide) {
+                dotsContainer.style.display = 'none';
+                return;
+            }
+            
+            totalSlides = Math.ceil(totalCards / cardsPerSlide);
+            dotsContainer.style.display = 'flex';
+            for (var i = 0; i < totalSlides; i++) {
+                var dot = document.createElement('button');
+                dot.className = 'dot' + (i === 0 ? ' active' : '');
+                dot.onclick = function(index) {
+                    return function() { window.goToCategorySlide(index); };
+                }(i);
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        setTimeout(function() {
+            createDots();
+            updateSlide();
+        }, 100);
+
+        var resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
+                createDots();
+                updateSlide();
+            }, 200);
+        });
+
+        var touchStartX = 0;
+        var wrapper = document.getElementById('categoryCarousel');
+        if (wrapper) {
+            wrapper.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            wrapper.addEventListener('touchend', function(e) {
+                var diff = touchStartX - e.changedTouches[0].screenX;
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0 && currentSlide < totalSlides - 1) {
+                        window.slideCategories(1);
+                    } else if (diff < 0 && currentSlide > 0) {
+                        window.slideCategories(-1);
+                    }
+                }
+            }, { passive: true });
+        }
+    })();
+</script>

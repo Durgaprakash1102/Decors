@@ -1156,20 +1156,27 @@ PAGE
             <span id="shortDescText">{{ product.short_description|default:"No short description available." }}</span>
         </div>
 
-        <!-- ===== PRICE ===== -->
+        <!-- ===== PRICE - FIXED ===== -->
         <div class="price-section" id="productPrice">
-            <span class="original" id="originalPrice">₹{{ product.price|floatformat:2 }}</span>
-            
-            {% if product.offer_name and product.offer_name != "Product Discount" %}
-                <span class="current" id="currentPrice">₹{{ product.offer_price|floatformat:2 }}</span>
-                <span class="offer-tag"><i class="fas fa-gift"></i> Offer</span>
-                <span class="savings">Save ₹{{ product.total_savings|floatformat:2 }}</span>
-            {% elif product.discount_percentage > 0 %}
-                <span class="current" id="currentPrice">₹{{ product.final_price|floatformat:2 }}</span>
-                <span class="discount-tag">{{ product.discount_percentage|floatformat:0 }}% OFF</span>
-            {% else %}
-                <span class="current" id="currentPrice">₹{{ product.price|floatformat:2 }}</span>
-            {% endif %}
+            {% with offer_price=product.offer_price|default:product.price %}
+                {% if offer_price < product.price %}
+                    <span class="original" id="originalPrice">₹{{ product.price|floatformat:2 }}</span>
+                    <span class="current" id="currentPrice">₹{{ offer_price|floatformat:2 }}</span>
+                    
+                    {% if product.discount_percentage > 0 %}
+                        <span class="discount-tag">{{ product.discount_percentage|floatformat:0 }}% OFF</span>
+                    {% endif %}
+                    
+                    {% if product.offer_name and product.offer_name != "Product Discount" %}
+                        <span class="offer-tag"><i class="fas fa-gift"></i> {{ product.offer_name|truncatechars:15 }}</span>
+                    {% endif %}
+                    
+                    <span class="savings">Save ₹{{ product.total_savings|floatformat:2 }}</span>
+                {% else %}
+                    <span class="original" id="originalPrice" style="display:none;">₹{{ product.price|floatformat:2 }}</span>
+                    <span class="current" id="currentPrice">₹{{ product.price|floatformat:2 }}</span>
+                {% endif %}
+            {% endwith %}
         </div>
 
         <!-- ===== DIRECTION INDICATOR ===== -->
@@ -1181,14 +1188,22 @@ PAGE
             </span>
         </div>
 
-        <!-- Offer Banner -->
-        {% if product.offer_name and product.offer_name != "Product Discount" %}
-            <div class="offer-banner">
-                <i class="fas fa-gift"></i>
-                <strong>{{ product.offer_name }}</strong> applied!
-                <span class="save-amount">Save ₹{{ product.total_savings|floatformat:2 }}</span>
-            </div>
-        {% endif %}
+        <!-- Offer Banner - FIXED -->
+        {% with offer_price=product.offer_price|default:product.price %}
+            {% if offer_price < product.price and product.offer_name and product.offer_name != "Product Discount" %}
+                <div class="offer-banner">
+                    <i class="fas fa-gift"></i>
+                    <strong>{{ product.offer_name }}</strong> applied!
+                    <span class="save-amount">Save ₹{{ product.total_savings|floatformat:2 }}</span>
+                </div>
+            {% elif product.discount_percentage > 0 %}
+                <div class="offer-banner" style="background:var(--warning-bg);border-left-color:var(--warning);">
+                    <i class="fas fa-tag"></i>
+                    <strong>{{ product.discount_percentage|floatformat:0 }}% Discount</strong> applied!
+                    <span class="save-amount">Save ₹{{ product.total_savings|floatformat:2 }}</span>
+                </div>
+            {% endif %}
+        {% endwith %}
 
         <!-- ===== DETAILS GRID ===== -->
         <div class="details-grid" id="detailsGrid">
@@ -1517,9 +1532,10 @@ const variantData = {
         material: "{{ variant.material|default:'Not specified'|escapejs }}",
         weight: "{% if variant.weight %}{{ variant.weight }} kg{% else %}Not specified{% endif %}",
         dimensions: "{% if variant.dimensions %}{{ variant.dimensions }}{% else %}Not specified{% endif %}",
-        price: "{{ variant.offer_price|floatformat:2 }}",
-        original_price: "{{ variant.price|floatformat:2 }}",
-        has_discount: "{% if variant.price != variant.offer_price %}true{% else %}false{% endif %}",
+        price: {{ variant.price|floatformat:2 }},
+        offer_price: {% if variant.offer_price %}{{ variant.offer_price|floatformat:2 }}{% else %}{{ variant.price|floatformat:2 }}{% endif %},
+        discount_percentage: {% if variant.discount_percentage %}{{ variant.discount_percentage|floatformat:0 }}{% else %}0{% endif %},
+        total_savings: {% if variant.total_savings %}{{ variant.total_savings|floatformat:2 }}{% else %}0{% endif %},
         stock: "{{ variant.stock_quantity }}",
         stock_status: "{% if variant.is_out_of_stock %}out{% elif variant.is_low_stock %}low{% else %}in{% endif %}",
         stock_text: "{% if variant.is_out_of_stock %}Out of Stock{% elif variant.is_low_stock %}Low Stock ({{ variant.stock_quantity }}){% else %}In Stock ({{ variant.stock_quantity }}){% endif %}",
@@ -1557,10 +1573,10 @@ const productData = {
     material: "{{ product.material|default:'Not specified'|escapejs }}",
     weight: "{% if product.weight %}{{ product.weight }} kg{% else %}Not specified{% endif %}",
     dimensions: "{{ product.dimensions|default:'Not specified'|escapejs }}",
-    price: "{{ product.price|floatformat:2 }}",
-    offer_price: "{{ product.offer_price|floatformat:2 }}",
-    original_price: "{{ product.price|floatformat:2 }}",
-    has_discount: "{% if product.offer_name and product.offer_name != 'Product Discount' %}true{% elif product.discount_percentage > 0 %}true{% else %}false{% endif %}",
+    price: {{ product.price|floatformat:2 }},
+    offer_price: {% if product.offer_price %}{{ product.offer_price|floatformat:2 }}{% else %}{{ product.price|floatformat:2 }}{% endif %},
+    discount_percentage: {% if product.discount_percentage %}{{ product.discount_percentage|floatformat:0 }}{% else %}0{% endif %},
+    total_savings: {% if product.total_savings %}{{ product.total_savings|floatformat:2 }}{% else %}0{% endif %},
     stock: "{{ product.stock_quantity }}",
     stock_status: "{% if product.is_out_of_stock %}out{% elif product.is_low_stock %}low{% else %}in{% endif %}",
     stock_text: "{% if product.is_out_of_stock %}Out of Stock{% elif product.is_low_stock %}Low Stock ({{ product.stock_quantity }}){% else %}In Stock ({{ product.stock_quantity }}){% endif %}",
@@ -1580,6 +1596,46 @@ const productData = {
     features: "{% if product.features %}{{ product.features|escapejs }}{% endif %}",
     warranty_details: "{% if product.warranty_details %}{{ product.warranty_details|escapejs }}{% endif %}"
 };
+
+// ============================================
+// UPDATE PRICE FUNCTION
+// ============================================
+function updatePriceDisplay(price, offerPrice, discountPercent, totalSavings) {
+    const originalEl = document.getElementById('originalPrice');
+    const currentEl = document.getElementById('currentPrice');
+    const priceSection = document.getElementById('productPrice');
+    
+    // Remove existing tags
+    priceSection.querySelectorAll('.discount-tag, .offer-tag, .savings').forEach(el => el.remove());
+    
+    const regularPrice = parseFloat(price);
+    const offerPriceNum = parseFloat(offerPrice);
+    
+    if (offerPriceNum < regularPrice) {
+        originalEl.style.display = 'inline';
+        originalEl.textContent = '₹' + regularPrice.toFixed(2);
+        currentEl.textContent = '₹' + offerPriceNum.toFixed(2);
+        
+        // Add discount tag if percentage > 0
+        if (discountPercent > 0) {
+            const tag = document.createElement('span');
+            tag.className = 'discount-tag';
+            tag.textContent = discountPercent + '% OFF';
+            priceSection.appendChild(tag);
+        }
+        
+        // Add savings
+        if (totalSavings > 0) {
+            const savings = document.createElement('span');
+            savings.className = 'savings';
+            savings.textContent = 'Save ₹' + totalSavings.toFixed(2);
+            priceSection.appendChild(savings);
+        }
+    } else {
+        originalEl.style.display = 'none';
+        currentEl.textContent = '₹' + regularPrice.toFixed(2);
+    }
+}
 
 // ============================================
 // SHOW PRODUCT DETAILS (Main Product)
@@ -1613,15 +1669,12 @@ function showProductDetails(imageUrl, element) {
     document.getElementById('shortDescText').textContent = productData.short_description;
     
     // Update Price
-    const originalEl = document.getElementById('originalPrice');
-    const currentEl = document.getElementById('currentPrice');
-    if (productData.has_discount === 'true') {
-        originalEl.textContent = '₹' + productData.original_price;
-        currentEl.textContent = '₹' + productData.offer_price;
-    } else {
-        originalEl.textContent = '₹' + productData.price;
-        currentEl.textContent = '₹' + productData.price;
-    }
+    updatePriceDisplay(
+        productData.price,
+        productData.offer_price,
+        productData.discount_percentage,
+        productData.total_savings
+    );
     
     // Update Details Grid
     document.getElementById('detailCategory').textContent = productData.category;
@@ -1741,15 +1794,12 @@ function showMainProduct() {
     document.getElementById('shortDescText').textContent = productData.short_description;
     
     // Price
-    const originalEl = document.getElementById('originalPrice');
-    const currentEl = document.getElementById('currentPrice');
-    if (productData.has_discount === 'true') {
-        originalEl.textContent = '₹' + productData.original_price;
-        currentEl.textContent = '₹' + productData.offer_price;
-    } else {
-        originalEl.textContent = '₹' + productData.price;
-        currentEl.textContent = '₹' + productData.price;
-    }
+    updatePriceDisplay(
+        productData.price,
+        productData.offer_price,
+        productData.discount_percentage,
+        productData.total_savings
+    );
     
     // Details Grid
     document.getElementById('detailCategory').textContent = productData.category;
@@ -1856,6 +1906,13 @@ function selectVariant(variantId) {
         variantThumb.classList.add('active');
     }
     
+    // Remove active from product thumbs
+    const productThumbs = document.querySelectorAll('.image-thumbs .thumb');
+    productThumbs.forEach(thumb => thumb.classList.remove('active'));
+    if (productThumbs.length > 0) {
+        productThumbs[0].classList.add('active');
+    }
+    
     // ===== UPDATE PRODUCT DETAILS WITH VARIANT DATA =====
     // Update Product Name
     const variantName = data.name !== 'Variant' ? data.name : '';
@@ -1873,16 +1930,13 @@ function selectVariant(variantId) {
     // Update Short Description
     document.getElementById('shortDescText').textContent = data.short_description;
     
-    // Update Price
-    const originalEl = document.getElementById('originalPrice');
-    const currentEl = document.getElementById('currentPrice');
-    if (data.has_discount === 'true') {
-        originalEl.textContent = '₹' + data.original_price;
-        currentEl.textContent = '₹' + data.price;
-    } else {
-        originalEl.textContent = '₹' + data.price;
-        currentEl.textContent = '₹' + data.price;
-    }
+    // Update Price - USING VARIANT PRICE
+    updatePriceDisplay(
+        data.price,
+        data.offer_price,
+        data.discount_percentage,
+        data.total_savings
+    );
     
     // Update Details Grid with Variant Data
     document.getElementById('detailCategory').textContent = data.category;

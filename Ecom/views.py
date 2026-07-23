@@ -69,7 +69,7 @@ def home(request):
     # ============================================
     # FEATURED PRODUCTS
     # ============================================
-    featured_products = products.filter(is_featured=True).order_by('-created_at')[:8]
+    featured_products = products.filter(is_featured=True).order_by('-created_at')[:10]
     
     # ============================================
     # BANNERS
@@ -79,12 +79,12 @@ def home(request):
     # ============================================
     # NEW ARRIVALS - products marked as new
     # ============================================
-    new_arrivals = products.filter(is_new=True).order_by('-created_at')[:8]
+    new_arrivals = products.filter(is_new=True).order_by('-created_at')[:10]
     
     # ============================================
     # ALTERNATIVE: Get newest products regardless of is_new flag
     # ============================================
-    newest_products = products.order_by('-created_at')[:8]
+    newest_products = products.order_by('-created_at')[:10]
     
     # ============================================
     # DEALS OF THE DAY - Products with highest discounts
@@ -92,7 +92,7 @@ def home(request):
     # Get products with discount > 0, sorted by discount percentage (highest first)
     deals_of_the_day_query = products.filter(
         discount_percentage__gt=0
-    ).order_by('-discount_percentage')[:6]
+    ).order_by('-discount_percentage')[:8]
     
     # If less than 6 products with discount, get some without discount to fill
     if deals_of_the_day_query.count() < 6:
@@ -189,7 +189,7 @@ def home(request):
         from .models import RecentlyViewed
         recently_viewed_items = RecentlyViewed.objects.filter(
             user=request.user
-        ).select_related('product').order_by('-viewed_at')[:8]
+        ).select_related('product').order_by('-viewed_at')[:5]
         recently_viewed = [item.product for item in recently_viewed_items]
     
     context = {
@@ -1823,7 +1823,7 @@ def product_detail_view(request, product_id):
     reviews = product.reviews.filter(is_approved=True)
     
     # Get similar products
-    similar_products = product.get_similar_products(limit=6)
+    similar_products = product.get_similar_products(limit=7)
     
     # Get product variants
     variants = product.variants.filter(is_active=True)
@@ -1834,7 +1834,7 @@ def product_detail_view(request, product_id):
     recently_viewed_products = []
     if request.user.is_authenticated:
         # Use the class method to get recently viewed
-        recently_viewed_items = RecentlyViewed.get_recently_viewed(request.user, limit=10)
+        recently_viewed_items = RecentlyViewed.get_recently_viewed(request.user, limit=7)
         
         # Exclude current product and get product objects
         recently_viewed_products = [
@@ -1900,26 +1900,26 @@ def product_delete_view(request, product_id):
 @login_required
 def low_stock_alert_view(request):
     """View all products with low stock"""
+    # Remove is_active filter for out-of-stock products
+    out_of_stock_products = Product.objects.filter(
+        stock_quantity=0
+    ).order_by('name')
+    
+    out_of_stock_variants = ProductVariant.objects.filter(
+        stock_quantity=0
+    ).select_related('product')
+    
+    # Keep is_active for low stock products (since low stock implies active)
     low_stock_products = Product.objects.filter(
         is_active=True,
         stock_quantity__lte=models.F('low_stock_threshold'),
         stock_quantity__gt=0
     ).order_by('stock_quantity')
     
-    out_of_stock_products = Product.objects.filter(
-        is_active=True,
-        stock_quantity=0
-    ).order_by('name')
-    
     low_stock_variants = ProductVariant.objects.filter(
         is_active=True,
         stock_quantity__lte=models.F('low_stock_threshold'),
         stock_quantity__gt=0
-    ).select_related('product')
-    
-    out_of_stock_variants = ProductVariant.objects.filter(
-        is_active=True,
-        stock_quantity=0
     ).select_related('product')
     
     context = {
@@ -1929,7 +1929,6 @@ def low_stock_alert_view(request):
         'out_of_stock_variants': out_of_stock_variants,
     }
     return render(request, 'Ecom/admin/low_stock_alerts.html', context)
-
 # ==================== RECENTLY VIEWED ====================
 
 @login_required
@@ -4294,103 +4293,136 @@ def orders_view(request):
 
 # views.py - Updated order_detail_view
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+
+from Ecom.models import Order
+from offline_sales.models import OfflineOrder, OfflineCustomer
+
+
 @login_required
 def order_detail_view(request, order_id):
     """
-    Order detail view with cancellation/return/replacement actions
-    Handles both Online and Offline orders
+    Order detail view with cancellation/return/replacement actions.
+    Handles both Online and Offline orders.
     """
-    # Try to find online order first
-    online_order = None
-    offline_order = None
-    order = None
+
     is_admin = request.user.is_admin or request.user.is_superuser
+
+    order = None
     is_offline = False
-    
-    # Check if it's an offline order (starts with OFF)
-    try:
-        offline_order = get_object_or_404(OfflineOrder, id=order_id)
+
+    # -------------------------
+    # Try Offline Order First
+    # -------------------------
+    offline_order = OfflineOrder.objects.filter(id=order_id).first()
+
+    if offline_order:
         if not is_admin:
-            # Check if user owns this offline order
-            if offline_order.customer and offline_order.customer.id != request.user.id:
-                # Check if offline customer matches user's email
-                offline_customer = OfflineCustomer.objects.filter(
+            has_permission = False
+
+            # Linked online customer
+            if offline_order.customer and offline_order.customer == request.user:
+                has_permission = True
+
+            # Linked offline customer
+            elif (
+                offline_order.offline_customer and
+                OfflineCustomer.objects.filter(
+                    id=offline_order.offline_customer.id,
                     email=request.user.email,
-                    id=offline_order.offline_customer.id
+                    is_active=True
                 ).exists()
-                if not offline_customer:
-                    messages.error(request, 'You do not have permission to view this order.')
-                    return redirect('Ecom:orders')
+            ):
+                has_permission = True
+
+            if not has_permission:
+                messages.error(request, "You do not have permission to view this order.")
+                return redirect("Ecom:orders")
+
         order = offline_order
         is_offline = True
-    except (OfflineOrder.DoesNotExist, ValueError):
-        pass
-    
-    # If not offline, try online order
-    if not order:
-        try:
-            if is_admin:
-                online_order = get_object_or_404(Order, id=order_id)
-            else:
-                online_order = get_object_or_404(Order, id=order_id, user=request.user)
-            order = online_order
-            is_offline = False
-        except (Order.DoesNotExist, ValueError):
-            messages.error(request, 'Order not found.')
-            return redirect('Ecom:orders')
-    
-    # Get items and transactions based on order type
-    if is_offline:
-        items = order.items.all() if hasattr(order, 'items') else []
-        transactions = order.transactions.all() if hasattr(order, 'transactions') else []
+
+    # -------------------------
+    # Otherwise try Online Order
+    # -------------------------
     else:
-        items = order.items.all()
-        transactions = order.transactions.all()
-    
-    # Check actions availability (only for online orders)
+        if is_admin:
+            order = get_object_or_404(Order, id=order_id)
+        else:
+            order = get_object_or_404(
+                Order,
+                id=order_id,
+                user=request.user
+            )
+        is_offline = False
+
+    # -------------------------
+    # Items & Transactions
+    # -------------------------
+    items = order.items.all() if hasattr(order, "items") else []
+    transactions = order.transactions.all() if hasattr(order, "transactions") else []
+
+    # -------------------------
+    # Defaults for Offline Orders
+    # -------------------------
     can_cancel = False
     can_request_return = False
     can_request_replacement = False
+
     cancellation_requested = False
     return_requested = False
     replacement_requested = False
+
     return_window_days = 0
-    return_status_display = 'N/A'
-    replacement_status_display = 'N/A'
-    refund_status_display = 'N/A'
-    
+    return_status_display = "N/A"
+    replacement_status_display = "N/A"
+    refund_status_display = "N/A"
+
+    # -------------------------
+    # Online Order Actions
+    # -------------------------
     if not is_offline:
         can_cancel = order.can_cancel
         can_request_return = order.can_request_return
         can_request_replacement = order.can_request_replacement
+
         cancellation_requested = order.cancellation_requested
         return_requested = order.return_requested
         replacement_requested = order.replacement_requested
+
         return_window_days = order.return_window_remaining
         return_status_display = order.return_status_display
         replacement_status_display = order.replacement_status_display
         refund_status_display = order.refund_status_display
-    
-    context = {
-        'order': order,
-        'items': items,
-        'transactions': transactions,
-        'is_admin_view': is_admin,
-        'is_offline': is_offline,
-        'can_cancel': can_cancel,
-        'can_request_return': can_request_return,
-        'can_request_replacement': can_request_replacement,
-        'cancellation_requested': cancellation_requested,
-        'return_requested': return_requested,
-        'replacement_requested': replacement_requested,
-        'return_window_days': return_window_days,
-        'return_status_display': return_status_display,
-        'replacement_status_display': replacement_status_display,
-        'refund_status_display': refund_status_display,
-        'order_type_display': 'Offline Order' if is_offline else 'Online Order',
-    }
-    return render(request, 'Ecom/order_detail.html', context)
 
+    context = {
+        "order": order,
+        "items": items,
+        "transactions": transactions,
+        "is_admin_view": is_admin,
+        "is_offline": is_offline,
+
+        "can_cancel": can_cancel,
+        "can_request_return": can_request_return,
+        "can_request_replacement": can_request_replacement,
+
+        "cancellation_requested": cancellation_requested,
+        "return_requested": return_requested,
+        "replacement_requested": replacement_requested,
+
+        "return_window_days": return_window_days,
+        "return_status_display": return_status_display,
+        "replacement_status_display": replacement_status_display,
+        "refund_status_display": refund_status_display,
+
+        "order_type_display": "Offline Order" if is_offline else "Online Order",
+    }
+
+    return render(request, "Ecom/order_detail.html", context)
+
+    
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import Address
@@ -5835,3 +5867,41 @@ def admin_replacement_detail_view(request, order_id):
     }
     return render(request, 'Ecom/admin/replacement_detail.html', context)
 
+# Ecom/views.py
+
+from django.http import JsonResponse
+from .models import Cart, Wishlist
+
+def get_nav_counts_api(request):
+    """
+    API endpoint to get current cart and wishlist counts.
+    """
+    cart_count = 0
+    wishlist_count = 0
+    
+    if request.user.is_authenticated:
+        # Get cart
+        cart, created = Cart.objects.get_or_create(user=request.user)
+        cart_count = cart.total_items if cart else 0
+        
+        # Get wishlist
+        try:
+            wishlist = Wishlist.objects.get(user=request.user)
+            wishlist_count = wishlist.total_items if wishlist else 0
+        except Wishlist.DoesNotExist:
+            wishlist_count = 0
+    else:
+        # Guest user
+        session_id = request.session.session_key
+        if session_id:
+            try:
+                cart = Cart.objects.get(session_id=session_id, user=None)
+                cart_count = cart.total_items if cart else 0
+            except Cart.DoesNotExist:
+                cart_count = 0
+    
+    return JsonResponse({
+        'success': True,
+        'cart_count': cart_count,
+        'wishlist_count': wishlist_count,
+    })

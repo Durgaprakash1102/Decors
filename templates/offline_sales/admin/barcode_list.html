@@ -1,71 +1,1175 @@
-
+{% extends 'includes/sidebar.html' %}
 {% load static %}
 
 {% block title %}Barcodes{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Product Barcodes</h2>
-        <div>
-            <span class="badge bg-primary p-2">Total: {{ total_barcodes }}</span>
-            {% if pending_count > 0 %}
-                <span class="badge bg-warning text-dark p-2">Pending: {{ pending_count }}</span>
-            {% endif %}
-            <a href="{% url 'offline_sales:generate_barcode' %}" class="btn btn-success">
-                <i class="fas fa-sync"></i> Generate All
-            </a>
+
+<style>
+    /* ============================================================
+       ROOT VARIABLES
+       ============================================================ */
+    :root {
+        --bp-primary: #5c121f;
+        --bp-primary-light: #8a1a2f;
+        --bp-primary-gradient: linear-gradient(145deg, #5c121f 0%, #8a1a2f 50%, #5c121f 100%);
+        --bp-gold: #c9a84c;
+        --bp-bg: #f5f0eb;
+        --bp-white: #ffffff;
+        --bp-border: #e8e4e0;
+        --bp-text: #1a1412;
+        --bp-text-light: #5a4e48;
+        --bp-text-muted: #a09892;
+        --bp-success: #0f7b4a;
+        --bp-danger: #b91c1c;
+        --bp-warning: #b45309;
+        --bp-info: #1a56a3;
+        --bp-shadow: 0 4px 24px rgba(92,18,31,0.06);
+        --bp-shadow-lg: 0 12px 48px rgba(92,18,31,0.1);
+        --bp-radius: 16px;
+        --bp-radius-sm: 10px;
+        --bp-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        --bp-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ============================================================
+       RESET & BASE
+       ============================================================ */
+    .bp-wrap {
+        max-width: 1400px;
+        margin: 0 auto;
+        
+        min-height: 100vh;
+        width: 100%;
+        box-sizing: border-box;
+        overflow-x: hidden;
+    }
+
+    /* ============================================================
+       TOP SECTION
+       ============================================================ */
+    .bp-top {
+        background: var(--bp-white);
+        border-radius: var(--bp-radius);
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--bp-shadow);
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    .bp-top::before {
+        content: '';
+        display: block;
+        height: 4px;
+        background: var(--bp-primary-gradient);
+    }
+
+    .bp-top-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 16px 20px;
+        background: linear-gradient(135deg, rgba(92,18,31,0.02), rgba(138,26,47,0.005));
+        border-bottom: 1px solid var(--bp-border);
+    }
+
+    .bp-top-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .bp-top-icon {
+        width: 44px;
+        height: 44px;
+        background: var(--bp-primary-gradient);
+        border-radius: var(--bp-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--bp-white);
+        font-size: 18px;
+        flex-shrink: 0;
+        box-shadow: 0 4px 16px rgba(92,18,31,0.2);
+    }
+
+    .bp-top-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--bp-text);
+        font-family: var(--bp-font);
+        margin: 0;
+        letter-spacing: -0.3px;
+    }
+
+    .bp-top-title span {
+        color: var(--bp-primary);
+    }
+
+    .bp-top-sub {
+        font-size: 12px;
+        color: var(--bp-text-muted);
+        font-family: var(--bp-font);
+        margin: 2px 0 0 0;
+    }
+
+    .bp-top-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .bp-btn {
+        padding: 8px 18px;
+        border-radius: var(--bp-radius-sm);
+        font-size: 12px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: var(--bp-transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        white-space: nowrap;
+        font-family: var(--bp-font);
+    }
+
+    .bp-btn-success {
+        background: var(--bp-success);
+        color: var(--bp-white);
+        box-shadow: 0 4px 16px rgba(15,123,74,0.2);
+    }
+
+    .bp-btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 24px rgba(15,123,74,0.3);
+    }
+
+    .bp-btn-sm {
+        padding: 5px 12px;
+        font-size: 10px;
+    }
+
+    .bp-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 14px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 600;
+        font-family: var(--bp-font);
+    }
+
+    .bp-badge-primary {
+        background: var(--bp-primary);
+        color: var(--bp-white);
+    }
+
+    .bp-badge-warning {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    /* ============================================================
+       STATS CARDS - VERY LIGHT GRADIENT COLORS
+       ============================================================ */
+    .bp-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        padding: 18px 20px 20px 20px;
+    }
+
+    .bp-stat {
+        border-radius: var(--bp-radius);
+        padding: 20px 22px;
+        transition: var(--bp-transition);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--bp-shadow);
+    }
+
+    .bp-stat:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--bp-shadow-lg);
+    }
+
+    .bp-stat .number {
+        font-size: 30px;
+        font-weight: 800;
+        font-family: var(--bp-font);
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+    }
+
+    .bp-stat .label {
+        font-size: 12px;
+        font-family: var(--bp-font);
+        margin-top: 4px;
+        font-weight: 500;
+    }
+
+    .bp-stat .stat-icon {
+        font-size: 24px;
+        opacity: 0.2;
+        float: right;
+        margin-top: -5px;
+    }
+
+    /* Card 1 - Very Light Pink/Red */
+    .bp-stat.primary {
+        background: linear-gradient(145deg, #fce8ec, #f5d6dc);
+        border-color: #e8c4cc;
+    }
+    .bp-stat.primary .number { color: #7a1a2b; }
+    .bp-stat.primary .label { color: #5c121f; }
+    .bp-stat.primary .stat-icon { color: #7a1a2b; }
+
+    /* Card 2 - Very Light Green */
+    .bp-stat.success {
+        background: linear-gradient(145deg, #e8f5ed, #d4eddf);
+        border-color: #b8e0c4;
+    }
+    .bp-stat.success .number { color: #0f7b4a; }
+    .bp-stat.success .label { color: #0f7b4a; }
+    .bp-stat.success .stat-icon { color: #0f7b4a; }
+
+    /* Card 3 - Very Light Orange/Gold */
+    .bp-stat.warning {
+        background: linear-gradient(145deg, #fdf0e8, #fae6d4);
+        border-color: #f5d4b8;
+    }
+    .bp-stat.warning .number { color: #b45309; }
+    .bp-stat.warning .label { color: #b45309; }
+    .bp-stat.warning .stat-icon { color: #b45309; }
+
+    /* Card 4 - Very Light Red */
+    .bp-stat.danger {
+        background: linear-gradient(145deg, #fce8e8, #f5d6d6);
+        border-color: #e8c4c4;
+    }
+    .bp-stat.danger .number { color: #b91c1c; }
+    .bp-stat.danger .label { color: #b91c1c; }
+    .bp-stat.danger .stat-icon { color: #b91c1c; }
+
+    /* ============================================================
+       PENDING TABLE
+       ============================================================ */
+    .bp-pending {
+        background: var(--bp-white);
+        border-radius: var(--bp-radius);
+        border: 2px solid #fcd34d;
+        box-shadow: var(--bp-shadow);
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    .bp-pending-header {
+        padding: 12px 18px;
+        background: linear-gradient(135deg, #fffbeb, #fef3c7);
+        border-bottom: 1px solid #fcd34d;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .bp-pending-header h5 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #92400e;
+        font-family: var(--bp-font);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .bp-pending-header h5 i {
+        font-size: 16px;
+    }
+
+    .bp-pending-body {
+        padding: 14px 18px;
+        overflow-x: auto;
+    }
+
+    .bp-pending-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding: 0 18px 14px 18px;
+    }
+
+    /* ============================================================
+       ALL BARCODES TABLE
+       ============================================================ */
+    .bp-table-wrap {
+        background: var(--bp-white);
+        border-radius: var(--bp-radius);
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--bp-shadow);
+        overflow: hidden;
+    }
+
+    .bp-table-header {
+        padding: 12px 20px;
+        background: var(--bp-primary);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .bp-table-header .left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .bp-table-header .left h5 {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--bp-white);
+        font-family: var(--bp-font);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .bp-table-header .left h5 i {
+        color: var(--bp-gold);
+        font-size: 15px;
+    }
+
+    .bp-table-header .left .total-count {
+        font-weight: 400;
+        font-size: 12px;
+        color: rgba(255,255,255,0.6);
+        margin-left: 4px;
+    }
+
+    /* Search in Table Header - Right Side */
+    .bp-table-search {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: var(--bp-radius-sm);
+        padding: 3px 10px 3px 12px;
+        transition: var(--bp-transition);
+        min-width: 160px;
+        max-width: 280px;
+    }
+
+    .bp-table-search:focus-within {
+        background: var(--bp-white);
+        border-color: var(--bp-gold);
+        box-shadow: 0 0 0 3px rgba(201,168,76,0.2);
+    }
+
+    .bp-table-search i {
+        color: rgba(255,255,255,0.5);
+        font-size: 13px;
+    }
+
+    .bp-table-search:focus-within i {
+        color: var(--bp-text-muted);
+    }
+
+    .bp-table-search input {
+        border: none;
+        background: transparent;
+        padding: 5px 2px;
+        font-size: 12px;
+        font-family: var(--bp-font);
+        color: var(--bp-white);
+        outline: none;
+        width: 100%;
+        min-width: 50px;
+    }
+
+    .bp-table-search:focus-within input {
+        color: var(--bp-text);
+    }
+
+    .bp-table-search input::placeholder {
+        color: rgba(255,255,255,0.4);
+    }
+
+    .bp-table-search:focus-within input::placeholder {
+        color: #bbb;
+    }
+
+    .bp-table-search .search-clear {
+        color: rgba(255,255,255,0.4);
+        text-decoration: none;
+        font-size: 12px;
+        padding: 0 2px;
+        transition: var(--bp-transition);
+    }
+
+    .bp-table-search:focus-within .search-clear {
+        color: var(--bp-text-muted);
+    }
+
+    .bp-table-search .search-clear:hover {
+        opacity: 1;
+        color: var(--bp-danger);
+    }
+
+    .bp-table-search .search-btn-table {
+        padding: 3px 10px;
+        border-radius: var(--bp-radius-sm);
+        background: var(--bp-gold);
+        color: var(--bp-primary);
+        border: none;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--bp-transition);
+        font-family: var(--bp-font);
+        white-space: nowrap;
+    }
+
+    .bp-table-search .search-btn-table:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 16px rgba(201,168,76,0.3);
+    }
+
+    .bp-table-body {
+        padding: 16px 20px 20px 20px;
+        overflow-x: auto;
+    }
+
+    /* ============================================================
+       TABLE STYLES
+       ============================================================ */
+    .bp-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: var(--bp-font);
+        font-size: 13px;
+        min-width: 500px;
+    }
+
+    .bp-table thead th {
+        padding: 10px 14px;
+        text-align: left;
+        font-weight: 600;
+        color: var(--bp-text-muted);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--bp-border);
+        background: var(--bp-bg);
+        white-space: nowrap;
+    }
+
+    .bp-table tbody td {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--bp-border);
+        color: var(--bp-text);
+        font-size: 13px;
+        word-break: break-word;
+        vertical-align: middle;
+    }
+
+    .bp-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .bp-table tbody tr:hover {
+        background: rgba(92,18,31,0.02);
+    }
+
+    .bp-table .badge-sm {
+        padding: 2px 12px;
+        border-radius: 50px;
+        font-size: 9px;
+        font-weight: 600;
+        display: inline-block;
+        text-transform: capitalize;
+        white-space: nowrap;
+        font-family: var(--bp-font);
+    }
+
+    .bp-table .badge-sm.info { background: #cce5ff; color: #004085; }
+    .bp-table .badge-sm.warning { background: #fef3c7; color: #92400e; }
+
+    /* Product Thumbnail */
+    .bp-product-thumb {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--bp-radius-sm);
+        background: var(--bp-bg);
+        border: 1px solid var(--bp-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        flex-shrink: 0;
+        object-fit: cover;
+    }
+
+    .bp-product-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .bp-product-thumb i {
+        font-size: 16px;
+        color: var(--bp-text-muted);
+        opacity: 0.3;
+    }
+
+    .bp-product-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .bp-product-info .details {
+        min-width: 0;
+    }
+
+    .bp-product-info .details .name {
+        font-weight: 600;
+        font-size: 13px;
+        color: var(--bp-text);
+        word-break: break-word;
+    }
+
+    .bp-product-info .details .sku {
+        font-size: 10px;
+        color: var(--bp-text-muted);
+        display: block;
+        margin-top: 1px;
+    }
+
+    .bp-product-info .details .variant-info {
+        font-size: 10px;
+        color: var(--bp-text-muted);
+        display: block;
+        margin-top: 1px;
+    }
+
+    /* ============================================================
+       BEAUTIFUL ICON-ONLY ACTION BUTTONS
+       ============================================================ */
+    .bp-action-group {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .bp-action-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        border: none;
+        cursor: pointer;
+        transition: var(--bp-transition);
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Download Icon Button */
+    .bp-action-download {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: var(--bp-white);
+        box-shadow: 0 2px 12px rgba(37,99,235,0.25);
+    }
+
+    .bp-action-download::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+        transition: var(--bp-transition);
+    }
+
+    .bp-action-download:hover::before {
+        left: 100%;
+    }
+
+    .bp-action-download:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 6px 24px rgba(37,99,235,0.4);
+    }
+
+    .bp-action-download:active {
+        transform: scale(0.95);
+    }
+
+    /* Delete Icon Button */
+    .bp-action-delete {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        color: var(--bp-white);
+        box-shadow: 0 2px 12px rgba(220,38,38,0.25);
+    }
+
+    .bp-action-delete::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: var(--bp-transition);
+    }
+
+    .bp-action-delete:hover::before {
+        left: 100%;
+    }
+
+    .bp-action-delete:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 6px 24px rgba(220,38,38,0.4);
+    }
+
+    .bp-action-delete:active {
+        transform: scale(0.95);
+    }
+
+    /* Tooltip on hover */
+    .bp-action-icon::after {
+        content: attr(title);
+        position: absolute;
+        bottom: -30px;
+        left: 50%;
+        transform: translateX(-50%) scale(0);
+        background: var(--bp-text);
+        color: var(--bp-white);
+        padding: 2px 10px;
+        border-radius: 4px;
+        font-size: 9px;
+        font-weight: 500;
+        white-space: nowrap;
+        opacity: 0;
+        transition: var(--bp-transition);
+        font-family: var(--bp-font);
+        pointer-events: none;
+    }
+
+    .bp-action-icon:hover::after {
+        transform: translateX(-50%) scale(1);
+        opacity: 1;
+    }
+
+    /* ============================================================
+       EMPTY STATE
+       ============================================================ */
+    .bp-empty {
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .bp-empty i {
+        font-size: 48px;
+        color: var(--bp-success);
+        display: block;
+        margin-bottom: 14px;
+        opacity: 0.6;
+    }
+
+    .bp-empty h5 {
+        font-size: 18px;
+        color: var(--bp-text);
+        font-family: var(--bp-font);
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .bp-empty p {
+        font-size: 13px;
+        color: var(--bp-text-muted);
+        font-family: var(--bp-font);
+    }
+
+    /* ============================================================
+       PAGINATION
+       ============================================================ */
+    .bp-pagination {
+        display: flex;
+        justify-content: center;
+        gap: 4px;
+        padding-top: 16px;
+        border-top: 1px solid var(--bp-border);
+        margin-top: 16px;
+        flex-wrap: wrap;
+    }
+
+    .bp-pagination a,
+    .bp-pagination span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 14px;
+        border: 1.5px solid var(--bp-border);
+        border-radius: var(--bp-radius-sm);
+        font-size: 12px;
+        font-weight: 500;
+        font-family: var(--bp-font);
+        color: var(--bp-text);
+        text-decoration: none;
+        transition: var(--bp-transition);
+        min-width: 34px;
+        background: var(--bp-white);
+    }
+
+    .bp-pagination a:hover {
+        border-color: var(--bp-primary);
+        color: var(--bp-primary);
+        transform: translateY(-2px);
+        box-shadow: var(--bp-shadow);
+    }
+
+    .bp-pagination .active {
+        background: var(--bp-primary-gradient);
+        border-color: var(--bp-primary);
+        color: var(--bp-white);
+        box-shadow: 0 4px 16px rgba(92,18,31,0.2);
+    }
+
+    .bp-pagination .disabled {
+        opacity: 0.4;
+        pointer-events: none;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+
+    @media (max-width: 1024px) {
+        .bp-stats {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .bp-wrap {
+            padding: 12px 16px 24px 16px;
+        }
+        .bp-table-search {
+            min-width: 120px;
+            max-width: 200px;
+        }
+        .bp-action-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 12px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .bp-top-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+            padding: 14px 16px;
+        }
+        .bp-top-header-left {
+            flex-wrap: wrap;
+        }
+        .bp-top-actions {
+            width: 100%;
+            justify-content: stretch;
+        }
+        .bp-top-actions .bp-btn {
+            flex: 1;
+            justify-content: center;
+        }
+        .bp-top-title {
+            font-size: 18px;
+        }
+        .bp-top-icon {
+            width: 38px;
+            height: 38px;
+            font-size: 15px;
+        }
+        .bp-stats {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 14px 16px 16px 16px;
+        }
+        .bp-stat {
+            padding: 16px 18px;
+        }
+        .bp-stat .number {
+            font-size: 24px;
+        }
+        .bp-stat .label {
+            font-size: 12px;
+        }
+        .bp-stat .stat-icon {
+            font-size: 20px;
+        }
+        .bp-pending-header {
+            padding: 10px 14px;
+        }
+        .bp-pending-body {
+            padding: 10px 14px;
+        }
+        .bp-pending-actions {
+            padding: 0 14px 10px 14px;
+        }
+        .bp-table-header {
+            padding: 10px 14px;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+        }
+        .bp-table-header .left h5 {
+            font-size: 13px;
+        }
+        .bp-table-search {
+            min-width: 100px;
+            max-width: 100%;
+            width: 100%;
+        }
+        .bp-table-body {
+            padding: 12px 14px 14px 14px;
+        }
+        .bp-table {
+            font-size: 12px;
+            min-width: 400px;
+        }
+        .bp-table thead th {
+            padding: 8px 10px;
+            font-size: 9px;
+        }
+        .bp-table tbody td {
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+        .bp-btn {
+            font-size: 11px;
+            padding: 6px 14px;
+        }
+        .bp-btn-sm {
+            font-size: 9px;
+            padding: 4px 10px;
+        }
+        .bp-badge {
+            font-size: 10px;
+            padding: 3px 12px;
+        }
+        .bp-product-thumb {
+            width: 34px;
+            height: 34px;
+        }
+        .bp-product-info .details .name {
+            font-size: 12px;
+        }
+        .bp-action-icon {
+            width: 30px;
+            height: 30px;
+            font-size: 11px;
+        }
+        .bp-action-group {
+            gap: 6px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .bp-wrap {
+            padding: 8px 8px 16px 8px;
+        }
+        .bp-top-header {
+            padding: 10px 12px;
+        }
+        .bp-top-title {
+            font-size: 16px;
+        }
+        .bp-top-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 13px;
+        }
+        .bp-top-sub {
+            font-size: 11px;
+        }
+        .bp-stats {
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 12px 12px 14px 12px;
+        }
+        .bp-stat {
+            padding: 14px 16px;
+        }
+        .bp-stat .number {
+            font-size: 20px;
+        }
+        .bp-stat .label {
+            font-size: 11px;
+        }
+        .bp-stat .stat-icon {
+            font-size: 18px;
+        }
+        .bp-pending-header h5 {
+            font-size: 12px;
+        }
+        .bp-pending-header {
+            padding: 8px 12px;
+        }
+        .bp-pending-body {
+            padding: 8px 12px;
+        }
+        .bp-pending-actions {
+            padding: 0 12px 8px 12px;
+        }
+        .bp-table-header {
+            padding: 8px 10px;
+        }
+        .bp-table-header .left h5 {
+            font-size: 12px;
+        }
+        .bp-table-search {
+            padding: 2px 8px 2px 10px;
+        }
+        .bp-table-search input {
+            font-size: 11px;
+            padding: 4px 2px;
+        }
+        .bp-table-search .search-btn-table {
+            font-size: 10px;
+            padding: 2px 8px;
+        }
+        .bp-table-body {
+            padding: 8px 10px 10px 10px;
+        }
+        .bp-table {
+            font-size: 11px;
+            min-width: 320px;
+        }
+        .bp-table thead th {
+            padding: 6px 8px;
+            font-size: 8px;
+        }
+        .bp-table tbody td {
+            padding: 6px 8px;
+            font-size: 11px;
+        }
+        .bp-table .badge-sm {
+            font-size: 8px;
+            padding: 1px 8px;
+        }
+        .bp-btn {
+            font-size: 10px;
+            padding: 5px 12px;
+            gap: 4px;
+        }
+        .bp-btn-sm {
+            font-size: 8px;
+            padding: 3px 8px;
+        }
+        .bp-badge {
+            font-size: 9px;
+            padding: 2px 10px;
+        }
+        .bp-pagination a,
+        .bp-pagination span {
+            font-size: 11px;
+            padding: 4px 10px;
+            min-width: 28px;
+        }
+        .bp-empty i {
+            font-size: 36px;
+        }
+        .bp-empty h5 {
+            font-size: 16px;
+        }
+        .bp-empty p {
+            font-size: 12px;
+        }
+        .bp-product-thumb {
+            width: 30px;
+            height: 30px;
+        }
+        .bp-product-info .details .name {
+            font-size: 11px;
+        }
+        .bp-product-info .details .sku {
+            font-size: 9px;
+        }
+        .bp-action-icon {
+            width: 26px;
+            height: 26px;
+            font-size: 10px;
+        }
+        .bp-action-group {
+            gap: 4px;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .bp-stats {
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            padding: 8px 8px 10px 8px;
+        }
+        .bp-stat {
+            padding: 10px 12px;
+        }
+        .bp-stat .number {
+            font-size: 17px;
+        }
+        .bp-stat .label {
+            font-size: 10px;
+        }
+        .bp-stat .stat-icon {
+            font-size: 16px;
+        }
+        .bp-top-title {
+            font-size: 14px;
+        }
+        .bp-top-icon {
+            width: 28px;
+            height: 28px;
+            font-size: 11px;
+        }
+        .bp-btn {
+            font-size: 9px;
+            padding: 4px 10px;
+            gap: 3px;
+        }
+        .bp-table {
+            font-size: 10px;
+            min-width: 280px;
+        }
+        .bp-table thead th {
+            padding: 4px 6px;
+            font-size: 7px;
+        }
+        .bp-table tbody td {
+            padding: 4px 6px;
+            font-size: 10px;
+        }
+        .bp-pagination a,
+        .bp-pagination span {
+            font-size: 10px;
+            padding: 3px 8px;
+            min-width: 24px;
+        }
+        .bp-product-thumb {
+            width: 26px;
+            height: 26px;
+        }
+        .bp-product-info .details .name {
+            font-size: 10px;
+        }
+        .bp-table-search input {
+            font-size: 10px;
+        }
+        .bp-table-search .search-btn-table {
+            font-size: 9px;
+            padding: 2px 6px;
+        }
+        .bp-action-icon {
+            width: 22px;
+            height: 22px;
+            font-size: 9px;
+        }
+        .bp-action-group {
+            gap: 3px;
+        }
+    }
+</style>
+
+<!-- ============================================================
+   HTML STRUCTURE
+   ============================================================ -->
+<div class="bp-wrap">
+
+    <!-- ===== TOP SECTION - Title + 4 Cards ===== -->
+    <div class="bp-top">
+        <!-- Top Header -->
+        <div class="bp-top-header">
+            <div class="bp-top-header-left">
+                <div class="bp-top-icon">
+                    <i class="fas fa-barcode"></i>
+                </div>
+                <div>
+                    <h1 class="bp-top-title">Product <span>Barcodes</span></h1>
+                    <p class="bp-top-sub">Manage all product and variant barcodes</p>
+                </div>
+            </div>
+            <div class="bp-top-actions">
+                <span class="bp-badge bp-badge-primary">
+                    <i class="fas fa-hashtag"></i> Total: {{ total_barcodes }}
+                </span>
+                {% if pending_count > 0 %}
+                    <span class="bp-badge bp-badge-warning">
+                        <i class="fas fa-clock"></i> Pending: {{ pending_count }}
+                    </span>
+                {% endif %}
+                <a href="{% url 'offline_sales:generate_barcode' %}" class="bp-btn bp-btn-success">
+                    <i class="fas fa-sync"></i> Generate All
+                </a>
+            </div>
+        </div>
+
+        <!-- 4 Very Light Gradient Stats Cards -->
+        <div class="bp-stats">
+            <div class="bp-stat primary">
+                <span class="stat-icon"><i class="fas fa-barcode"></i></span>
+                <div class="number">{{ total_barcodes }}</div>
+                <div class="label">Total Barcodes</div>
+            </div>
+            <div class="bp-stat success">
+                <span class="stat-icon"><i class="fas fa-box"></i></span>
+                <div class="number">{{ product_barcodes }}</div>
+                <div class="label">Product Barcodes</div>
+            </div>
+            <div class="bp-stat warning">
+                <span class="stat-icon"><i class="fas fa-tags"></i></span>
+                <div class="number">{{ variant_barcodes }}</div>
+                <div class="label">Variant Barcodes</div>
+            </div>
+            <div class="bp-stat danger">
+                <span class="stat-icon"><i class="fas fa-exclamation-triangle"></i></span>
+                <div class="number">{{ pending_count }}</div>
+                <div class="label">Pending Generation</div>
+            </div>
         </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h5 class="card-title">{{ total_barcodes }}</h5>
-                    <p class="card-text mb-0">Total Barcodes</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h5 class="card-title">{{ product_barcodes }}</h5>
-                    <p class="card-text mb-0">Product Barcodes</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-dark">
-                <div class="card-body">
-                    <h5 class="card-title">{{ variant_barcodes }}</h5>
-                    <p class="card-text mb-0">Variant Barcodes</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-danger text-white">
-                <div class="card-body">
-                    <h5 class="card-title">{{ pending_count }}</h5>
-                    <p class="card-text mb-0">Pending Generation</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pending Products List -->
+    <!-- ===== PENDING TABLE ===== -->
     {% if pending_products %}
-    <div class="card shadow mb-4 border border-warning">
-        <div class="card-header bg-warning text-dark">
-            <h5 class="mb-0">
-                <i class="fas fa-exclamation-triangle"></i> 
+    <div class="bp-pending">
+        <div class="bp-pending-header">
+            <h5>
+                <i class="fas fa-exclamation-triangle"></i>
                 Products & Variants Without Barcodes ({{ pending_count }})
             </h5>
         </div>
-        <div class="card-body">
+        <div class="bp-pending-body">
             <div class="table-responsive">
-                <table class="table table-sm">
+                <table class="bp-table">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -77,20 +1181,20 @@
                     <tbody>
                         {% for item in pending_products %}
                         <tr>
-                            <td>{{ item.name }}</td>
-                            <td>{{ item.sku }}</td>
+                            <td><strong>{{ item.name }}</strong></td>
+                            <td><code>{{ item.sku }}</code></td>
                             <td>
-                                <span class="badge bg-{% if item.type == 'product' %}info{% else %}warning{% endif %}">
+                                <span class="badge-sm {% if item.type == 'product' %}info{% else %}warning{% endif %}">
                                     {{ item.type|title }}
                                 </span>
                             </td>
                             <td>
                                 {% if item.type == 'product' %}
-                                    <a href="{% url 'offline_sales:generate_product_barcode' item.id %}" class="btn btn-sm btn-primary">
+                                    <a href="{% url 'offline_sales:generate_product_barcode' item.id %}" class="bp-btn bp-btn-primary bp-btn-sm">
                                         <i class="fas fa-sync"></i> Generate
                                     </a>
                                 {% else %}
-                                    <a href="{% url 'offline_sales:generate_variant_barcode' item.id %}" class="btn btn-sm btn-primary">
+                                    <a href="{% url 'offline_sales:generate_variant_barcode' item.id %}" class="bp-btn bp-btn-primary bp-btn-sm">
                                         <i class="fas fa-sync"></i> Generate
                                     </a>
                                 {% endif %}
@@ -100,86 +1204,128 @@
                     </tbody>
                 </table>
             </div>
-            <div class="mt-2">
-                <a href="{% url 'offline_sales:generate_barcode' %}" class="btn btn-success">
-                    <i class="fas fa-sync"></i> Generate All Pending
-                </a>
-            </div>
+        </div>
+        <div class="bp-pending-actions">
+            <a href="{% url 'offline_sales:generate_barcode' %}" class="bp-btn bp-btn-success bp-btn-sm">
+                <i class="fas fa-sync"></i> Generate All Pending
+            </a>
         </div>
     </div>
     {% endif %}
 
-    <!-- All Barcodes List -->
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">All Barcodes</h5>
+    <!-- ===== ALL BARCODES TABLE ===== -->
+    <div class="bp-table-wrap">
+        <div class="bp-table-header">
+            <div class="left">
+                <h5>
+                    <i class="fas fa-list"></i> All Barcodes
+                    <span class="total-count">({{ total_barcodes }})</span>
+                </h5>
+            </div>
+
+            <!-- Search in Table Header - Right Side (No Backend) -->
+            <div class="bp-table-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="barcodeSearch" placeholder="Search by name, SKU or barcode..." onkeyup="searchBarcodes()">
+                <button class="search-clear" onclick="clearSearch()" style="display:none;" id="clearSearchBtn">
+                    <i class="fas fa-times-circle"></i>
+                </button>
+            </div>
         </div>
-        <div class="card-body">
+        <div class="bp-table-body">
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="bp-table" id="barcodeTable">
                     <thead>
                         <tr>
-                            <th>Barcode Image</th>
-                            <th>Barcode Text</th>
+                            <th style="min-width:80px;">Barcode</th>
+                            <th style="min-width:100px;">Barcode Text</th>
                             <th>Product / Variant</th>
                             <th>Type</th>
-                            <th>Created</th>
-                            <th>Actions</th>
+                            <th style="min-width:80px;">Created</th>
+                            <th style="min-width:100px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for barcode in barcodes %}
-                        <tr>
+                        <tr class="barcode-row">
                             <td>
                                 {% if barcode.barcode_image %}
                                     <img src="{{ barcode.barcode_image.url }}" height="40" alt="Barcode">
                                 {% else %}
-                                    <span class="text-muted">No Image</span>
+                                    <span style="font-size:11px;color:var(--bp-text-muted);">No Image</span>
                                 {% endif %}
                             </td>
-                            <td><code>{{ barcode.barcode_text }}</code></td>
+                            <td><code style="font-size:11px;background:var(--bp-bg);padding:2px 8px;border-radius:4px;border:1px solid var(--bp-border);">{{ barcode.barcode_text }}</code></td>
                             <td>
-                                {% if barcode.product %}
-                                    <strong>{{ barcode.product.name }}</strong>
-                                    <br><small class="text-muted">SKU: {{ barcode.product.sku }}</small>
-                                {% elif barcode.variant %}
-                                    <strong>{{ barcode.variant.product.name }}</strong>
-                                    <br><small class="text-muted">Variant: {{ barcode.variant.sku }}</small>
-                                    {% if barcode.variant.color %}
-                                        <br><small class="text-muted">Color: {{ barcode.variant.color }}</small>
-                                    {% endif %}
-                                    {% if barcode.variant.size %}
-                                        <br><small class="text-muted">Size: {{ barcode.variant.size }}</small>
-                                    {% endif %}
-                                {% else %}
-                                    <span class="text-muted">N/A</span>
-                                {% endif %}
+                                <div class="bp-product-info">
+                                    <div class="bp-product-thumb">
+                                        {% if barcode.product and barcode.product.images.all %}
+                                            {% with img=barcode.product.images.all|first %}
+                                                {% if img.image %}
+                                                    <img src="{{ img.image.url }}" alt="{{ barcode.product.name }}">
+                                                {% else %}
+                                                    <i class="fas fa-box"></i>
+                                                {% endif %}
+                                            {% endwith %}
+                                        {% elif barcode.variant and barcode.variant.product.images.all %}
+                                            {% with img=barcode.variant.product.images.all|first %}
+                                                {% if img.image %}
+                                                    <img src="{{ img.image.url }}" alt="{{ barcode.variant.product.name }}">
+                                                {% else %}
+                                                    <i class="fas fa-box"></i>
+                                                {% endif %}
+                                            {% endwith %}
+                                        {% else %}
+                                            <i class="fas fa-box"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="details">
+                                        {% if barcode.product %}
+                                            <span class="name">{{ barcode.product.name }}</span>
+                                            <span class="sku">SKU: {{ barcode.product.sku }}</span>
+                                        {% elif barcode.variant %}
+                                            <span class="name">{{ barcode.variant.product.name }}</span>
+                                            <span class="sku">Variant: {{ barcode.variant.sku }}</span>
+                                            {% if barcode.variant.color or barcode.variant.size %}
+                                                <span class="variant-info">
+                                                    {% if barcode.variant.color %}Color: {{ barcode.variant.color }}{% endif %}
+                                                    {% if barcode.variant.color and barcode.variant.size %} | {% endif %}
+                                                    {% if barcode.variant.size %}Size: {{ barcode.variant.size }}{% endif %}
+                                                </span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span style="color:var(--bp-text-muted);font-size:12px;">N/A</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </td>
                             <td>
-                                <span class="badge bg-{% if barcode.barcode_type == 'product' %}info{% else %}warning{% endif %}">
+                                <span class="badge-sm {% if barcode.barcode_type == 'product' %}info{% else %}warning{% endif %}">
                                     {{ barcode.get_barcode_type_display }}
                                 </span>
                             </td>
-                            <td>{{ barcode.created_at|date:"M d, Y H:i" }}</td>
+                            <td style="font-size:11px;color:var(--bp-text-muted);">{{ barcode.created_at|date:"M d, Y H:i" }}</td>
                             <td>
-                                <div class="btn-group" role="group">
+                                <div class="bp-action-group">
                                     {% if barcode.barcode_image %}
-                                        <a href="{% url 'offline_sales:download_barcode' barcode.id %}" class="btn btn-sm btn-primary" title="Download">
-                                            <i class="fas fa-download"></i> Download
+                                        <a href="{% url 'offline_sales:download_barcode' barcode.id %}" class="bp-action-icon bp-action-download" title="Download">
+                                            <i class="fas fa-download"></i>
                                         </a>
                                     {% endif %}
-                                    <a href="{% url 'offline_sales:delete_barcode' barcode.id %}" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this barcode?')">
-                                        <i class="fas fa-trash"></i> Delete
+                                    <a href="{% url 'offline_sales:delete_barcode' barcode.id %}" class="bp-action-icon bp-action-delete" title="Delete" onclick="return confirm('Are you sure you want to delete this barcode?')">
+                                        <i class="fas fa-trash"></i>
                                     </a>
                                 </div>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="text-center py-4">
-                                <i class="fas fa-check-circle fa-3x text-success mb-3 d-block"></i>
-                                <h5>All barcodes generated!</h5>
-                                <p class="text-muted">All products and variants have barcodes.</p>
+                            <td colspan="6">
+                                <div class="bp-empty">
+                                    <i class="fas fa-check-circle"></i>
+                                    <h5>All barcodes generated!</h5>
+                                    <p>All products and variants have barcodes.</p>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -189,31 +1335,109 @@
 
             <!-- Pagination -->
             {% if barcodes.has_other_pages %}
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    {% if barcodes.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ barcodes.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
-                        </li>
+            <div class="bp-pagination">
+                {% if barcodes.has_previous %}
+                    <a href="?page={{ barcodes.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                {% else %}
+                    <span class="disabled"><i class="fas fa-chevron-left"></i></span>
+                {% endif %}
+
+                {% for num in barcodes.paginator.page_range %}
+                    {% if barcodes.number == num %}
+                        <span class="active">{{ num }}</span>
+                    {% elif num > barcodes.number|add:'-3' and num < barcodes.number|add:'3' %}
+                        <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
                     {% endif %}
-                    {% for num in barcodes.paginator.page_range %}
-                        {% if barcodes.number == num %}
-                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                        {% elif num > barcodes.number|add:'-3' and num < barcodes.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                    {% if barcodes.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ barcodes.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
+                {% endfor %}
+
+                {% if barcodes.has_next %}
+                    <a href="?page={{ barcodes.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                {% else %}
+                    <span class="disabled"><i class="fas fa-chevron-right"></i></span>
+                {% endif %}
+            </div>
             {% endif %}
         </div>
     </div>
 </div>
+
+<!-- ============================================================
+   JAVASCRIPT - SEARCH FUNCTIONALITY (NO BACKEND)
+   ============================================================ -->
+<script>
+    function searchBarcodes() {
+        const input = document.getElementById('barcodeSearch');
+        const filter = input.value.toLowerCase().trim();
+        const rows = document.querySelectorAll('.barcode-row');
+        const clearBtn = document.getElementById('clearSearchBtn');
+        let hasVisible = false;
+
+        // Show/Hide clear button
+        if (filter.length > 0) {
+            clearBtn.style.display = 'inline-flex';
+        } else {
+            clearBtn.style.display = 'none';
+        }
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (filter === '' || text.includes(filter)) {
+                row.style.display = '';
+                hasVisible = true;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Show empty message if no results
+        const table = document.getElementById('barcodeTable');
+        let emptyMsg = table.querySelector('.no-results-row');
+        
+        if (!hasVisible && filter !== '') {
+            if (!emptyMsg) {
+                emptyMsg = document.createElement('tr');
+                emptyMsg.className = 'no-results-row';
+                emptyMsg.innerHTML = `
+                    <td colspan="6">
+                        <div class="bp-empty" style="padding:30px 20px;">
+                            <i class="fas fa-search" style="font-size:36px;color:var(--bp-text-muted);opacity:0.4;display:block;margin-bottom:10px;"></i>
+                            <h5 style="font-size:16px;color:var(--bp-text);">No results found</h5>
+                            <p style="font-size:13px;color:var(--bp-text-muted);">Try adjusting your search terms</p>
+                        </div>
+                    </td>
+                `;
+                table.querySelector('tbody').appendChild(emptyMsg);
+            }
+        } else {
+            if (emptyMsg) {
+                emptyMsg.remove();
+            }
+        }
+    }
+
+    function clearSearch() {
+        const input = document.getElementById('barcodeSearch');
+        input.value = '';
+        searchBarcodes();
+        input.focus();
+    }
+
+    // Allow Enter key to trigger search
+    document.addEventListener('DOMContentLoaded', function() {
+        const input = document.getElementById('barcodeSearch');
+        if (input) {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchBarcodes();
+                }
+            });
+        }
+    });
+</script>
+
 {% endblock %}

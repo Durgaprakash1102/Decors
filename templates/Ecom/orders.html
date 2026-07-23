@@ -1,117 +1,693 @@
-
+{% extends base_template %}
 {% load static %}
 
 {% block title %}My Orders - MyStore{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-box text-primary"></i> My Orders</h2>
-        <div>
-            <span class="badge bg-primary p-2">Total: {{ total_orders }}</span>
-            <span class="badge bg-info p-2">Online: {{ online_count }}</span>
-            <span class="badge bg-warning text-dark p-2">Offline: {{ offline_count }}</span>
+<style>
+:root {
+    --primary: #5c121f;
+    --primary-light: #7a1a2b;
+    --primary-dark: #3d0c14;
+    --secondary: #F4B400;
+    --secondary-light: #f7c948;
+    --bg: #FEF7ED;
+    --white: #ffffff;
+    --border: #ebe7e3;
+    --text: #1d1d1d;
+    --text-light: #6d6d6d;
+    --text-muted: #888888;
+    --success: #2e9d57;
+    --danger: #d64045;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --shadow: 0 10px 28px rgba(0,0,0,0.06);
+    --shadow-hover: 0 18px 40px rgba(92,18,31,0.12);
+    --transition: 0.35s ease;
+    --radius: 14px;
+    --radius-sm: 10px;
+    --radius-xs: 8px;
+}
+
+/* ============================================================
+   MAIN CONTAINER - FIXED WIDTH 1400px MAX
+   ============================================================ */
+.main-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    width: 100%;
+}
+
+/* ============================================================
+   PAGE WRAPPER
+   ============================================================ */
+.page-wrapper {
+    padding: 20px 0 24px 0;
+    min-height: 100%;
+    width: 100%;
+}
+
+/* ============================================================
+   PROFESSIONAL HERO SECTION - CLEAN & PREMIUM
+   ============================================================ */
+.hero-section {
+    background: var(--primary);
+    padding: 20px 28px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: relative;
+    width: 100%;
+    border-left: 6px solid var(--secondary);
+    border-right: 6px solid var(--secondary);
+    box-shadow: 0 8px 32px rgba(92,18,31,0.15);
+}
+
+.hero-section::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    right: 10%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--secondary), transparent);
+    opacity: 0.3;
+}
+
+.hero-section .left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-section .left .icon-wrap {
+    width: 50px;
+    height: 50px;
+    background: rgba(244,180,0,0.10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary);
+    font-size: 22px;
+    border: 1px solid rgba(244,180,0,0.10);
+    transition: var(--transition);
+}
+
+.hero-section .left .icon-wrap:hover {
+    background: rgba(244,180,0,0.18);
+    transform: scale(1.05);
+}
+
+.hero-section .left .text .title {
+    color: var(--white);
+    font-size: 22px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.3px;
+}
+
+.hero-section .left .text .title .gold {
+    color: var(--secondary);
+}
+
+.hero-section .left .text .sub {
+    color: rgba(255,255,255,0.5);
+    font-size: 13px;
+    letter-spacing: 0.2px;
+}
+
+.hero-section .right {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-section .right .stat {
+    padding: 6px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.04);
+    color: var(--white);
+    border: 1px solid rgba(255,255,255,0.04);
+    transition: var(--transition);
+    letter-spacing: 0.3px;
+}
+
+.hero-section .right .stat:hover {
+    background: rgba(255,255,255,0.08);
+    transform: translateY(-2px);
+}
+
+.hero-section .right .stat i {
+    margin-right: 6px;
+}
+
+.hero-section .right .stat .num {
+    font-weight: 700;
+}
+
+/* ============================================================
+   ORDERS GRID - 3 CARDS
+   ============================================================ */
+.orders-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    width: 100%;
+}
+
+/* ============================================================
+   ORDER CARD - PROFESSIONAL DESIGN
+   ============================================================ */
+.order-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.order-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.order-card:hover::before {
+    opacity: 1;
+}
+
+.order-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-5px);
+}
+
+/* ===== CARD HEADER ===== */
+.order-card .card-header {
+    padding: 12px 16px;
+    background: #faf8f6;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.order-card .card-header .left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.order-card .card-header .left .type {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--bg);
+}
+
+.order-card .card-header .left .type .online { color: var(--info); }
+.order-card .card-header .left .type .offline { color: var(--warning); }
+
+.order-card .card-header .left .order-num {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 13px;
+}
+
+.order-card .card-header .left .date {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.order-card .card-header .right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 30px;
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.badge-status .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.badge-status.success { background: #d1fae5; color: #065f46; }
+.badge-status.success .dot { background: var(--success); }
+
+.badge-status.warning { background: #fef3c7; color: #92400e; }
+.badge-status.warning .dot { background: var(--warning); animation: blink 1.5s ease-in-out infinite; }
+
+.badge-status.danger { background: #fee2e2; color: #991b1b; }
+.badge-status.danger .dot { background: var(--danger); }
+
+.badge-status.info { background: #dbeafe; color: #1e40af; }
+.badge-status.info .dot { background: var(--info); }
+
+.badge-status.secondary { background: #f3f4f6; color: #374151; }
+.badge-status.secondary .dot { background: #6b7280; }
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* ============================================================
+   CARD BODY
+   ============================================================ */
+.order-card .card-body {
+    padding: 12px 16px;
+    flex: 1;
+}
+
+.order-card .card-body .items {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.order-card .card-body .items .item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 8px;
+    border-radius: var(--radius-xs);
+    background: var(--bg);
+    transition: var(--transition);
+}
+
+.order-card .card-body .items .item:hover {
+    background: #f0ece8;
+}
+
+.order-card .card-body .items .item .thumb {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    background: var(--white);
+    flex-shrink: 0;
+}
+
+.order-card .card-body .items .item .thumb-placeholder {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.order-card .card-body .items .item .info .name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.order-card .card-body .items .item .info .qty {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+.order-card .card-body .items .more {
+    padding: 4px 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* ============================================================
+   CARD FOOTER
+   ============================================================ */
+.order-card .card-footer {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: #faf8f6;
+}
+
+.order-card .card-footer .total {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.order-card .card-footer .type-badge {
+    font-size: 10px;
+    color: var(--text-muted);
+    background: var(--bg);
+    padding: 2px 10px;
+    border-radius: 30px;
+}
+
+.order-card .card-footer .btn-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 14px;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-xs);
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.order-card .card-footer .btn-view:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(92,18,31,0.2);
+    color: var(--white);
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    grid-column: 1 / -1;
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.empty-state .icon {
+    font-size: 60px;
+    color: var(--text-muted);
+    opacity: 0.2;
+    display: block;
+    margin-bottom: 16px;
+}
+
+.empty-state h4 {
+    font-size: 20px;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+
+.empty-state p {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.empty-state .btn-shop {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 28px;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    margin-top: 12px;
+}
+
+.empty-state .btn-shop:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(92,18,31,0.2);
+    color: var(--white);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1200px) {
+    .main-container { padding: 0 20px; }
+    .orders-grid { gap: 16px; }
+}
+
+@media (max-width: 992px) {
+    .main-container { padding: 0 16px; }
+    .hero-section { padding: 16px 20px; }
+    .hero-section .left .text .title { font-size: 18px; }
+    .hero-section .left .icon-wrap { width: 42px; height: 42px; font-size: 18px; }
+    .hero-section .right .stat { font-size: 11px; padding: 4px 14px; }
+    .orders-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .page-wrapper { padding: 14px 0 18px 0; }
+}
+
+@media (max-width: 768px) {
+    .main-container { padding: 0 12px; }
+    .hero-section {
+        padding: 12px 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        border-left: 4px solid var(--secondary);
+        border-right: 4px solid var(--secondary);
+    }
+    .hero-section .left .icon-wrap { width: 36px; height: 36px; font-size: 16px; }
+    .hero-section .left .text .title { font-size: 17px; }
+    .hero-section .left .text .sub { font-size: 12px; }
+    .hero-section .right { width: 100%; }
+    .hero-section .right .stat { font-size: 10px; padding: 4px 12px; }
+    .orders-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .page-wrapper { padding: 10px 0 14px 0; }
+    .order-card .card-header { padding: 8px 12px; }
+    .order-card .card-header .left .order-num { font-size: 12px; }
+    .order-card .card-body { padding: 10px 12px; }
+    .order-card .card-body .items .item .thumb { width: 30px; height: 30px; }
+    .order-card .card-body .items .item .thumb-placeholder { width: 30px; height: 30px; font-size: 12px; }
+    .order-card .card-body .items .item .info .name { font-size: 11px; }
+    .order-card .card-footer { padding: 8px 12px; }
+    .order-card .card-footer .total { font-size: 14px; }
+    .order-card .card-footer .btn-view { font-size: 10px; padding: 3px 12px; }
+    .badge-status { font-size: 8px; padding: 2px 8px; }
+}
+
+@media (max-width: 576px) {
+    .main-container { padding: 0 8px; }
+    .hero-section { padding: 10px 12px; border-left: 3px solid var(--secondary); border-right: 3px solid var(--secondary); }
+    .hero-section .left .icon-wrap { width: 30px; height: 30px; font-size: 14px; }
+    .hero-section .left .text .title { font-size: 14px; }
+    .hero-section .left .text .sub { font-size: 11px; }
+    .hero-section .right .stat { font-size: 9px; padding: 3px 10px; }
+    .orders-grid { grid-template-columns: 1fr; gap: 8px; }
+    .page-wrapper { padding: 6px 0 10px 0; }
+    .order-card { border-radius: var(--radius-xs); }
+    .order-card .card-header .left .type { font-size: 10px; }
+    .order-card .card-header .left .order-num { font-size: 11px; }
+    .order-card .card-header .left .date { font-size: 10px; }
+    .order-card .card-body { padding: 8px 10px; }
+    .order-card .card-body .items .item { padding: 3px 6px; gap: 8px; }
+    .order-card .card-body .items .item .thumb { width: 26px; height: 26px; }
+    .order-card .card-body .items .item .thumb-placeholder { width: 26px; height: 26px; font-size: 10px; }
+    .order-card .card-body .items .item .info .name { font-size: 10px; }
+    .order-card .card-body .items .item .info .qty { font-size: 9px; }
+    .order-card .card-footer { padding: 6px 10px; }
+    .order-card .card-footer .total { font-size: 13px; }
+    .order-card .card-footer .type-badge { font-size: 9px; padding: 1px 8px; }
+    .order-card .card-footer .btn-view { font-size: 10px; padding: 2px 10px; }
+    .badge-status { font-size: 7px; padding: 1px 6px; }
+    .badge-status .dot { width: 4px; height: 4px; }
+    .empty-state .icon { font-size: 40px; }
+    .empty-state h4 { font-size: 17px; }
+    .empty-state .btn-shop { font-size: 12px; padding: 8px 20px; }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-section { animation: fadeUp 0.5s ease both; }
+.order-card { animation: fadeUp 0.35s ease both; }
+.order-card:nth-child(1) { animation-delay: 0.04s; }
+.order-card:nth-child(2) { animation-delay: 0.08s; }
+.order-card:nth-child(3) { animation-delay: 0.12s; }
+.order-card:nth-child(4) { animation-delay: 0.16s; }
+.order-card:nth-child(5) { animation-delay: 0.20s; }
+.order-card:nth-child(6) { animation-delay: 0.24s; }
+</style>
+
+<!-- ============================================================
+   MAIN CONTAINER - FIXED 1400px MAX
+   ============================================================ -->
+<div class="main-container">
+
+    <!-- ============================================================
+       PAGE WRAPPER
+       ============================================================ -->
+    <div class="page-wrapper">
+
+        <!-- ===== HERO SECTION ===== -->
+        <div class="hero-section">
+            <div class="left">
+                <div class="icon-wrap">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div class="text">
+                    <div class="title">My <span class="gold">Orders</span></div>
+                    <div class="sub">View all your orders and track their status</div>
+                </div>
+            </div>
+            <div class="right">
+                <span class="stat">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="num">{{ total_orders }}</span> Total
+                </span>
+                <span class="stat" style="background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.08);">
+                    <i class="fas fa-shopping-cart" style="color:#3b82f6;"></i>
+                    <span class="num">{{ online_count }}</span> Online
+                </span>
+                <span class="stat" style="background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.08);">
+                    <i class="fas fa-store" style="color:#f59e0b;"></i>
+                    <span class="num">{{ offline_count }}</span> Offline
+                </span>
+            </div>
         </div>
-    </div>
-    
-    {% if orders %}
-        <div class="row">
-            {% for order_data in orders %}
-                <div class="col-12 mb-3">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap">
-                            <div>
-                                <strong>
+
+        <!-- ============================================================
+           ORDERS GRID - 3 CARDS PER ROW
+           ============================================================ -->
+        {% if orders %}
+            <div class="orders-grid">
+                {% for order_data in orders %}
+                    <div class="order-card">
+                        <!-- Card Header -->
+                        <div class="card-header">
+                            <div class="left">
+                                <span class="type">
                                     {% if order_data.type == 'online' %}
-                                        <i class="fas fa-shopping-cart text-primary"></i>
+                                        <i class="fas fa-shopping-cart online"></i> Online
                                     {% else %}
-                                        <i class="fas fa-store text-warning"></i>
+                                        <i class="fas fa-store offline"></i> Offline
                                     {% endif %}
-                                    Order #{{ order_data.order_number }}
-                                </strong>
-                                {% if order_data.type == 'offline' and order_data.invoice_number %}
-                                    <span class="ms-2 text-muted small">Invoice: {{ order_data.invoice_number }}</span>
-                                {% endif %}
-                                <span class="ms-3 text-muted">{{ order_data.created_at|date:"M d, Y H:i" }}</span>
+                                </span>
+                                <span class="order-num">#{{ order_data.order_number }}</span>
+                                <span class="date">{{ order_data.created_at|date:"M d, Y" }}</span>
                             </div>
-                            <div>
-                                {% if order_data.type == 'offline' %}
-                                    <span class="badge bg-warning text-dark me-1">Offline</span>
-                                {% endif %}
-                                <span class="badge bg-{% if order_data.status == 'delivered' or order_data.status == 'completed' %}success{% elif order_data.status == 'processing' %}warning{% elif order_data.status == 'cancelled' or order_data.status == 'failed' %}danger{% else %}secondary{% endif %}">
+                            <div class="right">
+                                <span class="badge-status {% if order_data.status == 'delivered' or order_data.status == 'completed' %}success{% elif order_data.status == 'processing' %}warning{% elif order_data.status == 'cancelled' or order_data.status == 'failed' %}danger{% else %}secondary{% endif %}">
+                                    <span class="dot"></span>
                                     {% if order_data.type == 'offline' %}
                                         {{ order_data.status|title }}
                                     {% else %}
                                         {{ order_data.order.get_status_display }}
                                     {% endif %}
                                 </span>
-                                <span class="badge bg-{% if order_data.payment_status == 'paid' %}success{% elif order_data.payment_status == 'pending' %}warning{% elif order_data.payment_status == 'refunded' %}info{% else %}danger{% endif %} ms-1">
+                                <span class="badge-status {% if order_data.payment_status == 'paid' %}success{% elif order_data.payment_status == 'pending' %}warning{% elif order_data.payment_status == 'refunded' %}info{% else %}danger{% endif %}">
+                                    <span class="dot"></span>
                                     {{ order_data.payment_status|title }}
                                 </span>
                             </div>
                         </div>
+
+                        <!-- Card Body -->
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <div class="row">
-                                        {% for item in order_data.items|slice:":3" %}
-                                            <div class="col-md-4 col-6 mb-2">
-                                                <div class="d-flex align-items-center">
-                                                    {% if item.product and item.product.main_image %}
-                                                        <img src="{{ item.product.main_image }}" width="40" height="40" style="object-fit:cover;border-radius:4px;" class="me-2">
-                                                    {% else %}
-                                                        <div class="bg-light me-2 d-flex align-items-center justify-content-center" style="width:40px;height:40px;border-radius:4px;">
-                                                            <i class="fas fa-box text-muted"></i>
-                                                        </div>
-                                                    {% endif %}
-                                                    <div>
-                                                        <div class="small">
-                                                            {% if order_data.type == 'offline' %}
-                                                                {{ item.product_name|truncatechars:15 }}
-                                                            {% else %}
-                                                                {{ item.product_name|truncatechars:15 }}
-                                                            {% endif %}
-                                                        </div>
-                                                        <div class="small text-muted">×{{ item.quantity }}</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        {% endfor %}
-                                        {% if order_data.items|length > 3 %}
-                                            <div class="col-md-4 col-6 mb-2">
-                                                <div class="d-flex align-items-center h-100">
-                                                    <span class="text-muted small">+{{ order_data.items|length|add:"-3" }} more items</span>
-                                                </div>
+                            <div class="items">
+                                {% for item in order_data.items|slice:":3" %}
+                                    <div class="item">
+                                        {% if item.product and item.product.main_image %}
+                                            <img src="{{ item.product.main_image }}" alt="Product" class="thumb">
+                                        {% else %}
+                                            <div class="thumb-placeholder">
+                                                <i class="fas fa-box"></i>
                                             </div>
                                         {% endif %}
+                                        <div class="info">
+                                            <div class="name">{{ item.product_name }}</div>
+                                            <div class="qty">×{{ item.quantity }}</div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-4 text-md-end">
-                                    <div><strong>Total: ₹{{ order_data.total_amount|floatformat:2 }}</strong></div>
-                                    <div class="mt-1">
-                                        {% if order_data.type == 'offline' %}
-                                            <span class="badge bg-secondary">Offline Purchase</span>
-                                        {% endif %}
-                                    </div>
-                                    <a href="{% url 'Ecom:order_detail' order_data.order.id %}" class="btn btn-outline-primary btn-sm mt-2">
-                                        <i class="fas fa-eye"></i> View Details
-                                    </a>
-                                </div>
+                                {% endfor %}
+                                {% if order_data.items|length > 3 %}
+                                    <div class="more">+{{ order_data.items|length|add:"-3" }} more items</div>
+                                {% endif %}
                             </div>
                         </div>
+
+                        <!-- Card Footer -->
+                        <div class="card-footer">
+                            <div>
+                                <div class="total">₹{{ order_data.total_amount|floatformat:2 }}</div>
+                                <span class="type-badge">
+                                    {% if order_data.type == 'offline' %}
+                                        <i class="fas fa-store"></i> Offline
+                                    {% else %}
+                                        <i class="fas fa-shopping-cart"></i> Online
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <a href="{% url 'Ecom:order_detail' order_data.order.id %}" class="btn-view">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </div>
                     </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="text-center py-5">
-            <i class="fas fa-box fa-4x text-muted"></i>
-            <h4 class="mt-3">No orders yet</h4>
-            <p class="text-muted">Start shopping and place your first order</p>
-            <a href="{% url 'Ecom:shop' %}" class="btn btn-primary">
-                <i class="fas fa-store"></i> Start Shopping
-            </a>
-        </div>
-    {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-state">
+                <span class="icon"><i class="fas fa-box"></i></span>
+                <h4>No orders yet</h4>
+                <p>Start shopping and place your first order</p>
+                <a href="{% url 'Ecom:shop' %}" class="btn-shop">
+                    <i class="fas fa-store"></i> Start Shopping
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
 </div>
 {% endblock %}
