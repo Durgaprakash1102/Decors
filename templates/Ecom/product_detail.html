@@ -3226,50 +3226,109 @@
     // ============================================
     // TOGGLE WISHLIST
     // ============================================
-    function toggleWishlist() {
-        const productId = {{ product.id }};
-        let variantId = selectedVariantId;
+   function toggleWishlist() {
 
-        const button = document.getElementById('wishlistBtn');
-        const originalHtml = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        button.disabled = true;
+    const productId = {{ product.id }};
+    const variantId = selectedVariantId || null;
 
-        fetch('{% url "Ecom:add_to_wishlist" %}', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                product_id: productId,
-                variant_id: variantId
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showToast(data.message, 'success');
-                if (data.in_wishlist) {
-                    button.innerHTML = '<i class="fas fa-heart"></i> <span class="wishlist-text">Remove</span>';
-                    button.classList.add('in-wishlist');
-                } else {
-                    button.innerHTML = '<i class="fas fa-heart"></i> <span class="wishlist-text">Wishlist</span>';
-                    button.classList.remove('in-wishlist');
-                }
-            } else {
-                showToast(data.error || 'Failed', 'error');
-                button.innerHTML = originalHtml;
-            }
-        })
-        .catch(error => {
-            showToast('Network error', 'error');
-            button.innerHTML = originalHtml;
-        })
-        .finally(() => {
-            button.disabled = false;
-        });
+    const button = document.getElementById('wishlistBtn');
+
+    // Prevent double click
+    if (button.disabled) {
+        return;
     }
+
+    const originalHtml = button.innerHTML;
+
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    fetch("{% url 'Ecom:add_to_wishlist' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: JSON.stringify({
+            product_id: productId,
+            variant_id: variantId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        // Login required
+        if (data.requires_login) {
+
+            // Restore button BEFORE redirect
+            button.innerHTML = originalHtml;
+            button.disabled = false;
+
+            showToast(data.message, "warning");
+
+            setTimeout(function () {
+                window.location.href = "{% url 'Ecom:login' %}?next={{ request.path }}";
+            }, 1500);
+
+            return;
+        }
+
+        if (data.success) {
+
+            showToast(data.message, "success");
+
+            if (data.in_wishlist) {
+                button.innerHTML =
+                    '<i class="fas fa-heart"></i> <span class="wishlist-text">Remove</span>';
+                button.classList.add("in-wishlist");
+            } else {
+                button.innerHTML =
+                    '<i class="fas fa-heart"></i> <span class="wishlist-text">Wishlist</span>';
+                button.classList.remove("in-wishlist");
+            }
+
+            if (data.count !== undefined) {
+                const badge = document.querySelector(".wishlist-count");
+                if (badge) {
+                    badge.textContent = data.count;
+                }
+            }
+
+        } else {
+
+            showToast(data.message || data.error || "Something went wrong.", "error");
+
+            button.innerHTML = originalHtml;
+            button.disabled = false;
+        }
+
+    })
+    .catch(function (error) {
+
+        console.error(error);
+
+        showToast("Network error", "error");
+
+        button.innerHTML = originalHtml;
+        button.disabled = false;
+
+    });
+}
+window.addEventListener("pageshow", function (event) {
+
+    const button = document.getElementById("wishlistBtn");
+
+    if (button) {
+
+        button.disabled = false;
+
+        if (button.innerHTML.indexOf("fa-spinner") !== -1) {
+            button.innerHTML =
+                '<i class="fas fa-heart"></i> <span class="wishlist-text">Wishlist</span>';
+        }
+    }
+
+});
 
     // ============================================
     // DOM READY

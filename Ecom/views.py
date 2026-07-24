@@ -3528,43 +3528,71 @@ def wishlist_view(request):
     return render(request, 'Ecom/wishlist.html', context)
 
 
-@login_required
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+import json
+
 def add_to_wishlist(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            product_id = data.get('product_id')
-            variant_id = data.get('variant_id')
-            
-            product = get_object_or_404(Product, id=product_id, is_active=True)
-            variant = None
-            if variant_id:
-                variant = get_object_or_404(ProductVariant, id=variant_id, is_active=True)
-            
-            wishlist, _ = Wishlist.objects.get_or_create(user=request.user)
-            wishlist_item, created = WishlistItem.objects.get_or_create(
-                wishlist=wishlist,
-                product=product,
-                variant=variant
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid request.'
+        })
+
+    # Check login manually
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'requires_login': True,
+            'message': 'Please login to use wishlist.'
+        })
+
+    try:
+        data = json.loads(request.body)
+
+        product_id = data.get('product_id')
+        variant_id = data.get('variant_id')
+
+        product = get_object_or_404(
+            Product,
+            id=product_id,
+            is_active=True
+        )
+
+        variant = None
+        if variant_id:
+            variant = get_object_or_404(
+                ProductVariant,
+                id=variant_id,
+                is_active=True
             )
-            
-            if created:
-                message = 'Added to wishlist!'
-            else:
-                wishlist_item.delete()
-                message = 'Removed from wishlist!'
-            
-            return JsonResponse({
-                'success': True,
-                'message': message,
-                'in_wishlist': created,
-                'count': wishlist.total_items
-            })
-            
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
-    
-    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+        wishlist, _ = Wishlist.objects.get_or_create(user=request.user)
+
+        wishlist_item, created = WishlistItem.objects.get_or_create(
+            wishlist=wishlist,
+            product=product,
+            variant=variant
+        )
+
+        if created:
+            message = "Added to wishlist!"
+        else:
+            wishlist_item.delete()
+            message = "Removed from wishlist!"
+
+        return JsonResponse({
+            'success': True,
+            'message': message,
+            'in_wishlist': created,
+            'count': wishlist.total_items
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        })
 
 
 @login_required
