@@ -257,7 +257,7 @@ class Product(models.Model):
     
     # Category Relations
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
-    subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, related_name='products', null=True, blank=True)
+    subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, related_name='products')
     
     # Descriptions (HTML supported)
     short_description = models.TextField(max_length=500, help_text="Brief description shown in listings")
