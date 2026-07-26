@@ -55,11 +55,11 @@ def send_otp_email(user_or_email, otp_code, otp_type, full_name='User'):
         <style>
             body {{ font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }}
             .container {{ max-width: 600px; margin: 30px auto; background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }}
-            .header {{ text-align: center; padding-bottom: 20px; border-bottom: 2px solid #4CAF50; }}
-            .header h1 {{ color: #4CAF50; margin: 0; }}
+            .header {{ text-align: center; padding-bottom: 20px; border-bottom: 2px solid #5c121f; }}
+            .header h1 {{ color: #5c121f; margin: 0; }}
             .content {{ padding: 20px 0; }}
             .otp-box {{ background-color: #f8f9fa; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0; }}
-            .otp-code {{ font-size: 32px; font-weight: bold; color: #4CAF50; letter-spacing: 5px; }}
+            .otp-code {{ font-size: 32px; font-weight: bold; color: #5c121f; letter-spacing: 5px; }}
             .expiry {{ color: #dc3545; font-size: 14px; text-align: center; margin-top: 10px; }}
             .footer {{ text-align: center; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px; }}
         </style>
@@ -67,7 +67,7 @@ def send_otp_email(user_or_email, otp_code, otp_type, full_name='User'):
     <body>
         <div class="container">
             <div class="header">
-                <h1>🛍️ MyStore</h1>
+                <h1>Hyzora</h1>
             </div>
             <div class="content">
                 <h2>{data['heading']}</h2>
@@ -81,7 +81,7 @@ def send_otp_email(user_or_email, otp_code, otp_type, full_name='User'):
                 </p>
             </div>
             <div class="footer">
-                <p>&copy; 2024 MyStore. All rights reserved.</p>
+                <p>&copy; 2026 Hyzora. All rights reserved.</p>
                 <p>This is an automated email, please do not reply.</p>
             </div>
         </div>

@@ -1,82 +1,661 @@
-<!-- templates/offline_sales/email/invoice_email.html -->
-
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice #{{ order.invoice_number }}</title>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: #007bff; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
-        .content { padding: 20px; background: #f8f9fa; }
-        .footer { text-align: center; padding: 20px; color: #6c757d; font-size: 14px; }
-        .btn { display: inline-block; padding: 10px 25px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-        table th { background: #007bff; color: white; padding: 10px; text-align: left; }
-        table td { padding: 8px 10px; border-bottom: 1px solid #ddd; }
+        /* ===== ROOT THEME ===== */
+        :root {
+            --primary: #5c121f;
+            --secondary: #F4B400;
+            --accent: #D97706;
+            --text-dark: #1a1a1a;
+            --text-light: #6b6b6b;
+            --text-muted: #999999;
+            --bg-white: #ffffff;
+            --bg-light: #f7f5f2;
+            --bg-card: #faf8f6;
+            --border: #e5e0db;
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+            --radius-sm: 6px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: #e8e4df;
+            padding: 24px 12px;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 580px;
+            width: 100%;
+            margin: 0 auto;
+            background: var(--bg-white);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .top-bar {
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            flex-shrink: 0;
+        }
+
+        .content {
+            padding: 0 28px 24px 28px;
+            overflow: hidden;
+            width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 30px 28px 24px 28px;
+            text-align: center;
+            margin: 0 -28px 20px -28px;
+            position: relative;
+        }
+
+        .header .store-name {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            word-break: break-word;
+            margin: 0;
+            color: white;
+        }
+
+        .header .invoice-num {
+            font-size: 15px;
+            font-weight: 400;
+            word-break: break-word;
+            display: block;
+            margin-top: 4px;
+            opacity: 0.9;
+            color: white;
+        }
+
+        .header .invoice-date {
+            font-size: 13px;
+            font-weight: 400;
+            word-break: break-word;
+            display: block;
+            margin-top: 2px;
+            opacity: 0.8;
+            color: white;
+        }
+
+        /* ===== GREETING ===== */
+        .greeting {
+            font-size: 15px;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+
+        .greeting strong {
+            color: var(--primary);
+        }
+
+        .thank-text {
+            font-size: 14px;
+            color: var(--text-dark);
+            margin-bottom: 18px;
+            word-break: break-word;
+        }
+
+        /* ===== INVOICE INFO ===== */
+        .invoice-info {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            margin-bottom: 14px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            width: 100%;
+            word-wrap: break-word;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px 16px;
+            width: 100%;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(229, 224, 219, 0.2);
+            gap: 0px;
+            width: 100%;
+        }
+
+        .info-item .label {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            word-break: break-word;
+        }
+
+        .info-item .value {
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        .info-item.full {
+            grid-column: 1 / -1;
+        }
+
+        /* ===== ITEMS TABLE ===== */
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 4px 0;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 280px;
+        }
+
+        .items-table thead th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        .items-table thead th:last-child,
+        .items-table thead th:nth-child(3) {
+            text-align: right;
+        }
+
+        .items-table tbody td {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+            word-break: break-word;
+        }
+
+        .items-table tbody td:nth-child(2) {
+            text-align: center;
+        }
+
+        .items-table tbody td:nth-child(3),
+        .items-table tbody td:last-child {
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .items-table tbody td:last-child {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .items-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ===== TOTALS ===== */
+        .totals-section {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 2px solid var(--border);
+            width: 100%;
+        }
+
+        .totals-section .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 0;
+            font-size: 13px;
+            color: var(--text-dark);
+            gap: 12px;
+            word-break: break-word;
+        }
+
+        .totals-section .row.total {
+            font-weight: 700;
+            font-size: 17px;
+            border-top: 2px solid var(--primary);
+            padding-top: 10px;
+            margin-top: 4px;
+            color: var(--primary);
+        }
+
+        .totals-section .row.discount {
+            color: var(--accent);
+        }
+
+        /* ===== VISIT MESSAGE ===== */
+        .visit-message {
+            background: var(--bg-light);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin: 18px 0 4px;
+            border: 2px solid var(--border);
+            text-align: left;
+            font-size: 14px;
+            color: var(--text-dark);
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            transition: 0.3s ease;
+            width: 100%;
+            word-break: break-word;
+            overflow: hidden;
+        }
+
+        .visit-message:hover {
+            border-color: var(--secondary);
+            background: #fef9ef;
+        }
+
+        .visit-message svg {
+            width: 22px;
+            height: 22px;
+            fill: var(--text-muted);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .visit-message strong {
+            color: var(--primary);
+            display: block;
+            margin-bottom: 1px;
+            word-break: break-word;
+        }
+
+        .visit-message .message-text {
+            font-size: 14px;
+            color: var(--text-dark);
+            line-height: 1.7;
+            word-break: break-word;
+        }
+
+        /* ===== CLOSING ===== */
+        .closing-text {
+            font-size: 14px;
+            color: var(--text-dark);
+            margin-top: 14px;
+            word-break: break-word;
+        }
+
+        .closing-text strong {
+            color: var(--primary);
+        }
+
+        .closing-text a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .closing-text a:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            padding: 20px 0 0;
+            border-top: 2px solid var(--border);
+            margin-top: 16px;
+            width: 100%;
+            word-wrap: break-word;
+        }
+
+        .footer .brand {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 2px 16px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+
+        .footer p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin: 2px 0;
+            word-break: break-word;
+        }
+
+        .footer strong {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        .footer a:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        .footer .store-address {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            word-break: break-word;
+            margin: 4px 0;
+        }
+
+        .footer .store-contact {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin: 2px 0;
+            word-break: break-word;
+        }
+
+        .footer .gst {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            word-break: break-word;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            body {
+                padding: 12px 6px;
+            }
+
+            .content {
+                padding: 0 14px 16px 14px;
+            }
+
+            .header {
+                padding: 24px 14px 20px 14px;
+                margin: 0 -14px 20px -14px;
+            }
+
+            .header .store-name {
+                font-size: 22px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .info-item.full {
+                grid-column: 1;
+            }
+
+            .info-item {
+                padding: 5px 0;
+            }
+
+            .visit-message {
+                font-size: 13px;
+                padding: 14px 16px;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .visit-message svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            .visit-message .message-text {
+                font-size: 13px;
+            }
+
+            .closing-text {
+                font-size: 13px;
+            }
+
+            .items-table {
+                font-size: 12px;
+                min-width: 200px;
+            }
+
+            .items-table thead th,
+            .items-table tbody td {
+                padding: 6px 8px;
+            }
+
+            .totals-section .row {
+                font-size: 12px;
+            }
+
+            .totals-section .row.total {
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .content {
+                padding: 0 10px 14px 10px;
+            }
+
+            .header {
+                padding: 20px 10px 16px 10px;
+                margin: 0 -10px 18px -10px;
+            }
+
+            .header .store-name {
+                font-size: 19px;
+            }
+
+            .info-item .value {
+                font-size: 13px;
+            }
+
+            .visit-message {
+                font-size: 12px;
+                padding: 12px 12px;
+            }
+
+            .greeting {
+                font-size: 14px;
+            }
+
+            .thank-text {
+                font-size: 13px;
+            }
+
+            .visit-message .message-text {
+                font-size: 12px;
+            }
+
+            .closing-text {
+                font-size: 12px;
+            }
+
+            .items-table {
+                font-size: 11px;
+            }
+
+            .items-table thead th,
+            .items-table tbody td {
+                padding: 4px 6px;
+            }
+
+            .footer p {
+                font-size: 11px;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                display: block;
+            }
+            .container {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                border-radius: 0;
+            }
+            .top-bar {
+                display: none;
+            }
+            .visit-message:hover {
+                background: var(--bg-light);
+                border-color: var(--border);
+            }
+        }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <div class="header">
-            <h2>{{ store.store_name }}</h2>
-            <p>Invoice #{{ order.invoice_number }}</p>
-        </div>
-        
+
+        <!-- TOP BAR -->
+        <div class="top-bar"></div>
+
+        <!-- CONTENT -->
         <div class="content">
-            <p>Dear <strong>{{ order.customer_name }}</strong>,</p>
-            
-            <p>Thank you for your purchase! Please find your invoice details below.</p>
-            
-            <p><strong>Order #:</strong> {{ order.order_number }}</p>
-            <p><strong>Date:</strong> {{ order.created_at|date:"d M, Y H:i" }}</p>
-            <p><strong>Payment Method:</strong> {{ order.get_payment_method_display }}</p>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Qty</th>
-                        <th>Price</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in items %}
-                    <tr>
-                        <td>{{ item.product_name }}</td>
-                        <td>{{ item.quantity }}</td>
-                        <td>₹{{ item.final_price|floatformat:2 }}</td>
-                        <td>₹{{ item.total|floatformat:2 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            
-            <p><strong>Subtotal:</strong> ₹{{ subtotal|floatformat:2 }}</p>
-            <p><strong>Discount:</strong> -₹{{ discount|floatformat:2 }}</p>
-            <p><strong>Grand Total:</strong> ₹{{ total|floatformat:2 }}</p>
-            
-            <p style="text-align: center; margin: 30px 0;">
-                <a href="{{ site_url }}{% url 'offline_sales:download_invoice' order.id %}" class="btn">
-                    <i class="fas fa-download"></i> Download Invoice PDF
-                </a>
+
+            <!-- HEADER -->
+            <div class="header">
+                <div class="store-name">{{ store.store_name }}</div>
+                <span class="invoice-num">Invoice #{{ order.invoice_number }}</span>
+                <span class="invoice-date">{{ order.created_at|date:"d M, Y H:i" }}</span>
+            </div>
+
+            <!-- GREETING -->
+            <p class="greeting">Dear <strong>{{ order.customer_name }}</strong>,</p>
+
+            <p class="thank-text">Thank you for your purchase! Please find your invoice details below.</p>
+
+            <!-- INVOICE INFO -->
+            <div class="invoice-info">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">Order #</span>
+                        <span class="value">{{ order.order_number }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Payment Method</span>
+                        <span class="value">{{ order.get_payment_method_display }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ITEMS TABLE -->
+            <div class="invoice-info" style="padding: 0; overflow: hidden;">
+                <div class="table-wrap">
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th style="text-align:center;">Qty</th>
+                                <th style="text-align:right;">Price</th>
+                                <th style="text-align:right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>{{ item.product_name }}</td>
+                                <td style="text-align:center;">{{ item.quantity }}</td>
+                                <td style="text-align:right;">₹{{ item.final_price|floatformat:2 }}</td>
+                                <td style="text-align:right;">₹{{ item.total|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- TOTALS -->
+                <div style="padding: 0 18px 16px 18px;">
+                    <div class="totals-section">
+                        <div class="row">
+                            <span>Subtotal</span>
+                            <span>₹{{ subtotal|floatformat:2 }}</span>
+                        </div>
+                        <div class="row discount">
+                            <span>Discount</span>
+                            <span>−₹{{ discount|floatformat:2 }}</span>
+                        </div>
+                        <div class="row total">
+                            <span>Grand Total</span>
+                            <span>₹{{ total|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VISIT MESSAGE -->
+            <div class="visit-message">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                <div>
+                    <strong>For more information about your invoice,</strong>
+                    <span class="message-text">please check our website to view your complete invoice details.</span>
+                </div>
+            </div>
+
+            <!-- CLOSING -->
+            <p class="closing-text">
+                If you have any questions, please contact us at <a href="mailto:{{ store.store_email }}">{{ store.store_email }}</a><br>
+                <strong>Team {{ store.store_name }}</strong>
             </p>
-            
-            <p>If you have any questions, please contact us at {{ store.store_email }}</p>
-            
-            <p>Thank you for shopping with us!</p>
-            <p><strong>Team {{ store.store_name }}</strong></p>
+
+            <!-- FOOTER -->
+            <div class="footer">
+                <span class="brand">{{ store.store_name }}</span>
+                <p class="store-address">{{ store.store_address|linebreaksbr }}</p>
+                <p class="store-contact">Phone: {{ store.store_phone }} | Email: {{ store.store_email }}</p>
+                {% if store.gst_number %}
+                    <p class="gst">GST: {{ store.gst_number }}</p>
+                {% endif %}
+                <p style="margin-top:8px;">&copy; {{ store.store_name }}. All rights reserved.</p>
+            </div>
+
         </div>
-        
-        <div class="footer">
-            <p>{{ store.store_address|linebreaksbr }}</p>
-            <p>Phone: {{ store.store_phone }} | Email: {{ store.store_email }}</p>
-            {% if store.gst_number %}
-                <p>GST: {{ store.gst_number }}</p>
-            {% endif %}
-        </div>
+        <!-- /content -->
+
     </div>
+    <!-- /container -->
+
 </body>
 </html>

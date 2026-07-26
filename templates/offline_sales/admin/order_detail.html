@@ -1048,7 +1048,7 @@
                 <div class="card-body">
                     <div style="display:flex;flex-direction:column;gap:8px;">
                         <a href="{% url 'offline_sales:download_invoice' order.id %}" class="btn-action btn-action-success" target="_blank">
-                            <i class="fas fa-download"></i> Download Invoice PDF
+                            <i class="fas fa-download"></i> View Invoice PDF
                         </a>
                         {% if order.offline_customer %}
                             <a href="{% url 'offline_sales:customer_edit' order.offline_customer.id %}" class="btn-action btn-action-primary">

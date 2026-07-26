@@ -971,6 +971,7 @@ def order_detail_view(request, order_id):
         'store_settings': store_settings,
         'has_offline_customer': has_offline_customer,
         'has_online_customer': has_online_customer,
+        
     }
     return render(request, 'offline_sales/admin/order_detail.html', context)
 
@@ -1182,155 +1183,30 @@ def offline_sale_complete(request):
 # INVOICE VIEWS
 # ============================================
 
+# offline_sales/views.py
+
 @staff_member_required
 def download_invoice_view(request, order_id):
-    """Download invoice as PDF"""
+    """Download invoice as HTML (using the existing invoice.html template)"""
     order = get_object_or_404(OfflineOrder, id=order_id)
+    items = order.items.all()
     store_settings = StoreSettings.objects.first()
     
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="invoice_{order.invoice_number or order.order_number}.pdf"'
+    # Calculate totals
+    subtotal = order.subtotal
+    total = order.total_amount
     
-    pdf = canvas.Canvas(response, pagesize=A4)
-    width, height = A4
+    # Prepare context for the invoice template
+    context = {
+        'order': order,
+        'items': items,
+        'store': store_settings,
+        'subtotal': subtotal,
+        'total': total,
+    }
     
-    # Store Logo
-    if store_settings and store_settings.store_logo:
-        try:
-            logo_path = store_settings.store_logo.path
-            pdf.drawImage(logo_path, 50, height - 100, width=100, height=50)
-        except:
-            pass
+    # Render the invoice HTML using your existing template
+    html_content = render_to_string('offline_sales/invoice.html', context)
     
-    # Store Name
-    pdf.setFont("Helvetica-Bold", 20)
-    pdf.drawString(50, height - 80, store_settings.store_name if store_settings else "My Store")
-    
-    # Store Address
-    pdf.setFont("Helvetica", 10)
-    y = height - 100
-    if store_settings:
-        lines = store_settings.store_address.split('\n')
-        for line in lines:
-            y -= 15
-            pdf.drawString(50, y, line)
-        pdf.drawString(50, y - 15, f"Phone: {store_settings.store_phone}")
-        pdf.drawString(50, y - 30, f"Email: {store_settings.store_email}")
-        if store_settings.gst_number:
-            pdf.drawString(50, y - 45, f"GST: {store_settings.gst_number}")
-    
-    # Invoice Title
-    pdf.setFont("Helvetica-Bold", 14)
-    pdf.drawString(400, height - 80, "INVOICE")
-    
-    # Invoice Details
-    pdf.setFont("Helvetica", 10)
-    pdf.drawString(400, height - 100, f"Invoice #: {order.invoice_number or order.order_number}")
-    pdf.drawString(400, height - 115, f"Date: {order.created_at.strftime('%d %B, %Y')}")
-    pdf.drawString(400, height - 130, f"Order #: {order.order_number}")
-    
-    # Customer Details
-    y = height - 180
-    pdf.setFont("Helvetica-Bold", 12)
-    pdf.drawString(50, y, "Bill To:")
-    pdf.setFont("Helvetica", 10)
-    y -= 20
-    pdf.drawString(50, y, order.customer_name)
-    y -= 15
-    if order.customer_phone:
-        pdf.drawString(50, y, f"Phone: {order.customer_phone}")
-        y -= 15
-    if order.customer_email:
-        pdf.drawString(50, y, f"Email: {order.customer_email}")
-        y -= 15
-    if order.customer_address:
-        lines = order.customer_address.split('\n')
-        for line in lines:
-            pdf.drawString(50, y, line)
-            y -= 15
-    
-    # Items Table
-    y = height - 350
-    pdf.setFont("Helvetica-Bold", 10)
-    pdf.drawString(50, y, "Item")
-    pdf.drawString(250, y, "Quantity")
-    pdf.drawString(320, y, "Price")
-    pdf.drawString(400, y, "Discount")
-    pdf.drawString(480, y, "Total")
-    
-    pdf.line(50, y - 5, 530, y - 5)
-    y -= 20
-    
-    pdf.setFont("Helvetica", 9)
-    total = 0
-    for item in order.items.all():
-        pdf.drawString(50, y, item.product_name[:30])
-        pdf.drawString(250, y, str(item.quantity))
-        pdf.drawString(320, y, f"₹{item.original_price:.2f}")
-        pdf.drawString(400, y, f"₹{item.discount:.2f}")
-        pdf.drawString(480, y, f"₹{item.total:.2f}")
-        total += item.total
-        y -= 20
-        
-        if y < 100:
-            pdf.showPage()
-            y = height - 50
-    
-    # Totals
-    y -= 20
-    pdf.line(50, y + 10, 530, y + 10)
-    
-    pdf.setFont("Helvetica-Bold", 10)
-    pdf.drawString(350, y, "Subtotal:")
-    pdf.drawString(480, y, f"₹{order.subtotal:.2f}")
-    y -= 20
-    
-    if order.product_discount_total > 0:
-        pdf.drawString(350, y, "Product Discount:")
-        pdf.drawString(480, y, f"-₹{order.product_discount_total:.2f}")
-        y -= 20
-    
-    if order.offer_discount > 0:
-        pdf.drawString(350, y, "Offer Discount:")
-        pdf.drawString(480, y, f"-₹{order.offer_discount:.2f}")
-        y -= 20
-    
-    y -= 10
-    pdf.setFont("Helvetica-Bold", 14)
-    pdf.drawString(350, y, "Total:")
-    pdf.drawString(480, y, f"₹{order.total_amount:.2f}")
-    
-    # Payment Details
-    y -= 40
-    pdf.setFont("Helvetica", 9)
-    pdf.drawString(50, y, f"Payment Method: {order.get_payment_method_display()}")
-    y -= 15
-    pdf.drawString(50, y, f"Payment Status: {order.get_payment_status_display()}")
-    y -= 15
-    if order.payment_reference:
-        pdf.drawString(50, y, f"Payment Reference: {order.payment_reference}")
-    
-    # Terms & Conditions
-    if store_settings and store_settings.terms_conditions:
-        y -= 40
-        pdf.setFont("Helvetica-Bold", 10)
-        pdf.drawString(50, y, "Terms & Conditions:")
-        y -= 15
-        pdf.setFont("Helvetica", 8)
-        lines = store_settings.terms_conditions.split('\n')
-        for line in lines:
-            pdf.drawString(50, y, line)
-            y -= 12
-    
-    # Footer
-    if store_settings and store_settings.footer_text:
-        pdf.setFont("Helvetica", 8)
-        pdf.drawString(50, 30, store_settings.footer_text)
-    
-    pdf.setFont("Helvetica-Bold", 12)
-    pdf.drawString(50, 50, "Thank you for your purchase!")
-    
-    pdf.save()
-    return response
-
-
+    # Return as HTML response
+    return HttpResponse(html_content)

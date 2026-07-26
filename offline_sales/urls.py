@@ -42,7 +42,6 @@ urlpatterns = [
     path('orders/', views.orders_list_view, name='orders_list'),
     path('orders/<int:order_id>/', views.order_detail_view, name='order_detail'),
     
-    # Invoice
-    path('invoice/download/<int:order_id>/', views.download_invoice_view, name='download_invoice'),
-    path('sale/search/', views.product_search_view, name='product_search'),
+    
+    path('download-invoice/<int:order_id>/', views.download_invoice_view, name='download_invoice'), 
 ]
