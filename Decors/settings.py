@@ -4,6 +4,15 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -28,6 +37,7 @@ INSTALLED_APPS = [
     "Ecom",
     "offline_sales",
      'sslserver',
+     "licensing",
 ]
 
 MIDDLEWARE = [
@@ -35,6 +45,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
+    "licensing.middleware.LicenseMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -145,3 +156,24 @@ if DEBUG:
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "handlers": {
+        "license_file": {
+            "class": "logging.FileHandler",
+            "filename": LOG_DIR / "license.log",
+            "level": "INFO",
+        },
+    },
+
+    "loggers": {
+        "licensing": {
+            "handlers": ["license_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

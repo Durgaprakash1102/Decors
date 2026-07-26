@@ -10,6 +10,10 @@ urlpatterns = [
     path("about/", views.about, name="about"),
     path("", include("Ecom.urls")),
     path('offline/', include('offline_sales.urls')),
+    path(
+        "license/",
+        include("licensing.urls")
+    ),
     path("admin/", admin.site.urls),
 ]
 if settings.DEBUG:
