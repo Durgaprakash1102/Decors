@@ -1,0 +1,9 @@
+{
+    "payload": {
+        "company_name": "localhost",
+        "domain": "localhost",
+        "issued_on": "2026-07-26",
+        "expires_on": "2026-07-25"
+    },
+    "signature": "dOXqohXtjL0MULBI5mAZbIkhf8VP6qfi9i2gNIKFG+hmiXmm3HUWJuPzi5Jawfk2lQyXjxTyqZpFTp5mYQY2X88V74L3ZK6c8jWxpROKeWHEVHvU+Lfj0XVmaD57HM+LIEqVetXOmakRqy2Td/np1/GsvsuaK0DTCcicQlQS0/DA9a0X5klOBR/F5jqzn7nKo5oa5GbHRk7OaRKD0r1iGf6tEFPcc7hLqDsrjSol1mH3wm40O+M5wF79G2EGSEx+C0mAlCs07tnjHM7DhaJ+lELzTTuPJi6MPTlPkpko9TX7GtXWplAe4hAolUaRYOYtHWMIZ/I9iY9CPgDG06nfkg=="
+}
