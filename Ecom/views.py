@@ -10,7 +10,7 @@ from .forms import *
 from .utils import create_and_send_otp, verify_otp, delete_file_if_exists, get_user_by_identifier
 from decimal import Decimal
 
-
+from .recommendation_utils import get_user_recommendations, get_hybrid_recommendations
 from django.db.models import Q, Count, Avg, F, DecimalField
 from django.db.models.functions import Coalesce
 
@@ -191,7 +191,39 @@ def home(request):
             user=request.user
         ).select_related('product').order_by('-viewed_at')[:5]
         recently_viewed = [item.product for item in recently_viewed_items]
-    
+
+    recommended_for_you = []
+    if request.user.is_authenticated:
+        # Get personalized recommendations
+        # Get user's interacted product IDs to exclude
+        from .models import RecentlyViewed, CartItem, WishlistItem, OrderItem
+        
+        # Get IDs of products user has already interacted with
+        viewed_ids = set(RecentlyViewed.objects.filter(
+            user=request.user
+        ).values_list('product_id', flat=True))
+        
+        cart_ids = set(CartItem.objects.filter(
+            cart__user=request.user
+        ).values_list('product_id', flat=True))
+        
+        wishlist_ids = set(WishlistItem.objects.filter(
+            wishlist__user=request.user
+        ).values_list('product_id', flat=True))
+        
+        order_ids = set(OrderItem.objects.filter(
+            order__user=request.user
+        ).values_list('product_id', flat=True))
+        
+        exclude_ids = viewed_ids | cart_ids | wishlist_ids | order_ids
+        
+        # Get recommendations using the hybrid method
+        recommended_for_you = get_hybrid_recommendations(
+            request.user, 
+            limit=12, 
+            exclude_product_ids=list(exclude_ids)
+        )
+
     context = {
         'best_sellers': best_sellers,
         'featured_products': featured_products,
@@ -206,9 +238,73 @@ def home(request):
         'coupons': coupons,
         'offers': offers,
         'featured_offers': featured_offers,
+        'recommended_for_you': recommended_for_you,
     }
     return render(request, 'home.html', context)
 
+# In views.py
+
+from django.http import JsonResponse
+from .recommendation_utils import get_hybrid_recommendations
+from .models import RecentlyViewed, CartItem, WishlistItem, OrderItem
+
+@login_required
+def get_recommendations_api(request):
+    """
+    API endpoint to get personalized recommendations for AJAX loading.
+    """
+    try:
+        # Get user's interacted product IDs to exclude
+        viewed_ids = set(RecentlyViewed.objects.filter(
+            user=request.user
+        ).values_list('product_id', flat=True))
+        
+        cart_ids = set(CartItem.objects.filter(
+            cart__user=request.user
+        ).values_list('product_id', flat=True))
+        
+        wishlist_ids = set(WishlistItem.objects.filter(
+            wishlist__user=request.user
+        ).values_list('product_id', flat=True))
+        
+        order_ids = set(OrderItem.objects.filter(
+            order__user=request.user
+        ).values_list('product_id', flat=True))
+        
+        exclude_ids = viewed_ids | cart_ids | wishlist_ids | order_ids
+        
+        # Get recommendations
+        recommendations = get_hybrid_recommendations(
+            request.user,
+            limit=12,
+            exclude_product_ids=list(exclude_ids)
+        )
+        
+        # Serialize products
+        data = []
+        for product in recommendations:
+            data.append({
+                'id': product.id,
+                'name': product.name,
+                'price': str(product.price),
+                'final_price': str(product.offer_price if hasattr(product, 'offer_price') else product.final_price),
+                'discount_percentage': float(product.discount_percentage),
+                'main_image': product.main_image,
+                'average_rating': float(product.average_rating) if product.average_rating else 0,
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'recommendations': data,
+            'count': len(data)
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+    
 def about(request):
     return render(request, "about.html")
 
