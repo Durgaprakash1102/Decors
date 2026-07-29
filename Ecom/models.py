@@ -29,6 +29,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     ROLE_CHOICES = [
         ('admin', 'Admin'),
+        ('employee', 'Employee'),
         ('customer', 'Customer'),
     ]
     
@@ -64,6 +65,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def is_customer(self):
         return self.role == 'customer'
+
+    @property
+    def is_employee(self):
+        return self.role == 'employee'
 
 # ========== PROFILE MODEL ==========
 class Profile(models.Model):

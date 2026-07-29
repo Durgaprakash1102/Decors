@@ -19,7 +19,7 @@ from django.db.models import Q, Sum
 from django.core.paginator import Paginator
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
-
+from offline_sales.decorators import staff_or_employee_required, admin_required, employee_required
 from Ecom.models import Product, ProductVariant, User, Offer, InventoryLog
 
 from .models import (
@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 # STORE SETTINGS
 # ============================================
 
-@staff_member_required
+@staff_or_employee_required
 def store_settings_list(request):
     """List store settings"""
     store_settings = StoreSettings.objects.first()
@@ -50,7 +50,7 @@ def store_settings_list(request):
     })
 
 
-@staff_member_required
+@staff_or_employee_required
 def store_settings_edit(request):
     """Edit store settings"""
     store_settings = StoreSettings.objects.first()
@@ -75,7 +75,7 @@ def store_settings_edit(request):
 # BARCODE VIEWS
 # ============================================
 
-@staff_member_required
+@staff_or_employee_required
 def barcode_list_view(request):
     """List all barcodes with pending count"""
     from Ecom.models import Product, ProductVariant
@@ -136,7 +136,7 @@ def barcode_list_view(request):
     return render(request, 'offline_sales/admin/barcode_list.html', context)
 
 
-@staff_member_required
+@staff_or_employee_required
 def generate_barcode_view(request, product_id=None, variant_id=None):
     """Generate barcode for a product or variant"""
     try:
@@ -169,7 +169,7 @@ def generate_barcode_view(request, product_id=None, variant_id=None):
     return redirect('offline_sales:barcode_list')
 
 
-@staff_member_required
+@staff_or_employee_required
 def download_barcode_view(request, barcode_id):
     """Download barcode image"""
     barcode = get_object_or_404(ProductBarcode, id=barcode_id)
@@ -183,7 +183,7 @@ def download_barcode_view(request, barcode_id):
     return redirect('offline_sales:barcode_list')
 
 
-@staff_member_required
+@staff_or_employee_required
 def delete_barcode_view(request, barcode_id):
     """Delete a barcode"""
     barcode = get_object_or_404(ProductBarcode, id=barcode_id)
@@ -197,7 +197,7 @@ def delete_barcode_view(request, barcode_id):
 # ============================================
 
 @csrf_exempt
-@staff_member_required
+@staff_or_employee_required
 def scan_barcode_view(request):
     """AJAX view to scan barcode and return product details"""
     if request.method == 'POST':
@@ -264,7 +264,7 @@ def scan_barcode_view(request):
 # PRODUCT SEARCH
 # ============================================
 
-@staff_member_required
+@staff_or_employee_required
 def product_search_view(request):
     """
     Search for products for offline sale (AJAX)
@@ -389,7 +389,7 @@ def product_search_view(request):
 
 # offline_sales/views.py - Update cart calculation
 
-@staff_member_required
+@staff_or_employee_required
 def offline_sale_view(request):
     """Main offline sale page"""
 
@@ -468,7 +468,7 @@ def offline_sale_view(request):
         context
     )
 @csrf_exempt
-@staff_member_required
+@staff_or_employee_required
 def offline_sale_add_product(request):
     """Add product to offline sale cart (AJAX)"""
     if request.method == 'POST':
@@ -573,7 +573,7 @@ def offline_sale_add_product(request):
 
 
 @csrf_exempt
-@staff_member_required
+@staff_or_employee_required
 def offline_sale_remove_product(request):
     """Remove product from offline sale cart (AJAX)"""
     if request.method == 'POST':
@@ -601,7 +601,7 @@ def offline_sale_remove_product(request):
 
 
 @csrf_exempt
-@staff_member_required
+@staff_or_employee_required
 def offline_sale_update_quantity(request):
     """Update product quantity in offline sale cart (AJAX)"""
     if request.method == 'POST':
@@ -648,7 +648,7 @@ def offline_sale_update_quantity(request):
 
 
 @csrf_exempt
-@staff_member_required
+@staff_or_employee_required
 def offline_sale_clear_cart(request):
     """Clear offline sale cart (AJAX)"""
     if request.method == 'POST':
@@ -663,7 +663,7 @@ def offline_sale_clear_cart(request):
 # CUSTOMER MANAGEMENT
 # ============================================
 
-@staff_member_required
+@staff_or_employee_required
 def customer_list_view(request):
     """List all offline customers"""
     customers = OfflineCustomer.objects.filter(is_active=True)
@@ -689,7 +689,7 @@ def customer_list_view(request):
     return render(request, 'offline_sales/admin/customer_list.html', context)
 
 
-@staff_member_required
+@staff_or_employee_required
 def customer_create_view(request):
     """Create a new customer"""
     if request.method == 'POST':
@@ -708,7 +708,7 @@ def customer_create_view(request):
     })
 
 
-@staff_member_required
+@staff_or_employee_required
 def customer_edit_view(request, customer_id):
     """Edit an existing customer"""
     customer = get_object_or_404(OfflineCustomer, id=customer_id)
@@ -729,7 +729,7 @@ def customer_edit_view(request, customer_id):
     })
 
 
-@staff_member_required
+@staff_or_employee_required
 def customer_delete_view(request, customer_id):
     """Delete a customer"""
     customer = get_object_or_404(OfflineCustomer, id=customer_id)
@@ -746,7 +746,7 @@ def customer_delete_view(request, customer_id):
 
 
 @csrf_exempt
-@staff_member_required
+@staff_or_employee_required
 def offline_customer_search(request):
     """Search for offline customer (AJAX)"""
     if request.method == 'GET':
@@ -804,7 +804,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 @csrf_exempt
-@staff_member_required
+@staff_or_employee_required
 def offline_customer_create(request):
     """Create new offline customer (AJAX)"""
     if request.method == 'POST':
@@ -907,11 +907,21 @@ def offline_customer_create(request):
 # ORDER MANAGEMENT
 # ============================================
 
-@staff_member_required
+@staff_or_employee_required
 def orders_list_view(request):
-    """List all offline orders"""
-    orders = OfflineOrder.objects.all().order_by('-created_at')
+    """List all offline orders - Admin sees all, Employee sees only their created orders"""
     
+    # Base queryset
+    if request.user.is_admin or request.user.is_superuser:
+        # Admin/Superuser: See all orders
+        orders = OfflineOrder.objects.all().order_by('-created_at')
+    else:
+        # Employee: See only orders they created
+        orders = OfflineOrder.objects.filter(
+            created_by=request.user
+        ).order_by('-created_at')
+    
+    # Apply filters
     status_filter = request.GET.get('status', '')
     payment_filter = request.GET.get('payment_status', '')
     search_query = request.GET.get('search', '')
@@ -935,12 +945,13 @@ def orders_list_view(request):
     page = request.GET.get('page')
     orders_page = paginator.get_page(page)
     
+    # Calculate stats based on filtered orders
     stats = {
-        'total': OfflineOrder.objects.count(),
-        'completed': OfflineOrder.objects.filter(status='completed').count(),
-        'pending': OfflineOrder.objects.filter(status='pending').count(),
-        'paid': OfflineOrder.objects.filter(payment_status='paid').count(),
-        'pending_payment': OfflineOrder.objects.filter(payment_status='pending').count(),
+        'total': orders.count(),
+        'completed': orders.filter(status='completed').count(),
+        'pending': orders.filter(status='pending').count(),
+        'paid': orders.filter(payment_status='paid').count(),
+        'pending_payment': orders.filter(payment_status='pending').count(),
     }
     
     context = {
@@ -951,11 +962,11 @@ def orders_list_view(request):
         'search_query': search_query,
         'status_choices': OfflineOrder.ORDER_STATUS,
         'payment_status_choices': OfflineOrder.PAYMENT_STATUS,
+        'is_admin': request.user.is_admin or request.user.is_superuser,
+        'is_employee': request.user.is_employee,
     }
     return render(request, 'offline_sales/admin/order_list.html', context)
-
-
-@staff_member_required
+@staff_or_employee_required
 def order_detail_view(request, order_id):
     """View order details"""
     order = get_object_or_404(OfflineOrder, id=order_id)
@@ -985,7 +996,7 @@ def order_detail_view(request, order_id):
 from decimal import Decimal
 
 @csrf_exempt
-@staff_member_required
+@staff_or_employee_required
 def offline_sale_complete(request):
     """Complete offline sale and create order"""
     if request.method == 'POST':
@@ -1185,7 +1196,7 @@ def offline_sale_complete(request):
 
 # offline_sales/views.py
 
-@staff_member_required
+@staff_or_employee_required
 def download_invoice_view(request, order_id):
     """Download invoice as HTML (using the existing invoice.html template)"""
     order = get_object_or_404(OfflineOrder, id=order_id)
@@ -1210,3 +1221,70 @@ def download_invoice_view(request, order_id):
     
     # Return as HTML response
     return HttpResponse(html_content)
+
+# offline_sales/views.py - Add this view
+
+@staff_or_employee_required
+def get_all_products_with_barcodes(request):
+    """
+    Get all products and variants with their barcode numbers and images for display in offline sale page
+    Returns JSON data for AJAX request
+    """
+    try:
+        # Get all active products with their barcodes
+        products = Product.objects.filter(is_active=True).prefetch_related('barcodes', 'variants')
+        
+        product_data = []
+        
+        for product in products:
+            # Get product barcode number
+            product_barcode = product.barcodes.filter(barcode_type='product').first()
+            
+            # Get product image
+            product_image = product.main_image
+            
+            # Get variants with their barcode numbers and images
+            variants_data = []
+            for variant in product.variants.filter(is_active=True):
+                variant_barcode = variant.barcodes.filter(barcode_type='variant').first()
+                variant_image = variant.main_image or variant.product.main_image
+                
+                variants_data.append({
+                    'id': variant.id,
+                    'name': variant.name or f"{variant.color} {variant.size}".strip() or variant.sku,
+                    'sku': variant.sku,
+                    'price': str(variant.final_price),
+                    'original_price': str(variant.price),
+                    'stock': variant.stock_quantity,
+                    'barcode_number': variant_barcode.barcode_text if variant_barcode else None,
+                    'color': variant.color,
+                    'size': variant.size,
+                    'material': variant.material,
+                    'image': variant_image,
+                })
+            
+            product_data.append({
+                'id': product.id,
+                'name': product.name,
+                'sku': product.sku,
+                'price': str(product.final_price),
+                'original_price': str(product.price),
+                'stock': product.stock_quantity,
+                'barcode_number': product_barcode.barcode_text if product_barcode else None,
+                'image': product_image,
+                'has_variants': len(variants_data) > 0,
+                'variants': variants_data,
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'products': product_data,
+            'total_products': len(product_data)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error fetching products with barcodes: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)

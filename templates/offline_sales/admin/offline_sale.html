@@ -2068,6 +2068,339 @@
         display:none;
     }
 }
+/* Product Barcode List Styles with Images */
+.pos-product-barcode-item {
+    border: 1px solid #e8e0da;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: #ffffff;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.pos-product-barcode-item:hover {
+    border-color: #f4b400;
+    box-shadow: 0 2px 8px rgba(244,180,0,0.1);
+}
+
+.pos-product-barcode-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.pos-product-barcode-header:hover {
+    background: #fdf8f0;
+}
+
+.pos-product-barcode-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.pos-product-barcode-image {
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #e8e0da;
+    background: #f6f4f2;
+}
+
+.pos-product-barcode-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pos-product-barcode-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.pos-product-barcode-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1d1d1d;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pos-product-barcode-sku {
+    font-size: 11px;
+    color: #8a7f7a;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.pos-product-barcode-number {
+    font-size: 11px;
+    background: #f6f4f2;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: #5c121f;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.pos-product-barcode-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 2px;
+}
+
+.pos-product-barcode-stock {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.pos-product-barcode-price {
+    font-weight: 600;
+    font-size: 12px;
+    color: #5c121f;
+}
+
+.pos-product-barcode-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.pos-product-barcode-actions .btn {
+    padding: 2px 10px;
+    font-size: 11px;
+    border-radius: 4px;
+}
+
+.pos-toggle-icon {
+    color: #8a7f7a;
+    margin-left: 4px;
+}
+
+.pos-toggle-icon i {
+    transition: transform 0.3s ease;
+}
+
+/* Variants */
+.pos-product-variants {
+    border-top: 1px solid #e8e0da;
+    padding: 4px 0;
+    background: #faf8f7;
+}
+
+.pos-variant-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 14px 8px 20px;
+    border-bottom: 1px solid #e8e0da;
+    transition: all 0.3s ease;
+}
+
+.pos-variant-item:last-child {
+    border-bottom: none;
+}
+
+.pos-variant-item:hover {
+    background: #ffffff;
+}
+
+.pos-variant-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.pos-variant-image {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #e8e0da;
+    background: #f6f4f2;
+}
+
+.pos-variant-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pos-variant-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.pos-variant-name {
+    font-weight: 500;
+    font-size: 12px;
+    color: #1d1d1d;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pos-variant-sku {
+    font-size: 10px;
+    color: #8a7f7a;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.pos-variant-attr {
+    font-size: 10px;
+    background: #e8e0da;
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: #1d1d1d;
+    display: inline-block;
+    margin-right: 4px;
+}
+
+.pos-variant-barcode-number {
+    font-size: 10px;
+    font-family: 'Courier New', monospace;
+    background: #f6f4f2;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    color: #5c121f;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.pos-variant-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 1px;
+    flex-wrap: wrap;
+}
+
+.pos-variant-price {
+    font-weight: 600;
+    font-size: 12px;
+    color: #5c121f;
+}
+
+.pos-variant-stock {
+    font-size: 11px;
+}
+
+.pos-variant-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.pos-variant-actions .btn {
+    padding: 2px 8px;
+    font-size: 10px;
+    border-radius: 4px;
+}
+
+.text-muted {
+    color: #8a7f7a !important;
+}
+
+.text-warning {
+    color: #f39c12 !important;
+}
+
+.text-danger {
+    color: #d64045 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pos-product-barcode-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .pos-product-barcode-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .pos-product-barcode-info {
+        width: 100%;
+    }
+    
+    .pos-variant-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding: 8px 10px 8px 16px;
+    }
+    
+    .pos-variant-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .pos-variant-info {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .pos-product-barcode-image {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .pos-product-barcode-name {
+        font-size: 12px;
+    }
+    
+    .pos-product-barcode-number {
+        font-size: 10px;
+        padding: 1px 6px;
+    }
+    
+    .pos-product-barcode-meta {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .pos-variant-image {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .pos-variant-info {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .pos-variant-details {
+        width: 100%;
+    }
+    
+    .pos-variant-meta {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+}
 </style>
 
 <!-- ============================================
@@ -2239,6 +2572,31 @@ MAIN CONTAINER
                 </div>
             </div>
         </div>
+        <!-- PRODUCTS WITH BARCODE NUMBERS AND IMAGES -->
+<div class="pos-card">
+    <div class="pos-card-head">
+        <h4><i class="fas fa-barcode"></i> Products & Barcodes</h4>
+        <span class="count" id="posTotalProducts">Loading...</span>
+    </div>
+    <div class="pos-card-body">
+        <div class="pos-search" style="margin-bottom:12px;">
+            <input type="text" id="posProductBarcodeSearch" placeholder="Search by name, SKU, or barcode number..." 
+                   onkeyup="posFilterProductBarcodeList(this.value)">
+            <button onclick="posLoadAllProductsWithBarcodes()" title="Refresh">
+                <i class="fas fa-sync"></i>
+            </button>
+        </div>
+        <div class="pos-results" id="posProductBarcodeList" style="max-height:450px;overflow-y:auto;">
+            <div class="pos-no-results" id="posBarcodeLoading">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>
+                <p>Loading products...</p>
+            </div>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:#8a7f7a;text-align:center;">
+            <i class="fas fa-info-circle"></i> Click on product to expand variants
+        </div>
+    </div>
+</div>
         
         <!-- RIGHT -->
         <div class="pos-right">
@@ -2435,6 +2793,230 @@ document.getElementById('posPmAmount').addEventListener('input', function() {
     document.getElementById('posPmChange').value = change >= 0 ? `₹${change.toFixed(2)}` : 'Insufficient';
 });
 
+// ============================================
+// LOAD ALL PRODUCTS WITH BARCODE NUMBERS AND IMAGES
+// ============================================
+
+let posAllProductsData = [];
+
+function posLoadAllProductsWithBarcodes() {
+    const container = document.getElementById('posProductBarcodeList');
+    const countBadge = document.getElementById('posTotalProducts');
+    
+    container.innerHTML = `
+        <div class="pos-no-results">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+            <p>Loading products...</p>
+        </div>
+    `;
+    countBadge.textContent = 'Loading...';
+    
+    fetch('/offline/api/products-with-barcodes/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                posAllProductsData = data.products;
+                countBadge.textContent = data.total_products;
+                posRenderProductBarcodeList(data.products);
+            } else {
+                container.innerHTML = `
+                    <div class="pos-no-results">
+                        <i class="fas fa-exclamation-circle fa-2x" style="color:#d64045;"></i>
+                        <p>Error: ${data.error || 'Failed to load products'}</p>
+                    </div>
+                `;
+                countBadge.textContent = 'Error';
+            }
+        })
+        .catch(error => {
+            container.innerHTML = `
+                <div class="pos-no-results">
+                    <i class="fas fa-exclamation-circle fa-2x" style="color:#d64045;"></i>
+                    <p>Error loading products</p>
+                </div>
+            `;
+            countBadge.textContent = 'Error';
+            console.error('Error loading products:', error);
+        });
+}
+
+function posRenderProductBarcodeList(products) {
+    const container = document.getElementById('posProductBarcodeList');
+    
+    if (!products || products.length === 0) {
+        container.innerHTML = `
+            <div class="pos-no-results">
+                <i class="fas fa-box-open fa-2x"></i>
+                <p>No products found</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    
+    products.forEach((product, index) => {
+        const hasBarcode = product.barcode_number ? true : false;
+        const stockClass = product.stock <= 0 ? 'text-danger' : (product.stock <= 5 ? 'text-warning' : '');
+        const productImage = product.image || '/static/images/no-image.png';
+        
+        html += `
+            <div class="pos-product-barcode-item" data-product-id="${product.id}" data-search="${product.name} ${product.sku} ${product.barcode_number || ''}">
+                <div class="pos-product-barcode-header" onclick="posToggleProductBarcodeVariants(${index})">
+                    <div class="pos-product-barcode-info">
+                        <div class="pos-product-barcode-image">
+                            <img src="${productImage}" alt="${product.name}" onerror="this.src='/static/images/no-image.png'">
+                        </div>
+                        <div class="pos-product-barcode-details">
+                            <span class="pos-product-barcode-name">${product.name}</span>
+                            <span class="pos-product-barcode-sku">SKU: ${product.sku}</span>
+                            ${product.barcode_number ? 
+                                `<span class="pos-product-barcode-number">📷 ${product.barcode_number}</span>` : 
+                                '<span class="pos-product-barcode-number text-muted">No barcode</span>'
+                            }
+                            <div class="pos-product-barcode-meta">
+                                <span class="pos-product-barcode-stock ${stockClass}">Stock: ${product.stock}</span>
+                                <span class="pos-product-barcode-price">₹${product.price}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pos-product-barcode-actions">
+                        ${product.barcode_number ? 
+                            `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); posAddByBarcode('${product.barcode_number}')">
+                                <i class="fas fa-plus"></i>
+                            </button>` : ''
+                        }
+                        ${product.has_variants ? 
+                            `<span class="badge bg-info">${product.variants.length} variants</span>` : ''
+                        }
+                        <span class="pos-toggle-icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                </div>
+                ${product.has_variants ? `
+                <div class="pos-product-variants" id="posVariants_${index}" style="display:none;">
+                    ${product.variants.map(variant => {
+                        const variantImage = variant.image || product.image || '/static/images/no-image.png';
+                        const variantStockClass = variant.stock <= 0 ? 'text-danger' : (variant.stock <= 5 ? 'text-warning' : '');
+                        return `
+                        <div class="pos-variant-item" data-search="${variant.name} ${variant.sku} ${variant.barcode_number || ''}">
+                            <div class="pos-variant-info">
+                                <div class="pos-variant-image">
+                                    <img src="${variantImage}" alt="${variant.name || variant.sku}" onerror="this.src='/static/images/no-image.png'">
+                                </div>
+                                <div class="pos-variant-details">
+                                    <span class="pos-variant-name">${variant.name || variant.sku}</span>
+                                    <span class="pos-variant-sku">${variant.sku}</span>
+                                    ${variant.color ? `<span class="pos-variant-attr">🎨 ${variant.color}</span>` : ''}
+                                    ${variant.size ? `<span class="pos-variant-attr">📏 ${variant.size}</span>` : ''}
+                                    ${variant.barcode_number ? 
+                                        `<span class="pos-variant-barcode-number">📷 ${variant.barcode_number}</span>` : 
+                                        '<span class="text-muted">No barcode</span>'
+                                    }
+                                    <div class="pos-variant-meta">
+                                        <span class="pos-variant-price">₹${variant.price}</span>
+                                        <span class="pos-variant-stock ${variantStockClass}">Stock: ${variant.stock}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pos-variant-actions">
+                                ${variant.barcode_number ? 
+                                    `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); posAddByBarcode('${variant.barcode_number}')">
+                                        <i class="fas fa-plus"></i>
+                                    </button>` : ''
+                                }
+                            </div>
+                        </div>
+                    `}).join('')}
+                </div>
+                ` : ''}
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function posToggleProductBarcodeVariants(index) {
+    const variants = document.getElementById(`posVariants_${index}`);
+    if (variants) {
+        const isVisible = variants.style.display !== 'none';
+        variants.style.display = isVisible ? 'none' : 'block';
+        const icon = document.querySelector(`#posVariants_${index}`).closest('.pos-product-barcode-item').querySelector('.pos-toggle-icon i');
+        if (icon) {
+            icon.className = isVisible ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+        }
+    }
+}
+
+function posFilterProductBarcodeList(query) {
+    const items = document.querySelectorAll('.pos-product-barcode-item');
+    const search = query.toLowerCase().trim();
+    
+    items.forEach(item => {
+        const searchText = (item.dataset.search || '').toLowerCase();
+        const variants = item.querySelectorAll('.pos-variant-item');
+        
+        let showProduct = false;
+        
+        // Check if product matches
+        if (search === '' || searchText.includes(search)) {
+            showProduct = true;
+        }
+        
+        // Check if any variant matches
+        variants.forEach(variant => {
+            const variantSearch = (variant.dataset.search || '').toLowerCase();
+            if (search !== '' && variantSearch.includes(search)) {
+                showProduct = true;
+                // Show the parent product
+                item.style.display = '';
+                // Expand variants if searching
+                const variantsContainer = item.querySelector('.pos-product-variants');
+                if (variantsContainer) {
+                    variantsContainer.style.display = 'block';
+                    const icon = item.querySelector('.pos-toggle-icon i');
+                    if (icon) icon.className = 'fas fa-chevron-up';
+                }
+            }
+        });
+        
+        // If no variant matches but product doesn't match, hide
+        if (search !== '' && !showProduct) {
+            // Check if any variant in this product matches
+            let variantMatch = false;
+            variants.forEach(variant => {
+                const variantSearch = (variant.dataset.search || '').toLowerCase();
+                if (variantSearch.includes(search)) {
+                    variantMatch = true;
+                }
+            });
+            if (!variantMatch) {
+                item.style.display = 'none';
+            } else {
+                item.style.display = '';
+            }
+        } else {
+            item.style.display = '';
+        }
+    });
+}
+
+function posAddByBarcode(barcode) {
+    if (!barcode) {
+        posToast('No barcode available', 'Error', 'error');
+        return;
+    }
+    posScanAndAdd(barcode);
+}
+
+// Load products on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Load products with barcodes
+    posLoadAllProductsWithBarcodes();
+    
+    // Refresh products every 60 seconds
+    setInterval(posLoadAllProductsWithBarcodes, 60000);
+});
 // ============================================
 // TOAST
 // ============================================

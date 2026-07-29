@@ -1,0 +1,99 @@
+
+{% load static %}
+
+{% block title %}Create Employee - MyStore{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h4 class="mb-0"><i class="fas fa-user-tie me-2"></i>Employee Signup</h4>
+                    <p class="mb-0 small">Create a new employee account</p>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="id_full_name" class="form-label">Full Name</label>
+                            <input type="text" name="full_name" id="id_full_name" 
+                                   class="form-control {% if form.full_name.errors %}is-invalid{% endif %}"
+                                   value="{{ form.full_name.value|default:'' }}"
+                                   placeholder="Enter full name" required>
+                            {% if form.full_name.errors %}
+                            <div class="invalid-feedback">{{ form.full_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_email" class="form-label">Email Address</label>
+                            <input type="email" name="email" id="id_email" 
+                                   class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                                   value="{{ form.email.value|default:'' }}"
+                                   placeholder="Enter email address" required>
+                            {% if form.email.errors %}
+                            <div class="invalid-feedback">{{ form.email.errors.0 }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">An OTP will be sent to this email for verification.</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_phone" class="form-label">Phone Number</label>
+                            <input type="text" name="phone" id="id_phone" 
+                                   class="form-control {% if form.phone.errors %}is-invalid{% endif %}"
+                                   value="{{ form.phone.value|default:'' }}"
+                                   placeholder="Enter phone number">
+                            {% if form.phone.errors %}
+                            <div class="invalid-feedback">{{ form.phone.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label">Password</label>
+                            <input type="password" name="password" id="id_password" 
+                                   class="form-control {% if form.password.errors %}is-invalid{% endif %}"
+                                   placeholder="Enter password" required>
+                            {% if form.password.errors %}
+                            <div class="invalid-feedback">{{ form.password.errors.0 }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">Password must be at least 8 characters.</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_confirm_password" class="form-label">Confirm Password</label>
+                            <input type="password" name="confirm_password" id="id_confirm_password" 
+                                   class="form-control {% if form.confirm_password.errors %}is-invalid{% endif %}"
+                                   placeholder="Confirm password" required>
+                            {% if form.confirm_password.errors %}
+                            <div class="invalid-feedback">{{ form.confirm_password.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-user-plus me-2"></i>Create Employee Account
+                        </button>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <a href="{% url 'Ecom:admin_dashboard' %}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

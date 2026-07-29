@@ -42,6 +42,6 @@ urlpatterns = [
     path('orders/', views.orders_list_view, name='orders_list'),
     path('orders/<int:order_id>/', views.order_detail_view, name='order_detail'),
     
-    
+    path('api/products-with-barcodes/', views.get_all_products_with_barcodes, name='api_products_with_barcodes'),
     path('download-invoice/<int:order_id>/', views.download_invoice_view, name='download_invoice'), 
 ]

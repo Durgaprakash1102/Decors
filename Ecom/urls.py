@@ -10,7 +10,8 @@ urlpatterns = [
     path('signup/admin/', views.admin_signup_view, name='admin_signup'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
-    
+    path('signup/employee/', views.employee_signup_view, name='employee_signup'),
+    path('employee/dashboard/', views.employee_dashboard_view, name='employee_dashboard'),
     # OTP Verification URLs
     path('verify-otp/', views.verify_otp_view, name='verify_otp'),
     path('verify-otp-login/', views.verify_otp_login_view, name='verify_otp_login'),
@@ -142,7 +143,7 @@ path('admin/orders/', admin_order_list_view, name='admin_order_list'),
     path('order/<int:order_id>/return/', views.request_return_view, name='request_return'),
     path('admin/returns/', views.admin_return_requests_view, name='admin_return_requests'),
     path('admin/return/<int:order_id>/', views.admin_return_detail_view, name='admin_return_detail'),
-    
+    path('admin/users/', views.user_list_view, name='user_list'),
     # ============================================
     # REPLACEMENT URLS
     # ============================================

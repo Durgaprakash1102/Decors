@@ -1001,3 +1001,46 @@ class AdminReplacementActionForm(forms.Form):
         label='Tracking URL',
         widget=forms.URLInput(attrs={'class': 'form-control'})
     )
+
+# forms.py - Add EmployeeSignupForm
+
+# ========== EMPLOYEE SIGNUP FORM (Admin Created) ==========
+class EmployeeSignupForm(forms.ModelForm):
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter password'}),
+        validators=[validate_password]
+    )
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm password'})
+    )
+    
+    class Meta:
+        model = User
+        fields = ['full_name', 'email', 'phone']
+        widgets = {
+            'full_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter full name'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter email address'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter phone number'}),
+        }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        confirm_password = cleaned_data.get('confirm_password')
+        
+        if password and confirm_password and password != confirm_password:
+            raise forms.ValidationError('Passwords do not match')
+        return cleaned_data
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('This email is already registered')
+        return email
+    
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        if phone:
+            if User.objects.filter(phone=phone).exists():
+                raise forms.ValidationError('This phone number is already registered')
+        return phone

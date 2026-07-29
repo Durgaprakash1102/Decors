@@ -192,6 +192,9 @@ def home(request):
         ).select_related('product').order_by('-viewed_at')[:5]
         recently_viewed = [item.product for item in recently_viewed_items]
 
+    # ============================================
+    # RECOMMENDED FOR YOU
+    # ============================================
     recommended_for_you = []
     if request.user.is_authenticated:
         # Get personalized recommendations
@@ -223,7 +226,11 @@ def home(request):
             limit=12, 
             exclude_product_ids=list(exclude_ids)
         )
-        top_categories_data = []
+    
+    # ============================================
+    # TOP CATEGORIES DATA - Initialize BEFORE the if block
+    # ============================================
+    top_categories_data = []
     
     # Get categories with most products and orders
     from django.db.models import Sum
@@ -248,36 +255,36 @@ def home(request):
         )
         
         # 1. Top Rated Products in this category
-        top_rated = category_products.annotate(
+        top_rated_cat = category_products.annotate(
             avg_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True))
         ).filter(
             avg_rating__gte=3.5
         ).order_by('-avg_rating')[:4]
         
         # 2. Most Purchased Products in this category
-        most_purchased = category_products.annotate(
+        most_purchased_cat = category_products.annotate(
             order_count=Count('orderitem')
         ).filter(
             order_count__gt=0
         ).order_by('-order_count')[:4]
         
         # 3. Top Discount Products in this category
-        top_discounts = category_products.filter(
+        top_discounts_cat = category_products.filter(
             discount_percentage__gt=0
         ).order_by('-discount_percentage')[:4]
         
         # 4. New Arrivals in this category
-        new_arrivals = category_products.filter(
+        new_arrivals_cat = category_products.filter(
             is_new=True
         ).order_by('-created_at')[:4]
         
         # 5. Best Sellers in this category
-        best_sellers = category_products.filter(
+        best_sellers_cat = category_products.filter(
             is_best_seller=True
         ).order_by('-created_at')[:4]
         
         # 6. Featured in this category
-        featured = category_products.filter(
+        featured_cat = category_products.filter(
             is_featured=True
         ).order_by('-created_at')[:4]
         
@@ -285,27 +292,27 @@ def home(request):
         product_scores = {}
         
         # Add top rated products (weight: 3)
-        for idx, product in enumerate(top_rated):
+        for idx, product in enumerate(top_rated_cat):
             product_scores[product.id] = product_scores.get(product.id, 0) + 3.0 - (idx * 0.2)
         
         # Add most purchased products (weight: 4)
-        for idx, product in enumerate(most_purchased):
+        for idx, product in enumerate(most_purchased_cat):
             product_scores[product.id] = product_scores.get(product.id, 0) + 4.0 - (idx * 0.2)
         
         # Add top discounts (weight: 2.5)
-        for idx, product in enumerate(top_discounts):
+        for idx, product in enumerate(top_discounts_cat):
             product_scores[product.id] = product_scores.get(product.id, 0) + 2.5 - (idx * 0.2)
         
         # Add new arrivals (weight: 2)
-        for idx, product in enumerate(new_arrivals):
+        for idx, product in enumerate(new_arrivals_cat):
             product_scores[product.id] = product_scores.get(product.id, 0) + 2.0 - (idx * 0.2)
         
         # Add best sellers (weight: 3.5)
-        for idx, product in enumerate(best_sellers):
+        for idx, product in enumerate(best_sellers_cat):
             product_scores[product.id] = product_scores.get(product.id, 0) + 3.5 - (idx * 0.2)
         
         # Add featured (weight: 2.5)
-        for idx, product in enumerate(featured):
+        for idx, product in enumerate(featured_cat):
             product_scores[product.id] = product_scores.get(product.id, 0) + 2.5 - (idx * 0.2)
         
         # Sort by score and get top 8 products
@@ -380,7 +387,6 @@ def home(request):
         'trending_products': trending_products,
     }
     return render(request, 'home.html', context)
-
 # In views.py
 
 from django.http import JsonResponse
@@ -517,6 +523,61 @@ def admin_signup_view(request):
     
     return render(request, 'Ecom/auth/admin_signup.html', {'form': form})
 
+# views.py - Add employee views
+
+# ==================== EMPLOYEE SIGNUP (Admin Only) ====================
+@login_required
+def employee_signup_view(request):
+    """Admin creates employee account - Admin only"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Only admin can create employee accounts.')
+        return redirect('Ecom:home')
+    
+    if request.method == 'POST':
+        form = EmployeeSignupForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            full_name = form.cleaned_data['full_name']
+            phone = form.cleaned_data['phone']
+            password = form.cleaned_data['password']
+            
+            # Store employee data in session
+            request.session['pending_user_data'] = {
+                'email': email,
+                'full_name': full_name,
+                'phone': phone,
+                'password': password,
+                'role': 'employee',
+                'is_staff': False  # Employee is NOT staff
+            }
+            
+            # Send OTP
+            create_and_send_otp(email, 'signup', full_name)
+            request.session['pending_email'] = email
+            request.session['otp_type'] = 'signup'
+            request.session['employee_creation'] = True  # Flag to identify employee creation
+            
+            messages.success(request, f'OTP sent to {email}. Please verify to create the employee account.')
+            return redirect('Ecom:verify_otp')
+    else:
+        form = EmployeeSignupForm()
+    
+    return render(request, 'Ecom/auth/employee_signup.html', {
+        'form': form,
+        'is_admin_creating': True
+    })
+
+
+# ==================== EMPLOYEE DASHBOARD ====================
+@login_required
+def employee_dashboard_view(request):
+    """Employee dashboard - Employee only"""
+    if not request.user.is_employee:
+        messages.error(request, 'Access denied. Employee only.')
+        return redirect('Ecom:home')
+    
+   
+    return render(request, 'Ecom/employee/dashboard.html')
 def verify_otp_view(request):
     email = request.session.get('pending_email')
     user_data = request.session.get('pending_user_data')
@@ -526,6 +587,7 @@ def verify_otp_view(request):
         return redirect('Ecom:customer_signup')
     
     otp_type = request.session.get('otp_type', 'signup')
+    is_employee_creation = request.session.get('employee_creation', False)
     
     if request.method == 'POST':
         form = OTPVerificationForm(request.POST)
@@ -549,27 +611,36 @@ def verify_otp_view(request):
                     if user_data.get('phone'):
                         user.phone = user_data['phone']
                     
-                    # If admin, set is_staff
+                    # Only set is_staff for admin, NOT for employee
                     if user_data.get('role') == 'admin':
                         user.is_staff = True
+                    # Employee does NOT get is_staff
                     
                     user.save()
                     
                     # Create profile
                     Profile.objects.create(user=user)
                 
-                # Login the user
-                login(request, user)
-                
                 # Clean session
                 request.session.pop('pending_user_data', None)
                 request.session.pop('pending_email', None)
                 request.session.pop('otp_type', None)
+                request.session.pop('employee_creation', None)  # Clean employee flag
                 
+                # Check if this was employee creation by admin
+                if is_employee_creation:
+                    messages.success(request, f'Employee "{user.full_name}" account created successfully!')
+                    # IMPORTANT: Do NOT login the employee. Stay logged in as admin.
+                    return redirect('Ecom:admin_dashboard')
+                
+                # For normal signup (customer or admin), login the user
+                login(request, user)
                 messages.success(request, f'Account created successfully! Welcome to MyStore, {user.full_name}!')
                 
                 if user.is_admin:
                     return redirect('Ecom:admin_dashboard')
+                elif user.is_employee:
+                    return redirect('Ecom:employee_dashboard')
                 else:
                     return redirect('Ecom:home')
             else:
@@ -580,9 +651,9 @@ def verify_otp_view(request):
     return render(request, 'Ecom/auth/verify_otp.html', {
         'form': form,
         'email': email,
-        'otp_type': otp_type
+        'otp_type': otp_type,
+        'is_employee_creation': is_employee_creation,
     })
-
 # ==================== LOGIN ====================
 def login_view(request):
     if request.user.is_authenticated:
@@ -640,6 +711,8 @@ def verify_otp_login_view(request):
                 
                 if user.is_admin:
                     return redirect('Ecom:admin_dashboard')
+                elif user.is_employee:
+                    return redirect('Ecom:employee_dashboard')
                 else:
                     return redirect('Ecom:home')
             else:
@@ -6168,3 +6241,105 @@ def get_nav_counts_api(request):
         'cart_count': cart_count,
         'wishlist_count': wishlist_count,
     })
+
+# views.py - Add user management view
+
+from django.contrib.admin.views.decorators import staff_member_required
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.shortcuts import render
+from django.contrib import messages
+from django.http import JsonResponse
+from .models import User
+
+# ==================== USER MANAGEMENT (Admin Only) ====================
+
+@staff_member_required
+def user_list_view(request):
+    """
+    User list view - Only accessible by admin/superuser
+    Shows all users with filters by role and search
+    """
+    # Check if user is admin or superuser
+    if not (request.user.is_admin or request.user.is_superuser):
+        messages.error(request, 'Access denied. Admin only.')
+        return redirect('Ecom:home')
+    
+    # Get all users
+    users = User.objects.all().order_by('-date_joined')
+    
+    # ============================================
+    # FILTERS
+    # ============================================
+    role_filter = request.GET.get('role', '')
+    status_filter = request.GET.get('status', '')
+    search_query = request.GET.get('search', '')
+    
+    # Role filter
+    if role_filter:
+        users = users.filter(role=role_filter)
+    
+    # Status filter (active/inactive)
+    if status_filter == 'active':
+        users = users.filter(is_active=True)
+    elif status_filter == 'inactive':
+        users = users.filter(is_active=False)
+    
+    # Search filter
+    if search_query:
+        users = users.filter(
+            Q(email__icontains=search_query) |
+            Q(full_name__icontains=search_query) |
+            Q(phone__icontains=search_query)
+        )
+    
+    # ============================================
+    # STATISTICS
+    # ============================================
+    stats = {
+        'total': User.objects.count(),
+        'admin': User.objects.filter(role='admin').count(),
+        'employee': User.objects.filter(role='employee').count(),
+        'customer': User.objects.filter(role='customer').count(),
+        'active': User.objects.filter(is_active=True).count(),
+        'inactive': User.objects.filter(is_active=False).count(),
+        'verified': User.objects.filter(is_verified=True).count(),
+        'unverified': User.objects.filter(is_verified=False).count(),
+    }
+    
+    # ============================================
+    # PAGINATION
+    # ============================================
+    paginator = Paginator(users, 20)
+    page = request.GET.get('page')
+    users_page = paginator.get_page(page)
+    
+    # ============================================
+    # ROLE CHOICES FOR FILTER
+    # ============================================
+    role_choices = [
+        {'value': '', 'label': 'All Roles'},
+        {'value': 'admin', 'label': 'Admin'},
+        {'value': 'employee', 'label': 'Employee'},
+        {'value': 'customer', 'label': 'Customer'},
+    ]
+    
+    status_choices = [
+        {'value': '', 'label': 'All Status'},
+        {'value': 'active', 'label': 'Active'},
+        {'value': 'inactive', 'label': 'Inactive'},
+    ]
+    
+    context = {
+        'users': users_page,
+        'stats': stats,
+        'role_filter': role_filter,
+        'status_filter': status_filter,
+        'search_query': search_query,
+        'role_choices': role_choices,
+        'status_choices': status_choices,
+        'total_users': users.count(),
+        'is_admin': request.user.is_admin or request.user.is_superuser,
+    }
+    
+    return render(request, 'Ecom/admin/user_list.html', context)

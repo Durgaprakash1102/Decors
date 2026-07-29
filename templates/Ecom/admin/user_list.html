@@ -1,0 +1,295 @@
+<!-- Ecom/admin/user_list.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}User Management - MyStore{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="fas fa-users me-2"></i>User Management</h2>
+            <p class="text-muted mb-0">Manage all users in the system</p>
+        </div>
+        <div>
+            <a href="{% url 'Ecom:employee_signup' %}" class="btn btn-primary">
+                <i class="fas fa-user-plus me-2"></i>Create Employee
+            </a>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-users me-2"></i>Total Users</h6>
+                    <h3 class="mb-0">{{ stats.total }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-user-check me-2"></i>Active</h6>
+                    <h3 class="mb-0">{{ stats.active }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card bg-danger text-white shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-user-times me-2"></i>Inactive</h6>
+                    <h3 class="mb-0">{{ stats.inactive }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card bg-info text-white shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-user-tag me-2"></i>Verified</h6>
+                    <h3 class="mb-0">{{ stats.verified }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Role Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-4">
+            <div class="card bg-warning text-dark shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-user-shield me-2"></i>Admins</h6>
+                    <h3 class="mb-0">{{ stats.admin }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card bg-secondary text-white shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-user-tie me-2"></i>Employees</h6>
+                    <h3 class="mb-0">{{ stats.employee }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card bg-light text-dark shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-user me-2"></i>Customers</h6>
+                    <h3 class="mb-0">{{ stats.customer }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters and Search -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" name="search" id="search" 
+                           class="form-control" 
+                           placeholder="Search by name, email or phone..."
+                           value="{{ search_query }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="role" class="form-label">Role</label>
+                    <select name="role" id="role" class="form-select">
+                        {% for choice in role_choices %}
+                        <option value="{{ choice.value }}" {% if role_filter == choice.value %}selected{% endif %}>
+                            {{ choice.label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select name="status" id="status" class="form-select">
+                        {% for choice in status_choices %}
+                        <option value="{{ choice.value }}" {% if status_filter == choice.value %}selected{% endif %}>
+                            {{ choice.label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-2"></i>Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- User Table -->
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">
+                <i class="fas fa-list me-2"></i>
+                Users ({{ total_users }} found)
+            </h6>
+            <div>
+                <a href="{% url 'Ecom:user_list' %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-undo me-1"></i>Reset
+                </a>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Verified</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ forloop.counter|add:users.start_index|add:-1 }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle bg-{% if user.is_admin %}danger{% elif user.is_employee %}info{% else %}secondary{% endif %} text-white me-2" 
+                                         style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px;">
+                                        {{ user.full_name|slice:":1"|upper }}
+                                    </div>
+                                    {{ user.full_name }}
+                                </div>
+                            </td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.phone|default:"-" }}</td>
+                            <td>
+                                {% if user.is_admin %}
+                                <span class="badge bg-danger">Admin</span>
+                                {% elif user.is_employee %}
+                                <span class="badge bg-info">Employee</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Customer</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.is_verified %}
+                                <span class="badge bg-success"><i class="fas fa-check-circle"></i> Yes</span>
+                                {% else %}
+                                <span class="badge bg-warning"><i class="fas fa-clock"></i> No</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.date_joined|date:"d M Y" }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="#" class="btn btn-outline-primary" title="View Profile">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if not user.is_superuser and user.role != 'admin' %}
+                                    <a href="#" class="btn btn-outline-{% if user.is_active %}warning{% else %}success{% endif %}" 
+                                       onclick="return confirm('Are you sure you want to {% if user.is_active %}deactivate{% else %}activate{% endif %} this user?')" 
+                                       title="Toggle Status">
+                                        <i class="fas {% if user.is_active %}fa-pause{% else %}fa-play{% endif %}"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                <i class="fas fa-users fa-3x text-muted mb-3 d-block"></i>
+                                <h5 class="text-muted">No users found</h5>
+                                <p class="text-muted">Try adjusting your search or filter criteria.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Pagination -->
+        {% if users.has_other_pages %}
+        <div class="card-footer">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if users.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in users.paginator.page_range %}
+                        {% if users.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > users.number|add:'-3' and num < users.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if users.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            <div class="text-center mt-2">
+                <small class="text-muted">
+                    Showing {{ users.start_index }} - {{ users.end_index }} of {{ users.paginator.count }} users
+                </small>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .avatar-circle {
+        font-weight: 600;
+    }
+    .table th {
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+    .badge {
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
