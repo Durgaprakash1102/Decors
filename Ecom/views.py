@@ -223,6 +223,140 @@ def home(request):
             limit=12, 
             exclude_product_ids=list(exclude_ids)
         )
+        top_categories_data = []
+    
+    # Get categories with most products and orders
+    from django.db.models import Sum
+    
+    top_categories = Category.objects.filter(
+        is_active=True,
+        products__is_active=True
+    ).annotate(
+        product_count=Count('products', filter=Q(products__is_active=True)),
+        order_count=Count('products__orderitem'),
+        total_revenue=Sum('products__orderitem__total'),
+        avg_rating=Avg('products__reviews__rating', filter=Q(products__reviews__is_approved=True))
+    ).filter(
+        product_count__gt=0
+    ).order_by('-order_count', '-product_count')[:4]
+    
+    for category in top_categories:
+        # Get products for this category with different criteria
+        category_products = Product.objects.filter(
+            category=category,
+            is_active=True
+        )
+        
+        # 1. Top Rated Products in this category
+        top_rated = category_products.annotate(
+            avg_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True))
+        ).filter(
+            avg_rating__gte=3.5
+        ).order_by('-avg_rating')[:4]
+        
+        # 2. Most Purchased Products in this category
+        most_purchased = category_products.annotate(
+            order_count=Count('orderitem')
+        ).filter(
+            order_count__gt=0
+        ).order_by('-order_count')[:4]
+        
+        # 3. Top Discount Products in this category
+        top_discounts = category_products.filter(
+            discount_percentage__gt=0
+        ).order_by('-discount_percentage')[:4]
+        
+        # 4. New Arrivals in this category
+        new_arrivals = category_products.filter(
+            is_new=True
+        ).order_by('-created_at')[:4]
+        
+        # 5. Best Sellers in this category
+        best_sellers = category_products.filter(
+            is_best_seller=True
+        ).order_by('-created_at')[:4]
+        
+        # 6. Featured in this category
+        featured = category_products.filter(
+            is_featured=True
+        ).order_by('-created_at')[:4]
+        
+        # Combine all products with weights
+        product_scores = {}
+        
+        # Add top rated products (weight: 3)
+        for idx, product in enumerate(top_rated):
+            product_scores[product.id] = product_scores.get(product.id, 0) + 3.0 - (idx * 0.2)
+        
+        # Add most purchased products (weight: 4)
+        for idx, product in enumerate(most_purchased):
+            product_scores[product.id] = product_scores.get(product.id, 0) + 4.0 - (idx * 0.2)
+        
+        # Add top discounts (weight: 2.5)
+        for idx, product in enumerate(top_discounts):
+            product_scores[product.id] = product_scores.get(product.id, 0) + 2.5 - (idx * 0.2)
+        
+        # Add new arrivals (weight: 2)
+        for idx, product in enumerate(new_arrivals):
+            product_scores[product.id] = product_scores.get(product.id, 0) + 2.0 - (idx * 0.2)
+        
+        # Add best sellers (weight: 3.5)
+        for idx, product in enumerate(best_sellers):
+            product_scores[product.id] = product_scores.get(product.id, 0) + 3.5 - (idx * 0.2)
+        
+        # Add featured (weight: 2.5)
+        for idx, product in enumerate(featured):
+            product_scores[product.id] = product_scores.get(product.id, 0) + 2.5 - (idx * 0.2)
+        
+        # Sort by score and get top 8 products
+        sorted_products = sorted(product_scores.items(), key=lambda x: x[1], reverse=True)[:8]
+        product_ids = [p_id for p_id, _ in sorted_products]
+        
+        # Fetch products with annotations
+        final_products = Product.objects.filter(
+            id__in=product_ids,
+            is_active=True
+        ).annotate(
+            avg_rating=Avg('reviews__rating', filter=Q(reviews__is_approved=True)),
+            order_count=Count('orderitem')
+        )
+        
+        # Preserve order
+        product_dict = {p.id: p for p in final_products}
+        ordered_products = [product_dict[p_id] for p_id in product_ids if p_id in product_dict]
+        
+        # Get category image
+        category_image = category.image.url if category.image else None
+        
+        top_categories_data.append({
+            'category': category,
+            'products': ordered_products,
+            'product_count': category.product_count,
+            'order_count': category.order_count or 0,
+            'total_revenue': category.total_revenue or 0,
+            'avg_rating': category.avg_rating or 0,
+            'image': category_image,
+        })
+    
+    # ============================================
+    # MOST PURCHASED PRODUCTS (Global)
+    # ============================================
+    most_purchased_products = products.annotate(
+        order_count=Count('orderitem')
+    ).filter(
+        order_count__gt=0
+    ).order_by('-order_count')[:12]
+    
+    # ============================================
+    # TRENDING PRODUCTS (Based on views + orders)
+    # ============================================
+    trending_products = products.annotate(
+        view_count=Count('recentlyviewed'),
+        order_count=Count('orderitem'),
+        total_engagement=Count('recentlyviewed') + Count('orderitem') * 2
+    ).filter(
+        Q(view_count__gt=0) | Q(order_count__gt=0)
+    ).order_by('-total_engagement', '-view_count')[:12]
 
     context = {
         'best_sellers': best_sellers,
@@ -239,6 +373,11 @@ def home(request):
         'offers': offers,
         'featured_offers': featured_offers,
         'recommended_for_you': recommended_for_you,
+        'top_categories_data': top_categories_data,
+        
+        # Most Purchased & Trending
+        'most_purchased_products': most_purchased_products,
+        'trending_products': trending_products,
     }
     return render(request, 'home.html', context)
 
