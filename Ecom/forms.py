@@ -14,10 +14,7 @@ class CustomerSignupForm(forms.ModelForm):
     confirm_password = forms.CharField(
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm password'})
     )
-    terms_accepted = forms.BooleanField(
-        required=True,
-        error_messages={'required': 'You must accept the terms and conditions'}
-    )
+    
     
     class Meta:
         model = User
