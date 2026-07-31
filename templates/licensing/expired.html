@@ -1,95 +1,653 @@
-{% load static %}
-
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>License Expired · Hyzora</title>
 
-<meta charset="UTF-8">
+  <!-- Bootstrap + Font Awesome + Inter font -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
 
-<title>License Expired</title>
+  <style>
+    /* ----- global reset & variables ----- */
+    :root {
+      --primary: #5c121f;
+      --secondary: #F4B400;
+      --accent: #D97706;
+      --text-dark: #1e1e1e;
+      --text-white: #ffffff;
+    }
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-rel="stylesheet">
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      background: var(--primary);
+      background: radial-gradient(ellipse at 30% 20%, #7a1a2b, var(--primary) 75%);
+      position: relative;
+    }
+
+    /* ----- animated orbs (background) ----- */
+    .bg-orbs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bg-orbs .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.12;
+      animation: floatOrb 22s ease-in-out infinite alternate;
+    }
+
+    .bg-orbs .orb-1 {
+      width: 500px;
+      height: 500px;
+      background: var(--secondary);
+      top: -150px;
+      right: -100px;
+      animation-delay: 0s;
+    }
+
+    .bg-orbs .orb-2 {
+      width: 400px;
+      height: 400px;
+      background: var(--accent);
+      bottom: -120px;
+      left: -80px;
+      animation-delay: 7s;
+      opacity: 0.08;
+    }
+
+    .bg-orbs .orb-3 {
+      width: 350px;
+      height: 350px;
+      background: #8b1a2b;
+      top: 40%;
+      left: 5%;
+      animation-delay: 14s;
+      opacity: 0.1;
+    }
+
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(50px, -60px) scale(1.1); }
+    }
+
+    /* ----- main wrapper (grid) ----- */
+    .main-wrapper {
+      width: 100%;
+      max-width: 1150px;
+      position: relative;
+      z-index: 1;
+      animation: fadeUp 0.8s ease-out;
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ----- LEFT SIDE (brand / features) ----- */
+    .left-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      color: var(--text-white);
+    }
+
+    .left-content .brand {
+      font-size: 58px;
+      font-weight: 900;
+      letter-spacing: -2px;
+      color: var(--text-white);
+      line-height: 1;
+      margin-bottom: 0px;
+    }
+
+    .left-content .brand span {
+      color: var(--secondary);
+      background: rgba(244, 180, 0, 0.06);
+      padding: 0 10px;
+      border-radius: 12px;
+    }
+
+    .left-content .tagline {
+      color: rgba(255, 255, 255, 0.2);
+      font-size: 14px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 6px;
+      margin-bottom: 18px;
+    }
+
+    .left-content .description {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 14px;
+      line-height: 1.7;
+      margin-bottom: 20px;
+      max-width: 90%;
+    }
+
+    .left-content .description strong {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .left-content .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(220, 38, 38, 0.08);
+      padding: 7px 22px 7px 16px;
+      border-radius: 60px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fca5a5;
+      border: 1px solid rgba(220, 38, 38, 0.05);
+      width: fit-content;
+      margin-bottom: 22px;
+    }
+
+    .left-content .status .dot {
+      width: 7px;
+      height: 7px;
+      background: #dc2626;
+      border-radius: 50%;
+      animation: pulseDot 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(1.6); }
+    }
+
+    .left-content .features {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .left-content .features .item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 14px;
+    }
+
+    .left-content .features .item i {
+      color: var(--secondary);
+      font-size: 14px;
+      width: 18px;
+    }
+
+    .left-content .features .item .badge-new {
+      background: rgba(244, 180, 0, 0.1);
+      color: var(--secondary);
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-left: 4px;
+    }
+
+    /* ----- RIGHT SIDE – GLASS CARD (form) ----- */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 28px;
+      padding: 38px 38px 28px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+    }
+
+    .glass-card .title {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--text-white);
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .glass-card .title .highlight {
+      color: #f87171;
+      position: relative;
+    }
+
+    .glass-card .title .highlight::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--secondary);
+      border-radius: 4px;
+      opacity: 0.3;
+    }
+
+    .glass-card .sub {
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .glass-card .sub strong {
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 600;
+    }
+
+    /* ----- alert messages (glass style) ----- */
+    .alert-glass {
+      border-radius: 12px;
+      padding: 9px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      background: rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 500;
+      font-size: 13px;
+      margin-bottom: 16px;
+      color: var(--text-white);
+    }
+
+    .alert-glass i { font-size: 14px; }
+    .alert-glass.alert-success { border-color: rgba(74, 222, 128, 0.1); color: #86efac; }
+    .alert-glass.alert-success i { color: #4ade80; }
+    .alert-glass.alert-error { border-color: rgba(248, 113, 113, 0.1); color: #fca5a5; }
+    .alert-glass.alert-error i { color: #f87171; }
+    .alert-glass.alert-warning { border-color: rgba(251, 191, 36, 0.1); color: #fcd34d; }
+    .alert-glass.alert-warning i { color: var(--secondary); }
+
+    /* ----- form fields ----- */
+    .form-glass .group {
+      margin-bottom: 14px;
+    }
+
+    .form-glass .group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 5px;
+    }
+
+    .form-glass .group label i {
+      color: var(--secondary);
+      font-size: 13px;
+    }
+
+    .form-glass .control {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--text-white);
+      transition: all 0.3s ease;
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .form-glass .control::placeholder {
+      color: rgba(255, 255, 255);
+    }
+
+    .form-glass .control:focus {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 3px rgba(244, 180, 0, 0.03);
+      outline: none;
+    }
+
+    /* ----- renew button ----- */
+    .btn-renew {
+      background: linear-gradient(135deg, var(--secondary), var(--accent));
+      border: none;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text-dark);
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(244, 180, 0, 0.1);
+      font-family: 'Inter', sans-serif;
+      margin-top: 4px;
+    }
+
+    .btn-renew:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(244, 180, 0, 0.2);
+      background: linear-gradient(135deg, #f5c400, var(--accent));
+    }
+
+    .btn-renew i { font-size: 15px; }
+    .btn-renew:disabled { opacity: 0.5; transform: none !important; }
+
+    .spinner-renew {
+      display: none;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .spinner-renew.show { display: inline-flex; }
+    .btn-text-renew.hide { display: none; }
+
+    /* ----- footer (inside glass) ----- */
+    .footer {
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 4px 14px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.1);
+      border-top: 1px solid rgba(255, 255, 255, 0.02);
+      padding-top: 16px;
+    }
+
+    .footer a {
+      color: rgba(255, 255, 255, 0.18);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .footer a:hover { color: var(--secondary); }
+    .footer i { color: var(--secondary); font-size: 12px; }
+    .footer .sep { opacity: 0.06; }
+
+    /* ----- responsive ----- */
+    @media (max-width: 992px) {
+      .main-wrapper {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        max-width: 520px;
+      }
+
+      .left-content {
+        align-items: center;
+        text-align: center;
+      }
+
+      .left-content .brand {
+        font-size: 44px;
+      }
+
+      .left-content .description {
+        max-width: 100%;
+        text-align: center;
+      }
+
+      .left-content .status {
+        align-self: center;
+      }
+
+      .left-content .features {
+        align-items: center;
+        width: 100%;
+      }
+
+      .left-content .features .item {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .glass-card {
+        padding: 30px 26px 22px;
+      }
+
+      .glass-card .title {
+        font-size: 26px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      body { padding: 16px; }
+
+      .main-wrapper {
+        gap: 30px;
+      }
+
+      .left-content .brand {
+        font-size: 34px;
+      }
+
+      .left-content .tagline {
+        font-size: 12px;
+        margin-bottom: 14px;
+      }
+
+      .left-content .description {
+        font-size: 13px;
+        margin-bottom: 16px;
+      }
+
+      .left-content .status {
+        font-size: 12px;
+        padding: 5px 16px 5px 12px;
+        margin-bottom: 18px;
+      }
+
+      .left-content .features .item {
+        font-size: 13px;
+        gap: 10px;
+      }
+
+      .glass-card {
+        padding: 22px 18px 18px;
+        border-radius: 20px;
+      }
+
+      .glass-card .title {
+        font-size: 22px;
+      }
+
+      .glass-card .sub {
+        font-size: 13px;
+        margin-bottom: 16px;
+      }
+
+      .form-glass .control {
+        font-size: 13px;
+        padding: 10px 14px;
+      }
+
+      .btn-renew {
+        font-size: 13px;
+        padding: 12px 18px;
+      }
+
+      .footer {
+        font-size: 11px;
+        gap: 4px 10px;
+        padding-top: 14px;
+        margin-top: 14px;
+      }
+
+      .alert-glass {
+        font-size: 12px;
+        padding: 8px 12px;
+        margin-bottom: 14px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .left-content .brand {
+        font-size: 28px;
+      }
+
+      .glass-card .title {
+        font-size: 19px;
+      }
+
+      .glass-card {
+        padding: 18px 14px 14px;
+      }
+    }
+  </style>
 </head>
+<body>
 
-<body class="bg-light">
+  <!-- background orbs -->
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
 
-<div class="container">
+  <div class="main-wrapper">
 
-<div class="row justify-content-center mt-5">
+    <!-- ===== LEFT SIDE ===== -->
+    <div class="left-content">
+      <div class="brand">
+        <span>Hyzora</span>
+      </div>
+      <div class="tagline">License Management System</div>
 
-<div class="col-md-6">
+      <div class="description">
+        <strong>Your license has expired.</strong> To continue enjoying all premium features, 
+        priority support, and regular security updates, please renew your license today.
+      </div>
 
-<div class="card shadow">
+      <div class="status">
+        <span class="dot"></span>
+        License Status: Expired
+      </div>
 
-<div class="card-header bg-danger text-white">
+      <div class="features">
+        <div class="item">
+          <i class="fas fa-lock"></i>
+          <span>Premium Features Locked</span>
+          <span class="badge-new">Inactive</span>
+        </div>
+        <div class="item">
+          <i class="fas fa-headset"></i>
+          <span>Priority Support Suspended</span>
+          <span class="badge-new">Inactive</span>
+        </div>
+        <div class="item">
+          <i class="fas fa-shield-alt"></i>
+          <span>Security Updates Paused</span>
+          <span class="badge-new">Inactive</span>
+        </div>
+        <div class="item">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <span>Cloud Backup Disabled</span>
+          <span class="badge-new">Inactive</span>
+        </div>
+        <div class="item">
+          <i class="fas fa-users"></i>
+          <span>Team Collaboration Locked</span>
+          <span class="badge-new">Inactive</span>
+        </div>
+        <div class="item">
+          <i class="fas fa-chart-line"></i>
+          <span>Analytics Dashboard Paused</span>
+          <span class="badge-new">Inactive</span>
+        </div>
+      </div>
+    </div>
 
-<h4>
+    <!-- ===== RIGHT SIDE – GLASS CARD ===== -->
+    <div class="glass-card">
 
-License Expired
+      <div class="title">
+        License Has <span class="highlight">Expired</span>
+      </div>
 
-</h4>
+      <div class="sub">
+        <strong>Renew your license</strong> to unlock premium features, priority support, and lifetime updates.
+      </div>
 
-</div>
+      <!-- messages (Django template) -->
+      {% if messages %}
+        {% for message in messages %}
+        <div class="alert-glass alert-{{ message.tags }}">
+          <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+          {{ message }}
+        </div>
+        {% endfor %}
+      {% endif %}
 
-<div class="card-body">
+      <!-- form (exactly original: method POST, enctype, csrf, form.as_p) -->
+      <form method="POST" enctype="multipart/form-data" class="form-glass" id="renewForm">
+        {% csrf_token %}
+        {{ form.as_p }}
 
-<p>
+        <button type="submit" class="btn-renew" id="renewBtn">
+          <span class="btn-text-renew"><i class="fas fa-sync-alt"></i> Renew License</span>
+          <span class="spinner-renew" id="spinnerContainer">
+            <span class="spinner-border spinner-border-sm" role="status" style="border-color:#1e1e1e transparent #1e1e1e transparent;"></span>
+            Renewing...
+          </span>
+        </button>
+      </form>
 
-Your software license has expired.
+      <!-- footer -->
+      <div class="footer">
+        <i class="fas fa-headset"></i>
+        <a href="#">Help</a>
+        <span class="sep">|</span>
+        <i class="fas fa-envelope"></i>
+        <a href="mailto:support@hyzora.com">support@hyzora.com</a>
+        <span class="sep">|</span>
+        <i class="fas fa-phone"></i>
+        <a href="tel:+1234567890">+1 234 567 890</a>
+      </div>
 
-</p>
+    </div>
+  </div>
 
-<p>
+  <!-- ===== minimal JS for spinner (same as original) ===== -->
+  <script>
+    (function() {
+      const form = document.getElementById('renewForm');
+      const btn = document.getElementById('renewBtn');
+      const btnText = btn?.querySelector('.btn-text-renew');
+      const spinner = document.getElementById('spinnerContainer');
 
-Please contact the software provider.
-
-</p>
-
-{% if messages %}
-
-{% for message in messages %}
-
-<div class="alert alert-{{ message.tags }}">
-
-{{ message }}
-
-</div>
-
-{% endfor %}
-
-{% endif %}
-
-<form
-method="POST"
-enctype="multipart/form-data">
-
-{% csrf_token %}
-
-{{ form.as_p }}
-
-<button
-class="btn btn-danger w-100">
-
-Renew License
-
-</button>
-
-</form>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
+      if (form && btn) {
+        form.addEventListener('submit', function(e) {
+          btnText.classList.add('hide');
+          spinner.classList.add('show');
+          btn.disabled = true;
+        });
+      }
+    })();
+  </script>
 
 </body>
-
 </html>

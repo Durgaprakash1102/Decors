@@ -2,78 +2,1102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
-
-    <title>Software Activation</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hyzora - Software Activation</title>
+    
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #5c121f;
+            --primary-light: #7a1a2b;
+            --primary-dark: #3d0c14;
+            --secondary: #F4B400;
+            --secondary-light: #f7c948;
+            --text-dark: #1a1a2e;
+            --text-muted: #6b7280;
+            --text-light: #9ca3af;
+            --border-color: #e5e7eb;
+            --white: #ffffff;
+            --bg-light: #faf8f6;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.08);
+            --shadow-xl: 0 20px 60px rgba(0,0,0,0.1);
+            --radius: 20px;
+            --radius-sm: 12px;
+            --transition: 0.3s ease;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f0ec 0%, #faf8f6 50%, #f5f0ec 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            position: relative;
+        }
+
+        /* Decorative Background */
+        .bg-decoration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-decoration .circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.04;
+        }
+
+        .bg-decoration .circle-1 {
+            width: 600px;
+            height: 600px;
+            background: var(--primary);
+            top: -250px;
+            right: -150px;
+        }
+
+        .bg-decoration .circle-2 {
+            width: 500px;
+            height: 500px;
+            background: var(--secondary);
+            bottom: -200px;
+            left: -150px;
+        }
+
+        .bg-decoration .circle-3 {
+            width: 350px;
+            height: 350px;
+            background: var(--primary);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Main Container */
+        .activation-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card */
+        .activation-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border-color);
+            transition: box-shadow var(--transition);
+        }
+
+        .activation-card:hover {
+            box-shadow: 0 30px 80px rgba(0,0,0,0.08);
+        }
+
+        /* ============================================
+           HERO HEADER
+           ============================================ */
+        .hero-section {
+            padding: 35px 50px 30px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            position: relative;
+            overflow: hidden;
+            border-bottom: 4px solid var(--secondary);
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(244,180,0,0.08), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: 10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.03), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .hero-icon {
+            width: 65px;
+            height: 65px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: var(--secondary);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-text h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 42px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+            line-height: 1.1;
+            letter-spacing: -1px;
+        }
+
+        .hero-text h1 .hyzora {
+            color: var(--secondary);
+            display: inline-block;
+            text-shadow: 0 0 40px rgba(244,180,0,0.2);
+        }
+
+        .hero-text .sub {
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            font-weight: 400;
+            margin: 2px 0 0;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.08);
+            padding: 8px 22px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.9);
+            font-size: 13px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-badge .dot {
+            width: 10px;
+            height: 10px;
+            background: var(--secondary);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(244,180,0,0.3);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(1.5); }
+        }
+
+        /* ============================================
+           BODY
+           ============================================ */
+        .card-body-custom {
+            padding: 45px 50px 40px;
+            background: var(--white);
+        }
+
+        /* Two Column Layout */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        /* ============================================
+           LEFT COLUMN
+           ============================================ */
+        .left-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .left-content .tagline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(92,18,31,0.05);
+            padding: 5px 16px 5px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--primary);
+            border: 1px solid rgba(92,18,31,0.06);
+            margin-bottom: 16px;
+            width: fit-content;
+        }
+
+        .left-content .tagline i {
+            color: var(--secondary);
+            font-size: 12px;
+        }
+
+        .left-content h2 {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        .left-content h2 .highlight {
+            color: var(--secondary);
+            position: relative;
+            display: inline-block;
+        }
+
+        .left-content h2 .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+
+        .left-content p {
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 0;
+        }
+
+        /* ===== IMAGE ===== */
+        .license-image {
+            width: 100%;
+            margin-top: 18px;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: linear-gradient(135deg, #f8f4f0, #f0ece8);
+            position: relative;
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .license-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .license-image .image-placeholder {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+        }
+
+        .license-image .image-placeholder i {
+            font-size: 48px;
+            color: var(--secondary);
+            opacity: 0.4;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .license-image .image-placeholder span {
+            font-size: 14px;
+            font-weight: 500;
+            display: block;
+        }
+
+        /* ============================================
+           RIGHT COLUMN - FORM
+           ============================================ */
+        .right-content {
+            padding: 0;
+        }
+
+        .right-content .form-wrapper {
+            background: linear-gradient(145deg, #fdfcfb, #f8f6f4);
+            border-radius: var(--radius-sm);
+            padding: 32px 35px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .right-content .form-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(244,180,0,0.04) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .form-header {
+            margin-bottom: 22px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-header h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .form-header h3 i {
+            color: var(--secondary);
+            margin-right: 8px;
+        }
+
+        .form-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* Domain */
+        .domain-box {
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid var(--border-color);
+            margin-bottom: 22px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .domain-box .label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .domain-box .label i {
+            color: var(--secondary);
+        }
+
+        .domain-box .value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            background: var(--bg-light);
+            padding: 4px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Messages */
+        .messages-container {
+            margin-bottom: 18px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .alert-custom {
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            font-size: 14px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-custom i { font-size: 16px; }
+
+        .alert-custom.alert-success { background: #f0fdf4; color: #065f46; border-color: #bbf7d0; }
+        .alert-custom.alert-success i { color: #10b981; }
+        .alert-custom.alert-error { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+        .alert-custom.alert-error i { color: #ef4444; }
+        .alert-custom.alert-warning { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+        .alert-custom.alert-warning i { color: #f59e0b; }
+        .alert-custom.alert-info { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+        .alert-custom.alert-info i { color: #3b82f6; }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 18px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group label i {
+            color: var(--secondary);
+        }
+
+        /* Upload */
+        .upload-area {
+            position: relative;
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 28px 20px;
+            text-align: center;
+            background: var(--white);
+            transition: all var(--transition);
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: #faf8f6;
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--secondary);
+            background: rgba(244,180,0,0.04);
+            transform: scale(1.02);
+        }
+
+        .upload-area.has-file {
+            border-color: #10b981;
+            background: rgba(16,185,129,0.04);
+        }
+
+        .upload-area input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .upload-icon {
+            font-size: 40px;
+            color: var(--secondary);
+            margin-bottom: 8px;
+            display: block;
+            transition: all var(--transition);
+        }
+
+        .upload-area:hover .upload-icon {
+            transform: scale(1.1) translateY(-3px);
+        }
+
+        .upload-text {
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .upload-text span {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .upload-hint {
+            color: var(--text-light);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .upload-hint i {
+            margin-right: 4px;
+            color: var(--secondary);
+        }
+
+        .file-info {
+            display: none;
+            margin-top: 12px;
+            padding: 10px 14px;
+            background: #f0fdf4;
+            border-radius: var(--radius-sm);
+            border: 1px solid #bbf7d0;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .file-info.show {
+            display: flex;
+        }
+
+        .file-info .name {
+            color: #065f46;
+            font-weight: 600;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-info .name i {
+            color: #10b981;
+        }
+
+        .file-info .size {
+            color: var(--text-muted);
+            font-size: 12px;
+            background: rgba(0,0,0,0.04);
+            padding: 2px 12px;
+            border-radius: 12px;
+        }
+
+        .file-info .remove {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all var(--transition);
+        }
+
+        .file-info .remove:hover {
+            background: #fee2e2;
+        }
+
+        /* Submit Button */
+        .btn-activate {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: #ffffff;
+            border: none;
+            padding: 16px 28px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 16px;
+            width: 100%;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 4px 20px rgba(92,18,31,0.25);
+            position: relative;
+            z-index: 1;
+            margin-top: 4px;
+        }
+
+        .btn-activate::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-activate:hover::before {
+            left: 100%;
+        }
+
+        .btn-activate:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 32px rgba(92,18,31,0.35);
+            color: #ffffff;
+        }
+
+        .btn-activate:active {
+            transform: translateY(0);
+        }
+
+        .btn-activate i {
+            font-size: 18px;
+        }
+
+        .btn-activate:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .spinner-container {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .spinner-container.show {
+            display: inline-flex;
+        }
+
+        .spinner-border-sm {
+            width: 20px;
+            height: 20px;
+            border-width: 2px;
+            border-color: #ffffff transparent #ffffff transparent;
+        }
+
+        .btn-text {
+            display: inline-flex;
+        }
+
+        .btn-text.hide {
+            display: none;
+        }
+
+        /* Footer */
+        .form-footer {
+            margin-top: 18px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-footer p {
+            font-size: 12px;
+            color: var(--text-light);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .form-footer p i {
+            font-size: 12px;
+        }
+
+        .form-footer .sep {
+            opacity: 0.3;
+        }
+
+        .footer-icon { color: var(--secondary); }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 992px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 35px;
+            }
+
+            .hero-section {
+                padding: 28px 30px 24px;
+            }
+
+            .hero-text h1 {
+                font-size: 34px;
+            }
+
+            .card-body-custom {
+                padding: 30px;
+            }
+
+            .left-content h2 {
+                font-size: 30px;
+            }
+
+            .license-image {
+                min-height: 150px;
+            }
+
+            .right-content .form-wrapper {
+                padding: 25px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .hero-left {
+                width: 100%;
+            }
+
+            .hero-badge {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .hero-text h1 {
+                font-size: 28px;
+            }
+
+            .hero-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 22px;
+            }
+
+            .card-body-custom {
+                padding: 20px;
+            }
+
+            .domain-box {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .domain-box .value {
+                width: 100%;
+                text-align: center;
+            }
+
+            .right-content .form-wrapper {
+                padding: 20px;
+            }
+
+            .license-image {
+                min-height: 120px;
+            }
+
+            .left-content h2 {
+                font-size: 26px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            body {
+                padding: 15px 10px;
+            }
+
+            .hero-section {
+                padding: 20px 18px;
+            }
+
+            .hero-text h1 {
+                font-size: 24px;
+            }
+
+            .hero-icon {
+                width: 44px;
+                height: 44px;
+                font-size: 20px;
+            }
+
+            .hero-text .sub {
+                font-size: 12px;
+            }
+
+            .hero-badge {
+                font-size: 12px;
+                padding: 6px 16px;
+            }
+
+            .card-body-custom {
+                padding: 16px;
+            }
+
+            .left-content h2 {
+                font-size: 22px;
+            }
+
+            .left-content p {
+                font-size: 14px;
+            }
+
+            .upload-area {
+                padding: 20px 15px;
+            }
+
+            .upload-icon {
+                font-size: 32px;
+            }
+
+            .file-info {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+
+            .form-footer p {
+                font-size: 11px;
+                gap: 4px;
+            }
+
+            .right-content .form-wrapper {
+                padding: 16px;
+            }
+
+            .license-image {
+                min-height: 100px;
+            }
+
+            .license-image .image-placeholder i {
+                font-size: 32px;
+            }
+
+            .form-header h3 {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .left-content h2 {
+                font-size: 20px;
+            }
+
+            .hero-text h1 {
+                font-size: 22px;
+            }
+
+            .hero-left {
+                gap: 12px;
+            }
+        }
+    </style>
 </head>
+<body>
 
-<body class="bg-light">
+<!-- Background Decoration -->
+<div class="bg-decoration">
+    <div class="circle circle-1"></div>
+    <div class="circle circle-2"></div>
+    <div class="circle circle-3"></div>
+</div>
 
-<div class="container">
+<div class="activation-wrapper">
+    <div class="activation-card">
+        
+        <!-- ============================================
+             HERO SECTION - Big Hyzora
+             ============================================ -->
+        <div class="hero-section">
+            <div class="hero-content">
+                <div class="hero-left">
+                    <div class="hero-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="hero-text">
+                        <h1>
+                            <span class="hyzora">Hyzora</span> Activation
+                        </h1>
+                        <p class="sub">Secure License Management System</p>
+                    </div>
+                </div>
+                <div class="hero-badge">
+                    <span class="dot"></span>
+                    🔒 Secure Connection
+                </div>
+            </div>
+        </div>
 
-    <div class="row justify-content-center mt-5">
+        <!-- ============================================
+             BODY
+             ============================================ -->
+        <div class="card-body-custom">
+            
+            <div class="content-grid">
+                
+                <!-- ===== LEFT COLUMN ===== -->
+                <div class="left-content">
+                    
+                    <!-- Tagline -->
+                    <div class="tagline">
+                        <i class="fas fa-shield-alt"></i> 
+                        Trusted License System
+                    </div>
+                    
+                    <!-- Title -->
+                    <h2>
+                        Activate Your <br><span class="highlight">Software</span> License
+                    </h2>
+                    
+                    <p>
+                        Upload your license file to activate premium features 
+                        and get access to all benefits, priority support, 
+                        and lifetime updates.
+                    </p>
 
-        <div class="col-md-6">
-
-            <div class="card shadow">
-
-                <div class="card-header bg-primary text-white">
-
-                    <h4 class="mb-0">
-                        Software Activation
-                    </h4>
-
+                    <!-- ===== IMAGE ===== -->
+                    <div class="license-image">
+                        <img src="{% static 'images/license.png' %}" alt="License Illustration" onerror="this.style.display='none'">
+                        
+                        
+                    </div>
                 </div>
 
-                <div class="card-body">
+                <!-- ===== RIGHT COLUMN - FORM ===== -->
+                <div class="right-content">
+                    
+                    <div class="form-wrapper">
+                        <!-- Form Header -->
+                        <div class="form-header">
+                            <h3><i class="fas fa-key"></i> Enter License Details</h3>
+                            <p>Fill in your license information below</p>
+                        </div>
 
-                    {% if messages %}
-
-                        {% for message in messages %}
-
-                            <div class="alert alert-{{ message.tags }}">
-
+                        <!-- Messages -->
+                        {% if messages %}
+                        <div class="messages-container">
+                            {% for message in messages %}
+                            <div class="alert-custom alert-{{ message.tags }}">
+                                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
                                 {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
 
+                        <!-- Domain -->
+                        <div class="domain-box">
+                            <span class="label">
+                                <i class="fas fa-globe"></i> Current Domain
+                            </span>
+                            <span class="value">
+                                {{ request.get_host }}
+                            </span>
+                        </div>
+
+                        <!-- Form -->
+                        <form method="POST" enctype="multipart/form-data" id="activationForm">
+                            {% csrf_token %}
+                            
+                            <!-- License Upload -->
+                            <div class="form-group">
+                                <label for="licenseFile">
+                                    <i class="fas fa-file-upload"></i> Upload License File
+                                </label>
+                                
+                                <div class="upload-area" id="uploadArea">
+                                    <input type="file" 
+                                           name="license_file" 
+                                           id="licenseFile" 
+                                           accept=".json,.lic,.txt,.key,.pem,.cert">
+                                    
+                                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                    
+                                    <div class="upload-text">
+                                        Drop your license file here or <span>browse</span>
+                                    </div>
+                                    
+                                    <div class="upload-hint">
+                                        <i class="fas fa-file"></i> Supports: .json, .lic, .txt, .key, .pem, .cert
+                                    </div>
+
+                                    <!-- File Info -->
+                                    <div class="file-info" id="fileInfo">
+                                        <span class="name">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span id="fileNameDisplay">license.json</span>
+                                        </span>
+                                        <span class="size" id="fileSizeDisplay">2.4 KB</span>
+                                        <button type="button" class="remove" id="removeFile" title="Remove file">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
-                        {% endfor %}
+                            <!-- Submit -->
+                            <button type="submit" class="btn-activate" id="activateBtn">
+                                <span class="btn-text">
+                                    <i class="fas fa-unlock-alt"></i> Activate License
+                                </span>
+                                <span class="spinner-container" id="spinnerContainer">
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    Activating...
+                                </span>
+                            </button>
 
-                    {% endif %}
+                        </form>
 
-                    <div class="mb-4">
-
-                        <h6>Current Domain</h6>
-
-                        <strong>
-
-                            {{ request.get_host }}
-
-                        </strong>
-
+                        <!-- Footer -->
+                        <div class="form-footer">
+                            <p>
+                                <i class="fas fa-shield-alt footer-icon"></i> 
+                                Secure
+                                <span class="sep">|</span>
+                                <i class="fas fa-clock footer-icon"></i> 
+                                Lifetime
+                                <span class="sep">|</span>
+                                <i class="fas fa-lock footer-icon"></i> 
+                                Encrypted
+                                <span class="sep">|</span>
+                                <i class="fas fa-check-circle footer-icon"></i> 
+                                Verified
+                            </p>
+                        </div>
                     </div>
-
-                    <form method="POST"
-
-                          enctype="multipart/form-data">
-
-                        {% csrf_token %}
-
-                        {{ form.as_p }}
-
-                        <button
-                            class="btn btn-primary w-100">
-
-                            Activate
-
-                        </button>
-
-                    </form>
-
                 </div>
 
             </div>
@@ -81,8 +1105,98 @@
         </div>
 
     </div>
-
 </div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Hide placeholder if image loads
+    document.querySelector('.license-image img')?.addEventListener('load', function() {
+        document.getElementById('imagePlaceholder').style.display = 'none';
+    });
+
+    // ============================================
+    // FILE UPLOAD HANDLING
+    // ============================================
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('licenseFile');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const fileSizeDisplay = document.getElementById('fileSizeDisplay');
+    const removeFileBtn = document.getElementById('removeFile');
+
+    fileInput.addEventListener('change', function() {
+        if (this.files && this.files.length > 0) {
+            const file = this.files[0];
+            showFileInfo(file);
+        } else {
+            hideFileInfo();
+        }
+    });
+
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+        
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const file = e.dataTransfer.files[0];
+            fileInput.files = e.dataTransfer.files;
+            showFileInfo(file);
+        }
+    });
+
+    function showFileInfo(file) {
+        fileNameDisplay.textContent = file.name;
+        fileSizeDisplay.textContent = (file.size / 1024).toFixed(1) + ' KB';
+        fileInfo.classList.add('show');
+        uploadArea.classList.add('has-file');
+    }
+
+    function hideFileInfo() {
+        fileInfo.classList.remove('show');
+        uploadArea.classList.remove('has-file');
+        fileInput.value = '';
+    }
+
+    removeFileBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        hideFileInfo();
+    });
+
+    uploadArea.addEventListener('click', function(e) {
+        if (e.target.tagName !== 'BUTTON' && !e.target.closest('.file-remove')) {
+            fileInput.click();
+        }
+    });
+
+    // ============================================
+    // FORM SUBMISSION
+    // ============================================
+    const form = document.getElementById('activationForm');
+    const activateBtn = document.getElementById('activateBtn');
+    const btnText = activateBtn.querySelector('.btn-text');
+    const spinnerContainer = document.getElementById('spinnerContainer');
+
+    form.addEventListener('submit', function(e) {
+        btnText.classList.add('hide');
+        spinnerContainer.classList.add('show');
+        activateBtn.disabled = true;
+    });
+
+    console.log('✨ Hyzora Activation Page Loaded');
+    console.log('🌐 Domain:', '{{ request.get_host }}');
+</script>
 
 </body>
 </html>

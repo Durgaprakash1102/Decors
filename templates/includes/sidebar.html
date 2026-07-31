@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hyzora · Admin Sidebar</title>
+    <title>Hyzora · {% if user.role == 'admin' %}Admin{% else %}Employee{% endif %} Sidebar</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
-         <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/newlogo.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/newlogo.png' %}">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -43,24 +43,25 @@
         :root {
             --primary: #5c121f;
             --primary-light: #7a1a2b;
-            --secondary: #F4B400;
-            --accent: #D97706;
+            --gold: #C9A84C;
+            --gold-light: #E8D5A3;
+            --gold-dark: #A8893A;
             --text-dark: #1a1a1a;
             --text-light: #6b6b6b;
             --text-white: #ffffff;
             --bg-white: #ffffff;
             --bg-light: #f8f6f4;
             --border: #eae6e2;
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-            --shadow-hover: 0 8px 32px rgba(92, 18, 31, 0.12);
-            --radius: 10px;
-            --transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            --shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --radius: 12px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             --sidebar-width: 260px;
             --header-height: 50px;
         }
 
         /* ============================================================
-           ADMIN SIDEBAR - FIXED POSITION
+           SIDEBAR - FIXED POSITION
            ============================================================ */
         .admin-sidebar {
             position: fixed;
@@ -78,6 +79,94 @@
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
+        }
+
+        /* Employee Sidebar - Full Primary Background */
+        body.employee-role .admin-sidebar {
+            background: var(--primary);
+            border-right: none;
+        }
+
+        body.employee-role .sidebar-header {
+            background: var(--primary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        body.employee-role .sidebar-header::after {
+            opacity: 0.6;
+        }
+
+        body.employee-role .sidebar-nav .nav-section-label {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        body.employee-role .sidebar-nav .nav-item,
+        body.employee-role .submenu-item {
+            color: rgba(255, 255, 255, 0.7);
+            border: none !important;
+        }
+
+        body.employee-role .sidebar-nav .nav-item:hover,
+        body.employee-role .submenu-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border: none !important;
+            transform: translateX(4px);
+        }
+
+        body.employee-role .sidebar-nav .nav-item.active,
+        body.employee-role .submenu-item.active {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            border: none !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        body.employee-role .sidebar-nav .nav-item i,
+        body.employee-role .submenu-item i {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.employee-role .sidebar-nav .nav-item:hover i,
+        body.employee-role .submenu-item:hover i {
+            color: #fff;
+        }
+
+        body.employee-role .sidebar-nav .nav-item.active i,
+        body.employee-role .submenu-item.active i {
+            color: var(--gold);
+        }
+
+        body.employee-role .section-divider::before {
+            background: linear-gradient(
+                to right,
+                transparent,
+                rgba(255, 255, 255, 0.08),
+                rgba(255, 255, 255, 0.2),
+                rgba(255, 255, 255, 0.08),
+                transparent
+            );
+        }
+
+        body.employee-role .section-divider .divider-dot {
+            background: var(--primary);
+            border-color: rgba(201, 168, 76, 0.3);
+        }
+
+        body.employee-role .sidebar-footer {
+            background: var(--primary);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Hide header for employee */
+        body.employee-role .admin-header {
+            display: none !important;
+        }
+
+        /* Employee main content - no header gap */
+        body.employee-role .main-content {
+            top: 0 !important;
+            left: var(--sidebar-width);
         }
 
         .admin-sidebar::-webkit-scrollbar {
@@ -115,7 +204,7 @@
             left: 20%;
             right: 20%;
             height: 2px;
-            background: linear-gradient(90deg, transparent, var(--secondary), transparent);
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
             opacity: 0.4;
         }
         .sidebar-header .logo-img img {
@@ -134,7 +223,7 @@
         /* --- Sidebar Navigation --- */
         .sidebar-nav {
             flex: 1;
-            padding: 6px 10px 10px;
+            padding: 8px 12px 10px;
             overflow-y: auto;
             overflow-x: hidden;
         }
@@ -153,7 +242,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 14px 0;
+            margin: 16px 0;
         }
         .section-divider::before {
             content: "";
@@ -162,9 +251,9 @@
             background: linear-gradient(
                 to right,
                 transparent,
-                rgba(92,18,31,.15),
-                rgba(92,18,31,.35),
-                rgba(92,18,31,.15),
+                rgba(92,18,31,.1),
+                rgba(92,18,31,.25),
+                rgba(92,18,31,.1),
                 transparent
             );
         }
@@ -173,17 +262,17 @@
             width: 18px;
             height: 18px;
             background: #fff;
-            border: 1px solid rgba(244,180,0,.3);
+            border: 1px solid rgba(201, 168, 76, 0.2);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 4px 14px rgba(0,0,0,.06);
+            box-shadow: 0 4px 14px rgba(0,0,0,.05);
         }
         .section-divider .divider-dot::before {
             content: "✦";
             font-size: 10px;
-            color: var(--secondary);
+            color: var(--gold);
         }
 
         /* --- Section Label --- */
@@ -193,8 +282,8 @@
             color: var(--primary);
             text-transform: uppercase;
             letter-spacing: 1.6px;
-            padding: 6px 10px 3px;
-            opacity: 0.5;
+            padding: 8px 10px 4px;
+            opacity: 0.4;
             white-space: nowrap;
         }
 
@@ -204,18 +293,18 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 8px 12px;
+            padding: 9px 14px;
             border-radius: var(--radius);
             color: var(--text-light);
             transition: var(--transition);
             cursor: pointer;
             position: relative;
             white-space: nowrap;
-            margin-bottom: 1px;
+            margin-bottom: 2px;
             font-weight: 500;
             font-size: 13px;
             background: transparent;
-            border: 1px solid transparent;
+            border: none !important;
             width: 100%;
             text-align: left;
         }
@@ -223,16 +312,16 @@
         .submenu-item:hover {
             background: var(--bg-light);
             color: var(--primary);
-            border-color: var(--border);
-            transform: translateX(3px);
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: none !important;
+            transform: translateX(4px);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
         }
         .sidebar-nav .nav-item.active,
         .submenu-item.active {
             background: var(--primary);
             color: #fff;
-            border-color: var(--primary);
-            box-shadow: 0 4px 20px rgba(92, 18, 31, 0.25);
+            border: none !important;
+            box-shadow: 0 4px 20px rgba(92, 18, 31, 0.2);
             transform: translateX(0);
         }
         .sidebar-nav .nav-item.active i,
@@ -270,13 +359,13 @@
         .submenu-item {
             font-weight: 400;
             font-size: 13px;
-            padding: 7px 12px 7px 46px;
+            padding: 8px 14px 8px 48px;
         }
         .submenu-item i {
             font-size: 14px;
             width: 20px;
             opacity: 0.6;
-            margin-left: -26px;
+            margin-left: -28px;
         }
         .submenu-item.active i {
             opacity: 1;
@@ -292,7 +381,7 @@
             height: 20px;
             padding: 0 7px;
             border-radius: 50px;
-            background: #F4B400;
+            background: var(--gold);
             color: #5c121f;
             font-size: 10px;
             font-weight: 700;
@@ -309,77 +398,306 @@
             color: var(--primary);
         }
 
-        /* --- Sidebar Footer --- */
+        /* ============================================================
+           FOOTER - LUXURY MINIMALIST DESIGN
+           ============================================================ */
         .sidebar-footer {
-            padding: 6px 10px 12px;
-            border-top: 1px solid var(--border);
+            padding: 20px 16px 22px;
+            border-top: 2px solid var(--gold);
             flex-shrink: 0;
             background: var(--bg-white);
             position: sticky;
             bottom: 0;
             z-index: 5;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
-        .sidebar-footer .logout-wrapper {
+
+        /* Luxury Home - Minimal with Gold Accent */
+        .footer-home-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            background: transparent;
+            color: var(--text-dark);
+            border: 1px solid transparent;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            width: 100%;
+            letter-spacing: 0.3px;
+        }
+
+        .footer-home-link .home-left {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 9px 14px;
-            border-radius: var(--radius);
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        }
+
+        .footer-home-link .home-right {
+            font-size: 12px;
+            color: var(--gold);
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .footer-home-link:hover .home-right {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .footer-home-link:hover {
+            background: var(--gold);
             color: #fff;
-            transition: var(--transition);
-            cursor: pointer;
-            border: none;
-            box-shadow: 0 4px 16px rgba(92, 18, 31, 0.25);
-            position: relative;
-            overflow: hidden;
-            width: 100%;
+            border-color: var(--gold);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(201, 168, 76, 0.25);
         }
-        .sidebar-footer .logout-wrapper::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: var(--transition);
-        }
-        .sidebar-footer .logout-wrapper:hover::before {
-            left: 100%;
-        }
-        .sidebar-footer .logout-wrapper:hover {
-            transform: translateX(3px);
-            box-shadow: 0 6px 24px rgba(92, 18, 31, 0.35);
-        }
-        .sidebar-footer .logout-wrapper i {
+
+        .footer-home-link i {
             font-size: 16px;
-            width: 20px;
-            text-align: center;
-            color: var(--secondary);
-            transition: var(--transition);
+            color: var(--gold);
+            transition: all 0.3s ease;
         }
-        .sidebar-footer .logout-wrapper:hover i {
-            transform: rotate(-15deg) scale(1.1);
+
+        .footer-home-link:hover i {
+            color: #fff;
         }
-        .sidebar-footer .logout-wrapper .logout-text {
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 0.3px;
+
+        /* Luxury Profile - Clean Card */
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .profile-section:hover {
+            border-color: var(--gold);
+            background: var(--bg-white);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(201, 168, 76, 0.12);
+        }
+
+        .profile-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .profile-section:hover .profile-avatar {
+            background: var(--gold);
+            transform: scale(1.05);
+        }
+
+        .profile-avatar .status-dot {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #22c55e;
+            border: 2px solid #fff;
+        }
+
+        .profile-info {
             flex: 1;
         }
-        .sidebar-footer .logout-wrapper .logout-arrow {
-            font-size: 12px;
-            opacity: 0.7;
-            transition: var(--transition);
+
+        .profile-info .profile-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            line-height: 1.3;
         }
-        .sidebar-footer .logout-wrapper:hover .logout-arrow {
+
+        .profile-info .profile-role {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+        }
+
+        .profile-info .profile-role i {
+            font-size: 6px;
+            color: var(--gold);
+        }
+
+        .profile-info .profile-role span {
+            color: var(--gold);
+        }
+
+        /* Luxury Logout - Minimal Button */
+        .sidebar-footer .logout-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            background: transparent;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            width: 100%;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .sidebar-footer .logout-wrapper .logout-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-footer .logout-wrapper .logout-right {
+            font-size: 12px;
+            color: var(--primary);
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-footer .logout-wrapper:hover .logout-right {
             opacity: 1;
-            transform: translateX(3px);
+            transform: translateX(0);
+        }
+
+        .sidebar-footer .logout-wrapper:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(92, 18, 31, 0.25);
+        }
+
+        .sidebar-footer .logout-wrapper i {
+            font-size: 16px;
+            color: var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-footer .logout-wrapper:hover i {
+            color: var(--gold);
+            transform: rotate(-10deg);
+        }
+
+        /* ===== EMPLOYEE FOOTER STYLES ===== */
+        body.employee-role .footer-home-link {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        body.employee-role .footer-home-link .home-right {
+            color: var(--gold);
+        }
+
+        body.employee-role .footer-home-link:hover {
+            background: var(--gold);
+            color: #fff;
+            border-color: var(--gold);
+        }
+
+        body.employee-role .footer-home-link i {
+            color: var(--gold);
+        }
+
+        body.employee-role .footer-home-link:hover i {
+            color: #fff;
+        }
+
+        body.employee-role .profile-section {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        body.employee-role .profile-section:hover {
+            border-color: var(--gold);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        body.employee-role .profile-avatar {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        body.employee-role .profile-section:hover .profile-avatar {
+            background: var(--gold);
+        }
+
+        body.employee-role .profile-info .profile-name {
+            color: #fff;
+        }
+
+        body.employee-role .profile-info .profile-role {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.employee-role .profile-info .profile-role i {
+            color: var(--gold);
+        }
+
+        body.employee-role .profile-info .profile-role span {
+            color: var(--gold);
+        }
+
+        body.employee-role .sidebar-footer .logout-wrapper {
+            color: rgba(255, 255, 255, 0.8);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body.employee-role .sidebar-footer .logout-wrapper .logout-right {
+            color: var(--gold);
+        }
+
+        body.employee-role .sidebar-footer .logout-wrapper:hover {
+            background: var(--gold);
+            color: #fff;
+            border-color: var(--gold);
+        }
+
+        body.employee-role .sidebar-footer .logout-wrapper i {
+            color: var(--gold);
+        }
+
+        body.employee-role .sidebar-footer .logout-wrapper:hover i {
+            color: #fff;
+        }
+
+        /* Hide footer elements for admin */
+        body.admin-role .profile-section,
+        body.admin-role .footer-home-link {
+            display: none !important;
+        }
+
+        /* Show footer elements for employee */
+        body.employee-role .profile-section,
+        body.employee-role .footer-home-link {
+            display: flex !important;
         }
 
         /* ============================================================
-           HEADER - FIXED
+           HEADER - FIXED (Admin only)
            ============================================================ */
         .admin-header {
             position: fixed;
@@ -409,7 +727,7 @@
             letter-spacing: 0.3px;
         }
         .admin-header .header-left .page-title i {
-            color: var(--secondary);
+            color: var(--gold);
             margin-right: 10px;
         }
         .admin-header .header-right {
@@ -439,7 +757,7 @@
         }
         .admin-header .header-right .admin-info .admin-avatar:hover {
             background: rgba(255, 255, 255, 0.2);
-            border-color: var(--secondary);
+            border-color: var(--gold);
         }
         .admin-header .header-right .admin-info .admin-name {
             font-weight: 500;
@@ -519,7 +837,71 @@
         }
 
         /* ============================================================
-           MOBILE HAMBURGER
+           MOBILE HEADER FOR EMPLOYEE
+           ============================================================ */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: var(--primary);
+            z-index: 999;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            box-shadow: 0 2px 20px rgba(92, 18, 31, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-header .mobile-logo img {
+            height: 32px;
+            width: auto;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
+        }
+
+        .mobile-header .mobile-toggle-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 17px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-header .mobile-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Show mobile header only for employee on mobile */
+        @media (max-width: 900px) {
+            body.employee-role .mobile-header {
+                display: flex !important;
+            }
+            
+            body.employee-role .admin-sidebar {
+                top: 56px;
+                height: calc(100vh - 56px);
+            }
+            
+            body.employee-role .main-content {
+                top: 56px !important;
+                left: 0 !important;
+                height: calc(100vh - 56px);
+            }
+        }
+
+        /* ============================================================
+           MOBILE HAMBURGER (Admin only)
            ============================================================ */
         .mobile-menu-btn {
             display: none;
@@ -554,28 +936,52 @@
             .admin-sidebar.mobile-open {
                 transform: translateX(0);
             }
+            
+            /* Admin header on mobile */
             .admin-header {
                 left: 0;
                 padding: 0 16px;
                 height: 54px;
             }
+            
             .main-content {
                 left: 0;
                 top: 54px;
                 padding: 18px 16px 60px;
             }
+            
             .mobile-menu-btn {
                 display: flex !important;
             }
+            
             .admin-header .header-left .page-title {
                 margin-left: 44px;
                 font-size: 15px;
             }
+            
             .sidebar-overlay.active {
                 display: block;
             }
+            
             .admin-header .header-right .admin-info .admin-name {
                 display: none;
+            }
+
+            /* Employee mobile adjustments */
+            body.employee-role .main-content {
+                top: 56px !important;
+                left: 0 !important;
+                padding-top: 16px;
+                height: calc(100vh - 56px);
+            }
+
+            body.employee-role .mobile-header {
+                display: flex !important;
+            }
+
+            body.employee-role .admin-sidebar {
+                top: 56px;
+                height: calc(100vh - 56px);
             }
         }
 
@@ -617,6 +1023,20 @@
                 height: 30px;
                 font-size: 14px;
             }
+
+            body.employee-role .mobile-header {
+                height: 50px;
+            }
+            
+            body.employee-role .admin-sidebar {
+                top: 50px;
+                height: calc(100vh - 50px);
+            }
+            
+            body.employee-role .main-content {
+                top: 50px !important;
+                height: calc(100vh - 50px);
+            }
         }
 
         @media (max-width: 400px) {
@@ -635,11 +1055,67 @@
                 padding: 12px 12px 60px;
             }
         }
+
+        /* ============================================================
+           ROLE-BASED HIDING
+           ============================================================ */
+        body.employee-role .admin-only {
+            display: none !important;
+        }
+        
+        body.admin-role .employee-only {
+            display: none !important;
+        }
+
+        /* Hide header completely for employee */
+        body.employee-role .admin-header {
+            display: none !important;
+        }
+
+        /* Hide admin mobile menu button for employee */
+        body.employee-role .mobile-menu-btn {
+            display: none !important;
+        }
+
+        /* Empty state image styling */
+        .empty-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            flex-direction: column;
+            gap: 30px;
+            color: #5c121f;
+        }
+
+        .empty-state img {
+            max-width: 150px;
+            opacity: 0.1;
+        }
+
+        .empty-state h1 {
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 24px;
+            color: #5c121f;
+            opacity: 0.4;
+            letter-spacing: 2px;
+        }
     </style>
 </head>
-<body>
+<body class="{% if user.role == 'employee' %}employee-role{% elif user.role == 'admin' %}admin-role{% endif %}">
 
-    <!-- ===== MOBILE MENU BUTTON ===== -->
+    <!-- ===== MOBILE HEADER FOR EMPLOYEE ===== -->
+    <header class="mobile-header" id="mobileHeader">
+        <div class="mobile-logo">
+            <img src="{% static 'images/nologonew.png' %}" alt="Hyzora" />
+        </div>
+        <button class="mobile-toggle-btn" id="mobileToggleBtn" aria-label="Toggle Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- ===== MOBILE MENU BUTTON (Admin only) ===== -->
     <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Menu">
         <i class="fa-solid fa-bars"></i>
     </button>
@@ -648,11 +1124,11 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- ============================================================
-    ADMIN HEADER - FIXED
+    ADMIN HEADER - FIXED (Hidden for Employee)
     ============================================================ -->
     <header class="admin-header">
         <div class="header-left">
-            <span class="page-title"><i class="fa-solid fa-gem"></i>Welcome !</span>
+            <span class="page-title"><i class="fa-solid fa-gem"></i>Welcome Admin!</span>
         </div>
         <div class="header-right">
             <div class="admin-info">
@@ -669,7 +1145,7 @@
     </header>
 
     <!-- ============================================================
-    ADMIN SIDEBAR - FIXED WITH PROPER ALIGNMENT
+    SIDEBAR - FIXED WITH PROPER ALIGNMENT
     ============================================================ -->
     <aside class="admin-sidebar" id="adminSidebar">
 
@@ -683,141 +1159,155 @@
         <!-- Sidebar Navigation -->
         <nav class="sidebar-nav">
 
-            <div class="nav-section-label">Main</div>
+            <!-- ===== ADMIN ONLY LINKS ===== -->
+            <div class="admin-only">
+                <div class="nav-section-label">Main</div>
 
-            <a href="{% url 'Ecom:admin_dashboard' %}"
-               class="nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
-                <i class="fa-solid fa-chart-pie"></i>
-                <span class="nav-text">Dashboard</span>
-            </a>
+                <a href="{% url 'Ecom:admin_dashboard' %}"
+                   class="nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
 
-            <a href="{% url 'Ecom:orders' %}"
-               class="nav-item {% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <span class="nav-text">All Orders</span>
-            </a>
+                <a href="{% url 'Ecom:orders' %}"
+                   class="nav-item {% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span class="nav-text">All Orders</span>
+                </a>
 
-            <a href="{% url 'Ecom:admin_order_list' %}"
-               class="nav-item {% if request.resolver_match.url_name == 'admin_order_list' %}active{% endif %}">
-                <i class="fa-solid fa-box"></i>
-                <span class="nav-text">Incoming Orders</span>
-                {% if incoming_orders_count > 0 %}
-                    <span class="menu-badge">{{ incoming_orders_count }}</span>
-                {% endif %}
-            </a>
+                <a href="{% url 'Ecom:admin_order_list' %}"
+                   class="nav-item {% if request.resolver_match.url_name == 'admin_order_list' %}active{% endif %}">
+                    <i class="fa-solid fa-box"></i>
+                    <span class="nav-text">Incoming Orders</span>
+                    {% if incoming_orders_count > 0 %}
+                        <span class="menu-badge">{{ incoming_orders_count }}</span>
+                    {% endif %}
+                </a>
 
-            <a href="{% url 'Ecom:admin_replacement_requests' %}"
-               class="nav-item {% if request.resolver_match.url_name == 'admin_replacement_requests' %}active{% endif %}">
-                <i class="fa-solid fa-right-left"></i>
-                <span class="nav-text">Replacement Requests</span>
-                {% if replacement_requests_count > 0 %}
-                    <span class="menu-badge">{{ replacement_requests_count }}</span>
-                {% endif %}
-            </a>
+                <a href="{% url 'Ecom:admin_replacement_requests' %}"
+                   class="nav-item {% if request.resolver_match.url_name == 'admin_replacement_requests' %}active{% endif %}">
+                    <i class="fa-solid fa-right-left"></i>
+                    <span class="nav-text">Replacement Requests</span>
+                    {% if replacement_requests_count > 0 %}
+                        <span class="menu-badge">{{ replacement_requests_count }}</span>
+                    {% endif %}
+                </a>
 
-            <a href="{% url 'Ecom:admin_return_requests' %}"
-               class="nav-item {% if request.resolver_match.url_name == 'admin_return_requests' %}active{% endif %}">
-                <i class="fa-solid fa-rotate-left"></i>
-                <span class="nav-text">Return Requests</span>
-                {% if return_requests_count > 0 %}
-                    <span class="menu-badge">{{ return_requests_count }}</span>
-                {% endif %}
-            </a>
+                <a href="{% url 'Ecom:admin_return_requests' %}"
+                   class="nav-item {% if request.resolver_match.url_name == 'admin_return_requests' %}active{% endif %}">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span class="nav-text">Return Requests</span>
+                    {% if return_requests_count > 0 %}
+                        <span class="menu-badge">{{ return_requests_count }}</span>
+                    {% endif %}
+                </a>
 
-            <a href="{% url 'Ecom:admin_cancellation_requests' %}"
-               class="nav-item {% if request.resolver_match.url_name == 'admin_cancellation_requests' %}active{% endif %}">
-                <i class="fa-solid fa-ban"></i>
-                <span class="nav-text">Cancellation Requests</span>
-                {% if cancellation_requests_count > 0 %}
-                    <span class="menu-badge">{{ cancellation_requests_count }}</span>
-                {% endif %}
-            </a>
+                <a href="{% url 'Ecom:admin_cancellation_requests' %}"
+                   class="nav-item {% if request.resolver_match.url_name == 'admin_cancellation_requests' %}active{% endif %}">
+                    <i class="fa-solid fa-ban"></i>
+                    <span class="nav-text">Cancellation Requests</span>
+                    {% if cancellation_requests_count > 0 %}
+                        <span class="menu-badge">{{ cancellation_requests_count }}</span>
+                    {% endif %}
+                </a>
 
-            <a href="{% url 'Ecom:product_list' %}"
-               class="nav-item {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
-                <i class="fa-solid fa-box-open"></i>
-                <span class="nav-text">Products</span>
-            </a>
+                <a href="{% url 'Ecom:product_list' %}"
+                   class="nav-item {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
+                    <i class="fa-solid fa-box-open"></i>
+                    <span class="nav-text">Products</span>
+                </a>
 
-            <a href="{% url 'Ecom:inventory_log' %}"
-               class="nav-item {% if request.resolver_match.url_name == 'inventory_log' %}active{% endif %}">
-                <i class="fa-solid fa-boxes-stacked"></i>
-                <span class="nav-text">Inventory</span>
-            </a>
+                <a href="{% url 'Ecom:inventory_log' %}"
+                   class="nav-item {% if request.resolver_match.url_name == 'inventory_log' %}active{% endif %}">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <span class="nav-text">Inventory</span>
+                </a>
 
-            <!-- Section Divider -->
-            <div class="section-divider">
-                <span class="divider-dot"></span>
+                <!-- Section Divider -->
+                <div class="section-divider">
+                    <span class="divider-dot"></span>
+                </div>
+
+                <div class="nav-section-label">Management</div>
+
+                <a href="{% url 'Ecom:category_list' %}"
+                   class="submenu-item {% if request.resolver_match.url_name == 'category_list' %}active{% endif %}">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span class="nav-text">Categories</span>
+                </a>
+
+                <a href="{% url 'Ecom:subcategory_list' %}"
+                   class="submenu-item {% if request.resolver_match.url_name == 'subcategory_list' %}active{% endif %}">
+                    <i class="fa-solid fa-diagram-project"></i>
+                    <span class="nav-text">Sub Categories</span>
+                </a>
+
+                <a href="{% url 'Ecom:review_list' %}"
+                   class="submenu-item {% if request.resolver_match.url_name == 'review_list' %}active{% endif %}">
+                    <i class="fa-solid fa-star"></i>
+                    <span class="nav-text">Reviews</span>
+                    {% if pending_review_count > 0 %}
+                        <span class="menu-badge">{{ pending_review_count }}</span>
+                    {% endif %}
+                </a>
+
+                <a href="{% url 'Ecom:coupon_list' %}"
+                   class="submenu-item {% if request.resolver_match.url_name == 'coupon_list' %}active{% endif %}">
+                    <i class="fa-solid fa-ticket"></i>
+                    <span class="nav-text">Coupons</span>
+                </a>
+
+                <a href="{% url 'Ecom:offer_list' %}"
+                   class="submenu-item {% if request.resolver_match.url_name == 'offer_list' %}active{% endif %}">
+                    <i class="fa-solid fa-tags"></i>
+                    <span class="nav-text">Offers</span>
+                </a>
+
+                <a href="{% url 'Ecom:low_stock_alerts' %}"
+                   class="submenu-item {% if request.resolver_match.url_name == 'low_stock_alerts' %}active{% endif %}">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span class="nav-text">Low Stock Items</span>
+                    {% if total_low_stock_count > 0 %}
+                        <span class="menu-badge">{{ total_low_stock_count }}</span>
+                    {% endif %}
+                </a>
+
+                <a href="{% url 'Ecom:banner_list' %}"
+                   class="submenu-item {% if request.resolver_match.url_name == 'banner_list' %}active{% endif %}">
+                    <i class="fa-solid fa-image"></i>
+                    <span class="nav-text">Banners</span>
+                </a>
+
+                <div class="section-divider">
+                    <span class="divider-dot"></span>
+                </div>
+
+                <div class="nav-section-label">Offline Order Management</div>
+
+                <a href="{% url 'offline_sales:store_settings_list' %}"
+                   class="nav-item {% if request.resolver_match.url_name == 'store_settings_list' %}active{% endif %}">
+                    <i class="fa-solid fa-store"></i>
+                    <span class="nav-text">Store Settings</span>
+                </a>
+
+                <a href="{% url 'offline_sales:barcode_list' %}"
+                   class="nav-item {% if request.resolver_match.url_name == 'barcode_list' %}active{% endif %}">
+                    <i class="fa-solid fa-barcode"></i>
+                    <span class="nav-text">Barcodes</span>
+                </a>
+
+                <a href="{% url 'offline_sales:customer_list' %}"
+                   class="nav-item {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}">
+                    <i class="fa-solid fa-users"></i>
+                    <span class="nav-text">Offline Customers</span>
+                </a>
+
+               
             </div>
 
-            <div class="nav-section-label">Management</div>
-
-            <a href="{% url 'Ecom:category_list' %}"
-               class="submenu-item {% if request.resolver_match.url_name == 'category_list' %}active{% endif %}">
-                <i class="fa-solid fa-layer-group"></i>
-                <span class="nav-text">Categories</span>
-            </a>
-
-            <a href="{% url 'Ecom:subcategory_list' %}"
-               class="submenu-item {% if request.resolver_match.url_name == 'subcategory_list' %}active{% endif %}">
-                <i class="fa-solid fa-diagram-project"></i>
-                <span class="nav-text">Sub Categories</span>
-            </a>
-
-            <a href="{% url 'Ecom:review_list' %}"
-               class="submenu-item {% if request.resolver_match.url_name == 'review_list' %}active{% endif %}">
-                <i class="fa-solid fa-star"></i>
-                <span class="nav-text">Reviews</span>
-                {% if pending_review_count > 0 %}
-                    <span class="menu-badge">{{ pending_review_count }}</span>
-                {% endif %}
-            </a>
-
-            <a href="{% url 'Ecom:coupon_list' %}"
-               class="submenu-item {% if request.resolver_match.url_name == 'coupon_list' %}active{% endif %}">
-                <i class="fa-solid fa-ticket"></i>
-                <span class="nav-text">Coupons</span>
-            </a>
-
-            <a href="{% url 'Ecom:offer_list' %}"
-               class="submenu-item {% if request.resolver_match.url_name == 'offer_list' %}active{% endif %}">
-                <i class="fa-solid fa-tags"></i>
-                <span class="nav-text">Offers</span>
-            </a>
-
-            <a href="{% url 'Ecom:low_stock_alerts' %}"
-               class="submenu-item {% if request.resolver_match.url_name == 'low_stock_alerts' %}active{% endif %}">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                <span class="nav-text">Low Stock Items</span>
-                {% if total_low_stock_count > 0 %}
-                    <span class="menu-badge">{{ total_low_stock_count }}</span>
-                {% endif %}
-            </a>
-
-            <a href="{% url 'Ecom:banner_list' %}"
-               class="submenu-item {% if request.resolver_match.url_name == 'banner_list' %}active{% endif %}">
-                <i class="fa-solid fa-image"></i>
-                <span class="nav-text">Banners</span>
-            </a>
-
-            <!-- Section Divider -->
-            <div class="section-divider">
-                <span class="divider-dot"></span>
-            </div>
-
-            <div class="nav-section-label">Offline Order Management</div>
-
-            <a href="{% url 'offline_sales:store_settings_list' %}"
-               class="nav-item {% if request.resolver_match.url_name == 'store_settings_list' %}active{% endif %}">
-                <i class="fa-solid fa-store"></i>
-                <span class="nav-text">Store Settings</span>
-            </a>
-
-            <a href="{% url 'offline_sales:barcode_list' %}"
-               class="nav-item {% if request.resolver_match.url_name == 'barcode_list' %}active{% endif %}">
-                <i class="fa-solid fa-barcode"></i>
-                <span class="nav-text">Barcodes</span>
-            </a>
+            <!-- ===== EMPLOYEE LINKS - PERFECT ALIGNMENT ===== -->
+            <!-- Offline Sales Section -->
+            <div class="nav-section-label">Offline Sales</div>
 
             <a href="{% url 'offline_sales:offline_sale' %}"
                class="nav-item {% if request.resolver_match.url_name == 'offline_sale' %}active{% endif %}">
@@ -825,11 +1315,8 @@
                 <span class="nav-text">Offline Sale</span>
             </a>
 
-            <a href="{% url 'offline_sales:customer_list' %}"
-               class="nav-item {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}">
-                <i class="fa-solid fa-users"></i>
-                <span class="nav-text">Offline Customers</span>
-            </a>
+            <!-- Orders Section -->
+            <div class="nav-section-label" style="margin-top: 8px;">Orders</div>
 
             <a href="{% url 'offline_sales:orders_list' %}"
                class="nav-item {% if request.resolver_match.url_name == 'orders_list' %}active{% endif %}">
@@ -837,14 +1324,73 @@
                 <span class="nav-text">Offline Orders</span>
             </a>
 
+            <!-- Admin-only extra links -->
+            <div class="admin-only">
+                <div class="section-divider">
+                    <span class="divider-dot"></span>
+                </div>
+
+                <div class="nav-section-label">User Management</div>
+
+                <a href="{% url 'offline_sales:customer_list' %}"
+                   class="nav-item {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}">
+                    <i class="fa-solid fa-users"></i>
+                    <span class="nav-text">Offline Customers</span>
+                </a>
+                 <a href="{% url 'Ecom:user_list' %}"
+                   class="nav-item {% if request.resolver_match.url_name == 'user_list' %}active{% endif %}">
+                    <i class="fa-solid fa-user-check"></i>
+                    <span class="nav-text">Online Users</span>
+                </a>
+
+                <a href="{% url 'Ecom:employee_signup' %}"
+                   class="nav-item {% if request.resolver_match.url_name == 'employee_signup' %}active{% endif %}">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span class="nav-text">Create Employee</span>
+                </a>
+            </div>
+
         </nav>
 
-        <!-- Sidebar Footer - Fixed at bottom -->
+        <!-- ============================================================
+        FOOTER - LUXURY MINIMALIST DESIGN
+        ============================================================ -->
         <div class="sidebar-footer">
+            <!-- Home Link -->
+            <a href="{% url 'Ecom:home' %}" class="footer-home-link">
+                <span class="home-left">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Home</span>
+                </span>
+                <span class="home-right">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </span>
+            </a>
+
+            <!-- Profile Section -->
+            <div class="profile-section">
+                <div class="profile-avatar">
+                    <i class="fa-regular fa-user"></i>
+                    <span class="status-dot"></span>
+                </div>
+                <div class="profile-info">
+                    <div class="profile-name">{{ user.full_name|default:"Employee" }}</div>
+                    <div class="profile-role">
+                        <i class="fa-solid fa-circle"></i>
+                        <span>Employee</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logout Button -->
             <a href="{% url 'Ecom:logout' %}" class="logout-wrapper">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                <span class="logout-text">Logout</span>
-                <span class="logout-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                <span class="logout-left">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="logout-text">Logout</span>
+                </span>
+                <span class="logout-right">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </span>
             </a>
         </div>
 
@@ -856,6 +1402,11 @@
     <main class="main-content" id="mainContent">
         {% block content %}
         <!-- Content from child templates will be injected here -->
+        <div class="empty-state">
+            <!-- You can replace this with your own image -->
+            <img src="{% static 'images/nologonew.png' %}" alt="Hyzora" />
+            <h1>{% if user.role == 'employee' %}Employee{% else %}Admin{% endif %} Dashboard</h1>
+        </div>
         {% endblock %}
     </main>
 
@@ -864,21 +1415,50 @@
         document.addEventListener('DOMContentLoaded', function() {
 
             const sidebar = document.getElementById('adminSidebar');
-            const mobileBtn = document.getElementById('mobileMenuBtn');
             const overlay = document.getElementById('sidebarOverlay');
+            
+            // Admin mobile menu button
+            const mobileBtn = document.getElementById('mobileMenuBtn');
+            
+            // Employee mobile toggle button
+            const mobileToggleBtn = document.getElementById('mobileToggleBtn');
 
-            mobileBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
+            // Function to toggle sidebar
+            function toggleSidebar(button) {
                 sidebar.classList.toggle('mobile-open');
                 overlay.classList.toggle('active');
-                const icon = mobileBtn.querySelector('i');
-                icon.className = sidebar.classList.contains('mobile-open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
-            });
+                if (button) {
+                    const icon = button.querySelector('i');
+                    icon.className = sidebar.classList.contains('mobile-open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+                }
+            }
 
+            // Admin mobile menu
+            if (mobileBtn) {
+                mobileBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleSidebar(this);
+                });
+            }
+
+            // Employee mobile toggle
+            if (mobileToggleBtn) {
+                mobileToggleBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleSidebar(this);
+                });
+            }
+
+            // Overlay click to close
             overlay.addEventListener('click', function() {
                 sidebar.classList.remove('mobile-open');
                 overlay.classList.remove('active');
-                mobileBtn.querySelector('i').className = 'fa-solid fa-bars';
+                if (mobileBtn) {
+                    mobileBtn.querySelector('i').className = 'fa-solid fa-bars';
+                }
+                if (mobileToggleBtn) {
+                    mobileToggleBtn.querySelector('i').className = 'fa-solid fa-bars';
+                }
             });
 
             // Active link highlighting
@@ -902,12 +1482,17 @@
             });
 
             // Close sidebar on link click (mobile)
-            document.querySelectorAll('.sidebar-nav .nav-item, .logout-wrapper, .submenu-item').forEach(item => {
+            document.querySelectorAll('.sidebar-nav .nav-item, .logout-wrapper, .submenu-item, .footer-home-link').forEach(item => {
                 item.addEventListener('click', function() {
                     if (window.innerWidth <= 900) {
                         sidebar.classList.remove('mobile-open');
                         overlay.classList.remove('active');
-                        mobileBtn.querySelector('i').className = 'fa-solid fa-bars';
+                        if (mobileBtn) {
+                            mobileBtn.querySelector('i').className = 'fa-solid fa-bars';
+                        }
+                        if (mobileToggleBtn) {
+                            mobileToggleBtn.querySelector('i').className = 'fa-solid fa-bars';
+                        }
                     }
                 });
             });
@@ -916,7 +1501,12 @@
                 if (window.innerWidth > 900) {
                     sidebar.classList.remove('mobile-open');
                     overlay.classList.remove('active');
-                    mobileBtn.querySelector('i').className = 'fa-solid fa-bars';
+                    if (mobileBtn) {
+                        mobileBtn.querySelector('i').className = 'fa-solid fa-bars';
+                    }
+                    if (mobileToggleBtn) {
+                        mobileToggleBtn.querySelector('i').className = 'fa-solid fa-bars';
+                    }
                 }
             });
 
