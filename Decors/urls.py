@@ -7,7 +7,7 @@ from Ecom import views
 
 urlpatterns = [
     
-    path("about/", views.about, name="about"),
+    
     path("", include("Ecom.urls")),
     path('offline/', include('offline_sales.urls')),
     path(

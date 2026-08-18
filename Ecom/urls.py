@@ -153,5 +153,42 @@ path('admin/orders/', admin_order_list_view, name='admin_order_list'),
     path('api/nav-counts/', views.get_nav_counts_api, name='api_nav_counts'),
     # In urls.py
 
-path('api/recommendations/', views.get_recommendations_api, name='get_recommendations_api'),
+    path('api/recommendations/', views.get_recommendations_api, name='get_recommendations_api'),
+
+    path(
+        "static-pages/",
+        views.manage_static_pages,
+        name="manage_static_pages"
+    ),
+
+    # Public pages
+    path(
+        "about/",
+        views.about,
+        name="about"
+    ),
+
+    path(
+        "terms-of-use/",
+        views.terms_of_use,
+        name="terms_of_use"
+    ),
+
+    path(
+        "privacy-policy/",
+        views.privacy_policy,
+        name="privacy_policy"
+    ),
+
+    path(
+        "shipping-policy/",
+        views.shipping_policy,
+        name="shipping_policy"
+    ),
+
+    path(
+        "return-refund-policy/",
+        views.return_refund_policy,
+        name="return_refund_policy"
+    ),
 ]

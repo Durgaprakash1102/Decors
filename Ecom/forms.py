@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from .models import User, Profile, Address
 
+
 User = get_user_model()
 
 # ========== CUSTOMER SIGNUP FORM ==========
@@ -1041,3 +1042,64 @@ class EmployeeSignupForm(forms.ModelForm):
             if User.objects.filter(phone=phone).exists():
                 raise forms.ValidationError('This phone number is already registered')
         return phone
+
+from django import forms
+from .models import StaticPage
+
+
+class StaticPageForm(forms.ModelForm):
+
+    class Meta:
+        model = StaticPage
+
+        fields = [
+            "page",
+            "section_title",
+            "section_content",
+            "image",
+            "order",
+            "is_active",
+        ]
+
+        widgets = {
+
+            "page": forms.Select(
+                attrs={
+                    "class": "sp-form-control"
+                }
+            ),
+
+            "section_title": forms.TextInput(
+                attrs={
+                    "class": "sp-form-control",
+                    "placeholder": "Enter section title"
+                }
+            ),
+
+            "section_content": forms.Textarea(
+                attrs={
+                    "class": "sp-form-control sp-content-input",
+                    "placeholder": "Write your section content..."
+                }
+            ),
+
+            "image": forms.ClearableFileInput(
+                attrs={
+                    "class": "sp-form-control",
+                    "accept": "image/*"
+                }
+            ),
+
+            "order": forms.NumberInput(
+                attrs={
+                    "class": "sp-form-control",
+                    "min": "1"
+                }
+            ),
+
+            "is_active": forms.CheckboxInput(
+                attrs={
+                    "class": "sp-checkbox"
+                }
+            ),
+        }

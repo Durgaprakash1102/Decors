@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="py-5">
+
+    <div class="container">
+
+        <div class="text-center mb-5">
+
+            <h1 class="display-5 fw-bold">
+                Return & Refund Policy
+            </h1>
+
+            <p class="text-muted">
+                Information about returns, refunds and cancellations.
+            </p>
+
+        </div>
+
+
+        <div class="row">
+
+            <div class="col-lg-9 mx-auto">
+
+                {% for section in sections %}
+
+                    <article class="mb-5">
+
+                        <div class="d-flex gap-3">
+
+                            <!-- NUMBER -->
+
+                            <div
+                                class="flex-shrink-0 rounded-circle bg-light d-flex align-items-center justify-content-center"
+                                style="
+                                    width: 45px;
+                                    height: 45px;
+                                "
+                            >
+
+                                <strong>
+                                    {{ forloop.counter }}
+                                </strong>
+
+                            </div>
+
+
+                            <!-- CONTENT -->
+
+                            <div class="flex-grow-1">
+
+                                <h2 class="fw-bold mb-3">
+                                    {{ section.section_title }}
+                                </h2>
+
+
+                                {% if section.image %}
+
+                                    <img
+                                        src="{{ section.image.url }}"
+                                        alt="{{ section.section_title }}"
+                                        class="img-fluid rounded mb-4"
+                                    >
+
+                                {% endif %}
+
+
+                                <div
+                                    class="text-muted"
+                                    style="line-height: 1.9;"
+                                >
+                                    {{ section.section_content|linebreaks }}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+                    {% if not forloop.last %}
+
+                        <hr class="my-4">
+
+                    {% endif %}
+
+
+                {% empty %}
+
+                    <div class="text-center py-5">
+
+                        <p class="text-muted">
+                            Content will be available soon.
+                        </p>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

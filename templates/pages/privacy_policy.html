@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="py-5">
+
+    <div class="container">
+
+        <div class="text-center mb-5">
+
+            <h1 class="display-5 fw-bold">
+                Privacy Policy
+            </h1>
+
+            <p class="text-muted">
+                Learn how we collect, use and protect your information.
+            </p>
+
+        </div>
+
+
+        <div class="row">
+
+            <div class="col-lg-9 mx-auto">
+
+                {% for section in sections %}
+
+                    <article class="mb-5">
+
+                        <h2 class="fw-bold mb-3">
+                            {{ section.section_title }}
+                        </h2>
+
+
+                        {% if section.image %}
+
+                            <img
+                                src="{{ section.image.url }}"
+                                alt="{{ section.section_title }}"
+                                class="img-fluid rounded mb-4"
+                            >
+
+                        {% endif %}
+
+
+                        <div
+                            class="text-muted"
+                            style="line-height: 1.9;"
+                        >
+                            {{ section.section_content|linebreaks }}
+                        </div>
+
+                    </article>
+
+
+                    {% if not forloop.last %}
+
+                        <hr class="my-4">
+
+                    {% endif %}
+
+
+                {% empty %}
+
+                    <div class="text-center py-5">
+
+                        <p class="text-muted">
+                            Content will be available soon.
+                        </p>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}
