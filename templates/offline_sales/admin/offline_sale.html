@@ -1,2414 +1,2108 @@
 <!-- templates/offline_sales/admin/offline_sale.html -->
-{% extends 'includes/sidebar.html' %}
 {% load static %}
-
-{% block title %}Offline Sale{% endblock %}
-{% block content %}
-
-<style>
-    /* ============================================
-       OFFLINE SALE - CLEAN PROFESSIONAL DESIGN
-       Colors: #5c121f (maroon) & #f4b400 (gold)
-    ============================================ */
-    
-    .pos-container {
-        max-width: 1440px;
-        margin: 0 auto;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-        background: #f6f4f2;
-        min-height: 100vh;
-    }
-    
-    /* --- HERO HEADER - PRIMARY BACKGROUND --- */
-    .pos-hero {
-        background: #5c121f;
-        border-radius: 12px;
-        padding: 20px 28px;
-        margin-bottom: 24px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 12px;
-        box-shadow: 0 4px 20px rgba(92,18,31,0.2);
-    }
-    
-    .pos-hero-left {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-    }
-    
-    .pos-hero-left .logo {
-        width: 44px;
-        height: 44px;
-        background: #f4b400;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #5c121f;
-        font-size: 20px;
-        font-weight: 800;
-    }
-    
-    .pos-hero-left h1 {
-        font-size: 22px;
-        font-weight: 700;
-        color: #ffffff;
-        margin: 0;
-    }
-    
-    .pos-hero-left h1 span {
-        font-weight: 400;
-        font-size: 14px;
-        color: rgba(255,255,255,0.7);
-    }
-    
-    .pos-hero-right {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-    
-    .pos-store-badge {
-        background: rgba(255,255,255,0.12);
-        color: #ffffff;
-        padding: 6px 18px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: 600;
-        border: 1px solid rgba(255,255,255,0.08);
-    }
-    
-    .pos-store-badge i {
-        color: #f4b400;
-        margin-right: 6px;
-    }
-    
-    .pos-btn-clear {
-        background: rgba(255,255,255,0.1);
-        border: 1px solid rgba(255,255,255,0.15);
-        padding: 6px 16px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: 600;
-        color: #ffffff;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .pos-btn-clear:hover {
-        background: #d64045;
-        border-color: #d64045;
-    }
-    
-    /* --- SCANNER --- */
-    .pos-scanner {
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 2px 12px rgba(92,18,31,0.08);
-        margin-bottom: 24px;
-        overflow: hidden;
-    }
-    
-    .pos-scanner-head {
-        padding: 14px 24px;
-        background: #faf8f7;
-        border-bottom: 1px solid #e8e0da;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-    
-    .pos-scanner-head h3 {
-        font-size: 15px;
-        font-weight: 700;
-        color: #1d1d1d;
-        margin: 0;
-    }
-    
-    .pos-scanner-head h3 i {
-        color: #f4b400;
-        margin-right: 8px;
-    }
-    
-    .pos-scanner-head .shortcuts {
-        font-size: 12px;
-        color: #8a7f7a;
-    }
-    
-    .pos-scanner-head .shortcuts kbd {
-        background: #5c121f;
-        color: #ffffff;
-        padding: 2px 10px;
-        border-radius: 4px;
-        font-size: 11px;
-        font-weight: 600;
-    }
-    
-    .pos-scanner-body {
-        padding: 20px 24px;
-    }
-    
-    .pos-scanner-container {
-        position: relative;
-        background: #0a0e14;
-        border-radius: 8px;
-        overflow: hidden;
-        min-height: 380px;
-        max-height: 55vh;
-        width: 100%;
-        margin-bottom: 16px;
-        display: none;
-    }
-    
-    .pos-scanner-container video {
-        width: 100%;
-        height: 100%;
-        min-height: 380px;
-        object-fit: cover;
-    }
-    
-    .pos-scanner-overlay {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 50%;
-        max-width: 280px;
-        height: 40%;
-        max-height: 180px;
-        border: 2px solid rgba(244,180,0,0.3);
-        border-radius: 8px;
-        pointer-events: none;
-    }
-    
-    .pos-scanner-corner {
-        position: absolute;
-        width: 16px;
-        height: 16px;
-        border-color: #f4b400;
-        border-style: solid;
-        border-width: 0;
-    }
-    .pos-scanner-corner.tl { top: -1px; left: -1px; border-top-width: 3px; border-left-width: 3px; border-radius: 4px 0 0 0; }
-    .pos-scanner-corner.tr { top: -1px; right: -1px; border-top-width: 3px; border-right-width: 3px; border-radius: 0 4px 0 0; }
-    .pos-scanner-corner.bl { bottom: -1px; left: -1px; border-bottom-width: 3px; border-left-width: 3px; border-radius: 0 0 0 4px; }
-    .pos-scanner-corner.br { bottom: -1px; right: -1px; border-bottom-width: 3px; border-right-width: 3px; border-radius: 0 0 4px 0; }
-    
-    .pos-scanner-line {
-        position: absolute;
-        top: 0;
-        left: 5%;
-        width: 90%;
-        height: 2px;
-        background: linear-gradient(to right, transparent, #f4b400, transparent);
-        z-index: 7;
-        animation: scanLine 2s ease-in-out infinite;
-    }
-    
-    @keyframes scanLine {
-        0% { top: 10%; opacity: 0; }
-        15% { opacity: 1; }
-        85% { opacity: 1; }
-        100% { top: 90%; opacity: 0; }
-    }
-    
-    .pos-scan-status {
-        position: absolute;
-        bottom: 14px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(10,14,20,0.9);
-        color: #ffffff;
-        padding: 4px 18px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 500;
-        z-index: 10;
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255,255,255,0.06);
-    }
-    
-    .pos-scan-status .dot {
-        display: inline-block;
-        width: 8px;
-        height: 8px;
-        background: #f4b400;
-        border-radius: 50%;
-        margin-right: 8px;
-        animation: pulse 1.2s ease-in-out infinite;
-    }
-    
-    @keyframes pulse {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.3; transform: scale(0.7); }
-    }
-    
-    .pos-scan-flash { animation: flash 0.4s ease; }
-    @keyframes flash {
-        0%, 100% { background: #0a0e14; }
-        50% { background: rgba(244,180,0,0.15); }
-    }
-    
-    .pos-scanner-controls {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        margin-bottom: 14px;
-    }
-    
-    .pos-scanner-controls .btn {
-        padding: 8px 20px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-    
-    .pos-scanner-controls .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    
-    .pos-btn-start {
-        background: #f4b400;
-        color: #ffffff;
-    }
-    .pos-btn-start:hover { background: #d4a000; }
-    
-    .pos-btn-stop {
-        background: #d64045;
-        color: #ffffff;
-    }
-    
-    .pos-btn-external {
-        background: #f6f4f2;
-        color: #1d1d1d;
-        border: 2px solid #e8e0da;
-    }
-    .pos-btn-external:hover { background: #e8e0da; }
-    
-    .pos-scanner-tools {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1.5fr;
-        gap: 12px;
-        align-items: center;
-    }
-    
-    @media (max-width: 768px) {
-        .pos-scanner-tools {
-            grid-template-columns: 1fr;
-        }
-    }
-    
-    .pos-cam-select select {
-        width: 100%;
-        padding: 8px 12px;
-        border: 2px solid #e8e0da;
-        border-radius: 6px;
-        font-size: 13px;
-        background: #ffffff;
-        cursor: pointer;
-        font-family: inherit;
-        transition: all 0.3s ease;
-    }
-    
-    .pos-cam-select select:focus {
-        border-color: #f4b400;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(244,180,0,0.12);
-    }
-    
-    .pos-gallery-scan {
-        border: 2px dashed #e8e0da;
-        border-radius: 6px;
-        padding: 8px 14px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        background: #f6f4f2;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        font-weight: 500;
-        font-size: 13px;
-        color: #6d6d6d;
-    }
-    
-    .pos-gallery-scan:hover {
-        border-color: #f4b400;
-        background: #fdf8f0;
-    }
-    
-    .pos-gallery-scan i {
-        color: #f4b400;
-        font-size: 18px;
-    }
-    
-    .pos-gallery-scan input { display: none; }
-    .pos-gallery-preview {
-        max-height: 44px;
-        border-radius: 4px;
-        display: none;
-        border: 2px solid #f4b400;
-    }
-    .pos-gallery-preview.active { display: inline-block; }
-    
-    .pos-manual-input {
-        display: flex;
-        gap: 8px;
-    }
-    
-    .pos-manual-input input {
-        flex: 1;
-        padding: 8px 14px;
-        border: 2px solid #e8e0da;
-        border-radius: 6px;
-        font-size: 14px;
-        font-family: inherit;
-        transition: all 0.3s ease;
-        background: #ffffff;
-        color: #1d1d1d;
-    }
-    
-    .pos-manual-input input:focus {
-        border-color: #f4b400;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(244,180,0,0.12);
-    }
-    
-    .pos-manual-input button {
-        padding: 8px 20px;
-        background: #5c121f;
-        color: #ffffff;
-        border: none;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 14px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        white-space: nowrap;
-    }
-    
-    .pos-manual-input button:hover {
-        background: #3d0c14;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(92,18,31,0.2);
-    }
-    
-    .pos-zoom-controls {
-        position: absolute;
-        right: 12px;
-        bottom: 60px;
-        z-index: 10;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-    
-    .pos-zoom-controls button {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        border: 1px solid rgba(255,255,255,0.1);
-        background: rgba(10,14,20,0.8);
-        color: #ffffff;
-        font-size: 16px;
-        cursor: pointer;
-        backdrop-filter: blur(8px);
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .pos-zoom-controls button:hover {
-        background: #f4b400;
-        color: #ffffff;
-    }
-    
-    .pos-zoom-indicator {
-        position: absolute;
-        right: 12px;
-        bottom: 100px;
-        z-index: 10;
-        background: rgba(10,14,20,0.85);
-        color: #ffffff;
-        padding: 2px 12px;
-        border-radius: 12px;
-        font-size: 10px;
-        font-weight: 600;
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255,255,255,0.06);
-        display: none;
-    }
-    
-    .pos-zoom-indicator.show { display: block; }
-    
-    .pos-scan-badge {
-        display: inline-block;
-        padding: 3px 14px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 500;
-        margin-top: 4px;
-    }
-    
-    .pos-scan-badge.ready {
-        background: #f6f4f2;
-        color: #8a7f7a;
-        border: 1px solid #e8e0da;
-    }
-    
-    .pos-scan-badge.active {
-        background: #e8f5e9;
-        color: #2e9d57;
-        border: 1px solid #a5d6a7;
-    }
-    
-    .pos-scan-badge.error {
-        background: #fde8e8;
-        color: #d64045;
-        border: 1px solid #f5c6cb;
-    }
-    
-    .pos-alert {
-        padding: 6px 14px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: 500;
-        margin-top: 6px;
-    }
-    
-    .pos-alert-success {
-        background: #e8f5e9;
-        color: #2e9d57;
-        border: 1px solid #a5d6a7;
-    }
-    
-    .pos-alert-danger {
-        background: #fde8e8;
-        color: #d64045;
-        border: 1px solid #f5c6cb;
-    }
-    
-    /* --- GRID --- */
-    .pos-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-    }
-    
-    @media (max-width: 1024px) {
-        .pos-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-    
-    /* --- CARDS - CLEAN NO PRIMARY HEADERS --- */
-    .pos-card {
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 2px 12px rgba(92,18,31,0.08);
-        overflow: hidden;
-        margin-bottom: 20px;
-        transition: all 0.3s ease;
-        border: 1px solid rgba(92,18,31,0.06);
-    }
-    
-    .pos-card:hover {
-        box-shadow: 0 8px 30px rgba(92,18,31,0.12);
-    }
-    
-    .pos-card-head {
-        padding: 14px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #e8e0da;
-        background: #faf8f7;
-    }
-    
-    .pos-card-head h4 {
-        font-size: 14px;
-        font-weight: 700;
-        color: #1d1d1d;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .pos-card-head h4 i {
-        color: #f4b400;
-        font-size: 15px;
-        width: 18px;
-    }
-    
-    .pos-card-head .count {
-        background: #f4b400;
-        color: #5c121f;
-        padding: 1px 12px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 700;
-    }
-    
-    .pos-card-body {
-        padding: 18px 20px;
-    }
-    
-    /* --- SEARCH --- */
-    .pos-search {
-        display: flex;
-        gap: 8px;
-    }
-    
-    .pos-search input {
-        flex: 1;
-        padding: 9px 14px;
-        border: 2px solid #e8e0da;
-        border-radius: 6px;
-        font-size: 14px;
-        font-family: inherit;
-        transition: all 0.3s ease;
-        background: #ffffff;
-        color: #1d1d1d;
-    }
-    
-    .pos-search input:focus {
-        border-color: #f4b400;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(244,180,0,0.12);
-    }
-    
-    .pos-search button {
-        padding: 9px 18px;
-        background: #5c121f;
-        color: #ffffff;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .pos-search button:hover {
-        background: #3d0c14;
-    }
-    
-    .pos-results {
-        max-height: 300px;
-        overflow-y: auto;
-        margin-top: 12px;
-    }
-    
-    .pos-results::-webkit-scrollbar {
-        width: 4px;
-    }
-    .pos-results::-webkit-scrollbar-thumb {
-        background: #f4b400;
-        border-radius: 4px;
-    }
-    
-    .pos-product {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 8px 12px;
-        border-bottom: 1px solid #e8e0da;
-        transition: all 0.3s ease;
-        border-radius: 4px;
-    }
-    
-    .pos-product:hover {
-        background: #fdf8f0;
-    }
-    
-    .pos-product img {
-        width: 40px;
-        height: 40px;
-        object-fit: cover;
-        border-radius: 6px;
-        border: 1px solid #e8e0da;
-        flex-shrink: 0;
-        background: #f6f4f2;
-    }
-    
-    .pos-product .info {
-        flex: 1;
-        min-width: 0;
-    }
-    
-    .pos-product .info .name {
-        font-weight: 600;
-        font-size: 13px;
-        color: #1d1d1d;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    
-    .pos-product .info .sku {
-        font-size: 11px;
-        color: #8a7f7a;
-    }
-    
-    .pos-product .info .price {
-        font-weight: 700;
-        font-size: 13px;
-        color: #5c121f;
-    }
-    
-    .pos-product .btn-add {
-        padding: 4px 14px;
-        background: #f4b400;
-        color: #ffffff;
-        border: none;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        flex-shrink: 0;
-    }
-    
-    .pos-product .btn-add:hover {
-        background: #d4a000;
-        transform: scale(1.05);
-    }
-    
-    .pos-no-results {
-        text-align: center;
-        padding: 28px 16px;
-        color: #8a7f7a;
-        font-size: 13px;
-    }
-    
-    /* --- CUSTOMER --- */
-    .pos-customer-wrapper {
-        position: relative;
-        width: 100%;
-    }
-    
-    .pos-customer-search input {
-        width: 100%;
-        padding: 9px 14px;
-        border: 2px solid #e8e0da;
-        border-radius: 6px;
-        font-size: 14px;
-        font-family: inherit;
-        transition: all 0.3s ease;
-        background: #ffffff;
-        color: #1d1d1d;
-    }
-    
-    .pos-customer-search input:focus {
-        border-color: #f4b400;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(244,180,0,0.12);
-    }
-    
-    .pos-customer-dropdown {
-        position: fixed;
-        max-height: 260px;
-        overflow-y: auto;
-        background: #ffffff;
-        border: 2px solid #e8e0da;
-        border-radius: 10px;
-        box-shadow: 0 16px 48px rgba(0,0,0,0.15);
-        display: none;
-        z-index: 99999;
-        min-width: 260px;
-        max-width: 400px;
-        animation: dropFade 0.2s ease;
-        padding: 4px 0;
-        border-top: 3px solid #f4b400;
-    }
-    
-    @keyframes dropFade {
-        from { opacity: 0; transform: translateY(-8px) scale(0.98); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    
-    .pos-customer-dropdown.show {
-        display: block;
-    }
-    
-    .pos-customer-dropdown::-webkit-scrollbar {
-        width: 4px;
-    }
-    .pos-customer-dropdown::-webkit-scrollbar-thumb {
-        background: #f4b400;
-        border-radius: 4px;
-    }
-    
-    .pos-customer-dropdown .item {
-        padding: 10px 16px;
-        border-bottom: 1px solid #e8e0da;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .pos-customer-dropdown .item:hover {
-        background: #fdf8f0;
-        padding-left: 20px;
-        padding-right: 20px;
-    }
-    
-    .pos-customer-dropdown .item:last-child {
-        border-bottom: none;
-    }
-    
-    .pos-customer-dropdown .item .left {
-        flex: 1;
-        min-width: 0;
-    }
-    
-    .pos-customer-dropdown .item .left .name {
-        font-weight: 600;
-        font-size: 14px;
-        color: #1d1d1d;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex-wrap: wrap;
-    }
-    
-    .pos-customer-dropdown .item .left .detail {
-        font-size: 12px;
-        color: #8a7f7a;
-        margin-top: 2px;
-    }
-    
-    .pos-customer-badge {
-        padding: 1px 10px;
-        border-radius: 10px;
-        font-size: 9px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-        flex-shrink: 0;
-    }
-    
-    .pos-customer-badge.offline {
-        background: #e8f5e9;
-        color: #2e9d57;
-    }
-    
-    .pos-customer-badge.online {
-        background: #e3f2fd;
-        color: #1976d2;
-    }
-    
-    .pos-customer-dropdown .item .arrow {
-        color: #8a7f7a;
-        font-size: 12px;
-    }
-    
-    .pos-selected-customer {
-        margin-top: 12px;
-        padding: 12px 16px;
-        background: #fdf8f0;
-        border-radius: 8px;
-        border-left: 4px solid #f4b400;
-        display: none;
-    }
-    
-    .pos-selected-customer.show {
-        display: block;
-        animation: slideDown 0.3s ease;
-    }
-    
-    @keyframes slideDown {
-        from { opacity: 0; transform: translateY(-6px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .pos-selected-customer .info {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-    
-    .pos-selected-customer .info .left .name {
-        font-weight: 700;
-        font-size: 14px;
-        color: #1d1d1d;
-    }
-    
-    .pos-selected-customer .info .left .name i {
-        color: #2e9d57;
-        font-size: 13px;
-        margin-right: 4px;
-    }
-    
-    .pos-selected-customer .info .left .detail {
-        font-size: 12px;
-        color: #8a7f7a;
-    }
-    
-    .pos-selected-customer .info .btn-change {
-        background: transparent;
-        color: #d64045;
-        border: 2px solid rgba(214,64,69,0.15);
-        padding: 3px 12px;
-        border-radius: 16px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .pos-selected-customer .info .btn-change:hover {
-        background: #d64045;
-        color: #ffffff;
-        border-color: #d64045;
-    }
-    
-    .pos-btn-new-customer {
-        margin-top: 12px;
-        padding: 6px 20px;
-        background: transparent;
-        color: #5c121f;
-        border: 2px solid #5c121f;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .pos-btn-new-customer:hover {
-        background: #5c121f;
-        color: #ffffff;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(92,18,31,0.2);
-    }
-    
-    /* --- INLINE FORM --- */
-    .pos-inline-form {
-        margin-top: 12px;
-        padding-top: 12px;
-        border-top: 2px solid #e8e0da;
-        display: none;
-    }
-    
-    .pos-inline-form.show {
-        display: block;
-        animation: slideDown 0.3s ease;
-    }
-    
-    .pos-inline-form .row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-    }
-    
-    @media (max-width: 480px) {
-        .pos-inline-form .row {
-            grid-template-columns: 1fr;
-        }
-    }
-    
-    .pos-inline-form .group {
-        margin-bottom: 10px;
-    }
-    
-    .pos-inline-form .group label {
-        display: block;
-        font-size: 12px;
-        font-weight: 600;
-        color: #1d1d1d;
-        margin-bottom: 3px;
-    }
-    
-    .pos-inline-form .group label .req {
-        color: #d64045;
-    }
-    
-    .pos-inline-form .group input,
-    .pos-inline-form .group textarea,
-    .pos-inline-form .group select {
-        width: 100%;
-        padding: 7px 12px;
-        border: 2px solid #e8e0da;
-        border-radius: 6px;
-        font-size: 13px;
-        font-family: inherit;
-        transition: all 0.3s ease;
-        background: #ffffff;
-        color: #1d1d1d;
-    }
-    
-    .pos-inline-form .group input:focus,
-    .pos-inline-form .group textarea:focus,
-    .pos-inline-form .group select:focus {
-        border-color: #f4b400;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(244,180,0,0.12);
-    }
-    
-    .pos-inline-form .group textarea {
-        resize: vertical;
-        min-height: 44px;
-    }
-    
-    .pos-inline-form .group .hint {
-        font-size: 11px;
-        color: #8a7f7a;
-        margin-top: 2px;
-    }
-    
-    .pos-inline-form .actions {
-        display: flex;
-        gap: 8px;
-        margin-top: 10px;
-        flex-wrap: wrap;
-    }
-    
-    .pos-inline-form .actions .btn {
-        padding: 6px 18px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .pos-inline-form .actions .btn:hover {
-        transform: translateY(-2px);
-    }
-    
-    .pos-inline-form .actions .btn-secondary {
-        background: #f6f4f2;
-        color: #1d1d1d;
-        border: 2px solid #e8e0da;
-    }
-    .pos-inline-form .actions .btn-secondary:hover {
-        background: #e8e0da;
-    }
-    
-    .pos-inline-form .actions .btn-success {
-        background: #2e9d57;
-        color: #ffffff;
-    }
-    .pos-inline-form .actions .btn-success:hover {
-        background: #1e8449;
-        box-shadow: 0 4px 12px rgba(46,157,87,0.3);
-    }
-    
-    .pos-inline-form .actions .btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-    
-    /* ============================================
-       CART - PROPER LAYOUT
-    ============================================ */
-    .pos-cart-items {
-        max-height: 450px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .pos-cart-items::-webkit-scrollbar {
-        width: 4px;
-    }
-    .pos-cart-items::-webkit-scrollbar-thumb {
-        background: #f4b400;
-        border-radius: 4px;
-    }
-    
-    .pos-cart-item {
-        background: #faf8f7;
-        border-radius: 8px;
-        padding: 12px 14px;
-        border: 1px solid #e8e0da;
-        transition: all 0.3s ease;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 10px;
-        position: relative;
-    }
-    
-    .pos-cart-item:hover {
-        border-color: #f4b400;
-        box-shadow: 0 2px 12px rgba(244,180,0,0.1);
-    }
-    
-    .pos-cart-item .img {
-        width: 44px;
-        height: 44px;
-        border-radius: 6px;
-        border: 1px solid #e8e0da;
-        flex-shrink: 0;
-        background: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #8a7f7a;
-        font-size: 18px;
-        overflow: hidden;
-    }
-    
-    .pos-cart-item .img img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    
-    .pos-cart-item .details {
-        flex: 1;
-        min-width: 100px;
-        overflow: hidden;
-    }
-    
-    .pos-cart-item .details .name {
-        font-weight: 600;
-        font-size: 13px;
-        color: #1d1d1d;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
-    }
-    
-    .pos-cart-item .details .name[title] {
-        cursor: help;
-    }
-    
-    .pos-cart-item .details .sku {
-        font-size: 10px;
-        color: #8a7f7a;
-    }
-    
-    .pos-cart-item .details .pricing {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        margin-top: 1px;
-        flex-wrap: wrap;
-    }
-    
-    .pos-cart-item .details .pricing .original {
-        font-size: 11px;
-        color: #8a7f7a;
-        text-decoration: line-through;
-    }
-    
-    .pos-cart-item .details .pricing .final {
-        font-weight: 700;
-        font-size: 13px;
-        color: #5c121f;
-    }
-    
-    .pos-cart-item .controls {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex-shrink: 0;
-        flex-wrap: wrap;
-    }
-    
-    .pos-qty {
-        display: flex;
-        align-items: center;
-        background: #ffffff;
-        border-radius: 6px;
-        border: 1px solid #e8e0da;
-        overflow: hidden;
-        flex-shrink: 0;
-    }
-    
-    .pos-qty button {
-        width: 24px;
-        height: 24px;
-        border: none;
-        background: transparent;
-        font-weight: 700;
-        font-size: 13px;
-        cursor: pointer;
-        color: #1d1d1d;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 24px;
-    }
-    
-    .pos-qty button:hover {
-        background: #f4b400;
-        color: #ffffff;
-    }
-    
-    .pos-qty input {
-        width: 28px;
-        text-align: center;
-        border: none;
-        background: transparent;
-        font-weight: 600;
-        font-size: 13px;
-        padding: 0;
-        color: #1d1d1d;
-        min-width: 24px;
-    }
-    
-    .pos-qty input:focus {
-        outline: none;
-    }
-    
-    .pos-cart-item .total {
-        font-weight: 700;
-        font-size: 13px;
-        color: #5c121f;
-        min-width: 50px;
-        text-align: right;
-        flex-shrink: 0;
-    }
-    
-    .pos-cart-item .btn-remove {
-        background: transparent;
-        border: none;
-        color: #8a7f7a;
-        font-size: 14px;
-        cursor: pointer;
-        padding: 2px 4px;
-        transition: all 0.3s ease;
-        flex-shrink: 0;
-        border-radius: 4px;
-    }
-    
-    .pos-cart-item .btn-remove:hover {
-        color: #d64045;
-        background: #fde8e8;
-    }
-    
-    .pos-cart-item .saved {
-        font-size: 11px;
-        color: #2e9d57;
-        font-weight: 600;
-        width: 100%;
-        padding-left: 54px;
-        margin-top: 2px;
-    }
-    
-    .pos-cart-item .item-index {
-        position: absolute;
-        top: -6px;
-        right: -6px;
-        background: #f4b400;
-        color: #5c121f;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 8px;
-        font-weight: 700;
-        box-shadow: 0 2px 6px rgba(244,180,0,0.3);
-    }
-    
-    .pos-cart-empty {
-        text-align: center;
-        padding: 40px 16px;
-        color: #8a7f7a;
-        background: #faf8f7;
-        border-radius: 8px;
-        border: 2px dashed #e8e0da;
-    }
-    
-    .pos-cart-empty i {
-        font-size: 36px;
-        display: block;
-        margin-bottom: 8px;
-        opacity: 0.2;
-        color: #5c121f;
-    }
-    
-    .pos-cart-empty p {
-        font-size: 13px;
-        margin: 0;
-        font-weight: 500;
-    }
-    
-    /* --- SUMMARY --- */
-    .pos-summary-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 5px 0;
-        font-size: 14px;
-        color: #6d6d6d;
-    }
-    
-    .pos-summary-row .value {
-        font-weight: 600;
-        color: #1d1d1d;
-    }
-    
-    .pos-summary-row .value.discount {
-        color: #2e9d57;
-    }
-    
-    .pos-summary-grand {
-        display: flex;
-        justify-content: space-between;
-        padding: 14px 0;
-        font-size: 22px;
-        font-weight: 800;
-        border-top: 2px solid #e8e0da;
-        margin-top: 10px;
-    }
-    
-    .pos-summary-grand .value {
-        color: #5c121f;
-    }
-    
-    .pos-btn-complete {
-        width: 100%;
-        padding: 13px;
-        background: #f4b400;
-        color: #5c121f;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-top: 10px;
-    }
-    
-    .pos-btn-complete:hover:not(:disabled) {
-        background: #d4a000;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 16px rgba(244,180,0,0.3);
-    }
-    
-    .pos-btn-complete:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-    
-    /* ============================================
-       SIMPLE PAYMENT MODAL - 4 FIELDS ONLY
-    ============================================ */
-    .pos-modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        backdrop-filter: blur(4px);
-        z-index: 999999;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
-    
-    .pos-modal-overlay.active {
-        display: flex;
-    }
-    
-    .pos-modal {
-        background: #ffffff;
-        border-radius: 12px;
-        max-width: 420px;
-        width: 100%;
-        box-shadow: 0 24px 64px rgba(0,0,0,0.25);
-        animation: modalSlide 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-        overflow: hidden;
-    }
-    
-    @keyframes modalSlide {
-        from { opacity: 0; transform: translateY(20px) scale(0.96); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    
-    .pos-modal-header {
-        padding: 14px 20px;
-        background: #faf8f7;
-        border-bottom: 1px solid #e8e0da;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .pos-modal-header h3 {
-        margin: 0;
-        font-size: 16px;
-        font-weight: 700;
-        color: #1d1d1d;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .pos-modal-header h3 i {
-        color: #f4b400;
-        font-size: 18px;
-    }
-    
-    .pos-modal-header .pos-modal-close {
-        background: transparent;
-        border: none;
-        color: #8a7f7a;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        font-size: 16px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .pos-modal-header .pos-modal-close:hover {
-        background: #f6f4f2;
-        color: #1d1d1d;
-    }
-    
-    .pos-modal-body {
-        padding: 20px;
-    }
-    
-    .pos-modal-body .pos-modal-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-    }
-    
-    @media (max-width: 480px) {
-        .pos-modal-body .pos-modal-row {
-            grid-template-columns: 1fr;
-        }
-    }
-    
-    .pos-modal-body .pos-modal-group {
-        margin-bottom: 12px;
-    }
-    
-    .pos-modal-body .pos-modal-group label {
-        display: block;
-        font-size: 12px;
-        font-weight: 600;
-        color: #1d1d1d;
-        margin-bottom: 3px;
-    }
-    
-    .pos-modal-body .pos-modal-group label .req {
-        color: #d64045;
-    }
-    
-    .pos-modal-body .pos-modal-group input,
-    .pos-modal-body .pos-modal-group select {
-        width: 100%;
-        padding: 8px 12px;
-        border: 2px solid #e8e0da;
-        border-radius: 6px;
-        font-size: 13px;
-        font-family: inherit;
-        transition: all 0.3s ease;
-        background: #ffffff;
-        color: #1d1d1d;
-    }
-    
-    .pos-modal-body .pos-modal-group input:focus,
-    .pos-modal-body .pos-modal-group select:focus {
-        border-color: #f4b400;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(244,180,0,0.12);
-    }
-    
-    .pos-modal-body .pos-modal-group input[readonly] {
-        background: #f6f4f2;
-        cursor: not-allowed;
-    }
-    
-    .pos-modal-footer {
-        padding: 12px 20px 20px;
-        display: flex;
-        gap: 10px;
-        border-top: 1px solid #e8e0da;
-    }
-    
-    .pos-modal-footer .pos-modal-btn {
-        flex: 1;
-        padding: 10px;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 700;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-family: inherit;
-    }
-    
-    .pos-modal-footer .pos-modal-btn:hover {
-        transform: translateY(-1px);
-    }
-    
-    .pos-modal-footer .pos-modal-btn-secondary {
-        background: #f6f4f2;
-        color: #1d1d1d;
-        border: 2px solid #e8e0da;
-    }
-    
-    .pos-modal-footer .pos-modal-btn-secondary:hover {
-        background: #e8e0da;
-    }
-    
-    .pos-modal-footer .pos-modal-btn-primary {
-        background: #f4b400;
-        color: #5c121f;
-        box-shadow: 0 4px 12px rgba(244,180,0,0.2);
-    }
-    
-    .pos-modal-footer .pos-modal-btn-primary:hover {
-        background: #d4a000;
-        box-shadow: 0 8px 20px rgba(244,180,0,0.3);
-    }
-    
-    .pos-modal-footer .pos-modal-btn-primary:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-    
-    /* --- TOAST --- */
-    .pos-toast-container {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        z-index: 99999;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        pointer-events: none;
-        max-width: 360px;
-        width: 100%;
-    }
-    
-    .pos-toast {
-        pointer-events: auto;
-        background: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 12px 40px rgba(0,0,0,0.12);
-        overflow: hidden;
-        animation: toastSlide 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-        border: 1px solid #e8e0da;
-    }
-    
-    @keyframes toastSlide {
-        from { opacity: 0; transform: translateY(30px) scale(0.95); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    
-    .pos-toast .body {
-        padding: 14px 18px;
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-    }
-    
-    .pos-toast .body .icon {
-        font-size: 18px;
-        flex-shrink: 0;
-        margin-top: 1px;
-    }
-    
-    .pos-toast .body .icon.success { color: #2e9d57; }
-    .pos-toast .body .icon.error { color: #d64045; }
-    .pos-toast .body .icon.warning { color: #f39c12; }
-    .pos-toast .body .icon.info { color: #f4b400; }
-    
-    .pos-toast .body .content {
-        flex: 1;
-    }
-    
-    .pos-toast .body .content .title {
-        font-weight: 700;
-        font-size: 14px;
-        color: #1d1d1d;
-    }
-    
-    .pos-toast .body .content .msg {
-        font-size: 13px;
-        color: #6d6d6d;
-        margin-top: 2px;
-    }
-    
-    .pos-toast .body .close {
-        background: transparent;
-        border: none;
-        color: #8a7f7a;
-        cursor: pointer;
-        font-size: 15px;
-        padding: 4px;
-        transition: all 0.3s ease;
-        flex-shrink: 0;
-    }
-    
-    .pos-toast .body .close:hover {
-        color: #1d1d1d;
-    }
-    
-    .pos-toast .progress {
-        height: 3px;
-        background: #f4b400;
-        animation: progress 3.5s linear forwards;
-        width: 100%;
-    }
-    
-    .pos-toast .progress.success { background: #2e9d57; }
-    .pos-toast .progress.error { background: #d64045; }
-    .pos-toast .progress.warning { background: #f39c12; }
-    .pos-toast .progress.info { background: #f4b400; }
-    
-    @keyframes progress {
-        from { width: 100%; }
-        to { width: 0%; }
-    }
-    
-    /* --- LOADER --- */
-    .pos-loader {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.45);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 99999;
-        backdrop-filter: blur(4px);
-    }
-    
-    .pos-loader.active {
-        display: flex;
-    }
-    
-    .pos-loader .box {
-        background: #ffffff;
-        padding: 32px 44px;
-        border-radius: 12px;
-        text-align: center;
-        box-shadow: 0 24px 64px rgba(0,0,0,0.2);
-    }
-    
-    .pos-loader .box .spinner {
-        width: 40px;
-        height: 40px;
-        border: 3px solid #e8e0da;
-        border-top-color: #f4b400;
-        border-radius: 50%;
-        animation: spin 0.7s linear infinite;
-        margin: 0 auto 12px;
-    }
-    
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-    
-    .pos-loader .box p {
-        font-size: 14px;
-        font-weight: 600;
-        color: #1d1d1d;
-        margin: 0;
-    }
-    
-    /* --- RESPONSIVE --- */
-    @media (max-width: 768px) {
-        .pos-container {
-            padding: 12px 14px;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>Offline Sale - POS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.2/dist/quagga.min.js"></script>
+    <style>
+        /* ============================================
+           OFFLINE SALE - CLEAN PROFESSIONAL DESIGN
+           Colors: #5c121f (maroon) & #f4b400 (gold)
+        ============================================ */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        .pos-hero {
+        html, body {
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #f6f4f2;
+            color: #1e1e2a;
+            overflow: hidden;
+        }
+        
+        .pos-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            background: #f6f4f2;
+            min-height: 100vh;
+            padding: 10px 14px;
+            display: flex;
             flex-direction: column;
-            align-items: stretch;
-            text-align: center;
-            padding: 16px 18px;
+            height: 100vh;
+        }
+        
+        /* --- HERO HEADER --- */
+        .pos-hero {
+            background: #5c121f;
+            border-radius: 10px;
+            padding: 10px 18px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(92,18,31,0.2);
+            flex-shrink: 0;
         }
         
         .pos-hero-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .pos-hero-left .logo {
+            width: 34px;
+            height: 34px;
+            background: #f4b400;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
             justify-content: center;
-        }
-        
-        .pos-hero-right {
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        .pos-scanner-head {
-            flex-direction: column;
-            gap: 6px;
-            text-align: center;
-        }
-        
-        .pos-scanner-body {
-            padding: 14px 16px;
-        }
-        
-        .pos-scanner-container {
-            min-height: 240px;
-        }
-        
-        .pos-scanner-container video {
-            min-height: 240px;
-        }
-        
-        .pos-scanner-controls {
-            justify-content: center;
-        }
-        
-        .pos-card-body {
-            padding: 14px 16px;
-        }
-        
-        .pos-cart-item {
-            padding: 10px 12px;
-            gap: 8px;
-        }
-        
-        .pos-cart-item .img {
-            width: 38px;
-            height: 38px;
-            font-size: 14px;
-        }
-        
-        .pos-cart-item .details {
-            min-width: 70px;
-        }
-        
-        .pos-cart-item .details .name {
-            font-size: 12px;
-        }
-        
-        .pos-cart-item .controls {
-            margin-left: 0;
-            width: 100%;
-            justify-content: flex-end;
-        }
-        
-        .pos-cart-item .total {
-            font-size: 12px;
-            min-width: 44px;
-        }
-        
-        .pos-cart-item .saved {
-            padding-left: 0;
-        }
-        
-        .pos-summary-grand {
-            font-size: 19px;
-        }
-        
-        .pos-customer-dropdown {
-            min-width: 200px;
-            max-width: calc(100vw - 28px);
-        }
-        
-        .pos-toast-container {
-            bottom: 14px;
-            right: 14px;
-            max-width: calc(100% - 28px);
-        }
-        
-        .pos-modal {
-            max-width: 100%;
-            margin: 10px;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .pos-container {
-            padding: 8px 10px;
+            color: #5c121f;
+            font-size: 15px;
+            font-weight: 800;
         }
         
         .pos-hero-left h1 {
             font-size: 17px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
         }
         
         .pos-hero-left h1 span {
+            font-weight: 400;
             font-size: 11px;
+            color: rgba(255,255,255,0.7);
         }
         
-        .pos-hero-left .logo {
-            width: 36px;
-            height: 36px;
-            font-size: 16px;
+        .pos-hero-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
         }
         
         .pos-store-badge {
-            font-size: 11px;
-            padding: 4px 10px;
+            background: rgba(255,255,255,0.12);
+            color: #ffffff;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .pos-store-badge i {
+            color: #f4b400;
+            margin-right: 4px;
         }
         
         .pos-btn-clear {
-            font-size: 11px;
-            padding: 4px 12px;
-        }
-        
-        .pos-scanner-head h3 {
-            font-size: 13px;
-        }
-        
-        .pos-scanner-head .shortcuts {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 3px 10px;
+            border-radius: 20px;
             font-size: 10px;
+            font-weight: 600;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
         
-        .pos-scanner-head .shortcuts kbd {
-            font-size: 10px;
-            padding: 1px 8px;
+        .pos-btn-clear:hover {
+            background: #d64045;
+            border-color: #d64045;
+            color: #fff;
         }
         
-        .pos-scanner-body {
-            padding: 10px 12px;
+        /* --- GRID --- */
+        .pos-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            flex: 1;
+            min-height: 0;
         }
         
-        .pos-scanner-container {
-            min-height: 180px;
+        @media (max-width: 1024px) {
+            .pos-grid {
+                grid-template-columns: 1fr;
+            }
         }
         
-        .pos-scanner-container video {
-            min-height: 180px;
-        }
-        
-        .pos-scanner-controls .btn {
-            font-size: 11px;
-            padding: 5px 12px;
-        }
-        
-        .pos-scanner-tools {
-            gap: 8px;
-        }
-        
-        .pos-manual-input {
+        /* --- LEFT SIDE - PRODUCTS ONLY --- */
+        .pos-left {
+            display: flex;
             flex-direction: column;
+            min-height: 0;
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid rgba(92,18,31,0.06);
+            overflow: hidden;
         }
         
-        .pos-manual-input button {
+        .pos-left .pos-search {
+            display: flex;
+            gap: 6px;
+            padding: 6px 10px;
+            flex-shrink: 0;
+            background: #faf8f7;
+            border-bottom: 1px solid #e8e0da;
+        }
+        
+        .pos-left .pos-search input {
+            flex: 1;
+            padding: 5px 8px;
+            border: 2px solid #e8e0da;
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #ffffff;
+            color: #1d1d1d;
+        }
+        
+        .pos-left .pos-search input:focus {
+            border-color: #f4b400;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(244,180,0,0.12);
+        }
+        
+        .pos-left .pos-search button {
+            padding: 5px 12px;
+            background: #5c121f;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-size: 11px;
+        }
+        
+        .pos-left .pos-search button:hover {
+            background: #3d0c14;
+        }
+        
+        /* PRODUCT GRID - 5 per row, ALL SAME SIZE */
+        .pos-product-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            padding: 6px 8px;
+            flex: 1;
+            overflow-y: auto;
+            align-content: start;
+        }
+        
+        @media (max-width: 1200px) {
+            .pos-product-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (max-width: 992px) {
+            .pos-product-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .pos-product-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 400px) {
+            .pos-product-grid { grid-template-columns: 1fr; }
+        }
+        
+        .pos-product-grid::-webkit-scrollbar {
+            width: 4px;
+        }
+        .pos-product-grid::-webkit-scrollbar-thumb {
+            background: #f4b400;
+            border-radius: 4px;
+        }
+        
+        /* PRODUCT ITEM - SAME WIDTH & HEIGHT */
+        .pos-product-item {
+            background: #fcfbfa;
+            border: 1px solid #edeae6;
+            border-radius: 8px;
+            padding: 6px 4px 4px;
+            text-align: center;
+            transition: all 0.25s ease;
+            position: relative;
+            cursor: default;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+            min-height: 140px;
             width: 100%;
         }
         
-        .pos-card-head {
-            padding: 10px 14px;
+        .pos-product-item:hover {
+            border-color: #f4b400;
+            box-shadow: 0 4px 16px rgba(244,180,0,0.12);
+            transform: translateY(-2px);
+            z-index: 5;
         }
         
-        .pos-card-head h4 {
-            font-size: 13px;
+        .pos-product-item .p-image {
+            width: 100%;
+            aspect-ratio: 1/1;
+            border-radius: 6px;
+            background: #f0ece8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #a0988a;
+            overflow: hidden;
+            margin-bottom: 3px;
+            flex-shrink: 0;
         }
         
-        .pos-card-body {
-            padding: 10px 12px;
+        .pos-product-item .p-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         
-        .pos-cart-item {
+        .pos-product-item .p-name {
+            font-weight: 600;
+            font-size: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #1d1d1d;
+            width: 100%;
+            margin-top: 2px;
+        }
+        
+        .pos-product-item .p-price {
+            font-weight: 700;
+            font-size: 11px;
+            color: #5c121f;
+            margin: 1px 0;
+        }
+        
+        .pos-product-item .p-add {
+            background: #f4b400;
+            border: none;
+            color: #5c121f;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 9px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            max-width: 70px;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+        
+        .pos-product-item .p-add:hover {
+            background: #d4a000;
+            transform: scale(0.96);
+        }
+        
+        .pos-product-item .p-variants-btn {
+            background: none;
+            border: none;
+            color: #8a7f7a;
+            font-size: 8px;
+            cursor: pointer;
+            text-decoration: underline dotted;
+            margin-top: 2px;
+        }
+        
+        .pos-product-item .p-variants-btn:hover {
+            color: #f4b400;
+        }
+        
+        /* HOVER TOOLTIP */
+        .pos-product-item .p-tooltip {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1d1d2a;
+            color: #ffffff;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 9px;
+            min-width: 130px;
+            max-width: 180px;
+            text-align: left;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+            z-index: 20;
+            pointer-events: none;
+        }
+        
+        .pos-product-item .p-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #1d1d2a;
+        }
+        
+        .pos-product-item:hover .p-tooltip {
+            display: block;
+            animation: tooltipFade 0.2s ease;
+        }
+        
+        @keyframes tooltipFade {
+            from { opacity: 0; transform: translateX(-50%) translateY(-4px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        
+        .pos-product-item .p-tooltip .tt-name {
+            font-weight: 700;
+            font-size: 11px;
+            margin-bottom: 2px;
+        }
+        
+        .pos-product-item .p-tooltip .tt-detail {
+            color: #c0b8ae;
+            font-size: 9px;
+            line-height: 1.4;
+        }
+        
+        .pos-product-item .p-tooltip .tt-detail span {
+            display: block;
+        }
+        
+        .pos-product-item .p-tooltip .tt-detail .tt-stock {
+            color: #7ecf8a;
+        }
+        
+        .pos-product-item .p-tooltip .tt-detail .tt-barcode {
+            font-family: 'Courier New', monospace;
+            color: #f4b400;
+        }
+        
+        .pos-no-results {
+            text-align: center;
+            padding: 20px 16px;
+            color: #8a7f7a;
+            font-size: 11px;
+            grid-column: 1 / -1;
+        }
+        
+        /* --- RIGHT SIDE --- */
+        .pos-right {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            gap: 8px;
+        }
+        
+        /* --- SCANNER --- */
+        .pos-scanner {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(92,18,31,0.08);
+            overflow: hidden;
+            border: 1px solid rgba(92,18,31,0.06);
+            flex-shrink: 0;
+        }
+        
+        .pos-scanner-head {
+            padding: 6px 12px;
+            background: #faf8f7;
+            border-bottom: 1px solid #e8e0da;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        
+        .pos-scanner-head h3 {
+            font-size: 12px;
+            font-weight: 700;
+            color: #1d1d1d;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .pos-scanner-head h3 i {
+            color: #f4b400;
+        }
+        
+        .pos-scanner-head .shortcuts {
+            font-size: 9px;
+            color: #8a7f7a;
+        }
+        
+        .pos-scanner-head .shortcuts kbd {
+            background: #5c121f;
+            color: #ffffff;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 8px;
+            font-weight: 600;
+        }
+        
+        .pos-scanner-body {
             padding: 8px 10px;
-            gap: 6px;
         }
         
-        .pos-cart-item .img {
-            width: 32px;
-            height: 32px;
+        .pos-scanner-container {
+            position: relative;
+            background: #0a0e14;
+            border-radius: 8px;
+            overflow: hidden;
+            min-height: 120px;
+            max-height: 25vh;
+            width: 100%;
+            margin-bottom: 6px;
+            display: none;
+        }
+        
+        .pos-scanner-container video {
+            width: 100%;
+            height: 100%;
+            min-height: 120px;
+            object-fit: cover;
+        }
+        
+        .pos-scanner-container.active {
+            display: block;
+        }
+        
+        .pos-scanner-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50%;
+            max-width: 150px;
+            height: 40%;
+            max-height: 90px;
+            border: 2px solid rgba(244,180,0,0.3);
+            border-radius: 6px;
+            pointer-events: none;
+        }
+        
+        .pos-scanner-corner {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-color: #f4b400;
+            border-style: solid;
+            border-width: 0;
+        }
+        .pos-scanner-corner.tl { top: -1px; left: -1px; border-top-width: 2px; border-left-width: 2px; border-radius: 2px 0 0 0; }
+        .pos-scanner-corner.tr { top: -1px; right: -1px; border-top-width: 2px; border-right-width: 2px; border-radius: 0 2px 0 0; }
+        .pos-scanner-corner.bl { bottom: -1px; left: -1px; border-bottom-width: 2px; border-left-width: 2px; border-radius: 0 0 0 2px; }
+        .pos-scanner-corner.br { bottom: -1px; right: -1px; border-bottom-width: 2px; border-right-width: 2px; border-radius: 0 0 2px 0; }
+        
+        .pos-scanner-line {
+            position: absolute;
+            top: 0;
+            left: 5%;
+            width: 90%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #f4b400, transparent);
+            z-index: 7;
+            animation: scanLine 2s ease-in-out infinite;
+        }
+        
+        @keyframes scanLine {
+            0% { top: 10%; opacity: 0; }
+            15% { opacity: 1; }
+            85% { opacity: 1; }
+            100% { top: 90%; opacity: 0; }
+        }
+        
+        .pos-scan-status {
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10,14,20,0.9);
+            color: #ffffff;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 8px;
+            font-weight: 500;
+            z-index: 10;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        
+        .pos-scan-status .dot {
+            display: inline-block;
+            width: 5px;
+            height: 5px;
+            background: #f4b400;
+            border-radius: 50%;
+            margin-right: 4px;
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.7); }
+        }
+        
+        .pos-scan-flash { animation: flash 0.4s ease; }
+        @keyframes flash {
+            0%, 100% { background: #0a0e14; }
+            50% { background: rgba(244,180,0,0.15); }
+        }
+        
+        .pos-scanner-controls {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+        
+        .pos-scanner-controls .btn {
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        
+        .pos-scanner-controls .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .pos-btn-start {
+            background: #f4b400;
+            color: #ffffff;
+        }
+        .pos-btn-start:hover { background: #d4a000; }
+        
+        .pos-btn-stop {
+            background: #d64045;
+            color: #ffffff;
+        }
+        
+        .pos-btn-external {
+            background: #f6f4f2;
+            color: #1d1d1d;
+            border: 2px solid #e8e0da;
+        }
+        .pos-btn-external:hover { background: #e8e0da; }
+        
+        .pos-scanner-tools {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.5fr;
+            gap: 4px;
+            align-items: center;
+        }
+        
+        @media (max-width: 768px) {
+            .pos-scanner-tools {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .pos-cam-select select {
+            width: 100%;
+            padding: 3px 6px;
+            border: 2px solid #e8e0da;
+            border-radius: 6px;
+            font-size: 9px;
+            background: #ffffff;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        
+        .pos-cam-select select:focus {
+            border-color: #f4b400;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(244,180,0,0.12);
+        }
+        
+        .pos-gallery-scan {
+            border: 2px dashed #e8e0da;
+            border-radius: 6px;
+            padding: 3px 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f6f4f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            font-weight: 500;
+            font-size: 9px;
+            color: #6d6d6d;
+        }
+        
+        .pos-gallery-scan:hover {
+            border-color: #f4b400;
+            background: #fdf8f0;
+        }
+        
+        .pos-gallery-scan i {
+            color: #f4b400;
             font-size: 12px;
         }
         
+        .pos-gallery-scan input { display: none; }
+        .pos-gallery-preview {
+            max-height: 22px;
+            border-radius: 4px;
+            display: none;
+            border: 2px solid #f4b400;
+        }
+        .pos-gallery-preview.active { display: inline-block; }
+        
+        .pos-manual-input {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .pos-manual-input input {
+            flex: 1;
+            padding: 3px 6px;
+            border: 2px solid #e8e0da;
+            border-radius: 6px;
+            font-size: 10px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #ffffff;
+            color: #1d1d1d;
+        }
+        
+        .pos-manual-input input:focus {
+            border-color: #f4b400;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(244,180,0,0.12);
+        }
+        
+        .pos-manual-input button {
+            padding: 3px 10px;
+            background: #5c121f;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .pos-manual-input button:hover {
+            background: #3d0c14;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(92,18,31,0.2);
+        }
+        
+        .pos-zoom-controls {
+            position: absolute;
+            right: 6px;
+            bottom: 40px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .pos-zoom-controls button {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(10,14,20,0.8);
+            color: #ffffff;
+            font-size: 10px;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pos-zoom-controls button:hover {
+            background: #f4b400;
+            color: #ffffff;
+        }
+        
+        .pos-zoom-indicator {
+            position: absolute;
+            right: 6px;
+            bottom: 68px;
+            z-index: 10;
+            background: rgba(10,14,20,0.85);
+            color: #ffffff;
+            padding: 1px 6px;
+            border-radius: 12px;
+            font-size: 7px;
+            font-weight: 600;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.06);
+            display: none;
+        }
+        
+        .pos-zoom-indicator.show { display: block; }
+        
+        .pos-scan-badge {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 12px;
+            font-size: 8px;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+        
+        .pos-scan-badge.ready {
+            background: #f6f4f2;
+            color: #8a7f7a;
+            border: 1px solid #e8e0da;
+        }
+        
+        .pos-scan-badge.active {
+            background: #e8f5e9;
+            color: #2e9d57;
+            border: 1px solid #a5d6a7;
+        }
+        
+        .pos-scan-badge.error {
+            background: #fde8e8;
+            color: #d64045;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .pos-alert {
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+        
+        .pos-alert-success {
+            background: #e8f5e9;
+            color: #2e9d57;
+            border: 1px solid #a5d6a7;
+        }
+        
+        .pos-alert-danger {
+            background: #fde8e8;
+            color: #d64045;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* --- CART CARD --- */
+        .pos-card {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(92,18,31,0.08);
+            overflow: hidden;
+            border: 1px solid rgba(92,18,31,0.06);
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+        
+        .pos-card-head {
+            padding: 6px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e8e0da;
+            background: #faf8f7;
+            flex-shrink: 0;
+        }
+        
+        .pos-card-head h4 {
+            font-size: 12px;
+            font-weight: 700;
+            color: #1d1d1d;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .pos-card-head h4 i {
+            color: #f4b400;
+        }
+        
+        .pos-card-head .count {
+            background: #f4b400;
+            color: #5c121f;
+            padding: 1px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        
+        .pos-card-body {
+            padding: 6px 10px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        /* CART ITEMS */
+        .pos-cart-items {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            max-height: none;
+        }
+        
+        .pos-cart-items::-webkit-scrollbar {
+            width: 4px;
+        }
+        .pos-cart-items::-webkit-scrollbar-thumb {
+            background: #f4b400;
+            border-radius: 4px;
+        }
+        
+        .pos-cart-item {
+            background: #faf8f7;
+            border-radius: 6px;
+            padding: 4px 8px;
+            border: 1px solid #e8e0da;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 3px;
+            position: relative;
+        }
+        
+        .pos-cart-item:hover {
+            border-color: #f4b400;
+            box-shadow: 0 2px 12px rgba(244,180,0,0.1);
+        }
+        
+        .pos-cart-item .img {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 1px solid #e8e0da;
+            flex-shrink: 0;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8a7f7a;
+            font-size: 10px;
+            overflow: hidden;
+        }
+        
+        .pos-cart-item .img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .pos-cart-item .details {
+            flex: 1;
+            min-width: 50px;
+            overflow: hidden;
+        }
+        
         .pos-cart-item .details .name {
-            font-size: 11px;
+            font-weight: 600;
+            font-size: 9px;
+            color: #1d1d1d;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
         }
         
         .pos-cart-item .details .sku {
+            font-size: 7px;
+            color: #8a7f7a;
+        }
+        
+        .pos-cart-item .details .pricing {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-top: 1px;
+            flex-wrap: wrap;
+        }
+        
+        .pos-cart-item .details .pricing .original {
+            font-size: 7px;
+            color: #8a7f7a;
+            text-decoration: line-through;
+        }
+        
+        .pos-cart-item .details .pricing .final {
+            font-weight: 700;
             font-size: 9px;
+            color: #5c121f;
+        }
+        
+        .pos-cart-item .controls {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        
+        .pos-qty {
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 4px;
+            border: 1px solid #e8e0da;
+            overflow: hidden;
+            flex-shrink: 0;
         }
         
         .pos-qty button {
-            width: 20px;
-            height: 20px;
-            font-size: 11px;
-            min-width: 20px;
+            width: 16px;
+            height: 16px;
+            border: none;
+            background: transparent;
+            font-weight: 700;
+            font-size: 9px;
+            cursor: pointer;
+            color: #1d1d1d;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 16px;
+        }
+        
+        .pos-qty button:hover {
+            background: #f4b400;
+            color: #ffffff;
         }
         
         .pos-qty input {
-            width: 22px;
-            font-size: 11px;
-            min-width: 18px;
+            width: 16px;
+            text-align: center;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            font-size: 9px;
+            padding: 0;
+            color: #1d1d1d;
+            min-width: 14px;
+        }
+        
+        .pos-qty input:focus {
+            outline: none;
         }
         
         .pos-cart-item .total {
-            font-size: 11px;
-            min-width: 36px;
+            font-weight: 700;
+            font-size: 9px;
+            color: #5c121f;
+            min-width: 28px;
+            text-align: right;
+            flex-shrink: 0;
         }
         
-        .pos-cart-item .item-index {
-            width: 16px;
-            height: 16px;
+        .pos-cart-item .btn-remove {
+            background: transparent;
+            border: none;
+            color: #8a7f7a;
+            font-size: 10px;
+            cursor: pointer;
+            padding: 1px;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            border-radius: 4px;
+        }
+        
+        .pos-cart-item .btn-remove:hover {
+            color: #d64045;
+            background: #fde8e8;
+        }
+        
+        .pos-cart-item .saved {
             font-size: 7px;
-            top: -5px;
-            right: -5px;
+            color: #2e9d57;
+            font-weight: 600;
+            width: 100%;
+            padding-left: 28px;
+            margin-top: 1px;
+        }
+        
+        .pos-cart-empty {
+            text-align: center;
+            padding: 12px;
+            color: #8a7f7a;
+            background: #faf8f7;
+            border-radius: 6px;
+            border: 2px dashed #e8e0da;
+        }
+        
+        .pos-cart-empty i {
+            font-size: 18px;
+            display: block;
+            margin-bottom: 2px;
+            opacity: 0.2;
+            color: #5c121f;
+        }
+        
+        .pos-cart-empty p {
+            font-size: 10px;
+            margin: 0;
+            font-weight: 500;
+        }
+        
+        /* --- SUMMARY - Only shows when cart has items --- */
+        .pos-summary-wrap {
+            display: none;
+            margin-top: 4px;
+            padding-top: 4px;
+            border-top: 2px solid #e8e0da;
+            flex-shrink: 0;
+        }
+        
+        .pos-summary-wrap.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pos-summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+            font-size: 10px;
+            color: #6d6d6d;
+        }
+        
+        .pos-summary-row .value {
+            font-weight: 600;
+            color: #1d1d1d;
+        }
+        
+        .pos-summary-row .value.discount {
+            color: #2e9d57;
         }
         
         .pos-summary-grand {
-            font-size: 17px;
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 14px;
+            font-weight: 800;
+            border-top: 2px solid #e8e0da;
+            margin-top: 3px;
         }
         
-        .pos-btn-complete {
+        .pos-summary-grand .value {
+            color: #5c121f;
+        }
+        
+        /* --- CUSTOMER - Only shows when cart has items --- */
+        .pos-customer-wrap {
+            display: none;
+            margin-top: 4px;
+            padding-top: 4px;
+            border-top: 2px solid #e8e0da;
+            flex-shrink: 0;
+        }
+        
+        .pos-customer-wrap.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .pos-customer-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        
+        .pos-customer-search input {
+            width: 100%;
+            padding: 3px 8px;
+            border: 2px solid #e8e0da;
+            border-radius: 6px;
+            font-size: 10px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #ffffff;
+            color: #1d1d1d;
+        }
+        
+        .pos-customer-search input:focus {
+            border-color: #f4b400;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(244,180,0,0.12);
+        }
+        
+        .pos-customer-dropdown {
+            position: fixed;
+            max-height: 140px;
+            overflow-y: auto;
+            background: #ffffff;
+            border: 2px solid #e8e0da;
+            border-radius: 8px;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 99999;
+            min-width: 160px;
+            max-width: 280px;
+            animation: dropFade 0.2s ease;
+            padding: 3px 0;
+            border-top: 3px solid #f4b400;
+        }
+        
+        @keyframes dropFade {
+            from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        .pos-customer-dropdown.show {
+            display: block;
+        }
+        
+        .pos-customer-dropdown::-webkit-scrollbar {
+            width: 4px;
+        }
+        .pos-customer-dropdown::-webkit-scrollbar-thumb {
+            background: #f4b400;
+            border-radius: 4px;
+        }
+        
+        .pos-customer-dropdown .item {
+            padding: 4px 8px;
+            border-bottom: 1px solid #e8e0da;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .pos-customer-dropdown .item:hover {
+            background: #fdf8f0;
+        }
+        
+        .pos-customer-dropdown .item:last-child {
+            border-bottom: none;
+        }
+        
+        .pos-customer-dropdown .item .left {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .pos-customer-dropdown .item .left .name {
+            font-weight: 600;
+            font-size: 10px;
+            color: #1d1d1d;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            flex-wrap: wrap;
+        }
+        
+        .pos-customer-dropdown .item .left .detail {
+            font-size: 8px;
+            color: #8a7f7a;
+            margin-top: 1px;
+        }
+        
+        .pos-customer-badge {
+            padding: 1px 5px;
+            border-radius: 10px;
+            font-size: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            flex-shrink: 0;
+        }
+        
+        .pos-customer-badge.offline {
+            background: #e8f5e9;
+            color: #2e9d57;
+        }
+        
+        .pos-customer-badge.online {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .pos-customer-dropdown .item .arrow {
+            color: #8a7f7a;
+            font-size: 8px;
+        }
+        
+        .pos-selected-customer {
+            margin-top: 4px;
+            padding: 4px 8px;
+            background: #fdf8f0;
+            border-radius: 6px;
+            border-left: 4px solid #f4b400;
+            display: none;
+        }
+        
+        .pos-selected-customer.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .pos-selected-customer .info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 3px;
+        }
+        
+        .pos-selected-customer .info .left .name {
+            font-weight: 700;
+            font-size: 10px;
+            color: #1d1d1d;
+        }
+        
+        .pos-selected-customer .info .left .name i {
+            color: #2e9d57;
+            font-size: 9px;
+            margin-right: 3px;
+        }
+        
+        .pos-selected-customer .info .left .detail {
+            font-size: 8px;
+            color: #8a7f7a;
+        }
+        
+        .pos-selected-customer .info .btn-change {
+            background: transparent;
+            color: #d64045;
+            border: 2px solid rgba(214,64,69,0.15);
+            padding: 1px 6px;
+            border-radius: 16px;
+            font-size: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .pos-selected-customer .info .btn-change:hover {
+            background: #d64045;
+            color: #ffffff;
+            border-color: #d64045;
+        }
+        
+        .pos-btn-new-customer {
+            margin-top: 4px;
+            padding: 2px 10px;
+            background: transparent;
+            color: #5c121f;
+            border: 2px solid #5c121f;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .pos-btn-new-customer:hover {
+            background: #5c121f;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(92,18,31,0.2);
+        }
+        
+        /* --- INLINE FORM --- */
+        .pos-inline-form {
+            margin-top: 4px;
+            padding-top: 4px;
+            border-top: 2px solid #e8e0da;
+            display: none;
+        }
+        
+        .pos-inline-form.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .pos-inline-form .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3px;
+        }
+        
+        @media (max-width: 480px) {
+            .pos-inline-form .row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .pos-inline-form .group {
+            margin-bottom: 3px;
+        }
+        
+        .pos-inline-form .group label {
+            display: block;
+            font-size: 8px;
+            font-weight: 600;
+            color: #1d1d1d;
+            margin-bottom: 1px;
+        }
+        
+        .pos-inline-form .group label .req {
+            color: #d64045;
+        }
+        
+        .pos-inline-form .group input,
+        .pos-inline-form .group textarea,
+        .pos-inline-form .group select {
+            width: 100%;
+            padding: 3px 5px;
+            border: 2px solid #e8e0da;
+            border-radius: 4px;
+            font-size: 9px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #ffffff;
+            color: #1d1d1d;
+        }
+        
+        .pos-inline-form .group input:focus,
+        .pos-inline-form .group textarea:focus,
+        .pos-inline-form .group select:focus {
+            border-color: #f4b400;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(244,180,0,0.12);
+        }
+        
+        .pos-inline-form .group textarea {
+            resize: vertical;
+            min-height: 24px;
+        }
+        
+        .pos-inline-form .group .hint {
+            font-size: 7px;
+            color: #8a7f7a;
+            margin-top: 1px;
+        }
+        
+        .pos-inline-form .actions {
+            display: flex;
+            gap: 3px;
+            margin-top: 3px;
+            flex-wrap: wrap;
+        }
+        
+        .pos-inline-form .actions .btn {
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .pos-inline-form .actions .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .pos-inline-form .actions .btn-secondary {
+            background: #f6f4f2;
+            color: #1d1d1d;
+            border: 2px solid #e8e0da;
+        }
+        .pos-inline-form .actions .btn-secondary:hover {
+            background: #e8e0da;
+        }
+        
+        .pos-inline-form .actions .btn-success {
+            background: #2e9d57;
+            color: #ffffff;
+        }
+        .pos-inline-form .actions .btn-success:hover {
+            background: #1e8449;
+            box-shadow: 0 4px 12px rgba(46,157,87,0.3);
+        }
+        
+        .pos-inline-form .actions .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* --- PAYMENT BUTTON FIXED AT BOTTOM --- */
+        .pos-payment-fixed {
+            flex-shrink: 0;
+            padding: 6px 0 4px;
+            background: transparent;
+            margin: 0 -14px;
+            padding-left: 14px;
+            padding-right: 14px;
+        }
+        
+        .pos-payment-fixed .pos-btn-complete {
+            width: 100%;
+            padding: 8px;
+            background: #f4b400;
+            color: #5c121f;
+            border: none;
+            border-radius: 8px;
             font-size: 14px;
-            padding: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .pos-payment-fixed .pos-btn-complete:hover:not(:disabled) {
+            background: #d4a000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(244,180,0,0.3);
+        }
+        
+        .pos-payment-fixed .pos-btn-complete:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* --- PAYMENT MODAL --- */
+        .pos-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 999999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .pos-modal-overlay.active {
+            display: flex;
+        }
+        
+        .pos-modal {
+            background: #ffffff;
+            border-radius: 12px;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+            animation: modalSlide 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            overflow: hidden;
+        }
+        
+        @keyframes modalSlide {
+            from { opacity: 0; transform: translateY(20px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        .pos-modal-header {
+            padding: 8px 14px;
+            background: #faf8f7;
+            border-bottom: 1px solid #e8e0da;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .pos-modal-header h3 {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1d1d1d;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .pos-modal-header h3 i {
+            color: #f4b400;
+            font-size: 15px;
+        }
+        
+        .pos-modal-header .pos-modal-close {
+            background: transparent;
+            border: none;
+            color: #8a7f7a;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pos-modal-header .pos-modal-close:hover {
+            background: #f6f4f2;
+            color: #1d1d1d;
+        }
+        
+        .pos-modal-body {
+            padding: 12px 14px;
         }
         
         .pos-modal-body .pos-modal-row {
-            grid-template-columns: 1fr;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
         }
-    }
-    /* ============================================
-   EXTRA SMALL DEVICES (360px and below)
-============================================ */
-@media (max-width: 360px) {
+        
+        @media (max-width: 480px) {
+            .pos-modal-body .pos-modal-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .pos-modal-body .pos-modal-group {
+            margin-bottom: 6px;
+        }
+        
+        .pos-modal-body .pos-modal-group label {
+            display: block;
+            font-size: 9px;
+            font-weight: 600;
+            color: #1d1d1d;
+            margin-bottom: 2px;
+        }
+        
+        .pos-modal-body .pos-modal-group label .req {
+            color: #d64045;
+        }
+        
+        .pos-modal-body .pos-modal-group input,
+        .pos-modal-body .pos-modal-group select {
+            width: 100%;
+            padding: 4px 6px;
+            border: 2px solid #e8e0da;
+            border-radius: 6px;
+            font-size: 10px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #ffffff;
+            color: #1d1d1d;
+        }
+        
+        .pos-modal-body .pos-modal-group input:focus,
+        .pos-modal-body .pos-modal-group select:focus {
+            border-color: #f4b400;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(244,180,0,0.12);
+        }
+        
+        .pos-modal-body .pos-modal-group input[readonly] {
+            background: #f6f4f2;
+            cursor: not-allowed;
+        }
+        
+        .pos-modal-footer {
+            padding: 6px 14px 10px;
+            display: flex;
+            gap: 6px;
+            border-top: 1px solid #e8e0da;
+        }
+        
+        .pos-modal-footer .pos-modal-btn {
+            flex: 1;
+            padding: 6px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .pos-modal-footer .pos-modal-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .pos-modal-footer .pos-modal-btn-secondary {
+            background: #f6f4f2;
+            color: #1d1d1d;
+            border: 2px solid #e8e0da;
+        }
+        
+        .pos-modal-footer .pos-modal-btn-secondary:hover {
+            background: #e8e0da;
+        }
+        
+        .pos-modal-footer .pos-modal-btn-primary {
+            background: #f4b400;
+            color: #5c121f;
+            box-shadow: 0 4px 12px rgba(244,180,0,0.2);
+        }
+        
+        .pos-modal-footer .pos-modal-btn-primary:hover {
+            background: #d4a000;
+            box-shadow: 0 8px 20px rgba(244,180,0,0.3);
+        }
+        
+        .pos-modal-footer .pos-modal-btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* --- TOAST --- */
+        .pos-toast-container {
+            position: fixed;
+            bottom: 60px;
+            right: 12px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            pointer-events: none;
+            max-width: 260px;
+            width: 100%;
+        }
+        
+        .pos-toast {
+            pointer-events: auto;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+            overflow: hidden;
+            animation: toastSlide 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            border: 1px solid #e8e0da;
+        }
+        
+        @keyframes toastSlide {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        .pos-toast .body {
+            padding: 6px 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+        }
+        
+        .pos-toast .body .icon {
+            font-size: 12px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        
+        .pos-toast .body .icon.success { color: #2e9d57; }
+        .pos-toast .body .icon.error { color: #d64045; }
+        .pos-toast .body .icon.warning { color: #f39c12; }
+        .pos-toast .body .icon.info { color: #f4b400; }
+        
+        .pos-toast .body .content {
+            flex: 1;
+        }
+        
+        .pos-toast .body .content .title {
+            font-weight: 700;
+            font-size: 10px;
+            color: #1d1d1d;
+        }
+        
+        .pos-toast .body .content .msg {
+            font-size: 9px;
+            color: #6d6d6d;
+            margin-top: 1px;
+        }
+        
+        .pos-toast .body .close {
+            background: transparent;
+            border: none;
+            color: #8a7f7a;
+            cursor: pointer;
+            font-size: 10px;
+            padding: 1px;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .pos-toast .body .close:hover {
+            color: #1d1d1d;
+        }
+        
+        .pos-toast .progress {
+            height: 3px;
+            background: #f4b400;
+            animation: progress 3.5s linear forwards;
+            width: 100%;
+        }
+        
+        .pos-toast .progress.success { background: #2e9d57; }
+        .pos-toast .progress.error { background: #d64045; }
+        .pos-toast .progress.warning { background: #f39c12; }
+        .pos-toast .progress.info { background: #f4b400; }
+        
+        @keyframes progress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+        
+        /* --- LOADER --- */
+        .pos-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            backdrop-filter: blur(4px);
+        }
+        
+        .pos-loader.active {
+            display: flex;
+        }
+        
+        .pos-loader .box {
+            background: #ffffff;
+            padding: 16px 24px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+        }
+        
+        .pos-loader .box .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #e8e0da;
+            border-top-color: #f4b400;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto 4px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .pos-loader .box p {
+            font-size: 10px;
+            font-weight: 600;
+            color: #1d1d1d;
+            margin: 0;
+        }
+        
+        /* --- INVOICE --- */
+        #posInvoiceSection {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid #e8e0da;
+            flex-shrink: 0;
+        }
+        
+        #posInvoiceSection.active {
+            display: block;
+        }
+        
+        /* --- VARIANT POPUP MODAL --- */
+        .pos-variant-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 999998;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .pos-variant-modal-overlay.active {
+            display: flex;
+        }
+        
+        .pos-variant-modal {
+            background: #ffffff;
+            border-radius: 12px;
+            max-width: 340px;
+            width: 100%;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+            animation: modalSlide 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            overflow: hidden;
+        }
+        
+        .pos-variant-modal .pos-modal-header {
+            padding: 8px 14px;
+            background: #faf8f7;
+            border-bottom: 1px solid #e8e0da;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .pos-variant-modal .pos-modal-header h3 {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1d1d1d;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .pos-variant-modal .pos-modal-header h3 i {
+            color: #f4b400;
+            font-size: 15px;
+        }
+        
+        .pos-variant-modal .pos-modal-body {
+            padding: 10px 14px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .pos-variant-modal .pos-modal-body .variant-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 4px;
+            border-bottom: 1px solid #f0ece8;
+        }
+        
+        .pos-variant-modal .pos-modal-body .variant-item:last-child {
+            border-bottom: none;
+        }
+        
+        .pos-variant-modal .pos-modal-body .variant-item .v-info {
+            flex: 1;
+        }
+        
+        .pos-variant-modal .pos-modal-body .variant-item .v-info .v-name {
+            font-weight: 500;
+            font-size: 11px;
+            color: #1d1d1d;
+        }
+        
+        .pos-variant-modal .pos-modal-body .variant-item .v-info .v-sku {
+            font-size: 9px;
+            color: #8a7f7a;
+        }
+        
+        .pos-variant-modal .pos-modal-body .variant-item .v-info .v-price {
+            font-weight: 700;
+            font-size: 11px;
+            color: #5c121f;
+        }
+        
+        .pos-variant-modal .pos-modal-body .variant-item .v-add {
+            background: #f4b400;
+            border: none;
+            color: #5c121f;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .pos-variant-modal .pos-modal-body .variant-item .v-add:hover {
+            background: #d4a000;
+            transform: scale(0.96);
+        }
+        
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .pos-container {
+                padding: 6px 8px;
+            }
+            
+            .pos-hero {
+                padding: 8px 12px;
+            }
+            
+            .pos-hero-left h1 {
+                font-size: 14px;
+            }
+            
+            .pos-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .pos-product-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .pos-scanner-container {
+                min-height: 100px;
+            }
+            
+            .pos-scanner-container video {
+                min-height: 100px;
+            }
+            
+            .pos-payment-fixed {
+                margin: 0 -8px;
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .pos-container {
+                padding: 4px 4px;
+            }
+            
+            .pos-hero-left .logo {
+                width: 26px;
+                height: 26px;
+                font-size: 12px;
+            }
+            
+            .pos-hero-left h1 {
+                font-size: 12px;
+            }
+            
+            .pos-hero-left h1 span {
+                font-size: 8px;
+            }
+            
+            .pos-store-badge {
+                font-size: 8px;
+                padding: 2px 8px;
+            }
+            
+            .pos-btn-clear {
+                font-size: 8px;
+                padding: 2px 6px;
+            }
+            
+            .pos-product-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 4px;
+            }
+            
+            .pos-product-item {
+                min-height: 110px;
+                padding: 4px 2px;
+            }
+            
+            .pos-product-item .p-name {
+                font-size: 8px;
+            }
+            
+            .pos-product-item .p-price {
+                font-size: 9px;
+            }
+            
+            .pos-product-item .p-add {
+                font-size: 8px;
+                max-width: 50px;
+                padding: 2px 4px;
+            }
+            
+            .pos-scanner-container {
+                min-height: 70px;
+            }
+            
+            .pos-scanner-container video {
+                min-height: 70px;
+            }
+            
+            .pos-scanner-tools {
+                grid-template-columns: 1fr;
+            }
+            
+            .pos-manual-input {
+                flex-direction: column;
+            }
+            
+            .pos-manual-input button {
+                width: 100%;
+            }
+            
+            .pos-card-head h4 {
+                font-size: 10px;
+            }
+            
+            .pos-cart-item {
+                padding: 3px 4px;
+            }
+            
+            .pos-cart-item .details .name {
+                font-size: 8px;
+            }
+            
+            .pos-payment-fixed .pos-btn-complete {
+                font-size: 11px;
+                padding: 6px;
+            }
+            
+            .pos-modal-body .pos-modal-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .pos-customer-dropdown {
+                min-width: 120px;
+                max-width: calc(100vw - 20px);
+            }
+            
+            .pos-variant-modal {
+                max-width: 300px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .pos-product-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
 
-    .pos-container{
-        padding:8px;
-    }
-
-    .pos-grid{
-        grid-template-columns:1fr;
-        gap:14px;
-    }
-
-    /* Hero */
-    .pos-hero{
-        padding:12px;
-        border-radius:10px;
-    }
-
-    .pos-hero-left{
-        flex-direction:column;
-        text-align:center;
-        gap:8px;
-    }
-
-    .pos-hero-left h1{
-        font-size:15px;
-    }
-
-    .pos-hero-left h1 span{
-        display:block;
-        font-size:10px;
-    }
-
-    .pos-hero-right{
-        width:100%;
-        justify-content:center;
-        flex-wrap:wrap;
-        gap:8px;
-    }
-
-    /* Cards */
-    .pos-card{
-        border-radius:10px;
-    }
-
-    .pos-card-head{
-        padding:10px;
-    }
-
-    .pos-card-body{
-        padding:10px;
-    }
-
-    .pos-card-head h4{
-        font-size:12px;
-    }
-
-    /* Search */
-    .pos-search{
-        flex-direction:column;
-    }
-
-    .pos-search button{
-        width:100%;
-    }
-
-    /* Manual Barcode */
-    .pos-manual-input{
-        flex-direction:column;
-    }
-
-    .pos-manual-input button{
-        width:100%;
-    }
-
-    /* Scanner */
-    .pos-scanner-container{
-        min-height:170px;
-    }
-
-    .pos-scanner-container video{
-        min-height:170px;
-    }
-
-    .pos-scanner-controls{
-        flex-direction:column;
-    }
-
-    .pos-scanner-controls .btn{
-        width:100%;
-        justify-content:center;
-    }
-
-    /* Customer form */
-    .pos-inline-form .row{
-        grid-template-columns:1fr;
-    }
-
-    /* Cart */
-    .pos-cart-item{
-        flex-direction:column;
-        align-items:flex-start;
-        gap:8px;
-    }
-
-    .pos-cart-item .details{
-        width:100%;
-    }
-
-    .pos-cart-item .controls{
-        width:100%;
-        justify-content:space-between;
-    }
-
-    .pos-cart-item .total{
-        font-size:13px;
-        min-width:auto;
-    }
-
-    .pos-cart-item .saved{
-        padding-left:0;
-    }
-
-    /* Summary */
-    .pos-summary-row{
-        font-size:13px;
-    }
-
-    .pos-summary-grand{
-        font-size:18px;
-    }
-
-    .pos-btn-complete{
-        font-size:14px;
-        padding:11px;
-    }
-
-    /* Payment Modal */
-    .pos-modal{
-        width:100%;
-        margin:8px;
-        border-radius:10px;
-    }
-
-    .pos-modal-body{
-        padding:14px;
-    }
-
-    .pos-modal-body .pos-modal-row{
-        grid-template-columns:1fr;
-    }
-
-    .pos-modal-footer{
-        flex-direction:column;
-    }
-
-    .pos-modal-footer .pos-modal-btn{
-        width:100%;
-    }
-
-    /* Customer Dropdown */
-    .pos-customer-dropdown{
-        max-width:calc(100vw - 16px);
-    }
-
-    /* Toast */
-    .pos-toast-container{
-        right:8px;
-        left:8px;
-        max-width:none;
-    }
-
-    /* Buttons */
-    .pos-btn-new-customer,
-    .pos-btn-clear{
-        width:100%;
-        justify-content:center;
-    }
-
-    /* Hide non-essential text */
-    .shortcuts{
-        display:none;
-    }
-}
-/* Product Barcode List Styles with Images */
-.pos-product-barcode-item {
-    border: 1px solid #e8e0da;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    background: #ffffff;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-.pos-product-barcode-item:hover {
-    border-color: #f4b400;
-    box-shadow: 0 2px 8px rgba(244,180,0,0.1);
-}
-
-.pos-product-barcode-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.pos-product-barcode-header:hover {
-    background: #fdf8f0;
-}
-
-.pos-product-barcode-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-    min-width: 0;
-}
-
-.pos-product-barcode-image {
-    width: 50px;
-    height: 50px;
-    flex-shrink: 0;
-    border-radius: 6px;
-    overflow: hidden;
-    border: 1px solid #e8e0da;
-    background: #f6f4f2;
-}
-
-.pos-product-barcode-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.pos-product-barcode-details {
-    flex: 1;
-    min-width: 0;
-}
-
-.pos-product-barcode-name {
-    font-weight: 600;
-    font-size: 13px;
-    color: #1d1d1d;
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.pos-product-barcode-sku {
-    font-size: 11px;
-    color: #8a7f7a;
-    display: inline-block;
-    margin-right: 8px;
-}
-
-.pos-product-barcode-number {
-    font-size: 11px;
-    background: #f6f4f2;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-family: 'Courier New', monospace;
-    font-weight: 600;
-    color: #5c121f;
-    letter-spacing: 0.5px;
-    display: inline-block;
-}
-
-.pos-product-barcode-meta {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 2px;
-}
-
-.pos-product-barcode-stock {
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.pos-product-barcode-price {
-    font-weight: 600;
-    font-size: 12px;
-    color: #5c121f;
-}
-
-.pos-product-barcode-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-}
-
-.pos-product-barcode-actions .btn {
-    padding: 2px 10px;
-    font-size: 11px;
-    border-radius: 4px;
-}
-
-.pos-toggle-icon {
-    color: #8a7f7a;
-    margin-left: 4px;
-}
-
-.pos-toggle-icon i {
-    transition: transform 0.3s ease;
-}
-
-/* Variants */
-.pos-product-variants {
-    border-top: 1px solid #e8e0da;
-    padding: 4px 0;
-    background: #faf8f7;
-}
-
-.pos-variant-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 14px 8px 20px;
-    border-bottom: 1px solid #e8e0da;
-    transition: all 0.3s ease;
-}
-
-.pos-variant-item:last-child {
-    border-bottom: none;
-}
-
-.pos-variant-item:hover {
-    background: #ffffff;
-}
-
-.pos-variant-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-    min-width: 0;
-}
-
-.pos-variant-image {
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-    border-radius: 6px;
-    overflow: hidden;
-    border: 1px solid #e8e0da;
-    background: #f6f4f2;
-}
-
-.pos-variant-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.pos-variant-details {
-    flex: 1;
-    min-width: 0;
-}
-
-.pos-variant-name {
-    font-weight: 500;
-    font-size: 12px;
-    color: #1d1d1d;
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.pos-variant-sku {
-    font-size: 10px;
-    color: #8a7f7a;
-    display: inline-block;
-    margin-right: 6px;
-}
-
-.pos-variant-attr {
-    font-size: 10px;
-    background: #e8e0da;
-    padding: 1px 6px;
-    border-radius: 4px;
-    color: #1d1d1d;
-    display: inline-block;
-    margin-right: 4px;
-}
-
-.pos-variant-barcode-number {
-    font-size: 10px;
-    font-family: 'Courier New', monospace;
-    background: #f6f4f2;
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-weight: 600;
-    color: #5c121f;
-    letter-spacing: 0.5px;
-    display: inline-block;
-}
-
-.pos-variant-meta {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 1px;
-    flex-wrap: wrap;
-}
-
-.pos-variant-price {
-    font-weight: 600;
-    font-size: 12px;
-    color: #5c121f;
-}
-
-.pos-variant-stock {
-    font-size: 11px;
-}
-
-.pos-variant-actions {
-    display: flex;
-    gap: 6px;
-    flex-shrink: 0;
-}
-
-.pos-variant-actions .btn {
-    padding: 2px 8px;
-    font-size: 10px;
-    border-radius: 4px;
-}
-
-.text-muted {
-    color: #8a7f7a !important;
-}
-
-.text-warning {
-    color: #f39c12 !important;
-}
-
-.text-danger {
-    color: #d64045 !important;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .pos-product-barcode-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-    
-    .pos-product-barcode-actions {
-        width: 100%;
-        justify-content: flex-start;
-    }
-    
-    .pos-product-barcode-info {
-        width: 100%;
-    }
-    
-    .pos-variant-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
-        padding: 8px 10px 8px 16px;
-    }
-    
-    .pos-variant-actions {
-        width: 100%;
-        justify-content: flex-start;
-    }
-    
-    .pos-variant-info {
-        width: 100%;
-    }
-}
-
-@media (max-width: 480px) {
-    .pos-product-barcode-image {
-        width: 40px;
-        height: 40px;
-    }
-    
-    .pos-product-barcode-name {
-        font-size: 12px;
-    }
-    
-    .pos-product-barcode-number {
-        font-size: 10px;
-        padding: 1px 6px;
-    }
-    
-    .pos-product-barcode-meta {
-        flex-wrap: wrap;
-        gap: 6px;
-    }
-    
-    .pos-variant-image {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .pos-variant-info {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-    
-    .pos-variant-details {
-        width: 100%;
-    }
-    
-    .pos-variant-meta {
-        flex-wrap: wrap;
-        gap: 6px;
-    }
-}
-</style>
-
-<!-- ============================================
-MAIN CONTAINER
-============================================ -->
 <div class="pos-container">
     
-    <!-- HERO HEADER - PRIMARY BACKGROUND ONLY HERE -->
+    <!-- HERO HEADER -->
     <div class="pos-hero">
         <div class="pos-hero-left">
             <div class="logo">POS</div>
@@ -2417,292 +2111,266 @@ MAIN CONTAINER
         <div class="pos-hero-right">
             <span class="pos-store-badge"><i class="fas fa-building"></i> {{ store_settings.store_name }}</span>
             <button class="pos-btn-clear" onclick="posClearCart()"><i class="fas fa-trash"></i> Clear</button>
-<a href="{% url 'offline_sales:offline_sale' %}" class="pos-btn-clear">
-    <i class="fas fa-plus"></i> New Sale
-</a>
+            <a href="{% url 'offline_sales:offline_sale' %}" class="pos-btn-clear">
+                <i class="fas fa-plus"></i> New Sale
+            </a>
         </div>
     </div>
-
-    <!-- SCANNER -->
-    <section class="pos-scanner">
-        <div class="pos-scanner-head">
-            <h3><i class="fas fa-qrcode"></i> Barcode Scanner</h3>
-            <span class="shortcuts">
-                <kbd>F1</kbd> Camera &nbsp;·&nbsp; <kbd>F2</kbd> External
-            </span>
-        </div>
-        <div class="pos-scanner-body">
-            
-            <div class="pos-scanner-container" id="posScannerContainer">
-                <video id="posScannerVideo" autoplay playsinline></video>
-                <div class="pos-scanner-overlay">
-                    <div class="pos-scanner-corner tl"></div>
-                    <div class="pos-scanner-corner tr"></div>
-                    <div class="pos-scanner-corner bl"></div>
-                    <div class="pos-scanner-corner br"></div>
-                </div>
-                <div class="pos-scanner-line"></div>
-                <div class="pos-scan-status" id="posScanStatus">
-                    <span class="dot"></span> Scanning...
-                </div>
-                <div class="pos-zoom-indicator" id="posZoomIndicator">1.0x</div>
-                <div class="pos-zoom-controls">
-                    <button onclick="posZoomCamera('in')" title="Zoom In">+</button>
-                    <button onclick="posZoomCamera('out')" title="Zoom Out">−</button>
-                </div>
-            </div>
-            
-            <div class="pos-scanner-controls">
-                <button class="btn pos-btn-start" onclick="posStartScanner()" id="posStartBtn">
-                    <i class="fas fa-camera"></i> Start
-                </button>
-                <button class="btn pos-btn-stop" onclick="posStopScanner()" id="posStopBtn" style="display:none;">
-                    <i class="fas fa-stop"></i> Stop
-                </button>
-                <button class="btn pos-btn-external" onclick="posToggleExternal()" id="posExternalBtn">
-                    <i class="fas fa-bluetooth-b"></i> External
-                </button>
-            </div>
-            
-            <div class="pos-scanner-tools">
-                <div class="pos-cam-select">
-                    <select id="posCameraSelect" onchange="posSwitchCamera(this.value)">
-                        <option value="default">📷 Default</option>
-                    </select>
-                </div>
-                
-                <div class="pos-gallery-scan" onclick="document.getElementById('posGalleryInput').click()">
-                    <i class="fas fa-images"></i>
-                    <span>Scan from Gallery</span>
-                    <input type="file" id="posGalleryInput" accept="image/*">
-                    <img id="posGalleryPreview" class="pos-gallery-preview" alt="Preview">
-                </div>
-                
-                <div class="pos-manual-input">
-                    <input type="text" id="posBarcodeInput" placeholder="Enter barcode..." 
-                           onkeypress="if(event.key==='Enter') posScanAndAdd(this.value)">
-                    <button onclick="posScanAndAdd(document.getElementById('posBarcodeInput').value)">
-                        <i class="fas fa-plus"></i> Add
-                    </button>
-                </div>
-            </div>
-            
-            <div id="posScanResult"></div>
-            <div id="posGalleryResult"></div>
-            
-            <div style="margin-top:6px;">
-                <span class="pos-scan-badge ready" id="posStatusBadge">
-                    <i class="fas fa-check-circle"></i> Ready
-                </span>
-            </div>
-        </div>
-    </section>
 
     <!-- GRID -->
     <div class="pos-grid">
         
-        <!-- LEFT -->
+        <!-- LEFT SIDE - PRODUCTS ONLY -->
         <div class="pos-left">
-            
-            <!-- SEARCH -->
-            <div class="pos-card">
-                <div class="pos-card-head">
-                    <h4><i class="fas fa-search"></i> Search Products</h4>
-                </div>
-                <div class="pos-card-body">
-                    <div class="pos-search">
-                        <input type="text" id="posProductSearch" placeholder="Search by name, SKU, or barcode...">
-                        <button onclick="posSearchProducts()"><i class="fas fa-search"></i></button>
-                    </div>
-                    <div class="pos-results" id="posProductResults"></div>
+            <div class="pos-search">
+                <input type="text" id="posProductSearch" placeholder="Search by name, SKU, or barcode..." 
+                       onkeyup="posFilterProducts(this.value)">
+                <button onclick="posLoadAllProducts()" title="Refresh">
+                    <i class="fas fa-sync"></i>
+                </button>
+            </div>
+            <div class="pos-product-grid" id="posProductGrid">
+                <div class="pos-no-results">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                    <p>Loading products...</p>
                 </div>
             </div>
+            <div style="padding:3px 10px 6px;font-size:7px;color:#8a7f7a;text-align:center;flex-shrink:0;">
+                <i class="fas fa-info-circle"></i> Hover for details · Click variants to view
+            </div>
+        </div>
+        
+        <!-- RIGHT SIDE -->
+        <div class="pos-right">
             
-            <!-- CUSTOMER -->
-            <div class="pos-card">
-                <div class="pos-card-head">
-                    <h4><i class="fas fa-user"></i> Customer</h4>
+            <!-- SCANNER -->
+            <section class="pos-scanner">
+                <div class="pos-scanner-head">
+                    <h3><i class="fas fa-qrcode"></i> Barcode Scanner</h3>
+                    <span class="shortcuts">
+                        <kbd>F1</kbd> Camera &nbsp;·&nbsp; <kbd>F2</kbd> External
+                    </span>
                 </div>
-                <div class="pos-card-body">
-                    <div class="pos-customer-wrapper">
-                        <div class="pos-customer-search">
-                            <input type="text" id="posCustomerSearch" placeholder="Search by name, phone, or email..."
-                                   onkeyup="posSearchCustomer(this.value)" autocomplete="off">
+                <div class="pos-scanner-body">
+                    
+                    <div class="pos-scanner-container" id="posScannerContainer">
+                        <video id="posScannerVideo" autoplay playsinline></video>
+                        <div class="pos-scanner-overlay">
+                            <div class="pos-scanner-corner tl"></div>
+                            <div class="pos-scanner-corner tr"></div>
+                            <div class="pos-scanner-corner bl"></div>
+                            <div class="pos-scanner-corner br"></div>
                         </div>
-                        <div class="pos-customer-dropdown" id="posCustomerDropdown"></div>
+                        <div class="pos-scanner-line"></div>
+                        <div class="pos-scan-status" id="posScanStatus">
+                            <span class="dot"></span> Scanning...
+                        </div>
+                        <div class="pos-zoom-indicator" id="posZoomIndicator">1.0x</div>
+                        <div class="pos-zoom-controls">
+                            <button onclick="posZoomCamera('in')" title="Zoom In">+</button>
+                            <button onclick="posZoomCamera('out')" title="Zoom Out">−</button>
+                        </div>
                     </div>
                     
-                    <div class="pos-selected-customer" id="posSelectedCustomer"></div>
+                    <div class="pos-scanner-controls">
+                        <button class="btn pos-btn-start" onclick="posStartScanner()" id="posStartBtn">
+                            <i class="fas fa-camera"></i> Start
+                        </button>
+                        <button class="btn pos-btn-stop" onclick="posStopScanner()" id="posStopBtn" style="display:none;">
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                        <button class="btn pos-btn-external" onclick="posToggleExternal()" id="posExternalBtn">
+                            <i class="fas fa-bluetooth-b"></i> External
+                        </button>
+                    </div>
                     
-                    <button class="pos-btn-new-customer" onclick="posToggleForm('posNewCustomerForm')">
-                        <i class="fas fa-plus"></i> New Customer
-                    </button>
-                    
-                    <div class="pos-inline-form" id="posNewCustomerForm">
-                        <div class="row">
-                            <div class="group">
-                                <label>First Name <span class="req">*</span></label>
-                                <input type="text" id="posCfFirstName" placeholder="First name">
-                            </div>
-                            <div class="group">
-                                <label>Last Name</label>
-                                <input type="text" id="posCfLastName" placeholder="Last name">
-                            </div>
+                    <div class="pos-scanner-tools">
+                        <div class="pos-cam-select">
+                            <select id="posCameraSelect" onchange="posSwitchCamera(this.value)">
+                                <option value="default">📷 Default</option>
+                            </select>
                         </div>
-                        <div class="group">
-                            <label>Phone <span class="req">*</span></label>
-                            <input type="tel" id="posCfPhone" placeholder="10-digit phone number">
-                            <div class="hint">Enter 10-digit phone number</div>
+                        
+                        <div class="pos-gallery-scan" onclick="document.getElementById('posGalleryInput').click()">
+                            <i class="fas fa-images"></i>
+                            <span>Scan from Gallery</span>
+                            <input type="file" id="posGalleryInput" accept="image/*">
+                            <img id="posGalleryPreview" class="pos-gallery-preview" alt="Preview">
                         </div>
-                        <div class="group">
-                            <label>Email</label>
-                            <input type="email" id="posCfEmail" placeholder="Email address">
-                        </div>
-                        <div class="group">
-                            <label>Address</label>
-                            <textarea id="posCfAddress" rows="2" placeholder="Address"></textarea>
-                        </div>
-                        <div class="actions">
-                            <button class="btn btn-secondary" onclick="posToggleForm('posNewCustomerForm')">Cancel</button>
-                            <button class="btn btn-success" onclick="posCreateCustomer()">
-                                <i class="fas fa-save"></i> Save
+                        
+                        <div class="pos-manual-input">
+                            <input type="text" id="posBarcodeInput" placeholder="Enter barcode..." 
+                                   onkeypress="if(event.key==='Enter') posScanAndAdd(this.value)">
+                            <button onclick="posScanAndAdd(document.getElementById('posBarcodeInput').value)">
+                                <i class="fas fa-plus"></i> Add
                             </button>
                         </div>
                     </div>
+                    
+                    <div id="posScanResult"></div>
+                    <div id="posGalleryResult"></div>
+                    
+                    <div style="margin-top:2px;">
+                        <span class="pos-scan-badge ready" id="posStatusBadge">
+                            <i class="fas fa-check-circle"></i> Ready
+                        </span>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <!-- PRODUCTS WITH BARCODE NUMBERS AND IMAGES -->
-<div class="pos-card">
-    <div class="pos-card-head">
-        <h4><i class="fas fa-barcode"></i> Products & Barcodes</h4>
-        <span class="count" id="posTotalProducts">Loading...</span>
-    </div>
-    <div class="pos-card-body">
-        <div class="pos-search" style="margin-bottom:12px;">
-            <input type="text" id="posProductBarcodeSearch" placeholder="Search by name, SKU, or barcode number..." 
-                   onkeyup="posFilterProductBarcodeList(this.value)">
-            <button onclick="posLoadAllProductsWithBarcodes()" title="Refresh">
-                <i class="fas fa-sync"></i>
-            </button>
-        </div>
-        <div class="pos-results" id="posProductBarcodeList" style="max-height:450px;overflow-y:auto;">
-            <div class="pos-no-results" id="posBarcodeLoading">
-                <i class="fas fa-spinner fa-spin fa-2x"></i>
-                <p>Loading products...</p>
-            </div>
-        </div>
-        <div style="margin-top:8px;font-size:11px;color:#8a7f7a;text-align:center;">
-            <i class="fas fa-info-circle"></i> Click on product to expand variants
-        </div>
-    </div>
-</div>
-        
-        <!-- RIGHT -->
-        <div class="pos-right">
+            </section>
             
-            <!-- CART -->
+            <!-- CARD: CART + SUMMARY + CUSTOMER -->
             <div class="pos-card">
                 <div class="pos-card-head">
                     <h4><i class="fas fa-shopping-cart"></i> Cart</h4>
                     <span class="count" id="posCartCount">{{ cart_count }}</span>
                 </div>
-                <div class="pos-card-body pos-cart-items" id="posCartItems">
-                    {% if cart_items %}
-                        {% for item in cart_items %}
-                        <div class="pos-cart-item" data-index="{{ forloop.counter0 }}">
-                            <div class="img">
-                                {% if item.image %}
-                                <img src="{{ item.image }}" alt="{{ item.name }}">
-                                {% else %}
-                                <i class="fas fa-box"></i>
-                                {% endif %}
-                            </div>
-                            <div class="details">
-                                <div class="name" title="{{ item.name }}">{{ item.name }}</div>
-                                <div class="sku">SKU: {{ item.sku }}</div>
-                                <div class="pricing">
-                                    {% if item.original_price > item.price %}
-                                    <span class="original">₹{{ item.original_price|floatformat:2 }}</span>
-                                    <span class="final">₹{{ item.price|floatformat:2 }}</span>
+                <div class="pos-card-body">
+                    
+                    <!-- CART ITEMS -->
+                    <div class="pos-cart-items" id="posCartItems">
+                        {% if cart_items %}
+                            {% for item in cart_items %}
+                            <div class="pos-cart-item" data-index="{{ forloop.counter0 }}">
+                                <div class="img">
+                                    {% if item.image %}
+                                    <img src="{{ item.image }}" alt="{{ item.name }}">
                                     {% else %}
-                                    <span class="final">₹{{ item.price|floatformat:2 }}</span>
+                                    <i class="fas fa-box"></i>
                                     {% endif %}
                                 </div>
-                            </div>
-                            <div class="controls">
-                                <div class="pos-qty">
-                                    <button onclick="posUpdateQty({{ forloop.counter0 }}, -1)">−</button>
-                                    <input type="number" value="{{ item.quantity }}" min="1" max="{{ item.stock }}"
-                                           onchange="posUpdateQty({{ forloop.counter0 }}, 0, this.value)">
-                                    <button onclick="posUpdateQty({{ forloop.counter0 }}, 1)">+</button>
+                                <div class="details">
+                                    <div class="name" title="{{ item.name }}">{{ item.name }}</div>
+                                    <div class="sku">SKU: {{ item.sku }}</div>
+                                    <div class="pricing">
+                                        {% if item.original_price > item.price %}
+                                        <span class="original">₹{{ item.original_price|floatformat:2 }}</span>
+                                        <span class="final">₹{{ item.price|floatformat:2 }}</span>
+                                        {% else %}
+                                        <span class="final">₹{{ item.price|floatformat:2 }}</span>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                <span class="total">₹{{ item.total|floatformat:2 }}</span>
-                                <button class="btn-remove" onclick="posRemoveItem({{ forloop.counter0 }})" title="Remove">
-                                    <i class="fas fa-times"></i>
-                                </button>
+                                <div class="controls">
+                                    <div class="pos-qty">
+                                        <button onclick="posUpdateQty({{ forloop.counter0 }}, -1)">−</button>
+                                        <input type="number" value="{{ item.quantity }}" min="1" max="{{ item.stock }}"
+                                               onchange="posUpdateQty({{ forloop.counter0 }}, 0, this.value)">
+                                        <button onclick="posUpdateQty({{ forloop.counter0 }}, 1)">+</button>
+                                    </div>
+                                    <span class="total">₹{{ item.total|floatformat:2 }}</span>
+                                    <button class="btn-remove" onclick="posRemoveItem({{ forloop.counter0 }})" title="Remove">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                {% if item.discount > 0 %}
+                                <div class="saved">Saved: ₹{{ item.discount|floatformat:2 }}</div>
+                                {% endif %}
                             </div>
-                            {% if item.discount > 0 %}
-                            <div class="saved">Saved: ₹{{ item.discount|floatformat:2 }}</div>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="pos-cart-empty">
-                            <i class="fas fa-shopping-cart"></i>
-                            <p>Your cart is empty</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <!-- SUMMARY -->
-            <div class="pos-card">
-                <div class="pos-card-head">
-                    <h4><i class="fas fa-calculator"></i> Summary</h4>
-                </div>
-                <div class="pos-card-body" id="posCartTotals">
-                    <div class="pos-summary-row">
-                        <span>Subtotal</span>
-                        <span class="value">₹{{ subtotal|floatformat:2 }}</span>
-                    </div>
-                    {% if total_product_discount > 0 %}
-                    <div class="pos-summary-row">
-                        <span>Product Discount</span>
-                        <span class="value discount">-₹{{ total_product_discount|floatformat:2 }}</span>
-                    </div>
-                    {% endif %}
-                    {% if total_offer_discount > 0 %}
-                    <div class="pos-summary-row">
-                        <span>Offer Discount</span>
-                        <span class="value discount">-₹{{ total_offer_discount|floatformat:2 }}</span>
-                    </div>
-                    {% endif %}
-                    <div class="pos-summary-grand">
-                        <span>Grand Total</span>
-                        <span class="value" id="posGrandTotal">₹{{ grand_total|floatformat:2 }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <div class="pos-cart-empty">
+                                <i class="fas fa-shopping-cart"></i>
+                                <p>Your cart is empty</p>
+                            </div>
+                        {% endif %}
                     </div>
                     
-                    <button class="pos-btn-complete" onclick="posOpenPaymentModal()" {% if not cart_items %}disabled{% endif %}>
-                        <i class="fas fa-credit-card"></i> Complete Sale
-                    </button>
+                    <!-- SUMMARY - Only shows when cart has items -->
+                    <div class="pos-summary-wrap" id="posSummaryWrap">
+                        <div class="pos-summary-row">
+                            <span>Subtotal</span>
+                            <span class="value">₹{{ subtotal|floatformat:2 }}</span>
+                        </div>
+                        {% if total_product_discount > 0 %}
+                        <div class="pos-summary-row">
+                            <span>Product Discount</span>
+                            <span class="value discount">-₹{{ total_product_discount|floatformat:2 }}</span>
+                        </div>
+                        {% endif %}
+                        {% if total_offer_discount > 0 %}
+                        <div class="pos-summary-row">
+                            <span>Offer Discount</span>
+                            <span class="value discount">-₹{{ total_offer_discount|floatformat:2 }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="pos-summary-grand">
+                            <span>Grand Total</span>
+                            <span class="value" id="posGrandTotal">₹{{ grand_total|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- CUSTOMER - Only shows when cart has items -->
+                    <div class="pos-customer-wrap" id="posCustomerWrap">
+                        <div class="pos-customer-wrapper">
+                            <div class="pos-customer-search">
+                                <input type="text" id="posCustomerSearch" placeholder="Search by name, phone, or email..."
+                                       onkeyup="posSearchCustomer(this.value)" autocomplete="off">
+                            </div>
+                            <div class="pos-customer-dropdown" id="posCustomerDropdown"></div>
+                        </div>
+                        
+                        <div class="pos-selected-customer" id="posSelectedCustomer"></div>
+                        
+                        <button class="pos-btn-new-customer" onclick="posToggleForm('posNewCustomerForm')">
+                            <i class="fas fa-plus"></i> New Customer
+                        </button>
+                        
+                        <div class="pos-inline-form" id="posNewCustomerForm">
+                            <div class="row">
+                                <div class="group">
+                                    <label>First Name <span class="req">*</span></label>
+                                    <input type="text" id="posCfFirstName" placeholder="First name">
+                                </div>
+                                <div class="group">
+                                    <label>Last Name</label>
+                                    <input type="text" id="posCfLastName" placeholder="Last name">
+                                </div>
+                            </div>
+                            <div class="group">
+                                <label>Phone <span class="req">*</span></label>
+                                <input type="tel" id="posCfPhone" placeholder="10-digit phone number">
+                                <div class="hint">Enter 10-digit phone number</div>
+                            </div>
+                            <div class="group">
+                                <label>Email</label>
+                                <input type="email" id="posCfEmail" placeholder="Email address">
+                            </div>
+                            <div class="group">
+                                <label>Address</label>
+                                <textarea id="posCfAddress" rows="2" placeholder="Address"></textarea>
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-secondary" onclick="posToggleForm('posNewCustomerForm')">Cancel</button>
+                                <button class="btn btn-success" onclick="posCreateCustomer()">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     
+    <!-- PAYMENT BUTTON FIXED AT BOTTOM -->
+    <div class="pos-payment-fixed">
+        <button class="pos-btn-complete" onclick="posOpenPaymentModal()" {% if not cart_items %}disabled{% endif %}>
+            <i class="fas fa-credit-card"></i> Complete Sale
+        </button>
+    </div>
+    
     <!-- INVOICE -->
-    <div id="posInvoiceSection" style="display:none;margin-top:24px;">
+    <div id="posInvoiceSection">
         <div id="posInvoiceContent"></div>
-        <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
-            <button onclick="posPrintInvoice()" style="padding:10px 24px;background:#5c121f;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">Print</button>
-            <button onclick="posCloseInvoice()" style="padding:10px 24px;background:#e8e0da;color:#1d1d1d;border:none;border-radius:6px;cursor:pointer;font-weight:600;">Close</button>
+        <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
+            <button onclick="posPrintInvoice()" style="padding:4px 14px;background:#5c121f;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:11px;">Print</button>
+            <button onclick="posCloseInvoice()" style="padding:4px 14px;background:#e8e0da;color:#1d1d1d;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:11px;">Close</button>
         </div>
     </div>
 </div>
 
 <!-- ============================================
-SIMPLE PAYMENT MODAL - 4 FIELDS ONLY
+PAYMENT MODAL
 ============================================ -->
 <div class="pos-modal-overlay" id="posPaymentModal">
     <div class="pos-modal">
@@ -2746,6 +2414,21 @@ SIMPLE PAYMENT MODAL - 4 FIELDS ONLY
     </div>
 </div>
 
+<!-- ============================================
+VARIANT POPUP MODAL
+============================================ -->
+<div class="pos-variant-modal-overlay" id="posVariantModal">
+    <div class="pos-variant-modal">
+        <div class="pos-modal-header">
+            <h3><i class="fas fa-cubes"></i> <span id="posVariantModalTitle">Variants</span></h3>
+            <button class="pos-modal-close" onclick="posCloseVariantModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="pos-modal-body" id="posVariantModalBody">
+            <!-- Variants will be rendered here -->
+        </div>
+    </div>
+</div>
+
 <!-- TOAST -->
 <div class="pos-toast-container" id="posToastContainer"></div>
 
@@ -2757,9 +2440,47 @@ SIMPLE PAYMENT MODAL - 4 FIELDS ONLY
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.2/dist/quagga.min.js"></script>
-
 <script>
+// ============================================
+// ALL JAVASCRIPT - WITH FIX FOR AUTO-SHOWING
+// CUSTOMER AND SUMMARY SECTIONS
+// ============================================
+
+// ============================================
+// UPDATE CART UI - SHOW/HIDE SECTIONS
+// ============================================
+function posUpdateCartUI() {
+    // Check if there are items in the cart
+    const cartItems = document.querySelectorAll('.pos-cart-item');
+    const hasItems = cartItems.length > 0;
+    
+    // Toggle summary section
+    const summaryWrap = document.getElementById('posSummaryWrap');
+    if (summaryWrap) {
+        if (hasItems) {
+            summaryWrap.classList.add('active');
+        } else {
+            summaryWrap.classList.remove('active');
+        }
+    }
+    
+    // Toggle customer section
+    const customerWrap = document.getElementById('posCustomerWrap');
+    if (customerWrap) {
+        if (hasItems) {
+            customerWrap.classList.add('active');
+        } else {
+            customerWrap.classList.remove('active');
+        }
+    }
+    
+    // Update payment button
+    const payBtn = document.querySelector('.pos-btn-complete');
+    if (payBtn) {
+        payBtn.disabled = !hasItems;
+    }
+}
+
 // ============================================
 // PAYMENT MODAL
 // ============================================
@@ -2778,14 +2499,12 @@ function posClosePaymentModal() {
     document.getElementById('posPaymentModal').classList.remove('active');
 }
 
-// Close modal on overlay click
 document.getElementById('posPaymentModal').addEventListener('click', function(e) {
     if (e.target === this) {
         posClosePaymentModal();
     }
 });
 
-// Calculate change
 document.getElementById('posPmAmount').addEventListener('input', function() {
     const total = parseFloat(document.getElementById('posGrandTotal').textContent.replace('₹', ''));
     const received = parseFloat(this.value) || 0;
@@ -2794,229 +2513,156 @@ document.getElementById('posPmAmount').addEventListener('input', function() {
 });
 
 // ============================================
-// LOAD ALL PRODUCTS WITH BARCODE NUMBERS AND IMAGES
+// VARIANT MODAL
 // ============================================
+let posVariantProductId = null;
+let posVariantProductName = '';
 
-let posAllProductsData = [];
-
-function posLoadAllProductsWithBarcodes() {
-    const container = document.getElementById('posProductBarcodeList');
-    const countBadge = document.getElementById('posTotalProducts');
+function posOpenVariantModal(productId, productName, variants) {
+    posVariantProductId = productId;
+    posVariantProductName = productName;
+    document.getElementById('posVariantModalTitle').textContent = productName + ' - Variants';
     
-    container.innerHTML = `
-        <div class="pos-no-results">
-            <i class="fas fa-spinner fa-spin fa-2x"></i>
-            <p>Loading products...</p>
-        </div>
-    `;
-    countBadge.textContent = 'Loading...';
+    const body = document.getElementById('posVariantModalBody');
+    if (!variants || variants.length === 0) {
+        body.innerHTML = '<div style="text-align:center;padding:20px;color:#8a7f7a;">No variants available</div>';
+    } else {
+        let html = '';
+        variants.forEach(v => {
+            const imgSrc = v.image || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23f0ece8%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%238a827a%22 font-size=%2224%22%3E📦%3C/text%3E%3C/svg%3E';
+            html += `
+                <div class="variant-item">
+                    <div class="v-info">
+                        <div class="v-name">${v.name || v.sku}</div>
+                        <div class="v-sku">SKU: ${v.sku} ${v.color ? '· ' + v.color : ''} ${v.size ? '· ' + v.size : ''}</div>
+                        <div class="v-price">₹${v.price} ${v.stock > 0 ? '· Stock: ' + v.stock : '· <span style="color:#d64045;">Out of stock</span>'}</div>
+                    </div>
+                    <button class="v-add" onclick="posAddVariantFromModal(${v.id})" ${v.stock <= 0 ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>
+                        <i class="fas fa-plus"></i> Add
+                    </button>
+                </div>
+            `;
+        });
+        body.innerHTML = html;
+    }
+    
+    document.getElementById('posVariantModal').classList.add('active');
+}
+
+function posCloseVariantModal() {
+    document.getElementById('posVariantModal').classList.remove('active');
+}
+
+// Close variant modal on overlay click
+document.getElementById('posVariantModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        posCloseVariantModal();
+    }
+});
+
+function posAddVariantFromModal(variantId) {
+    posCloseVariantModal();
+    posAddProductDirect(variantId, 'variant');
+}
+
+// ============================================
+// LOAD PRODUCTS
+// ============================================
+let posAllProducts = [];
+
+function posLoadAllProducts() {
+    const grid = document.getElementById('posProductGrid');
+    
+    grid.innerHTML = `<div class="pos-no-results">
+        <i class="fas fa-spinner fa-spin fa-2x"></i>
+        <p>Loading products...</p>
+    </div>`;
     
     fetch('/offline/api/products-with-barcodes/')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                posAllProductsData = data.products;
-                countBadge.textContent = data.total_products;
-                posRenderProductBarcodeList(data.products);
+                posAllProducts = data.products;
+                posRenderProducts(data.products);
             } else {
-                container.innerHTML = `
-                    <div class="pos-no-results">
-                        <i class="fas fa-exclamation-circle fa-2x" style="color:#d64045;"></i>
-                        <p>Error: ${data.error || 'Failed to load products'}</p>
-                    </div>
-                `;
-                countBadge.textContent = 'Error';
+                grid.innerHTML = `<div class="pos-no-results">
+                    <i class="fas fa-exclamation-circle fa-2x" style="color:#d64045;"></i>
+                    <p>Error: ${data.error || 'Failed to load products'}</p>
+                </div>`;
             }
         })
         .catch(error => {
-            container.innerHTML = `
-                <div class="pos-no-results">
-                    <i class="fas fa-exclamation-circle fa-2x" style="color:#d64045;"></i>
-                    <p>Error loading products</p>
-                </div>
-            `;
-            countBadge.textContent = 'Error';
+            grid.innerHTML = `<div class="pos-no-results">
+                <i class="fas fa-exclamation-circle fa-2x" style="color:#d64045;"></i>
+                <p>Error loading products</p>
+            </div>`;
             console.error('Error loading products:', error);
         });
 }
 
-function posRenderProductBarcodeList(products) {
-    const container = document.getElementById('posProductBarcodeList');
+function posRenderProducts(products) {
+    const grid = document.getElementById('posProductGrid');
     
     if (!products || products.length === 0) {
-        container.innerHTML = `
-            <div class="pos-no-results">
-                <i class="fas fa-box-open fa-2x"></i>
-                <p>No products found</p>
-            </div>
-        `;
+        grid.innerHTML = `<div class="pos-no-results">
+            <i class="fas fa-box-open fa-2x"></i>
+            <p>No products found</p>
+        </div>`;
         return;
     }
     
     let html = '';
     
     products.forEach((product, index) => {
-        const hasBarcode = product.barcode_number ? true : false;
-        const stockClass = product.stock <= 0 ? 'text-danger' : (product.stock <= 5 ? 'text-warning' : '');
-        const productImage = product.image || '/static/images/no-image.png';
+        const productImage = product.image || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23f0ece8%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%238a827a%22 font-size=%2224%22%3E📦%3C/text%3E%3C/svg%3E';
         
         html += `
-            <div class="pos-product-barcode-item" data-product-id="${product.id}" data-search="${product.name} ${product.sku} ${product.barcode_number || ''}">
-                <div class="pos-product-barcode-header" onclick="posToggleProductBarcodeVariants(${index})">
-                    <div class="pos-product-barcode-info">
-                        <div class="pos-product-barcode-image">
-                            <img src="${productImage}" alt="${product.name}" onerror="this.src='/static/images/no-image.png'">
-                        </div>
-                        <div class="pos-product-barcode-details">
-                            <span class="pos-product-barcode-name">${product.name}</span>
-                            <span class="pos-product-barcode-sku">SKU: ${product.sku}</span>
-                            ${product.barcode_number ? 
-                                `<span class="pos-product-barcode-number">📷 ${product.barcode_number}</span>` : 
-                                '<span class="pos-product-barcode-number text-muted">No barcode</span>'
-                            }
-                            <div class="pos-product-barcode-meta">
-                                <span class="pos-product-barcode-stock ${stockClass}">Stock: ${product.stock}</span>
-                                <span class="pos-product-barcode-price">₹${product.price}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="pos-product-barcode-actions">
-                        ${product.barcode_number ? 
-                            `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); posAddByBarcode('${product.barcode_number}')">
-                                <i class="fas fa-plus"></i>
-                            </button>` : ''
-                        }
-                        ${product.has_variants ? 
-                            `<span class="badge bg-info">${product.variants.length} variants</span>` : ''
-                        }
-                        <span class="pos-toggle-icon"><i class="fas fa-chevron-down"></i></span>
+            <div class="pos-product-item" data-search="${product.name} ${product.sku} ${product.barcode_number || ''}">
+                <div class="p-image">
+                    <img src="${productImage}" alt="${product.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23f0ece8%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%238a827a%22 font-size=%2224%22%3E📦%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div class="p-name" title="${product.name}">${product.name}</div>
+                <div class="p-price">₹${product.price}</div>
+                <button class="p-add" onclick="posAddProductDirect(${product.id}, 'product')">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+                ${product.has_variants ? 
+                    `<button class="p-variants-btn" onclick="posOpenVariantModal(${product.id}, '${product.name}', ${JSON.stringify(product.variants).replace(/"/g, '&quot;')})">
+                        ${product.variants.length} variants ▾
+                    </button>` : ''
+                }
+                <!-- HOVER TOOLTIP -->
+                <div class="p-tooltip">
+                    <div class="tt-name">${product.name}</div>
+                    <div class="tt-detail">
+                        <span>SKU: ${product.sku}</span>
+                        <span>Price: ₹${product.price}</span>
+                        <span class="tt-stock">Stock: ${product.stock}</span>
+                        ${product.barcode_number ? `<span class="tt-barcode">Barcode: ${product.barcode_number}</span>` : ''}
+                        ${product.has_variants ? `<span>Variants: ${product.variants.length}</span>` : ''}
                     </div>
                 </div>
-                ${product.has_variants ? `
-                <div class="pos-product-variants" id="posVariants_${index}" style="display:none;">
-                    ${product.variants.map(variant => {
-                        const variantImage = variant.image || product.image || '/static/images/no-image.png';
-                        const variantStockClass = variant.stock <= 0 ? 'text-danger' : (variant.stock <= 5 ? 'text-warning' : '');
-                        return `
-                        <div class="pos-variant-item" data-search="${variant.name} ${variant.sku} ${variant.barcode_number || ''}">
-                            <div class="pos-variant-info">
-                                <div class="pos-variant-image">
-                                    <img src="${variantImage}" alt="${variant.name || variant.sku}" onerror="this.src='/static/images/no-image.png'">
-                                </div>
-                                <div class="pos-variant-details">
-                                    <span class="pos-variant-name">${variant.name || variant.sku}</span>
-                                    <span class="pos-variant-sku">${variant.sku}</span>
-                                    ${variant.color ? `<span class="pos-variant-attr">🎨 ${variant.color}</span>` : ''}
-                                    ${variant.size ? `<span class="pos-variant-attr">📏 ${variant.size}</span>` : ''}
-                                    ${variant.barcode_number ? 
-                                        `<span class="pos-variant-barcode-number">📷 ${variant.barcode_number}</span>` : 
-                                        '<span class="text-muted">No barcode</span>'
-                                    }
-                                    <div class="pos-variant-meta">
-                                        <span class="pos-variant-price">₹${variant.price}</span>
-                                        <span class="pos-variant-stock ${variantStockClass}">Stock: ${variant.stock}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="pos-variant-actions">
-                                ${variant.barcode_number ? 
-                                    `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); posAddByBarcode('${variant.barcode_number}')">
-                                        <i class="fas fa-plus"></i>
-                                    </button>` : ''
-                                }
-                            </div>
-                        </div>
-                    `}).join('')}
-                </div>
-                ` : ''}
             </div>
         `;
     });
     
-    container.innerHTML = html;
+    grid.innerHTML = html;
 }
 
-function posToggleProductBarcodeVariants(index) {
-    const variants = document.getElementById(`posVariants_${index}`);
-    if (variants) {
-        const isVisible = variants.style.display !== 'none';
-        variants.style.display = isVisible ? 'none' : 'block';
-        const icon = document.querySelector(`#posVariants_${index}`).closest('.pos-product-barcode-item').querySelector('.pos-toggle-icon i');
-        if (icon) {
-            icon.className = isVisible ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
-        }
-    }
-}
-
-function posFilterProductBarcodeList(query) {
-    const items = document.querySelectorAll('.pos-product-barcode-item');
+function posFilterProducts(query) {
+    const items = document.querySelectorAll('.pos-product-item');
     const search = query.toLowerCase().trim();
     
     items.forEach(item => {
         const searchText = (item.dataset.search || '').toLowerCase();
-        const variants = item.querySelectorAll('.pos-variant-item');
-        
-        let showProduct = false;
-        
-        // Check if product matches
         if (search === '' || searchText.includes(search)) {
-            showProduct = true;
-        }
-        
-        // Check if any variant matches
-        variants.forEach(variant => {
-            const variantSearch = (variant.dataset.search || '').toLowerCase();
-            if (search !== '' && variantSearch.includes(search)) {
-                showProduct = true;
-                // Show the parent product
-                item.style.display = '';
-                // Expand variants if searching
-                const variantsContainer = item.querySelector('.pos-product-variants');
-                if (variantsContainer) {
-                    variantsContainer.style.display = 'block';
-                    const icon = item.querySelector('.pos-toggle-icon i');
-                    if (icon) icon.className = 'fas fa-chevron-up';
-                }
-            }
-        });
-        
-        // If no variant matches but product doesn't match, hide
-        if (search !== '' && !showProduct) {
-            // Check if any variant in this product matches
-            let variantMatch = false;
-            variants.forEach(variant => {
-                const variantSearch = (variant.dataset.search || '').toLowerCase();
-                if (variantSearch.includes(search)) {
-                    variantMatch = true;
-                }
-            });
-            if (!variantMatch) {
-                item.style.display = 'none';
-            } else {
-                item.style.display = '';
-            }
-        } else {
             item.style.display = '';
+        } else {
+            item.style.display = 'none';
         }
     });
 }
 
-function posAddByBarcode(barcode) {
-    if (!barcode) {
-        posToast('No barcode available', 'Error', 'error');
-        return;
-    }
-    posScanAndAdd(barcode);
-}
-
-// Load products on page load
-document.addEventListener('DOMContentLoaded', function() {
-    // Load products with barcodes
-    posLoadAllProductsWithBarcodes();
-    
-    // Refresh products every 60 seconds
-    setInterval(posLoadAllProductsWithBarcodes, 60000);
-});
 // ============================================
 // TOAST
 // ============================================
@@ -3185,6 +2831,7 @@ function posStartScannerWithDevice(deviceId) {
     }
     
     container.style.display = 'block';
+    container.classList.add('active');
     document.getElementById('posStartBtn').style.display = 'none';
     document.getElementById('posStopBtn').style.display = 'inline-block';
     document.getElementById('posStatusBadge').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing...';
@@ -3277,6 +2924,7 @@ function posStopScanner() {
     if (posScannerRunning) { try { Quagga.stop(); } catch(e) {} posScannerRunning = false; posScannerType = 'manual'; }
     const container = document.getElementById('posScannerContainer');
     container.style.display = 'none';
+    container.classList.remove('active');
     document.getElementById('posZoomIndicator').classList.remove('show');
     document.getElementById('posStartBtn').style.display = 'inline-block';
     document.getElementById('posStopBtn').style.display = 'none';
@@ -3368,7 +3016,7 @@ function posDetectBarcode(imageData) {
 }
 
 // ============================================
-// SCAN & ADD
+// SCAN & ADD - MODIFIED WITH UI UPDATE
 // ============================================
 function posScanAndAdd(barcode) {
     if (!barcode || !barcode.trim()) { posToast('Enter a barcode', 'Error', 'error'); return; }
@@ -3391,7 +3039,8 @@ function posScanAndAdd(barcode) {
             setTimeout(() => { document.getElementById('posScanResult').innerHTML = ''; }, 2000);
             document.getElementById('posBarcodeInput').value = '';
             if (posScannerType === 'external') document.getElementById('posBarcodeInput').focus();
-            setTimeout(() => location.reload(), 400);
+            // Reload page to update cart display
+            setTimeout(() => location.reload(), 300);
         } else {
             document.getElementById('posScanResult').innerHTML = `<div class="pos-alert pos-alert-danger">❌ ${data.error || 'Not found'}</div>`;
             posToast(data.error || 'Product not found', 'Error', 'error');
@@ -3400,6 +3049,9 @@ function posScanAndAdd(barcode) {
     .catch(error => { posHideLoader(); posToast('Error: ' + error, 'Error', 'error'); });
 }
 
+// ============================================
+// ADD TO CART - MODIFIED WITH UI UPDATE
+// ============================================
 function posAddToCart(product) {
     const data = {
         product_id: product.type === 'product' ? product.id : null,
@@ -3414,50 +3066,26 @@ function posAddToCart(product) {
     })
     .then(r => r.json())
     .then(data => {
-        if (data.success) posToast(data.message, 'Added', 'success');
-        else posToast(data.error || 'Failed', 'Error', 'error');
+        if (data.success) {
+            posToast(data.message, 'Added', 'success');
+            // Reload page to update cart display
+            setTimeout(() => location.reload(), 300);
+        } else {
+            posToast(data.error || 'Failed', 'Error', 'error');
+        }
     })
     .catch(error => posToast('Error: ' + error, 'Error', 'error'));
 }
 
 // ============================================
-// SEARCH PRODUCTS
+// ADD PRODUCT DIRECT - MODIFIED WITH UI UPDATE
 // ============================================
-function posSearchProducts() {
-    const query = document.getElementById('posProductSearch').value.trim();
-    const container = document.getElementById('posProductResults');
-    if (!query) { container.innerHTML = ''; return; }
-    
-    fetch(`/offline/sale/search/?q=${encodeURIComponent(query)}`)
-        .then(r => r.json())
-        .then(data => {
-            container.innerHTML = '';
-            if (data.results.length === 0) {
-                container.innerHTML = '<div class="pos-no-results">No products found</div>';
-                return;
-            }
-            data.results.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'pos-product';
-                div.innerHTML = `
-                    <img src="${item.image || '/static/images/no-image.png'}" alt="${item.name}">
-                    <div class="info">
-                        <div class="name">${item.name}</div>
-                        <div class="sku">SKU: ${item.sku}</div>
-                        <div class="price">₹${item.price}</div>
-                    </div>
-                    <button class="btn-add" onclick="posAddProductDirect('${item.id}', '${item.type}')">
-                        <i class="fas fa-plus"></i> Add
-                    </button>
-                `;
-                container.appendChild(div);
-            });
-        })
-        .catch(() => {});
-}
-
 function posAddProductDirect(id, type) {
-    const data = { product_id: type === 'product' ? id : null, variant_id: type === 'variant' ? id : null, quantity: 1 };
+    const data = { 
+        product_id: type === 'product' ? id : null, 
+        variant_id: type === 'variant' ? id : null, 
+        quantity: 1 
+    };
     posShowLoader('Adding to cart...');
     fetch('/offline/sale/add-product/', {
         method: 'POST',
@@ -3467,14 +3095,19 @@ function posAddProductDirect(id, type) {
     .then(r => r.json())
     .then(data => {
         posHideLoader();
-        if (data.success) { posToast(data.message, 'Added', 'success'); setTimeout(() => location.reload(), 400); }
-        else posToast(data.error || 'Failed', 'Error', 'error');
+        if (data.success) { 
+            posToast(data.message, 'Added', 'success'); 
+            // Reload page to update cart display
+            setTimeout(() => location.reload(), 300); 
+        } else {
+            posToast(data.error || 'Failed', 'Error', 'error');
+        }
     })
     .catch(error => { posHideLoader(); posToast('Error: ' + error, 'Error', 'error'); });
 }
 
 // ============================================
-// CART
+// CART - MODIFIED WITH UI UPDATE
 // ============================================
 function posRemoveItem(index) {
     if (!confirm('Remove this item?')) return;
@@ -3484,7 +3117,13 @@ function posRemoveItem(index) {
         body: JSON.stringify({ index: index })
     })
     .then(r => r.json())
-    .then(data => { if (data.success) location.reload(); else posToast(data.error || 'Failed', 'Error', 'error'); })
+    .then(data => { 
+        if (data.success) {
+            location.reload();
+        } else {
+            posToast(data.error || 'Failed', 'Error', 'error');
+        }
+    })
     .catch(() => {});
 }
 
@@ -3503,7 +3142,13 @@ function posUpdateQty(index, change, value) {
         body: JSON.stringify({ index: index, quantity: quantity })
     })
     .then(r => r.json())
-    .then(data => { if (data.success) location.reload(); else posToast(data.error || 'Failed', 'Error', 'error'); })
+    .then(data => { 
+        if (data.success) {
+            location.reload(); 
+        } else {
+            posToast(data.error || 'Failed', 'Error', 'error');
+        }
+    })
     .catch(() => {});
 }
 
@@ -3514,7 +3159,13 @@ function posClearCart() {
         headers: { 'X-CSRFToken': posGetCSRF() }
     })
     .then(r => r.json())
-    .then(data => { if (data.success) location.reload(); else posToast(data.error || 'Failed', 'Error', 'error'); })
+    .then(data => { 
+        if (data.success) {
+            location.reload(); 
+        } else {
+            posToast(data.error || 'Failed', 'Error', 'error');
+        }
+    })
     .catch(() => {});
 }
 
@@ -3711,6 +3362,7 @@ document.addEventListener('keydown', function(e) {
         if (posScannerRunning) posStopScanner();
         if (document.getElementById('posInvoiceSection').style.display === 'block') posCloseInvoice();
         if (document.getElementById('posPaymentModal').classList.contains('active')) posClosePaymentModal();
+        if (document.getElementById('posVariantModal').classList.contains('active')) posCloseVariantModal();
         document.querySelectorAll('.pos-inline-form.show').forEach(el => el.classList.remove('show'));
         document.getElementById('posCustomerDropdown').classList.remove('show');
     }
@@ -3718,11 +3370,19 @@ document.addEventListener('keydown', function(e) {
     if (e.key === '-' && posScannerRunning) { e.preventDefault(); posZoomCamera('out'); }
 });
 
-document.getElementById('posProductSearch').addEventListener('input', function() {
-    clearTimeout(this._timer);
-    this._timer = setTimeout(() => posSearchProducts(), 400);
+// ============================================
+// INIT - MODIFIED WITH UI UPDATE CHECK
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    posLoadAllProducts();
+    document.getElementById('posBarcodeInput').focus();
+    posLoadCameras();
+    
+    // Check cart status and update UI - FIX: This makes sections appear automatically
+    posUpdateCartUI();
 });
 
+// Close dropdown on outside click
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.pos-customer-wrapper')) {
         document.getElementById('posCustomerDropdown').classList.remove('show');
@@ -3749,10 +3409,6 @@ window.addEventListener('resize', function() {
         dropdown.style.width = Math.min(rect.width, 400) + 'px';
     }
 });
-
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('posBarcodeInput').focus();
-    posLoadCameras();
-});
 </script>
-{% endblock %}
+</body>
+</html>

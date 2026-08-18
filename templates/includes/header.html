@@ -1185,18 +1185,26 @@ a {
                     </span>
                 </div>
                 <div class="dropdown-menu">
-                    {% if user.is_authenticated %}
-                        {% if user.is_staff or user.is_superuser %}
-                            <a href="{% url 'Ecom:admin_dashboard' %}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
-                        {% else %}
-                            <a href="{% url 'Ecom:profile' %}"><i class="fa-regular fa-user"></i> Profile</a>
-                        {% endif %}
-                        <div class="divider"></div>
-                        <a href="{% url 'Ecom:logout' %}" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
-                    {% else %}
-                        <a href="{% url 'Ecom:login' %}" id="loginLink"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
-                    {% endif %}
-                </div>
+    {% if user.is_authenticated %}
+        <!-- Admin Dashboard -->
+        {% if user.is_staff or user.is_superuser %}
+            <a href="{% url 'Ecom:admin_dashboard' %}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+        {% endif %}
+        
+        <!-- Employee Dashboard -->
+        {% if user.role == 'employee' %}
+            <a href="{% url 'Ecom:employee_dashboard' %}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+        {% endif %}
+        
+        <!-- Profile - Visible to all authenticated users -->
+        <a href="{% url 'Ecom:profile' %}"><i class="fa-regular fa-user"></i> Profile</a>
+        
+        <div class="divider"></div>
+        <a href="{% url 'Ecom:logout' %}" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    {% else %}
+        <a href="{% url 'Ecom:login' %}" id="loginLink"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+    {% endif %}
+</div>
             </div>
 
             <!-- Cart Icon with Badge -->
