@@ -6762,3 +6762,700 @@ def return_refund_policy(request):
             "page_title": "Return & Refund Policy",
         }
     )
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+
+from .forms import SiteSettingsForm
+from .models import SiteSettings
+
+
+@login_required
+def manage_site_settings(request):
+
+    # =========================================================
+    # POST
+    # =========================================================
+
+    if request.method == "POST":
+
+        action = request.POST.get("action")
+
+        # =====================================================
+        # CREATE
+        # =====================================================
+
+        if action == "create":
+
+            form = SiteSettingsForm(
+                request.POST,
+                request.FILES
+            )
+
+            if form.is_valid():
+
+                # Only one active settings record
+                SiteSettings.objects.filter(
+                    is_active=True
+                ).update(
+                    is_active=False
+                )
+
+                settings_obj = form.save()
+
+                messages.success(
+                    request,
+                    "Website settings created successfully."
+                )
+
+                return redirect(
+                    "Ecom:manage_site_settings"
+                )
+
+        # =====================================================
+        # UPDATE
+        # =====================================================
+
+        elif action == "update":
+
+            settings_id = request.POST.get(
+                "settings_id"
+            )
+
+            settings_obj = get_object_or_404(
+                SiteSettings,
+                id=settings_id
+            )
+
+            form = SiteSettingsForm(
+                request.POST,
+                request.FILES,
+                instance=settings_obj
+            )
+
+            if form.is_valid():
+
+                updated_settings = form.save()
+
+                # Keep only one active record
+                if updated_settings.is_active:
+
+                    SiteSettings.objects.exclude(
+                        id=updated_settings.id
+                    ).update(
+                        is_active=False
+                    )
+
+                messages.success(
+                    request,
+                    "Website settings updated successfully."
+                )
+
+                return redirect(
+                    "Ecom:manage_site_settings"
+                )
+
+        # =====================================================
+        # DELETE
+        # =====================================================
+
+        elif action == "delete":
+
+            settings_id = request.POST.get(
+                "settings_id"
+            )
+
+            settings_obj = get_object_or_404(
+                SiteSettings,
+                id=settings_id
+            )
+
+            settings_obj.delete()
+
+            messages.success(
+                request,
+                "Website settings deleted successfully."
+            )
+
+            return redirect(
+                "Ecom:manage_site_settings"
+            )
+
+
+    # =========================================================
+    # GET
+    # =========================================================
+
+    settings_obj = (
+        SiteSettings.objects
+        .order_by("-id")
+        .first()
+    )
+
+    if settings_obj:
+
+        form = SiteSettingsForm(
+            instance=settings_obj
+        )
+
+        form_action = "update"
+
+    else:
+
+        form = SiteSettingsForm(
+            initial={
+                "company_name": "My Store",
+                "country": "India",
+                "payment_currency": "INR",
+                "is_active": True,
+            }
+        )
+
+        form_action = "create"
+
+
+    context = {
+        "settings_obj": settings_obj,
+        "form": form,
+        "form_action": form_action,
+    }
+
+
+    return render(
+        request,
+        "settings/manage.html",
+        context
+    )
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.http import JsonResponse
+from django.shortcuts import (
+    get_object_or_404,
+    redirect,
+    render,
+)
+from django.utils import timezone
+from django.conf import settings
+
+from .forms import (
+    ContactMessageForm,
+    ContactMessageAdminForm,
+)
+
+from .models import (
+    ContactMessage,
+    SiteSettings,
+)
+def contact(request):
+
+    if request.method == "POST":
+
+        form = ContactMessageForm(
+            request.POST
+        )
+
+        if form.is_valid():
+
+            enquiry = form.save(
+                commit=False
+            )
+
+            enquiry.status = "new"
+
+            enquiry.save()
+
+            messages.success(
+                request,
+                "Your message has been sent successfully. "
+                "We will get back to you soon."
+            )
+
+            return redirect(
+                "Ecom:contact"
+            )
+
+    else:
+
+        form = ContactMessageForm()
+
+    return render(
+        request,
+        "pages/contact.html",
+        {
+            "form": form
+        }
+    )
+
+@login_required
+def manage_contact_messages(request):
+
+    # =========================================================
+    # POST
+    # =========================================================
+
+    if request.method == "POST":
+
+        action = request.POST.get(
+            "action"
+        )
+
+        # =====================================================
+        # CREATE
+        # =====================================================
+
+        if action == "create":
+
+            form = ContactMessageAdminForm(
+                request.POST
+            )
+
+            if form.is_valid():
+
+                enquiry = form.save(
+                    commit=False
+                )
+
+                enquiry.status = "new"
+
+                enquiry.save()
+
+                messages.success(
+                    request,
+                    "Contact enquiry created successfully."
+                )
+
+            else:
+
+                messages.error(
+                    request,
+                    "Please correct the errors."
+                )
+
+            return redirect(
+                "Ecom:manage_contact_messages"
+            )
+
+        # =====================================================
+        # UPDATE
+        # =====================================================
+
+        elif action == "update":
+
+            message_id = request.POST.get(
+                "message_id"
+            )
+
+            enquiry = get_object_or_404(
+                ContactMessage,
+                id=message_id
+            )
+
+            form = ContactMessageAdminForm(
+                request.POST,
+                instance=enquiry
+            )
+
+            if form.is_valid():
+
+                form.save()
+
+                messages.success(
+                    request,
+                    "Enquiry updated successfully."
+                )
+
+            else:
+
+                messages.error(
+                    request,
+                    "Please correct the errors."
+                )
+
+            return redirect(
+                "Ecom:manage_contact_messages"
+            )
+
+        # =====================================================
+        # DELETE
+        # =====================================================
+
+        elif action == "delete":
+
+            message_id = request.POST.get(
+                "message_id"
+            )
+
+            enquiry = get_object_or_404(
+                ContactMessage,
+                id=message_id
+            )
+
+            enquiry.delete()
+
+            messages.success(
+                request,
+                "Enquiry deleted successfully."
+            )
+
+            return redirect(
+                "Ecom:manage_contact_messages"
+            )
+
+        # =====================================================
+        # MARK AS READ
+        # =====================================================
+
+        elif action == "mark_read":
+
+            message_id = request.POST.get(
+                "message_id"
+            )
+
+            enquiry = get_object_or_404(
+                ContactMessage,
+                id=message_id
+            )
+
+            # Only NEW should become READ.
+            # A replied or closed enquiry should not
+            # be changed back to read.
+
+            if enquiry.status == "new":
+
+                enquiry.status = "read"
+
+                enquiry.save(
+                    update_fields=[
+                        "status",
+                        "updated_at",
+                    ]
+                )
+
+            # AJAX request
+            if (
+                request.headers.get(
+                    "X-Requested-With"
+                )
+                == "XMLHttpRequest"
+            ):
+
+                return JsonResponse({
+                    "success": True,
+                    "status": enquiry.status,
+                    "status_display":
+                        enquiry.get_status_display(),
+                })
+
+            return redirect(
+                "Ecom:manage_contact_messages"
+            )
+
+        # =====================================================
+        # SEND REPLY
+        # =====================================================
+
+        elif action == "send_reply":
+
+            message_id = request.POST.get(
+                "message_id"
+            )
+
+            reply = request.POST.get(
+                "admin_reply",
+                ""
+            ).strip()
+
+            enquiry = get_object_or_404(
+                ContactMessage,
+                id=message_id
+            )
+
+            # -------------------------------------------------
+            # VALIDATE
+            # -------------------------------------------------
+
+            if not reply:
+
+                messages.error(
+                    request,
+                    "Please write a reply before sending."
+                )
+
+                return redirect(
+                    "manage_contact_messages"
+                )
+
+            # -------------------------------------------------
+            # GET COMPANY SETTINGS
+            # -------------------------------------------------
+
+            site_settings = (
+                SiteSettings.get_settings()
+            )
+
+            company_name = "Our Store"
+
+            company_email = ""
+
+            company_phone = ""
+
+            if site_settings:
+
+                company_name = (
+                    site_settings.company_name
+                    or "Our Store"
+                )
+
+                company_email = (
+                    site_settings.email
+                    or ""
+                )
+
+                company_phone = (
+                    site_settings.phone
+                    or ""
+                )
+
+            # -------------------------------------------------
+            # EMAIL SUBJECT
+            # -------------------------------------------------
+
+            email_subject = (
+                f"Re: {enquiry.subject}"
+            )
+
+            # -------------------------------------------------
+            # EMAIL BODY
+            # -------------------------------------------------
+
+            email_body = f"""
+Hello {enquiry.name},
+
+Thank you for contacting {company_name}.
+
+We received your enquiry regarding:
+
+{enquiry.subject}
+
+--------------------------------------------------
+
+OUR RESPONSE
+
+{reply}
+
+--------------------------------------------------
+
+YOUR ORIGINAL MESSAGE
+
+{enquiry.message}
+
+--------------------------------------------------
+
+If you have any further questions, please feel free
+to contact us again.
+
+Regards,
+
+{company_name}
+"""
+
+            if company_email:
+
+                email_body += f"""
+
+Email: {company_email}
+"""
+
+            if company_phone:
+
+                email_body += f"""
+Phone: {company_phone}
+"""
+
+            # -------------------------------------------------
+            # SEND EMAIL
+            # -------------------------------------------------
+
+            try:
+
+                send_mail(
+                    subject=email_subject,
+
+                    message=email_body,
+
+                    from_email=(
+                        settings.DEFAULT_FROM_EMAIL
+                    ),
+
+                    recipient_list=[
+                        enquiry.email
+                    ],
+
+                    fail_silently=False,
+                )
+
+            except Exception as e:
+
+                # Email failed.
+                # DO NOT change status.
+
+                messages.error(
+                    request,
+                    "Email could not be sent to "
+                    f"{enquiry.email}. "
+                    f"Error: {str(e)}"
+                )
+
+                return redirect(
+                    "Ecom:manage_contact_messages"
+                )
+
+            # -------------------------------------------------
+            # EMAIL SUCCESS
+            # -------------------------------------------------
+
+            enquiry.admin_reply = reply
+
+            enquiry.last_sent_reply = reply
+
+            enquiry.status = "replied"
+
+            enquiry.replied_at = timezone.now()
+
+            enquiry.save(
+                update_fields=[
+                    "admin_reply",
+                    "last_sent_reply",
+                    "status",
+                    "replied_at",
+                    "updated_at",
+                ]
+            )
+
+            messages.success(
+                request,
+                f"Reply successfully sent to "
+                f"{enquiry.email}."
+            )
+
+            return redirect(
+                "Ecom:manage_contact_messages"
+            )
+
+    # =========================================================
+    # GET
+    # =========================================================
+
+    search = request.GET.get(
+        "search",
+        ""
+    ).strip()
+
+    status_filter = request.GET.get(
+        "status",
+        ""
+    ).strip()
+
+    enquiries = ContactMessage.objects.all()
+
+    # =========================================================
+    # SEARCH
+    # =========================================================
+
+    if search:
+
+        enquiries = enquiries.filter(
+
+            Q(name__icontains=search)
+            |
+            Q(email__icontains=search)
+            |
+            Q(phone__icontains=search)
+            |
+            Q(subject__icontains=search)
+            |
+            Q(message__icontains=search)
+
+        )
+
+    # =========================================================
+    # FILTER
+    # =========================================================
+
+    if status_filter:
+
+        enquiries = enquiries.filter(
+            status=status_filter
+        )
+
+    # =========================================================
+    # PAGINATION
+    # =========================================================
+
+    paginator = Paginator(
+        enquiries,
+        10
+    )
+
+    page_number = request.GET.get(
+        "page"
+    )
+
+    page_obj = paginator.get_page(
+        page_number
+    )
+
+    # =========================================================
+    # STATISTICS
+    # =========================================================
+
+    context = {
+
+        "page_obj": page_obj,
+
+        "contact_messages":
+            page_obj.object_list,
+
+        "create_form":
+            ContactMessageAdminForm(),
+
+        "search":
+            search,
+
+        "status_filter":
+            status_filter,
+
+        "total_messages":
+            ContactMessage.objects.count(),
+
+        "new_messages":
+            ContactMessage.objects.filter(
+                status="new"
+            ).count(),
+
+        "read_messages":
+            ContactMessage.objects.filter(
+                status="read"
+            ).count(),
+
+        "replied_messages":
+            ContactMessage.objects.filter(
+                status="replied"
+            ).count(),
+
+        "closed_messages":
+            ContactMessage.objects.filter(
+                status="closed"
+            ).count(),
+    }
+
+    return render(
+        request,
+        "contact/manage.html",
+        context
+    )

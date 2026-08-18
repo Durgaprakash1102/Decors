@@ -1103,3 +1103,393 @@ class StaticPageForm(forms.ModelForm):
                 }
             ),
         }
+
+from django import forms
+from .models import SiteSettings
+
+
+class SiteSettingsForm(forms.ModelForm):
+
+    class Meta:
+
+        model = SiteSettings
+
+        fields = [
+            # Company
+            "company_name",
+            "company_tagline",
+            "company_description",
+            "logo",
+            "favicon",
+
+            # Contact
+            "phone",
+            "alternate_phone",
+            "email",
+            "support_email",
+            "whatsapp_number",
+
+            # Address
+            "address_line_1",
+            "address_line_2",
+            "city",
+            "state",
+            "country",
+            "pincode",
+
+            # Business
+            "gst_number",
+            "business_registration_number",
+
+            # Social
+            "facebook_url",
+            "instagram_url",
+            "youtube_url",
+            "linkedin_url",
+            "twitter_url",
+            "pinterest_url",
+
+            # Other
+            "google_maps_url",
+            "app_store_url",
+            "play_store_url",
+
+            # Footer
+            "footer_text",
+            "copyright_text",
+
+            # Status
+            "is_active",
+        ]
+
+        widgets = {
+
+            "company_name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Company Name"
+                }
+            ),
+
+            "company_tagline": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Company tagline"
+                }
+            ),
+
+            "company_description": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4
+                }
+            ),
+
+            "phone": forms.TextInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "alternate_phone": forms.TextInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "email": forms.EmailInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "support_email": forms.EmailInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "whatsapp_number": forms.TextInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "address_line_1": forms.TextInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "address_line_2": forms.TextInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "city": forms.TextInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "state": forms.TextInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "country": forms.TextInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "pincode": forms.TextInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "gst_number": forms.TextInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "business_registration_number": forms.TextInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "facebook_url": forms.URLInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "instagram_url": forms.URLInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "youtube_url": forms.URLInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "linkedin_url": forms.URLInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "twitter_url": forms.URLInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "pinterest_url": forms.URLInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "google_maps_url": forms.URLInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "app_store_url": forms.URLInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "play_store_url": forms.URLInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "footer_text": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4
+                }
+            ),
+
+            "copyright_text": forms.TextInput(
+                attrs={
+                    "class": "form-control"
+                }
+            ),
+
+            "is_active": forms.CheckboxInput(
+                attrs={
+                    "class": "form-check-input"
+                }
+            ),
+        }
+
+from django import forms
+
+from .models import ContactMessage
+
+
+# =============================================================
+# PUBLIC CONTACT FORM
+# =============================================================
+
+class ContactMessageForm(forms.ModelForm):
+
+    class Meta:
+
+        model = ContactMessage
+
+        fields = [
+            "name",
+            "email",
+            "phone",
+            "subject",
+            "message",
+        ]
+
+        widgets = {
+
+            "name": forms.TextInput(
+                attrs={
+                    "class": "contact-input",
+                    "placeholder": "Enter your name",
+                }
+            ),
+
+            "email": forms.EmailInput(
+                attrs={
+                    "class": "contact-input",
+                    "placeholder": "Enter your email",
+                }
+            ),
+
+            "phone": forms.TextInput(
+                attrs={
+                    "class": "contact-input",
+                    "placeholder": "Enter your phone number",
+                }
+            ),
+
+            "subject": forms.TextInput(
+                attrs={
+                    "class": "contact-input",
+                    "placeholder": "Subject",
+                }
+            ),
+
+            "message": forms.Textarea(
+                attrs={
+                    "class": "contact-input contact-textarea",
+                    "placeholder": "Write your message...",
+                }
+            ),
+        }
+
+    def clean_name(self):
+
+        name = self.cleaned_data["name"].strip()
+
+        if len(name) < 2:
+
+            raise forms.ValidationError(
+                "Please enter a valid name."
+            )
+
+        return name
+
+    def clean_subject(self):
+
+        subject = self.cleaned_data["subject"].strip()
+
+        if len(subject) < 3:
+
+            raise forms.ValidationError(
+                "Please enter a valid subject."
+            )
+
+        return subject
+
+    def clean_message(self):
+
+        message = self.cleaned_data["message"].strip()
+
+        if len(message) < 10:
+
+            raise forms.ValidationError(
+                "Message must contain at least 10 characters."
+            )
+
+        return message
+
+
+# =============================================================
+# ADMIN FORM
+# =============================================================
+
+class ContactMessageAdminForm(forms.ModelForm):
+
+    class Meta:
+
+        model = ContactMessage
+
+        fields = [
+            "name",
+            "email",
+            "phone",
+            "subject",
+            "message",
+            "admin_notes",
+        ]
+
+        widgets = {
+
+            "name": forms.TextInput(
+                attrs={
+                    "class": "admin-input"
+                }
+            ),
+
+            "email": forms.EmailInput(
+                attrs={
+                    "class": "admin-input"
+                }
+            ),
+
+            "phone": forms.TextInput(
+                attrs={
+                    "class": "admin-input"
+                }
+            ),
+
+            "subject": forms.TextInput(
+                attrs={
+                    "class": "admin-input"
+                }
+            ),
+
+            "message": forms.Textarea(
+                attrs={
+                    "class": "admin-input admin-textarea"
+                }
+            ),
+
+            "admin_notes": forms.Textarea(
+                attrs={
+                    "class": "admin-input admin-textarea",
+                    "placeholder": "Private admin notes..."
+                }
+            ),
+        }

@@ -191,4 +191,21 @@ path('admin/orders/', admin_order_list_view, name='admin_order_list'),
         views.return_refund_policy,
         name="return_refund_policy"
     ),
+    path(
+        "settings/",
+        views.manage_site_settings,
+        name="manage_site_settings"
+    ),
+    path(
+        "contact/",
+        views.contact,
+        name="contact"
+    ),
+
+    path(
+        "contact-messages/",
+        views.manage_contact_messages,
+        name="manage_contact_messages"
+    ),
+
 ]

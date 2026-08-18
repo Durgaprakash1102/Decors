@@ -1,0 +1,422 @@
+{% extends "base.html" %}
+
+{% block title %}
+Contact Us
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+
+.contact-page {
+    max-width: 1100px;
+    margin: auto;
+    padding: 60px 20px;
+}
+
+.contact-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.contact-header h1 {
+    margin: 0;
+    font-size: 38px;
+    color: #111827;
+}
+
+.contact-header p {
+    color: #6b7280;
+    margin-top: 10px;
+}
+
+.contact-layout {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 30px;
+}
+
+.contact-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 30px;
+}
+
+.contact-card h2 {
+    margin-top: 0;
+    color: #111827;
+}
+
+.contact-info {
+    margin-top: 22px;
+}
+
+.contact-info-label {
+    font-size: 12px;
+    color: #6b7280;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.contact-info-value {
+    color: #111827;
+    font-size: 14px;
+}
+
+.contact-info-value a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.contact-full {
+    grid-column: 1 / -1;
+}
+
+.contact-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.contact-label {
+    margin-bottom: 7px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.contact-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    outline: none;
+    font-size: 14px;
+}
+
+.contact-input:focus {
+    border-color: #2563eb;
+}
+
+.contact-textarea {
+    min-height: 160px;
+    resize: vertical;
+}
+
+.contact-submit {
+    border: none;
+    background: #2563eb;
+    color: white;
+    padding: 12px 22px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.contact-submit:hover {
+    background: #1d4ed8;
+}
+
+.contact-error {
+    color: #dc2626;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.contact-success {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #047857;
+    padding: 13px;
+    border-radius: 7px;
+    margin-bottom: 20px;
+}
+
+@media(max-width: 800px) {
+
+    .contact-layout {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media(max-width: 600px) {
+
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-full {
+        grid-column: auto;
+    }
+
+}
+
+</style>
+
+
+<div class="contact-page">
+
+    <div class="contact-header">
+
+        <h1>
+            Contact Us
+        </h1>
+
+        <p>
+            Have a question?
+            Send us a message and we'll get back to you.
+        </p>
+
+    </div>
+
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div class="contact-success">
+                {{ message }}
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+
+    <div class="contact-layout">
+
+
+        <!-- =================================================
+             COMPANY DETAILS
+        ================================================== -->
+
+        <div class="contact-card">
+
+            <h2>
+                Get in Touch
+            </h2>
+
+
+            {% if site_settings.company_description %}
+
+                <p class="contact-info-value">
+                    {{ site_settings.company_description }}
+                </p>
+
+            {% endif %}
+
+
+            {% if site_settings.phone %}
+
+                <div class="contact-info">
+
+                    <span class="contact-info-label">
+                        Phone
+                    </span>
+
+                    <div class="contact-info-value">
+
+                        <a
+                            href="tel:{{ site_settings.phone }}"
+                        >
+                            {{ site_settings.phone }}
+                        </a>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+            {% if site_settings.email %}
+
+                <div class="contact-info">
+
+                    <span class="contact-info-label">
+                        Email
+                    </span>
+
+                    <div class="contact-info-value">
+
+                        <a
+                            href="mailto:{{ site_settings.email }}"
+                        >
+                            {{ site_settings.email }}
+                        </a>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+            {% if site_settings.address_line_1 %}
+
+                <div class="contact-info">
+
+                    <span class="contact-info-label">
+                        Address
+                    </span>
+
+                    <div class="contact-info-value">
+
+                        {{ site_settings.address_line_1 }}
+
+                        {% if site_settings.address_line_2 %}
+                            <br>
+                            {{ site_settings.address_line_2 }}
+                        {% endif %}
+
+                        {% if site_settings.city %}
+                            <br>{{ site_settings.city }}
+                        {% endif %}
+
+                        {% if site_settings.state %}
+                            , {{ site_settings.state }}
+                        {% endif %}
+
+                        {% if site_settings.pincode %}
+                            - {{ site_settings.pincode }}
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- =================================================
+             FORM
+        ================================================== -->
+
+        <div class="contact-card">
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <div class="contact-grid">
+
+
+                    <div class="contact-field">
+
+                        <label class="contact-label">
+                            Name *
+                        </label>
+
+                        {{ form.name }}
+
+                        {% for error in form.name.errors %}
+
+                            <div class="contact-error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="contact-field">
+
+                        <label class="contact-label">
+                            Email *
+                        </label>
+
+                        {{ form.email }}
+
+                        {% for error in form.email.errors %}
+
+                            <div class="contact-error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="contact-field">
+
+                        <label class="contact-label">
+                            Phone
+                        </label>
+
+                        {{ form.phone }}
+
+                    </div>
+
+
+                    <div class="contact-field">
+
+                        <label class="contact-label">
+                            Subject *
+                        </label>
+
+                        {{ form.subject }}
+
+                        {% for error in form.subject.errors %}
+
+                            <div class="contact-error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="contact-field contact-full">
+
+                        <label class="contact-label">
+                            Message *
+                        </label>
+
+                        {{ form.message }}
+
+                        {% for error in form.message.errors %}
+
+                            <div class="contact-error">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="contact-field contact-full">
+
+                        <button
+                            type="submit"
+                            class="contact-submit"
+                        >
+                            Send Message
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

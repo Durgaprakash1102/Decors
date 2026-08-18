@@ -2048,3 +2048,346 @@ class Banner(models.Model):
             if os.path.isfile(self.image.path):
                 os.remove(self.image.path)
         super().delete(*args, **kwargs)
+
+from django.db import models
+
+
+class SiteSettings(models.Model):
+
+    # =========================================================
+    # COMPANY INFORMATION
+    # =========================================================
+
+    company_name = models.CharField(
+        max_length=255,
+        default="My Store"
+    )
+
+    company_tagline = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    company_description = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    logo = models.ImageField(
+        upload_to="site/",
+        blank=True,
+        null=True
+    )
+
+    favicon = models.ImageField(
+        upload_to="site/",
+        blank=True,
+        null=True
+    )
+
+
+    # =========================================================
+    # CONTACT INFORMATION
+    # =========================================================
+
+    phone = models.CharField(
+        max_length=30,
+        blank=True,
+        null=True
+    )
+
+    alternate_phone = models.CharField(
+        max_length=30,
+        blank=True,
+        null=True
+    )
+
+    email = models.EmailField(
+        blank=True,
+        null=True
+    )
+
+    support_email = models.EmailField(
+        blank=True,
+        null=True
+    )
+
+    whatsapp_number = models.CharField(
+        max_length=30,
+        blank=True,
+        null=True
+    )
+
+
+    # =========================================================
+    # ADDRESS
+    # =========================================================
+
+    address_line_1 = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    address_line_2 = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    city = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    state = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    country = models.CharField(
+        max_length=100,
+        default="India"
+    )
+
+    pincode = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True
+    )
+
+
+    # =========================================================
+    # BUSINESS INFORMATION
+    # =========================================================
+
+    gst_number = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True
+    )
+
+    business_registration_number = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+
+    # =========================================================
+    # SOCIAL MEDIA
+    # =========================================================
+
+    facebook_url = models.URLField(
+        blank=True,
+        null=True
+    )
+
+    instagram_url = models.URLField(
+        blank=True,
+        null=True
+    )
+
+    youtube_url = models.URLField(
+        blank=True,
+        null=True
+    )
+
+    linkedin_url = models.URLField(
+        blank=True,
+        null=True
+    )
+
+    twitter_url = models.URLField(
+        blank=True,
+        null=True
+    )
+
+    pinterest_url = models.URLField(
+        blank=True,
+        null=True
+    )
+
+
+    # =========================================================
+    # OTHER LINKS
+    # =========================================================
+
+    google_maps_url = models.URLField(
+        blank=True,
+        null=True
+    )
+
+    app_store_url = models.URLField(
+        blank=True,
+        null=True
+    )
+
+    play_store_url = models.URLField(
+        blank=True,
+        null=True
+    )
+
+
+    # =========================================================
+    # FOOTER
+    # =========================================================
+
+    footer_text = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    copyright_text = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+
+    # =========================================================
+    # STATUS
+    # =========================================================
+
+    is_active = models.BooleanField(
+        default=True
+    )
+
+
+    # =========================================================
+    # TIMESTAMPS
+    # =========================================================
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+
+    class Meta:
+        verbose_name = "Site Settings"
+        verbose_name_plural = "Site Settings"
+
+
+    def __str__(self):
+
+        return self.company_name
+
+
+    @classmethod
+    def get_settings(cls):
+
+        settings = cls.objects.filter(
+            is_active=True
+        ).first()
+
+        if not settings:
+
+            settings = cls.objects.create(
+                company_name="My Store"
+            )
+
+        return settings
+
+from django.db import models
+
+
+class ContactMessage(models.Model):
+
+    STATUS_CHOICES = [
+        ("new", "New"),
+        ("read", "Read"),
+        ("replied", "Replied"),
+        ("closed", "Closed"),
+    ]
+
+    # =========================================================
+    # CUSTOMER INFORMATION
+    # =========================================================
+
+    name = models.CharField(
+        max_length=150
+    )
+
+    email = models.EmailField()
+
+    phone = models.CharField(
+        max_length=30,
+        blank=True,
+        null=True
+    )
+
+    # =========================================================
+    # ENQUIRY
+    # =========================================================
+
+    subject = models.CharField(
+        max_length=255
+    )
+
+    message = models.TextField()
+
+    # =========================================================
+    # STATUS
+    # =========================================================
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="new"
+    )
+
+    # =========================================================
+    # ADMIN INFORMATION
+    # =========================================================
+
+    admin_notes = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    admin_reply = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    # =========================================================
+    # REPLY TRACKING
+    # =========================================================
+
+    replied_at = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
+    last_sent_reply = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    # =========================================================
+    # TIMESTAMPS
+    # =========================================================
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+        verbose_name = "Contact Message"
+        verbose_name_plural = "Contact Messages"
+
+    def __str__(self):
+        return f"{self.name} - {self.subject}"

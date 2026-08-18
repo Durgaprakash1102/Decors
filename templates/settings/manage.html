@@ -1,0 +1,1281 @@
+
+{% block content %}
+
+<style>
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.settings-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 35px 25px 60px;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.settings-title {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.settings-subtitle {
+    margin-top: 6px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   BUTTON
+========================================================= */
+
+.settings-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 11px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.settings-btn-primary {
+    background: #2563eb;
+    color: white;
+}
+
+.settings-btn-primary:hover {
+    background: #1d4ed8;
+}
+
+.settings-btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.settings-btn-danger {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.settings-btn-danger:hover {
+    background: #fecaca;
+}
+
+
+/* =========================================================
+   ALERT
+========================================================= */
+
+.settings-alert {
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.settings-alert-close {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+
+/* =========================================================
+   MAIN CARD
+========================================================= */
+
+.settings-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.04);
+}
+
+
+/* =========================================================
+   SECTION
+========================================================= */
+
+.settings-section {
+    padding: 28px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.settings-section:last-child {
+    border-bottom: none;
+}
+
+.settings-section-header {
+    margin-bottom: 22px;
+}
+
+.settings-section-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.settings-section-description {
+    margin-top: 5px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.settings-grid-three {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+
+/* =========================================================
+   FIELD
+========================================================= */
+
+.settings-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-field-full {
+    grid-column: 1 / -1;
+}
+
+.settings-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 7px;
+}
+
+.settings-input {
+    width: 100%;
+    box-sizing: border-box;
+
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+
+    padding: 11px 12px;
+
+    font-size: 14px;
+    color: #111827;
+
+    outline: none;
+
+    background: white;
+
+    transition: 0.2s ease;
+}
+
+.settings-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+.settings-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.settings-help {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+
+/* =========================================================
+   IMAGE
+========================================================= */
+
+.settings-image-preview {
+    margin-top: 12px;
+}
+
+.settings-image-preview img {
+    max-width: 180px;
+    max-height: 100px;
+    object-fit: contain;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 5px;
+}
+
+
+/* =========================================================
+   CHECKBOX
+========================================================= */
+
+.settings-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 10px;
+}
+
+.settings-checkbox {
+    width: 17px;
+    height: 17px;
+}
+
+
+/* =========================================================
+   FOOTER ACTIONS
+========================================================= */
+
+.settings-actions {
+    padding: 24px 28px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    background: #f9fafb;
+
+    border-radius: 0 0 14px 14px;
+}
+
+.settings-status {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.settings-modal-overlay {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(17,24,39,0.65);
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 99999;
+
+    padding: 20px;
+}
+
+.settings-modal-overlay.show {
+    display: flex;
+}
+
+.settings-modal {
+    width: 100%;
+    max-width: 430px;
+
+    background: white;
+
+    border-radius: 14px;
+
+    box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+}
+
+.settings-modal-header {
+    padding: 20px 24px;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.settings-modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.settings-modal-body {
+    padding: 25px;
+
+    text-align: center;
+
+    color: #6b7280;
+    line-height: 1.7;
+}
+
+.settings-modal-footer {
+    padding: 18px 24px;
+
+    border-top: 1px solid #e5e7eb;
+
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width: 900px) {
+
+    .settings-grid,
+    .settings-grid-three {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media(max-width: 600px) {
+
+    .settings-wrapper {
+        padding: 20px 12px 40px;
+    }
+
+    .settings-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .settings-section {
+        padding: 20px;
+    }
+
+    .settings-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+}
+
+</style>
+
+
+<div class="settings-wrapper">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="settings-header">
+
+        <div>
+
+            <h1 class="settings-title">
+                Website Settings
+            </h1>
+
+            <p class="settings-subtitle">
+                Manage your company information, contact details,
+                social links and website configuration.
+            </p>
+
+        </div>
+
+
+        {% if settings_obj %}
+
+            <button
+                type="button"
+                class="settings-btn settings-btn-danger"
+                onclick="openDeleteModal()"
+            >
+                Delete Settings
+            </button>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         MESSAGES
+    ====================================================== -->
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div class="settings-alert">
+
+                <span>
+                    {{ message }}
+                </span>
+
+                <button
+                    type="button"
+                    class="settings-alert-close"
+                    onclick="this.parentElement.remove()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         FORM
+    ====================================================== -->
+
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+        id="settingsForm"
+    >
+
+        {% csrf_token %}
+
+        <input
+            type="hidden"
+            name="action"
+            value="{{ form_action }}"
+        >
+
+
+        {% if settings_obj %}
+
+            <input
+                type="hidden"
+                name="settings_id"
+                value="{{ settings_obj.id }}"
+            >
+
+        {% endif %}
+
+
+        <div class="settings-card">
+
+
+            <!-- =================================================
+                 COMPANY
+            ================================================== -->
+
+            <div class="settings-section">
+
+                <div class="settings-section-header">
+
+                    <h2 class="settings-section-title">
+                        🏢 Company Information
+                    </h2>
+
+                    <p class="settings-section-description">
+                        Basic information about your company or store.
+                    </p>
+
+                </div>
+
+
+                <div class="settings-grid">
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            Company Name *
+                        </label>
+
+                        {{ form.company_name }}
+
+                        {% if form.company_name.errors %}
+                            <small class="settings-help">
+                                {{ form.company_name.errors }}
+                            </small>
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            Company Tagline
+                        </label>
+
+                        {{ form.company_tagline }}
+
+                    </div>
+
+
+                    <div class="settings-field settings-field-full">
+
+                        <label class="settings-label">
+                            Company Description
+                        </label>
+
+                        {{ form.company_description }}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            Logo
+                        </label>
+
+                        {{ form.logo }}
+
+                        {% if settings_obj.logo %}
+
+                            <div class="settings-image-preview">
+
+                                <img
+                                    src="{{ settings_obj.logo.url }}"
+                                    alt="Company Logo"
+                                >
+
+                            </div>
+
+                        {% endif %}
+
+                        <small class="settings-help">
+                            Upload your company logo.
+                        </small>
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            Favicon
+                        </label>
+
+                        {{ form.favicon }}
+
+                        {% if settings_obj.favicon %}
+
+                            <div class="settings-image-preview">
+
+                                <img
+                                    src="{{ settings_obj.favicon.url }}"
+                                    alt="Favicon"
+                                >
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 CONTACT
+            ================================================== -->
+
+            <div class="settings-section">
+
+                <div class="settings-section-header">
+
+                    <h2 class="settings-section-title">
+                        📞 Contact Information
+                    </h2>
+
+                    <p class="settings-section-description">
+                        Phone numbers and email addresses displayed
+                        throughout your website.
+                    </p>
+
+                </div>
+
+
+                <div class="settings-grid">
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            Phone
+                        </label>
+
+                        {{ form.phone }}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            Alternate Phone
+                        </label>
+
+                        {{ form.alternate_phone }}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            Email
+                        </label>
+
+                        {{ form.email }}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            Support Email
+                        </label>
+
+                        {{ form.support_email }}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            WhatsApp Number
+                        </label>
+
+                        {{ form.whatsapp_number }}
+
+                        <small class="settings-help">
+                            Example: 919876543210
+                        </small>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 ADDRESS
+            ================================================== -->
+
+            <div class="settings-section">
+
+                <div class="settings-section-header">
+
+                    <h2 class="settings-section-title">
+                        📍 Business Address
+                    </h2>
+
+                    <p class="settings-section-description">
+                        Your registered or store address.
+                    </p>
+
+                </div>
+
+
+                <div class="settings-grid">
+
+
+                    <div class="settings-field settings-field-full">
+
+                        <label class="settings-label">
+                            Address Line 1
+                        </label>
+
+                        {{ form.address_line_1 }}
+
+                    </div>
+
+
+                    <div class="settings-field settings-field-full">
+
+                        <label class="settings-label">
+                            Address Line 2
+                        </label>
+
+                        {{ form.address_line_2 }}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            City
+                        </label>
+
+                        {{ form.city }}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            State
+                        </label>
+
+                        {{ form.state }}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            Country
+                        </label>
+
+                        {{ form.country }}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            Pincode
+                        </label>
+
+                        {{ form.pincode }}
+
+                    </div>
+
+
+                    <div class="settings-field settings-field-full">
+
+                        <label class="settings-label">
+                            Google Maps URL
+                        </label>
+
+                        {{ form.google_maps_url }}
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 BUSINESS
+            ================================================== -->
+
+            <div class="settings-section">
+
+                <div class="settings-section-header">
+
+                    <h2 class="settings-section-title">
+                        🧾 Business Information
+                    </h2>
+
+                </div>
+
+
+                <div class="settings-grid">
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            GST Number
+                        </label>
+
+                        {{ form.gst_number }}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            Registration Number
+                        </label>
+
+                        {{ form.business_registration_number }}
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 SOCIAL MEDIA
+            ================================================== -->
+
+            <div class="settings-section">
+
+                <div class="settings-section-header">
+
+                    <h2 class="settings-section-title">
+                        📱 Social Media
+                    </h2>
+
+                    <p class="settings-section-description">
+                        Add your social media profile links.
+                    </p>
+
+                </div>
+
+
+                <div class="settings-grid">
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            Facebook
+                        </label>
+
+                        {{ form.facebook_url }}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            Instagram
+                        </label>
+
+                        {{ form.instagram_url }}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            YouTube
+                        </label>
+
+                        {{ form.youtube_url }}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            LinkedIn
+                        </label>
+
+                        {{ form.linkedin_url }}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            X / Twitter
+                        </label>
+
+                        {{ form.twitter_url }}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            Pinterest
+                        </label>
+
+                        {{ form.pinterest_url }}
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 APP LINKS
+            ================================================== -->
+
+            <div class="settings-section">
+
+                <div class="settings-section-header">
+
+                    <h2 class="settings-section-title">
+                        📲 App Links
+                    </h2>
+
+                </div>
+
+
+                <div class="settings-grid">
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            App Store
+                        </label>
+
+                        {{ form.app_store_url }}
+
+                    </div>
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            Google Play Store
+                        </label>
+
+                        {{ form.play_store_url }}
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 PAYMENT
+            ================================================== -->
+
+            <div class="settings-section">
+
+                <div class="settings-section-header">
+
+                    <h2 class="settings-section-title">
+                        💳 Payment Settings
+                    </h2>
+
+                    <p class="settings-section-description">
+                        Non-sensitive payment configuration.
+                    </p>
+
+                </div>
+
+
+                <div class="settings-grid">
+
+
+                    <div class="settings-field">
+
+                        <label class="settings-label">
+                            Currency
+                        </label>
+
+                        {{ form.payment_currency }}
+
+                        <small class="settings-help">
+                            Example: INR
+                        </small>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 FOOTER
+            ================================================== -->
+
+            <div class="settings-section">
+
+                <div class="settings-section-header">
+
+                    <h2 class="settings-section-title">
+                        🦶 Footer Information
+                    </h2>
+
+                </div>
+
+
+                <div class="settings-grid">
+
+
+                    <div class="settings-field settings-field-full">
+
+                        <label class="settings-label">
+                            Footer Text
+                        </label>
+
+                        {{ form.footer_text }}
+
+                    </div>
+
+
+                    <div class="settings-field settings-field-full">
+
+                        <label class="settings-label">
+                            Copyright Text
+                        </label>
+
+                        {{ form.copyright_text }}
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 STATUS
+            ================================================== -->
+
+            <div class="settings-section">
+
+                <div class="settings-checkbox-wrapper">
+
+                    {{ form.is_active }}
+
+                    <label class="settings-label"
+                           style="margin:0;">
+                        Active Website Settings
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 ACTIONS
+            ================================================== -->
+
+            <div class="settings-actions">
+
+                <div class="settings-status">
+
+                    {% if settings_obj %}
+
+                        Last updated:
+                        {{ settings_obj.updated_at|date:"d M Y, h:i A" }}
+
+                    {% else %}
+
+                        No settings have been created yet.
+
+                    {% endif %}
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="settings-btn settings-btn-primary"
+                >
+
+                    {% if settings_obj %}
+
+                        Update Settings
+
+                    {% else %}
+
+                        Create Settings
+
+                    {% endif %}
+
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- =========================================================
+     DELETE MODAL
+========================================================= -->
+
+<div
+    id="deleteSettingsModal"
+    class="settings-modal-overlay"
+    onclick="closeDeleteModal(event)"
+>
+
+
+    <div
+        class="settings-modal"
+        onclick="event.stopPropagation()"
+    >
+
+
+        <div class="settings-modal-header">
+
+            <h2 class="settings-modal-title">
+                Delete Website Settings
+            </h2>
+
+        </div>
+
+
+        <div class="settings-modal-body">
+
+            <p>
+                Are you sure you want to delete your website settings?
+            </p>
+
+            <p>
+                Your company information, logo, contact details,
+                social links and footer configuration will be removed.
+            </p>
+
+        </div>
+
+
+        <div class="settings-modal-footer">
+
+            <button
+                type="button"
+                class="settings-btn settings-btn-secondary"
+                onclick="closeDeleteModal()"
+            >
+                Cancel
+            </button>
+
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="action"
+                    value="delete"
+                >
+
+                <input
+                    type="hidden"
+                    name="settings_id"
+                    value="{{ settings_obj.id }}"
+                >
+
+                <button
+                    type="submit"
+                    class="settings-btn settings-btn-danger"
+                >
+                    Yes, Delete
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   DELETE MODAL
+========================================================= */
+
+function openDeleteModal() {
+
+    const modal =
+        document.getElementById(
+            "deleteSettingsModal"
+        );
+
+    modal.classList.add("show");
+
+    document.body.style.overflow = "hidden";
+}
+
+
+function closeDeleteModal(event) {
+
+    if (
+        event &&
+        event.target !== event.currentTarget
+    ) {
+        return;
+    }
+
+    const modal =
+        document.getElementById(
+            "deleteSettingsModal"
+        );
+
+    modal.classList.remove("show");
+
+    document.body.style.overflow = "";
+}
+
+
+/* =========================================================
+   ESCAPE KEY
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (event.key === "Escape") {
+
+            const modal =
+                document.getElementById(
+                    "deleteSettingsModal"
+                );
+
+            modal.classList.remove("show");
+
+            document.body.style.overflow = "";
+
+        }
+
+    }
+);
+
+</script>
+
+{% endblock %}
