@@ -1,0 +1,2015 @@
+
+{% block title %}
+Theme Settings
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.theme-page {
+
+    max-width: 1250px;
+
+    margin: auto;
+
+    padding: 35px 25px 70px;
+
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.theme-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 25px;
+
+}
+
+.theme-title {
+
+    margin: 0;
+
+    font-size: 30px;
+
+    color: #111827;
+
+}
+
+.theme-description {
+
+    margin-top: 6px;
+
+    color: #6B7280;
+
+    font-size: 14px;
+
+}
+
+
+/* =========================================================
+   ALERT
+========================================================= */
+
+.theme-alert {
+
+    padding: 13px 16px;
+
+    border-radius: 8px;
+
+    margin-bottom: 20px;
+
+    font-size: 14px;
+
+}
+
+.theme-alert-success {
+
+    background: #ECFDF5;
+
+    border: 1px solid #A7F3D0;
+
+    color: #047857;
+
+}
+
+.theme-alert-error {
+
+    background: #FEF2F2;
+
+    border: 1px solid #FECACA;
+
+    color: #B91C1C;
+
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.theme-card {
+
+    background: #FFFFFF;
+
+    border: 1px solid #E5E7EB;
+
+    border-radius: 12px;
+
+    padding: 25px;
+
+    margin-bottom: 25px;
+
+}
+
+
+/* =========================================================
+   SECTION
+========================================================= */
+
+.theme-section {
+
+    margin-bottom: 35px;
+
+}
+
+.theme-section:last-child {
+
+    margin-bottom: 0;
+
+}
+
+.theme-section-title {
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    color: #111827;
+
+    margin-bottom: 5px;
+
+}
+
+.theme-section-description {
+
+    color: #6B7280;
+
+    font-size: 13px;
+
+    margin-bottom: 20px;
+
+}
+
+
+/* =========================================================
+   THEME NAME
+========================================================= */
+
+.theme-name-field {
+
+    margin-bottom: 30px;
+
+}
+
+.theme-label {
+
+    display: block;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #374151;
+
+    margin-bottom: 7px;
+
+}
+
+.theme-input {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 12px 13px;
+
+    border: 1px solid #D1D5DB;
+
+    border-radius: 7px;
+
+    font-size: 14px;
+
+    outline: none;
+
+}
+
+.theme-input:focus {
+
+    border-color: #2563EB;
+
+}
+
+
+/* =========================================================
+   COLOR GRID
+========================================================= */
+
+.theme-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 18px;
+
+}
+
+
+/* =========================================================
+   COLOR CARD
+========================================================= */
+
+.color-field {
+
+    border: 1px solid #E5E7EB;
+
+    border-radius: 9px;
+
+    padding: 15px;
+
+    background: #FFFFFF;
+
+}
+
+.color-label {
+
+    display: block;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #374151;
+
+    margin-bottom: 9px;
+
+}
+
+.color-control {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+}
+
+.theme-color-input {
+
+    width: 52px;
+
+    height: 42px;
+
+    padding: 2px;
+
+    border: 1px solid #D1D5DB;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    background: transparent;
+
+}
+
+.color-value {
+
+    flex: 1;
+
+    padding: 10px 11px;
+
+    border: 1px solid #D1D5DB;
+
+    border-radius: 7px;
+
+    background: #F9FAFB;
+
+    color: #374151;
+
+    font-family: monospace;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   ACTIVE
+========================================================= */
+
+.active-field {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 20px;
+
+}
+
+.theme-checkbox {
+
+    width: 18px;
+
+    height: 18px;
+
+    cursor: pointer;
+
+}
+
+.active-label {
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #374151;
+
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.theme-actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 30px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid #E5E7EB;
+
+}
+
+.theme-btn {
+
+    border: none;
+
+    border-radius: 7px;
+
+    padding: 11px 18px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+}
+
+.theme-btn-primary {
+
+    background: #2563EB;
+
+    color: #FFFFFF;
+
+}
+
+.theme-btn-primary:hover {
+
+    background: #1D4ED8;
+
+}
+
+.theme-btn-danger {
+
+    background: #FEF2F2;
+
+    color: #DC2626;
+
+}
+
+.theme-btn-secondary {
+
+    background: #F3F4F6;
+
+    color: #374151;
+
+}
+
+
+/* =========================================================
+   PREVIEW
+========================================================= */
+
+.theme-preview {
+
+    border-radius: 10px;
+
+    overflow: hidden;
+
+    border: 1px solid #E5E7EB;
+
+    margin-top: 20px;
+
+}
+
+.preview-header {
+
+    padding: 16px 20px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+}
+
+.preview-logo {
+
+    font-weight: 700;
+
+}
+
+.preview-nav {
+
+    display: flex;
+
+    gap: 15px;
+
+    font-size: 13px;
+
+}
+
+.preview-body {
+
+    padding: 35px;
+
+}
+
+.preview-body h3 {
+
+    margin-top: 0;
+
+}
+
+.preview-card {
+
+    padding: 20px;
+
+    border-radius: 9px;
+
+    margin-top: 15px;
+
+}
+
+.preview-button {
+
+    display: inline-block;
+
+    padding: 10px 18px;
+
+    border-radius: 6px;
+
+    margin-top: 15px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+.preview-footer {
+
+    padding: 18px 20px;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.theme-modal-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, .6);
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    z-index: 99999;
+
+}
+
+.theme-modal-overlay.active {
+
+    display: flex;
+
+}
+
+.theme-modal {
+
+    background: #FFFFFF;
+
+    width: 100%;
+
+    max-width: 430px;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+}
+
+.theme-modal-header {
+
+    padding: 20px;
+
+    border-bottom: 1px solid #E5E7EB;
+
+}
+
+.theme-modal-header h3 {
+
+    margin: 0;
+
+    color: #111827;
+
+}
+
+.theme-modal-body {
+
+    padding: 20px;
+
+    color: #4B5563;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+}
+
+.theme-modal-footer {
+
+    padding: 16px 20px;
+
+    border-top: 1px solid #E5E7EB;
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width: 750px) {
+
+    .theme-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    .theme-header {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 10px;
+
+    }
+
+}
+
+</style>
+
+
+<div class="theme-page">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="theme-header">
+
+        <div>
+
+            <h1 class="theme-title">
+                Theme Settings
+            </h1>
+
+            <p class="theme-description">
+                Manage the colors used throughout your website.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MESSAGES
+    ====================================================== -->
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div
+                class="
+                    theme-alert
+                    {% if message.tags == 'error' %}
+                        theme-alert-error
+                    {% else %}
+                        theme-alert-success
+                    {% endif %}
+                "
+            >
+
+                {{ message }}
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         MAIN FORM
+    ====================================================== -->
+
+    <div class="theme-card">
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="action"
+                value="{% if theme %}update{% else %}create{% endif %}"
+            >
+
+
+            {% if theme %}
+
+                <input
+                    type="hidden"
+                    name="theme_id"
+                    value="{{ theme.id }}"
+                >
+
+            {% endif %}
+
+
+            <!-- =============================================
+                 THEME INFORMATION
+            ============================================== -->
+
+            <div class="theme-section">
+
+                <h2 class="theme-section-title">
+                    Theme Information
+                </h2>
+
+                <p class="theme-section-description">
+                    Configure the name and active status of your theme.
+                </p>
+
+
+                <div class="theme-name-field">
+
+                    <label class="theme-label">
+                        Theme Name
+                    </label>
+
+                    <input
+                        type="text"
+                        name="theme_name"
+                        class="theme-input"
+                        value="{% if theme %}{{ theme.theme_name }}{% else %}Default Theme{% endif %}"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="active-field">
+
+                    <input
+                        type="checkbox"
+                        name="is_active"
+                        class="theme-checkbox"
+                        {% if not theme or theme.is_active %}
+                            checked
+                        {% endif %}
+                    >
+
+                    <label class="active-label">
+                        Active Theme
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 BRAND COLORS
+            ============================================== -->
+
+            <div class="theme-section">
+
+                <h2 class="theme-section-title">
+                    Brand Colors
+                </h2>
+
+                <p class="theme-section-description">
+                    Main colors used across the website.
+                </p>
+
+
+                <div class="theme-grid">
+
+
+                    <!-- PRIMARY -->
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Primary Color
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="primary_color"
+                                class="theme-color-input"
+                                value="{{ theme.primary_color|default:'#2563EB' }}"
+                                data-target="primary-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="primary-text"
+                                class="color-value"
+                                value="{{ theme.primary_color|default:'#2563EB' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- SECONDARY -->
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Secondary Color
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="secondary_color"
+                                class="theme-color-input"
+                                value="{{ theme.secondary_color|default:'#1E40AF' }}"
+                                data-target="secondary-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="secondary-text"
+                                class="color-value"
+                                value="{{ theme.secondary_color|default:'#1E40AF' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ACCENT -->
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Accent Color
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="accent_color"
+                                class="theme-color-input"
+                                value="{{ theme.accent_color|default:'#F59E0B' }}"
+                                data-target="accent-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="accent-text"
+                                class="color-value"
+                                value="{{ theme.accent_color|default:'#F59E0B' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 BACKGROUND
+            ============================================== -->
+
+            <div class="theme-section">
+
+                <h2 class="theme-section-title">
+                    Background Colors
+                </h2>
+
+
+                <div class="theme-grid">
+
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Background Color
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="background_color"
+                                class="theme-color-input"
+                                value="{{ theme.background_color|default:'#F9FAFB' }}"
+                                data-target="background-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="background-text"
+                                class="color-value"
+                                value="{{ theme.background_color|default:'#F9FAFB' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Surface Color
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="surface_color"
+                                class="theme-color-input"
+                                value="{{ theme.surface_color|default:'#FFFFFF' }}"
+                                data-target="surface-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="surface-text"
+                                class="color-value"
+                                value="{{ theme.surface_color|default:'#FFFFFF' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 TEXT
+            ============================================== -->
+
+            <div class="theme-section">
+
+                <h2 class="theme-section-title">
+                    Text Colors
+                </h2>
+
+
+                <div class="theme-grid">
+
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Text Color
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="text_color"
+                                class="theme-color-input"
+                                value="{{ theme.text_color|default:'#374151' }}"
+                                data-target="text-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="text-text"
+                                class="color-value"
+                                value="{{ theme.text_color|default:'#374151' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Heading Color
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="heading_color"
+                                class="theme-color-input"
+                                value="{{ theme.heading_color|default:'#111827' }}"
+                                data-target="heading-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="heading-text"
+                                class="color-value"
+                                value="{{ theme.heading_color|default:'#111827' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Muted Text Color
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="muted_text_color"
+                                class="theme-color-input"
+                                value="{{ theme.muted_text_color|default:'#6B7280' }}"
+                                data-target="muted-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="muted-text"
+                                class="color-value"
+                                value="{{ theme.muted_text_color|default:'#6B7280' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Border Color
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="border_color"
+                                class="theme-color-input"
+                                value="{{ theme.border_color|default:'#E5E7EB' }}"
+                                data-target="border-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="border-text"
+                                class="color-value"
+                                value="{{ theme.border_color|default:'#E5E7EB' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 STATUS COLORS
+            ============================================== -->
+
+            <div class="theme-section">
+
+                <h2 class="theme-section-title">
+                    Status Colors
+                </h2>
+
+
+                <div class="theme-grid">
+
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Success Color
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="success_color"
+                                class="theme-color-input"
+                                value="{{ theme.success_color|default:'#16A34A' }}"
+                                data-target="success-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="success-text"
+                                class="color-value"
+                                value="{{ theme.success_color|default:'#16A34A' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Warning Color
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="warning_color"
+                                class="theme-color-input"
+                                value="{{ theme.warning_color|default:'#F59E0B' }}"
+                                data-target="warning-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="warning-text"
+                                class="color-value"
+                                value="{{ theme.warning_color|default:'#F59E0B' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Danger Color
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="danger_color"
+                                class="theme-color-input"
+                                value="{{ theme.danger_color|default:'#DC2626' }}"
+                                data-target="danger-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="danger-text"
+                                class="color-value"
+                                value="{{ theme.danger_color|default:'#DC2626' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Info Color
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="info_color"
+                                class="theme-color-input"
+                                value="{{ theme.info_color|default:'#2563EB' }}"
+                                data-target="info-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="info-text"
+                                class="color-value"
+                                value="{{ theme.info_color|default:'#2563EB' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 BUTTON COLORS
+            ============================================== -->
+
+            <div class="theme-section">
+
+                <h2 class="theme-section-title">
+                    Button Colors
+                </h2>
+
+
+                <div class="theme-grid">
+
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Button Text Color
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="button_text_color"
+                                class="theme-color-input"
+                                value="{{ theme.button_text_color|default:'#FFFFFF' }}"
+                                data-target="button-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="button-text"
+                                class="color-value"
+                                value="{{ theme.button_text_color|default:'#FFFFFF' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Button Hover Color
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="button_hover_color"
+                                class="theme-color-input"
+                                value="{{ theme.button_hover_color|default:'#1D4ED8' }}"
+                                data-target="button-hover-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="button-hover-text"
+                                class="color-value"
+                                value="{{ theme.button_hover_color|default:'#1D4ED8' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 HEADER
+            ============================================== -->
+
+            <div class="theme-section">
+
+                <h2 class="theme-section-title">
+                    Header
+                </h2>
+
+
+                <div class="theme-grid">
+
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Header Background
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="header_background_color"
+                                class="theme-color-input"
+                                value="{{ theme.header_background_color|default:'#FFFFFF' }}"
+                                data-target="header-bg-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="header-bg-text"
+                                class="color-value"
+                                value="{{ theme.header_background_color|default:'#FFFFFF' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Header Text
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="header_text_color"
+                                class="theme-color-input"
+                                value="{{ theme.header_text_color|default:'#111827' }}"
+                                data-target="header-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="header-text"
+                                class="color-value"
+                                value="{{ theme.header_text_color|default:'#111827' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 FOOTER
+            ============================================== -->
+
+            <div class="theme-section">
+
+                <h2 class="theme-section-title">
+                    Footer
+                </h2>
+
+
+                <div class="theme-grid">
+
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Footer Background
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="footer_background_color"
+                                class="theme-color-input"
+                                value="{{ theme.footer_background_color|default:'#111827' }}"
+                                data-target="footer-bg-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="footer-bg-text"
+                                class="color-value"
+                                value="{{ theme.footer_background_color|default:'#111827' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="color-field">
+
+                        <label class="color-label">
+                            Footer Text
+                        </label>
+
+                        <div class="color-control">
+
+                            <input
+                                type="color"
+                                name="footer_text_color"
+                                class="theme-color-input"
+                                value="{{ theme.footer_text_color|default:'#FFFFFF' }}"
+                                data-target="footer-text"
+                            >
+
+                            <input
+                                type="text"
+                                id="footer-text"
+                                class="color-value"
+                                value="{{ theme.footer_text_color|default:'#FFFFFF' }}"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 LIVE PREVIEW
+            ============================================== -->
+
+            <div class="theme-section">
+
+                <h2 class="theme-section-title">
+                    Live Preview
+                </h2>
+
+                <p class="theme-section-description">
+                    Preview how your selected colors will look.
+                </p>
+
+
+                <div
+                    id="themePreview"
+                    class="theme-preview"
+                >
+
+                    <div
+                        id="previewHeader"
+                        class="preview-header"
+                    >
+
+                        <div
+                            id="previewLogo"
+                            class="preview-logo"
+                        >
+                            {{ theme.theme_name|default:"My Store" }}
+                        </div>
+
+                        <div class="preview-nav">
+
+                            <span>
+                                Home
+                            </span>
+
+                            <span>
+                                Shop
+                            </span>
+
+                            <span>
+                                Contact
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="previewBody"
+                        class="preview-body"
+                    >
+
+                        <h3 id="previewHeading">
+                            Your Website Theme
+                        </h3>
+
+                        <p id="previewText">
+                            This is an example of your
+                            website using the selected colors.
+                        </p>
+
+
+                        <div
+                            id="previewCard"
+                            class="preview-card"
+                        >
+
+                            Example Content Card
+
+                            <br>
+
+                            <button
+                                type="button"
+                                id="previewButton"
+                                class="preview-button"
+                            >
+                                Shop Now
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="previewFooter"
+                        class="preview-footer"
+                    >
+                        Website Footer
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 ACTIONS
+            ============================================== -->
+
+            <div class="theme-actions">
+
+                {% if theme %}
+
+                    <button
+                        type="button"
+                        class="theme-btn theme-btn-danger"
+                        onclick="openDeleteModal(
+                            '{{ theme.id }}',
+                            '{{ theme.theme_name|escapejs }}'
+                        )"
+                    >
+                        Delete Theme
+                    </button>
+
+                {% endif %}
+
+
+                <button
+                    type="submit"
+                    class="
+                        theme-btn
+                        theme-btn-primary
+                    "
+                >
+
+                    {% if theme %}
+                        Update Theme
+                    {% else %}
+                        Create Theme
+                    {% endif %}
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     DELETE MODAL
+========================================================== -->
+
+<div
+    id="deleteModal"
+    class="theme-modal-overlay"
+    onclick="closeDeleteOutside(event)"
+>
+
+    <div
+        class="theme-modal"
+        onclick="event.stopPropagation()"
+    >
+
+        <div class="theme-modal-header">
+
+            <h3>
+                Delete Theme
+            </h3>
+
+        </div>
+
+
+        <div class="theme-modal-body">
+
+            <p>
+                Are you sure you want to delete
+                <strong id="deleteThemeName"></strong>?
+            </p>
+
+            <p>
+                This action cannot be undone.
+            </p>
+
+        </div>
+
+
+        <div class="theme-modal-footer">
+
+            <button
+                type="button"
+                class="theme-btn theme-btn-secondary"
+                onclick="closeDeleteModal()"
+            >
+                Cancel
+            </button>
+
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="action"
+                    value="delete"
+                >
+
+                <input
+                    type="hidden"
+                    name="theme_id"
+                    id="deleteThemeId"
+                >
+
+                <button
+                    type="submit"
+                    class="theme-btn theme-btn-danger"
+                >
+                    Yes, Delete
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   COLOR PICKER
+========================================================= */
+
+document
+.querySelectorAll(
+    ".theme-color-input"
+)
+.forEach(
+    function(input) {
+
+        input.addEventListener(
+            "input",
+            function() {
+
+                const target =
+                    document.getElementById(
+                        this.dataset.target
+                    );
+
+                if (target) {
+
+                    target.value =
+                        this.value;
+
+                }
+
+                updatePreview();
+
+            }
+        );
+
+    }
+);
+
+
+/* =========================================================
+   GET COLOR
+========================================================= */
+
+function getColor(name, fallback) {
+
+    const input =
+        document.querySelector(
+            'input[name="' + name + '"]'
+        );
+
+    if (
+        input &&
+        input.value
+    ) {
+
+        return input.value;
+
+    }
+
+    return fallback;
+}
+
+
+/* =========================================================
+   LIVE PREVIEW
+========================================================= */
+
+function updatePreview() {
+
+    const primary =
+        getColor(
+            "primary_color",
+            "#2563EB"
+        );
+
+    const secondary =
+        getColor(
+            "secondary_color",
+            "#1E40AF"
+        );
+
+    const accent =
+        getColor(
+            "accent_color",
+            "#F59E0B"
+        );
+
+    const background =
+        getColor(
+            "background_color",
+            "#F9FAFB"
+        );
+
+    const surface =
+        getColor(
+            "surface_color",
+            "#FFFFFF"
+        );
+
+    const text =
+        getColor(
+            "text_color",
+            "#374151"
+        );
+
+    const heading =
+        getColor(
+            "heading_color",
+            "#111827"
+        );
+
+    const border =
+        getColor(
+            "border_color",
+            "#E5E7EB"
+        );
+
+    const headerBg =
+        getColor(
+            "header_background_color",
+            "#FFFFFF"
+        );
+
+    const headerText =
+        getColor(
+            "header_text_color",
+            "#111827"
+        );
+
+    const footerBg =
+        getColor(
+            "footer_background_color",
+            "#111827"
+        );
+
+    const footerText =
+        getColor(
+            "footer_text_color",
+            "#FFFFFF"
+        );
+
+    const buttonText =
+        getColor(
+            "button_text_color",
+            "#FFFFFF"
+        );
+
+    const buttonHover =
+        getColor(
+            "button_hover_color",
+            "#1D4ED8"
+        );
+
+
+    /* Header */
+
+    const header =
+        document.getElementById(
+            "previewHeader"
+        );
+
+    header.style.background =
+        headerBg;
+
+    header.style.color =
+        headerText;
+
+
+    /* Logo */
+
+    document.getElementById(
+        "previewLogo"
+    ).style.color =
+        primary;
+
+
+    /* Body */
+
+    const body =
+        document.getElementById(
+            "previewBody"
+        );
+
+    body.style.background =
+        background;
+
+    body.style.color =
+        text;
+
+
+    /* Heading */
+
+    document.getElementById(
+        "previewHeading"
+    ).style.color =
+        heading;
+
+
+    /* Card */
+
+    const card =
+        document.getElementById(
+            "previewCard"
+        );
+
+    card.style.background =
+        surface;
+
+    card.style.border =
+        "1px solid " + border;
+
+
+    /* Button */
+
+    const button =
+        document.getElementById(
+            "previewButton"
+        );
+
+    button.style.background =
+        primary;
+
+    button.style.color =
+        buttonText;
+
+
+    button.onmouseenter =
+        function() {
+
+            this.style.background =
+                buttonHover;
+
+        };
+
+
+    button.onmouseleave =
+        function() {
+
+            this.style.background =
+                primary;
+
+        };
+
+
+    /* Accent */
+
+    document.getElementById(
+        "previewText"
+    ).style.color =
+        text;
+
+
+    /* Footer */
+
+    const footer =
+        document.getElementById(
+            "previewFooter"
+        );
+
+    footer.style.background =
+        footerBg;
+
+    footer.style.color =
+        footerText;
+
+}
+
+
+/* =========================================================
+   INITIAL PREVIEW
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        updatePreview();
+
+    }
+);
+
+
+/* =========================================================
+   DELETE MODAL
+========================================================= */
+
+function openDeleteModal(
+    id,
+    name
+) {
+
+    document.getElementById(
+        "deleteThemeId"
+    ).value = id;
+
+    document.getElementById(
+        "deleteThemeName"
+    ).textContent = name;
+
+    document.getElementById(
+        "deleteModal"
+    ).classList.add(
+        "active"
+    );
+
+    document.body.style.overflow =
+        "hidden";
+}
+
+
+function closeDeleteModal() {
+
+    document.getElementById(
+        "deleteModal"
+    ).classList.remove(
+        "active"
+    );
+
+    document.body.style.overflow =
+        "";
+}
+
+
+function closeDeleteOutside(event) {
+
+    if (
+        event.target ===
+        event.currentTarget
+    ) {
+
+        closeDeleteModal();
+
+    }
+
+}
+
+
+/* =========================================================
+   ESC KEY
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Escape"
+        ) {
+
+            closeDeleteModal();
+
+        }
+
+    }
+);
+
+</script>
+
+{% endblock %}

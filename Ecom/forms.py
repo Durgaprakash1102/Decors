@@ -1493,3 +1493,196 @@ class ContactMessageAdminForm(forms.ModelForm):
                 }
             ),
         }
+
+from django import forms
+
+from .models import ThemeSettings
+
+
+class ThemeSettingsForm(forms.ModelForm):
+
+    class Meta:
+
+        model = ThemeSettings
+
+        fields = [
+            "theme_name",
+
+            "primary_color",
+            "secondary_color",
+            "accent_color",
+
+            "background_color",
+            "surface_color",
+
+            "text_color",
+            "heading_color",
+            "muted_text_color",
+
+            "border_color",
+
+            "success_color",
+            "warning_color",
+            "danger_color",
+            "info_color",
+
+            "button_text_color",
+            "button_hover_color",
+
+            "header_background_color",
+            "header_text_color",
+
+            "footer_background_color",
+            "footer_text_color",
+
+            "is_active",
+        ]
+
+        widgets = {
+
+            "theme_name": forms.TextInput(
+                attrs={
+                    "class": "theme-input",
+                    "placeholder": "Theme name"
+                }
+            ),
+
+            "primary_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "secondary_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "accent_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "background_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "surface_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "text_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "heading_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "muted_text_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "border_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "success_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "warning_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "danger_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "info_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "button_text_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "button_hover_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "header_background_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "header_text_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "footer_background_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "footer_text_color": forms.TextInput(
+                attrs={
+                    "type": "color",
+                    "class": "theme-color-input"
+                }
+            ),
+
+            "is_active": forms.CheckboxInput(
+                attrs={
+                    "class": "theme-checkbox"
+                }
+            ),
+        }

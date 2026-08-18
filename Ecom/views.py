@@ -7459,3 +7459,208 @@ Phone: {company_phone}
         "contact/manage.html",
         context
     )
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import (
+    render,
+    redirect,
+    get_object_or_404,
+)
+
+from .models import ThemeSettings
+from .forms import ThemeSettingsForm
+
+
+@login_required
+def manage_theme_settings(request):
+
+    # =========================================================
+    # GET CURRENT THEME
+    # =========================================================
+
+    theme = (
+        ThemeSettings.objects
+        .filter(is_active=True)
+        .first()
+    )
+
+    # =========================================================
+    # POST
+    # =========================================================
+
+    if request.method == "POST":
+
+        action = request.POST.get(
+            "action"
+        )
+
+        # =====================================================
+        # CREATE
+        # =====================================================
+
+        if action == "create":
+
+            # Prevent multiple active themes
+
+            ThemeSettings.objects.update(
+                is_active=False
+            )
+
+            form = ThemeSettingsForm(
+                request.POST
+            )
+
+            if form.is_valid():
+
+                new_theme = form.save(
+                    commit=False
+                )
+
+                new_theme.is_active = True
+
+                new_theme.save()
+
+                messages.success(
+                    request,
+                    "Theme created successfully."
+                )
+
+            else:
+
+                messages.error(
+                    request,
+                    "Please correct the errors."
+                )
+
+            return redirect(
+                "Ecom:manage_theme_settings"
+            )
+
+        # =====================================================
+        # UPDATE
+        # =====================================================
+
+        elif action == "update":
+
+            theme_id = request.POST.get(
+                "theme_id"
+            )
+
+            theme = get_object_or_404(
+                ThemeSettings,
+                id=theme_id
+            )
+
+            form = ThemeSettingsForm(
+                request.POST,
+                instance=theme
+            )
+
+            if form.is_valid():
+
+                updated_theme = form.save(
+                    commit=False
+                )
+
+                # This application uses one active theme
+
+                updated_theme.is_active = True
+
+                # Deactivate other themes
+
+                ThemeSettings.objects.exclude(
+                    id=updated_theme.id
+                ).update(
+                    is_active=False
+                )
+
+                updated_theme.save()
+
+                messages.success(
+                    request,
+                    "Theme updated successfully."
+                )
+
+            else:
+
+                messages.error(
+                    request,
+                    "Please correct the errors."
+                )
+
+            return redirect(
+                "Ecom:manage_theme_settings"
+            )
+
+        # =====================================================
+        # DELETE
+        # =====================================================
+
+        elif action == "delete":
+
+            theme_id = request.POST.get(
+                "theme_id"
+            )
+
+            theme_to_delete = get_object_or_404(
+                ThemeSettings,
+                id=theme_id
+            )
+
+            theme_to_delete.delete()
+
+            messages.success(
+                request,
+                "Theme deleted successfully."
+            )
+
+            return redirect(
+                "Ecom:manage_theme_settings"
+            )
+
+    # =========================================================
+    # CREATE FORM
+    # =========================================================
+
+    create_form = ThemeSettingsForm()
+
+    # =========================================================
+    # UPDATE FORM
+    # =========================================================
+
+    update_form = None
+
+    if theme:
+
+        update_form = ThemeSettingsForm(
+            instance=theme
+        )
+
+    # =========================================================
+    # ALL THEMES
+    # =========================================================
+
+    themes = ThemeSettings.objects.all()
+
+    # =========================================================
+    # CONTEXT
+    # =========================================================
+
+    context = {
+
+        "theme": theme,
+
+        "themes": themes,
+
+        "create_form": create_form,
+
+        "update_form": update_form,
+
+    }
+
+    return render(
+        request,
+        "theme/manage.html",
+        context
+    )

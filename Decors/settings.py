@@ -72,6 +72,7 @@ TEMPLATES = [
                 "Ecom.context_processor.base_template",
                 'Ecom.custom_context.get_nav_counts',
                 'Ecom.context_processors_site_settings.site_settings',
+                'Ecom.context_processor_theme_settings.theme_settings',
             ],
         },
     },

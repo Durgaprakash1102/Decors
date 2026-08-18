@@ -2391,3 +2391,146 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.subject}"
+
+class ThemeSettings(models.Model):
+
+    theme_name = models.CharField(
+        max_length=100,
+        default="Default Theme"
+    )
+
+    primary_color = models.CharField(
+        max_length=20,
+        default="#2563EB"
+    )
+
+    secondary_color = models.CharField(
+        max_length=20,
+        default="#1E40AF"
+    )
+
+    accent_color = models.CharField(
+        max_length=20,
+        default="#F59E0B"
+    )
+
+    background_color = models.CharField(
+        max_length=20,
+        default="#F9FAFB"
+    )
+
+    surface_color = models.CharField(
+        max_length=20,
+        default="#FFFFFF"
+    )
+
+    text_color = models.CharField(
+        max_length=20,
+        default="#374151"
+    )
+
+    heading_color = models.CharField(
+        max_length=20,
+        default="#111827"
+    )
+
+    muted_text_color = models.CharField(
+        max_length=20,
+        default="#6B7280"
+    )
+
+    border_color = models.CharField(
+        max_length=20,
+        default="#E5E7EB"
+    )
+
+    success_color = models.CharField(
+        max_length=20,
+        default="#16A34A"
+    )
+
+    warning_color = models.CharField(
+        max_length=20,
+        default="#F59E0B"
+    )
+
+    danger_color = models.CharField(
+        max_length=20,
+        default="#DC2626"
+    )
+
+    info_color = models.CharField(
+        max_length=20,
+        default="#2563EB"
+    )
+
+    button_text_color = models.CharField(
+        max_length=20,
+        default="#FFFFFF"
+    )
+
+    button_hover_color = models.CharField(
+        max_length=20,
+        default="#1D4ED8"
+    )
+
+    header_background_color = models.CharField(
+        max_length=20,
+        default="#FFFFFF"
+    )
+
+    header_text_color = models.CharField(
+        max_length=20,
+        default="#111827"
+    )
+
+    footer_background_color = models.CharField(
+        max_length=20,
+        default="#111827"
+    )
+
+    footer_text_color = models.CharField(
+        max_length=20,
+        default="#FFFFFF"
+    )
+
+    is_active = models.BooleanField(
+        default=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    class Meta:
+
+        verbose_name = "Theme Settings"
+
+        verbose_name_plural = "Theme Settings"
+
+        ordering = ["-updated_at"]
+
+    def __str__(self):
+        return self.theme_name
+
+    @classmethod
+    def get_settings(cls):
+
+        theme = (
+            cls.objects
+            .filter(is_active=True)
+            .first()
+        )
+
+        if not theme:
+
+            theme = cls.objects.create(
+                theme_name="Default Theme",
+                is_active=True
+            )
+
+        return theme

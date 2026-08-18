@@ -207,5 +207,10 @@ path('admin/orders/', admin_order_list_view, name='admin_order_list'),
         views.manage_contact_messages,
         name="manage_contact_messages"
     ),
+    path(
+    "theme-settings/",
+    views.manage_theme_settings,
+    name="manage_theme_settings",   
+    ),
 
 ]
