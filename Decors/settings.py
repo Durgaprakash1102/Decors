@@ -1,8 +1,10 @@
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv(BASE_DIR / ".env")
 
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(exist_ok=True)
@@ -11,18 +13,32 @@ LOG_DIR.mkdir(exist_ok=True)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-
+from dotenv import load_dotenv
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
+# SECRET_KEY = os.getenv(
+#     "DJANGO_SECRET_KEY",
+#     ""
+# )
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-5$6z69*l21(4l@ct61zp&l_n2rn7%@f4-+4tho10hu_s2tgdue"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv(
+    "DJANGO_DEBUG",
+    "False"
+).lower() == "true"
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv(
+        "DJANGO_ALLOWED_HOSTS",
+        "127.0.0.1,localhost"
+    ).split(",")
+    if host.strip()
+]
 
 
 # Application definition
@@ -129,17 +145,60 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-RAZORPAY_KEY_ID = 'rzp_test_KdiESTDcHPC74B'
-RAZORPAY_KEY_SECRET = 'F8aPdLzdQKLt3RmgTWFcnYBG'
-RAZORPAY_CURRENCY = 'INR'
+RAZORPAY_KEY_ID = os.getenv(
+    "RAZORPAY_KEY_ID",
+    ""
+)
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'projecttestmail02@gmail.com'
-EMAIL_HOST_PASSWORD = 'iizo uksz ngai kyir'
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+RAZORPAY_KEY_SECRET = os.getenv(
+    "RAZORPAY_KEY_SECRET",
+    ""
+)
+
+RAZORPAY_CURRENCY = os.getenv(
+    "RAZORPAY_CURRENCY",
+    "INR"
+)
+
+
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.smtp.EmailBackend"
+)
+
+EMAIL_HOST = os.getenv(
+    "EMAIL_HOST",
+    "smtp.gmail.com"
+)
+
+EMAIL_PORT = int(
+    os.getenv(
+        "EMAIL_PORT",
+        "587"
+    )
+)
+
+EMAIL_USE_TLS = (
+    os.getenv(
+        "EMAIL_USE_TLS",
+        "True"
+    ).lower() == "true"
+)
+
+EMAIL_HOST_USER = os.getenv(
+    "EMAIL_HOST_USER",
+    ""
+)
+
+EMAIL_HOST_PASSWORD = os.getenv(
+    "EMAIL_HOST_PASSWORD",
+    ""
+)
+
+DEFAULT_FROM_EMAIL = os.getenv(
+    "DEFAULT_FROM_EMAIL",
+    EMAIL_HOST_USER
+)
 
 SESSION_COOKIE_AGE = 86400  # 24 hours
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
@@ -180,6 +239,14 @@ LOGGING = {
     },
 }
 
-TWO_FACTOR_API_KEY = "49982e3b-1182-11f1-bcb0-0200cd936042"
+TWO_FACTOR_API_KEY = os.getenv(
+    "TWO_FACTOR_API_KEY",
+    ""
+)
 
-SMS_ENABLED = True
+SMS_ENABLED = (
+    os.getenv(
+        "SMS_ENABLED",
+        "True"
+    ).lower() == "true"
+)
