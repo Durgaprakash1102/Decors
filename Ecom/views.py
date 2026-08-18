@@ -571,13 +571,48 @@ def employee_signup_view(request):
 # ==================== EMPLOYEE DASHBOARD ====================
 @login_required
 def employee_dashboard_view(request):
-    """Employee dashboard - Employee only"""
+    """Employee dashboard - Employee only - Offline orders only"""
     if not request.user.is_employee:
         messages.error(request, 'Access denied. Employee only.')
         return redirect('Ecom:home')
     
-   
-    return render(request, 'Ecom/employee/dashboard.html')
+    from django.db.models import Sum
+    from django.utils import timezone
+    from datetime import datetime
+    from offline_sales.models import OfflineOrder
+    
+    # Get today's date
+    today = timezone.now().date()
+    today_start = timezone.make_aware(datetime.combine(today, datetime.min.time()))
+    today_end = timezone.make_aware(datetime.combine(today, datetime.max.time()))
+    
+    # Today's Offline Orders (filter by created_by = request.user)
+    today_offline_orders = OfflineOrder.objects.filter(
+        created_by=request.user,
+        created_at__gte=today_start,
+        created_at__lte=today_end
+    ).count()
+    
+    # Today's Offline Income
+    today_offline_amount = OfflineOrder.objects.filter(
+        created_by=request.user,
+        created_at__gte=today_start,
+        created_at__lte=today_end
+    ).aggregate(total=Sum('total_amount'))['total'] or 0
+    
+    # Recent Offline Orders (last 5 created by this employee only)
+    recent_offline_orders = OfflineOrder.objects.filter(
+        created_by=request.user
+    ).order_by('-created_at')[:7]
+    
+    context = {
+        'today_offline_orders': today_offline_orders,
+        'today_offline_amount': today_offline_amount,
+        'recent_offline_orders': recent_offline_orders,
+        'today_date': today,
+    }
+    
+    return render(request, 'Ecom/employee/dashboard.html', context)
 def verify_otp_view(request):
     email = request.session.get('pending_email')
     user_data = request.session.get('pending_user_data')

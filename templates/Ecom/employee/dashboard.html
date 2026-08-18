@@ -1,8 +1,949 @@
+<!-- employee_dashboard.html - Clean Beautiful Dashboard -->
 {% extends 'includes/sidebar.html' %}
 {% load static %}
 
-{% block title %}Admin Dashboard - ShubhDecor{% endblock %}
+{% block title %}Employee Dashboard - ShubhDecor{% endblock %}
 
 {% block content %}
-    Employee Dashboard
+
+<style>
+    /* ============================================
+       CLEAN BEAUTIFUL DASHBOARD
+    ============================================ */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap');
+
+    :root {
+        --bp-primary: #5c121f;
+        --bp-primary-light: #8a1a2f;
+        --bp-primary-gradient: linear-gradient(135deg, #5c121f 0%, #7a1528 50%, #4a0e18 100%);
+        --bp-gold: #c9a84c;
+        --bp-gold-gradient: linear-gradient(135deg, #c9a84c 0%, #f0d68a 100%);
+        --bp-bg: #f5f1ec;
+        --bp-white: #ffffff;
+        --bp-border: #e8e2dc;
+        --bp-text: #1a1412;
+        --bp-text-light: #6b5f59;
+        --bp-text-muted: #b0a69e;
+        --bp-success: #0f7b4a;
+        --bp-shadow: 0 2px 16px rgba(92,18,31,0.04);
+        --bp-shadow-lg: 0 8px 40px rgba(92,18,31,0.08);
+        --bp-radius: 20px;
+        --bp-radius-sm: 12px;
+        --bp-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        --bp-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    .emp-dash-wrap {
+        max-width: 1440px;
+        margin: 0 auto;
+        font-family: var(--bp-font);
+        background: var(--bp-bg);
+        min-height: 100vh;
+        width: 100%;
+    }
+
+    /* ============================================
+       HEADER - CLEAN
+    ============================================ */
+    .emp-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 0px 0 16px 0;
+        border-bottom: 1px solid var(--bp-border);
+        margin-bottom: 20px;
+    }
+
+    .emp-header .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .emp-header .logo .mark {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: var(--bp-primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--bp-white);
+        font-size: 15px;
+        box-shadow: 0 4px 12px rgba(92,18,31,0.12);
+    }
+
+    .emp-header .logo .name {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--bp-text);
+        letter-spacing: -0.3px;
+    }
+
+    .emp-header .logo .name .gold { color: var(--bp-gold); }
+
+    .emp-header .right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .emp-header .right .pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--bp-white);
+        padding: 6px 16px;
+        border-radius: 50px;
+        font-size: 12px;
+        color: var(--bp-text-muted);
+        font-weight: 500;
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--bp-shadow);
+        transition: var(--bp-transition);
+    }
+
+    .emp-header .right .pill:hover {
+        border-color: var(--bp-gold);
+        box-shadow: var(--bp-shadow-lg);
+    }
+
+    .emp-header .right .pill i { color: var(--bp-gold); font-size: 12px; }
+    .emp-header .right .pill strong { color: var(--bp-text); font-weight: 600; }
+
+    .emp-header .right .user {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--bp-white);
+        padding: 3px 16px 3px 3px;
+        border-radius: 50px;
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--bp-shadow);
+        transition: var(--bp-transition);
+    }
+
+    .emp-header .right .user:hover {
+        border-color: var(--bp-gold);
+        box-shadow: var(--bp-shadow-lg);
+    }
+
+    .emp-header .right .user .av {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--bp-primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--bp-white);
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .emp-header .right .user .nm { font-size: 12px; font-weight: 500; color: var(--bp-text); }
+
+    /* ============================================
+       GRID - 3 COLUMN WITH MINIMAL GAPS
+    ============================================ */
+    .emp-grid {
+        display: grid;
+        grid-template-columns: 1.3fr 0.9fr 1fr;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    /* ============================================
+       WELCOME CARD
+    ============================================ */
+    .emp-welcome {
+        background: var(--bp-primary-gradient);
+        border-radius: var(--bp-radius);
+        padding: 22px 26px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-shadow: 0 8px 32px rgba(92,18,31,0.10);
+        position: relative;
+        overflow: hidden;
+        min-height: 150px;
+    }
+
+    .emp-welcome::before {
+        content: '';
+        position: absolute;
+        top: -40%;
+        right: -20%;
+        width: 50%;
+        height: 180%;
+        background: radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .emp-welcome .greet {
+        font-size: 12px;
+        color: rgba(255,255,255,0.4);
+        font-weight: 400;
+        position: relative;
+        z-index: 1;
+    }
+
+    .emp-welcome .greet .wave {
+        display: inline-block;
+        animation: wave 2.5s ease-in-out infinite;
+    }
+
+    @keyframes wave {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(20deg); }
+        75% { transform: rotate(-10deg); }
+    }
+
+    .emp-welcome h1 {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--bp-white);
+        margin: 2px 0 0 0;
+        letter-spacing: -0.3px;
+        line-height: 1.2;
+        position: relative;
+        z-index: 1;
+    }
+
+    .emp-welcome h1 .gold {
+        background: var(--bp-gold-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .emp-welcome .sub {
+        font-size: 12px;
+        color: rgba(255,255,255,0.2);
+        font-weight: 300;
+        margin-top: 2px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .emp-welcome .meta-tags {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 1;
+    }
+
+    .emp-welcome .meta-tags .tag {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.04);
+        padding: 2px 12px;
+        border-radius: 50px;
+        font-size: 10px;
+        color: rgba(255,255,255,0.25);
+    }
+
+    .emp-welcome .meta-tags .tag i { color: var(--bp-gold); font-size: 10px; }
+
+    /* ============================================
+       STATS STACK
+    ============================================ */
+    .emp-stats-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .emp-stat-mini {
+        background: var(--bp-white);
+        border-radius: var(--bp-radius);
+        padding: 14px 18px;
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--bp-shadow);
+        transition: var(--bp-transition);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+    }
+
+    .emp-stat-mini:hover {
+        transform: translateX(4px);
+        box-shadow: var(--bp-shadow-lg);
+        border-color: rgba(201,168,76,0.08);
+    }
+
+    .emp-stat-mini .icn {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        flex-shrink: 0;
+        transition: var(--bp-transition);
+    }
+
+    .emp-stat-mini:hover .icn { transform: scale(1.05) rotate(-4deg); }
+
+    .emp-stat-mini.orange .icn {
+        background: rgba(15,123,74,0.06);
+        color: var(--bp-success);
+    }
+
+    .emp-stat-mini.gold .icn {
+        background: rgba(201,168,76,0.06);
+        color: var(--bp-gold);
+    }
+
+    .emp-stat-mini .info .label {
+        font-size: 10px;
+        color: var(--bp-text-muted);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .emp-stat-mini .info .number {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--bp-text);
+        line-height: 1.1;
+    }
+
+    .emp-stat-mini .info .number .curr {
+        font-size: 13px;
+        color: var(--bp-text-muted);
+        font-weight: 400;
+        margin-right: 2px;
+    }
+
+    /* ============================================
+       IMAGE CARD
+    ============================================ */
+    .emp-image-card {
+        border-radius: var(--bp-radius);
+        overflow: hidden;
+        position: relative;
+        min-height: 150px;
+        box-shadow: var(--bp-shadow);
+        transition: var(--bp-transition);
+    }
+
+    .emp-image-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--bp-shadow-lg);
+    }
+
+    .emp-image-card .img-bg {
+        position: absolute;
+        inset: 0;
+        background: 
+            linear-gradient(135deg, rgba(92,18,31,0.4) 0%, rgba(92,18,31,0.1) 100%),
+            url('https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=400&h=300&fit=crop&crop=center') center/cover no-repeat;
+        transition: transform 8s ease;
+    }
+
+    .emp-image-card:hover .img-bg {
+        transform: scale(1.03);
+    }
+
+    .emp-image-card .img-overlay {
+        position: relative;
+        z-index: 2;
+        padding: 18px 22px;
+        min-height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+    }
+
+    .emp-image-card .img-overlay .img-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: var(--bp-gold);
+        margin-bottom: 4px;
+    }
+
+    .emp-image-card .img-overlay h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--bp-white);
+        margin: 0;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .emp-image-card .img-overlay p {
+        font-size: 11px;
+        color: rgba(255,255,255,0.3);
+        margin: 2px 0 0 0;
+    }
+
+    .emp-image-card .img-overlay .img-tag {
+        display: inline-block;
+        margin-top: 4px;
+        padding: 2px 12px;
+        border-radius: 50px;
+        background: rgba(201,168,76,0.06);
+        border: 1px solid rgba(201,168,76,0.06);
+        font-size: 8px;
+        color: var(--bp-gold);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        width: fit-content;
+    }
+
+    /* ============================================
+       CALENDAR + ORDERS
+    ============================================ */
+    .emp-main {
+        display: grid;
+        grid-template-columns: 1.2fr 1.8fr;
+        gap: 14px;
+    }
+
+    /* ============================================
+       CALENDAR
+    ============================================ */
+    .emp-calendar {
+        background: var(--bp-white);
+        border-radius: var(--bp-radius);
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--bp-shadow);
+        overflow: hidden;
+        transition: var(--bp-transition);
+    }
+
+    .emp-calendar:hover {
+        box-shadow: var(--bp-shadow-lg);
+    }
+
+    .emp-calendar .cal-head {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--bp-border);
+        background: var(--bp-bg);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .emp-calendar .cal-head h5 {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--bp-text);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .emp-calendar .cal-head h5 i { color: var(--bp-primary); }
+    .emp-calendar .cal-head .yr {
+        font-size: 10px;
+        padding: 2px 12px;
+        background: var(--bp-white);
+        border-radius: 50px;
+        border: 1px solid var(--bp-border);
+        color: var(--bp-text-muted);
+        font-weight: 500;
+    }
+
+    .emp-calendar .cal-body { padding: 14px 16px 16px; }
+
+    .cal-ctrl {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .cal-ctrl .month {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--bp-text);
+    }
+
+    .cal-ctrl .nav {
+        display: flex;
+        gap: 4px;
+    }
+
+    .cal-ctrl .nav button {
+        background: var(--bp-bg);
+        border: none;
+        border-radius: 6px;
+        width: 28px;
+        height: 28px;
+        cursor: pointer;
+        color: var(--bp-text);
+        transition: var(--bp-transition);
+        font-size: 12px;
+    }
+
+    .cal-ctrl .nav button:hover {
+        background: var(--bp-primary);
+        color: var(--bp-white);
+    }
+
+    .cal-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+        text-align: center;
+    }
+
+    .cal-grid .day-label {
+        font-size: 8px;
+        font-weight: 600;
+        color: var(--bp-text-muted);
+        padding: 3px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .cal-grid .day {
+        font-size: 11px;
+        font-weight: 500;
+        padding: 4px 0;
+        border-radius: 6px;
+        color: var(--bp-text);
+        transition: var(--bp-transition);
+        cursor: pointer;
+        background: transparent;
+    }
+
+    .cal-grid .day:hover { 
+        background: var(--bp-bg);
+        transform: scale(1.05);
+    }
+
+    .cal-grid .day.today {
+        background: var(--bp-primary-gradient);
+        color: var(--bp-white);
+        font-weight: 600;
+        box-shadow: 0 4px 16px rgba(92,18,31,0.15);
+    }
+
+    .cal-grid .day.other { color: var(--bp-text-muted); opacity: 0.15; }
+    .cal-grid .day.event::after {
+        content: '';
+        display: block;
+        width: 4px;
+        height: 4px;
+        background: var(--bp-gold);
+        border-radius: 50%;
+        margin: 1px auto 0;
+    }
+
+    .cal-legend {
+        display: flex;
+        gap: 10px;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--bp-border);
+        font-size: 9px;
+        color: var(--bp-text-muted);
+    }
+
+    .cal-legend span { display: flex; align-items: center; gap: 4px; }
+    .cal-legend .dot { width: 6px; height: 6px; border-radius: 50%; }
+    .cal-legend .dot.gold { background: var(--bp-gold); }
+    .cal-legend .dot.primary { background: var(--bp-primary-gradient); }
+
+    /* ============================================
+       ORDERS TABLE
+    ============================================ */
+    .emp-orders {
+        background: var(--bp-white);
+        border-radius: var(--bp-radius);
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--bp-shadow);
+        overflow: hidden;
+        transition: var(--bp-transition);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .emp-orders:hover {
+        box-shadow: var(--bp-shadow-lg);
+    }
+
+    .emp-orders .ord-head {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--bp-border);
+        background: var(--bp-bg);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .emp-orders .ord-head h5 {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--bp-text);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .emp-orders .ord-head h5 i { color: var(--bp-primary); }
+    .emp-orders .ord-head .cnt {
+        background: var(--bp-primary-gradient);
+        color: var(--bp-white);
+        padding: 2px 12px;
+        border-radius: 50px;
+        font-size: 10px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(92,18,31,0.12);
+    }
+
+    .emp-orders .ord-body { padding: 0; flex: 1; }
+
+    .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        min-width: 380px;
+    }
+
+    .table thead th {
+        padding: 8px 12px;
+        text-align: left;
+        font-weight: 600;
+        color: var(--bp-text-muted);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--bp-border);
+        background: var(--bp-bg);
+    }
+
+    .table tbody td {
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--bp-border);
+        color: var(--bp-text);
+        font-weight: 500;
+        font-size: 12px;
+    }
+
+    .table tbody tr:last-child td { border-bottom: none; }
+    .table tbody tr { transition: var(--bp-transition); }
+    .table tbody tr:hover { background: var(--bp-bg); }
+
+    .table .id { font-weight: 600; color: var(--bp-primary); }
+    .table .amt { font-weight: 700; }
+    .table .amt .rs { font-weight: 400; color: var(--bp-text-muted); font-size: 10px; }
+
+    .status {
+        padding: 2px 10px;
+        border-radius: 50px;
+        font-size: 9px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .status.pending { background: #fef3c7; color: #92400e; }
+    .status.processing { background: #dbeafe; color: #1e40af; }
+    .status.completed { background: #d1fae5; color: #065f46; }
+    .status.cancelled { background: #fee2e2; color: #991b1b; }
+
+    .empty {
+        text-align: center;
+        padding: 30px 12px;
+        color: var(--bp-text-muted);
+    }
+
+    .empty .icon { font-size: 30px; display: block; margin-bottom: 6px; opacity: 0.15; }
+    .empty p { font-size: 13px; }
+
+    /* ============================================
+       RESPONSIVE
+    ============================================ */
+    @media (max-width: 1100px) {
+        .emp-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+        .emp-image-card {
+            grid-column: span 2;
+        }
+        .emp-main { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+        .emp-dash-wrap { padding: 0 14px 14px 14px; }
+        
+        .emp-header { flex-direction: column; align-items: flex-start; }
+        .emp-header .right { width: 100%; flex-wrap: wrap; }
+        
+        .emp-grid {
+            grid-template-columns: 1fr;
+        }
+        .emp-image-card {
+            grid-column: span 1;
+        }
+        .emp-welcome { min-height: auto; padding: 18px 20px; }
+        .emp-welcome h1 { font-size: 20px; }
+        .emp-image-card { min-height: 120px; }
+        .emp-image-card .img-overlay { min-height: 120px; }
+    }
+
+    @media (max-width: 480px) {
+        .emp-dash-wrap { padding: 0 10px 10px 10px; }
+        
+        .emp-header .logo .name { font-size: 16px; }
+        .emp-header .logo .mark { width: 30px; height: 30px; font-size: 13px; }
+        .emp-header .right .pill { font-size: 10px; padding: 4px 12px; }
+        .emp-header .right .user .nm { font-size: 10px; }
+        .emp-header .right .user .av { width: 24px; height: 24px; font-size: 10px; }
+        .emp-header .right .user { padding: 3px 12px 3px 3px; }
+        
+        .emp-welcome { padding: 14px 16px; }
+        .emp-welcome h1 { font-size: 17px; }
+        .emp-welcome .sub { font-size: 11px; }
+        .emp-welcome .meta-tags .tag { font-size: 9px; padding: 2px 10px; }
+        
+        .emp-stat-mini { padding: 10px 12px; gap: 10px; }
+        .emp-stat-mini .info .number { font-size: 17px; }
+        .emp-stat-mini .info .label { font-size: 9px; }
+        .emp-stat-mini .icn { width: 32px; height: 32px; font-size: 14px; }
+        
+        .emp-image-card .img-overlay { padding: 12px 14px; min-height: 100px; }
+        .emp-image-card .img-overlay .img-icon { width: 32px; height: 32px; font-size: 14px; }
+        .emp-image-card .img-overlay h4 { font-size: 14px; }
+        .emp-image-card .img-overlay p { font-size: 10px; }
+        .emp-image-card { min-height: 100px; }
+        
+        .table { font-size: 11px; min-width: 320px; }
+        .table thead th, .table tbody td { padding: 6px 8px; }
+        
+        .cal-grid .day { font-size: 10px; padding: 3px 0; }
+        .cal-ctrl .month { font-size: 12px; }
+        .emp-calendar .cal-body { padding: 8px 10px 10px; }
+        .emp-calendar .cal-head { padding: 8px 12px; }
+        .cal-ctrl .nav button { width: 24px; height: 24px; font-size: 10px; }
+        
+        .emp-orders .ord-head { padding: 8px 12px; }
+        .emp-orders .ord-head h5 { font-size: 12px; }
+        .emp-orders .ord-head .cnt { font-size: 9px; padding: 2px 10px; }
+    }
+</style>
+
+<!-- ============================================
+   CLEAN BEAUTIFUL DASHBOARD
+   ============================================ -->
+<div class="emp-dash-wrap">
+
+    <!-- ===== HEADER ===== -->
+    <div class="emp-header">
+        <div class="logo">
+            <div class="mark"><i class="fas fa-store-alt"></i></div>
+            <span class="name">Shubh<span class="gold">Decor</span></span>
+        </div>
+        <div class="right">
+            <span class="pill"><i class="fas fa-calendar-day"></i> <strong>{{ today_date|date:"d M Y" }}</strong></span>
+            <span class="pill"><i class="fas fa-clock"></i> <strong>{% now "g:i A" %}</strong></span>
+            <span class="pill"><i class="fas fa-store"></i> {{ store_settings.store_name|default:"ShubhDecor" }}</span>
+            <div class="user">
+                <div class="av">{{ request.user.full_name|first|upper|default:"T" }}</div>
+                <span class="nm">{{ request.user.full_name|default:"Team" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 3 COLUMN GRID ===== -->
+    <div class="emp-grid">
+        <div class="emp-welcome">
+            <span class="greet"><span class="wave">👋</span> Welcome back</span>
+            <h1>Hello, <span class="gold">{{ request.user.full_name|default:"Team Member" }}</span></h1>
+            <span class="sub">Here's your daily overview</span>
+            <div class="meta-tags">
+                <span class="tag"><i class="fas fa-store"></i> {{ store_settings.store_name|default:"ShubhDecor" }}</span>
+                <span class="tag"><i class="fas fa-user"></i> Employee</span>
+            </div>
+        </div>
+
+        <div class="emp-stats-stack">
+            <div class="emp-stat-mini orange">
+                <div class="icn"><i class="fas fa-shopping-bag"></i></div>
+                <div class="info">
+                    <div class="label">Today's Orders</div>
+                    <div class="number">{{ today_offline_orders|default:0 }}</div>
+                </div>
+            </div>
+            <div class="emp-stat-mini gold">
+                <div class="icn"><i class="fas fa-coins"></i></div>
+                <div class="info">
+                    <div class="label">Today's Income</div>
+                    <div class="number">
+                        <span class="curr">₹</span>{{ today_offline_amount|floatformat:0|default:"0" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="emp-image-card">
+            <div class="img-bg"></div>
+            <div class="img-overlay">
+                <div class="img-icon"><i class="fas fa-store-alt"></i></div>
+                <h4>ShubhDecor</h4>
+                <p>Employee Dashboard</p>
+                <span class="img-tag">✦ Active</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CALENDAR + ORDERS ===== -->
+    <div class="emp-main">
+        <div class="emp-calendar">
+            <div class="cal-head">
+                <h5><i class="fas fa-calendar-alt"></i> Calendar</h5>
+                <span class="yr">{{ today_date|date:"Y" }}</span>
+            </div>
+            <div class="cal-body">
+                <div class="cal-ctrl">
+                    <span class="month" id="calMonth">August 2026</span>
+                    <div class="nav">
+                        <button onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                        <button onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+                <div class="cal-grid" id="calGrid"></div>
+                <div class="cal-legend">
+                    <span><span class="dot gold"></span> Event</span>
+                    <span><span class="dot primary"></span> Today</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="emp-orders">
+            <div class="ord-head">
+                <h5><i class="fas fa-receipt"></i> Recent Orders</h5>
+                <span class="cnt">{{ recent_offline_orders|length }}</span>
+            </div>
+            <div class="ord-body">
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Customer</th>
+                                <th>Phone</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_offline_orders %}
+                                {% for order in recent_offline_orders %}
+                                <tr>
+                                    <td class="id">#{{ order.order_number }}</td>
+                                    <td>{{ order.customer_name|truncatechars:12 }}</td>
+                                    <td>{{ order.customer_phone|default:"N/A" }}</td>
+                                    <td class="amt"><span class="rs">₹</span>{{ order.total_amount|floatformat:0 }}</td>
+                                    <td><span class="status {{ order.status }}">{{ order.status|title }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5">
+                                        <div class="empty">
+                                            <span class="icon"><i class="fas fa-store"></i></span>
+                                            <p>No orders yet</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================
+   CALENDAR
+   ============================================ -->
+<script>
+    let calMonth = new Date().getMonth();
+    let calYear = new Date().getFullYear();
+
+    function renderCal(month, year) {
+        const names = ['January', 'February', 'March', 'April', 'May', 'June', 
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+        document.getElementById('calMonth').textContent = names[month] + ' ' + year;
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInPrev = new Date(year, month, 0).getDate();
+
+        const today = new Date();
+        const td = today.getDate();
+        const tm = today.getMonth();
+        const ty = today.getFullYear();
+
+        let html = '';
+        ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].forEach(d => {
+            html += `<div class="day-label">${d}</div>`;
+        });
+
+        let start = firstDay === 0 ? 6 : firstDay - 1;
+
+        for (let i = start - 1; i >= 0; i--) {
+            html += `<div class="day other">${daysInPrev - i}</div>`;
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            let cls = 'day';
+            if (day === td && month === tm && year === ty) cls += ' today';
+            if ((day === 5 || day === 12 || day === 18 || day === 26) && month === 7) cls += ' event';
+            html += `<div class="${cls}">${day}</div>`;
+        }
+
+        const total = start + daysInMonth;
+        const rem = (7 - (total % 7)) % 7;
+        for (let day = 1; day <= rem; day++) {
+            html += `<div class="day other">${day}</div>`;
+        }
+
+        document.getElementById('calGrid').innerHTML = html;
+    }
+
+    function changeMonth(delta) {
+        calMonth += delta;
+        if (calMonth > 11) { calMonth = 0; calYear++; }
+        else if (calMonth < 0) { calMonth = 11; calYear--; }
+        renderCal(calMonth, calYear);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        renderCal(calMonth, calYear);
+    });
+</script>
+
 {% endblock %}
