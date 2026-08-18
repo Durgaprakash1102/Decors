@@ -13,7 +13,8 @@ from decimal import Decimal
 from .recommendation_utils import get_user_recommendations, get_hybrid_recommendations
 from django.db.models import Q, Count, Avg, F, DecimalField
 from django.db.models.functions import Coalesce
-
+# views.py - Add these imports
+from .utils import *
 # utils.py or add to views.py
 
 from .models import Coupon, Offer
@@ -453,21 +454,22 @@ def get_recommendations_api(request):
 def about(request):
     return render(request, "about.html")
 
-
-# ==================== CUSTOMER SIGNUP ====================
 def customer_signup_view(request):
     if request.user.is_authenticated:
         return redirect('Ecom:home')
-    
+
     if request.method == 'POST':
         form = CustomerSignupForm(request.POST)
+
+       
+
         if form.is_valid():
+
             email = form.cleaned_data['email']
             full_name = form.cleaned_data['full_name']
             phone = form.cleaned_data['phone']
             password = form.cleaned_data['password']
-            
-            # Store user data in session
+
             request.session['pending_user_data'] = {
                 'email': email,
                 'full_name': full_name,
@@ -475,19 +477,42 @@ def customer_signup_view(request):
                 'password': password,
                 'role': 'customer'
             }
-            
-            # Send OTP
-            create_and_send_otp(email, 'signup', full_name)
+
+            try:
+                create_and_send_otp(
+                    user_or_email=email,
+                    otp_type='signup',
+                    full_name=full_name,
+                    phone=phone
+                )
+               
+            except Exception as e:
+                
+                raise
+
             request.session['pending_email'] = email
             request.session['otp_type'] = 'signup'
-            
-            messages.success(request, 'OTP sent to your email. Please verify to create your account.')
+
+            messages.success(
+                request,
+                'OTP sent to your email and mobile number.'
+            )
+
             return redirect('Ecom:verify_otp')
+
+        else:
+           pass
+
     else:
         form = CustomerSignupForm()
-    
-    return render(request, 'Ecom/auth/customer_signup.html', {'form': form})
 
+    return render(
+        request,
+        'Ecom/auth/customer_signup.html',
+        {
+            'form': form
+        }
+    )
 # ==================== ADMIN SIGNUP ====================
 def admin_signup_view(request):
     if request.user.is_authenticated:
@@ -613,6 +638,10 @@ def employee_dashboard_view(request):
     }
     
     return render(request, 'Ecom/employee/dashboard.html', context)
+   
+    return render(request, 'Ecom/employee/dashboard.html')
+# views.py - Update verify_otp_view
+
 def verify_otp_view(request):
     email = request.session.get('pending_email')
     user_data = request.session.get('pending_user_data')
@@ -631,7 +660,6 @@ def verify_otp_view(request):
             is_valid, message, otp = verify_otp(email, otp_code, otp_type)
             
             if is_valid:
-                # Create the actual user in database
                 with transaction.atomic():
                     user = User.objects.create_user(
                         email=user_data['email'],
@@ -642,35 +670,30 @@ def verify_otp_view(request):
                         is_verified=True
                     )
                     
-                    # Set phone if provided
                     if user_data.get('phone'):
                         user.phone = user_data['phone']
                     
-                    # Only set is_staff for admin, NOT for employee
                     if user_data.get('role') == 'admin':
                         user.is_staff = True
-                    # Employee does NOT get is_staff
                     
                     user.save()
-                    
-                    # Create profile
                     Profile.objects.create(user=user)
                 
                 # Clean session
                 request.session.pop('pending_user_data', None)
                 request.session.pop('pending_email', None)
                 request.session.pop('otp_type', None)
-                request.session.pop('employee_creation', None)  # Clean employee flag
+                request.session.pop('employee_creation', None)
                 
-                # Check if this was employee creation by admin
+                # Send account created SMS
+                send_account_created_success_sms(user)
+                
                 if is_employee_creation:
                     messages.success(request, f'Employee "{user.full_name}" account created successfully!')
-                    # IMPORTANT: Do NOT login the employee. Stay logged in as admin.
                     return redirect('Ecom:admin_dashboard')
                 
-                # For normal signup (customer or admin), login the user
                 login(request, user)
-                messages.success(request, f'Account created successfully! Welcome to MyStore, {user.full_name}!')
+                messages.success(request, f'Account created successfully! Welcome to Hyzora, {user.full_name}!')
                 
                 if user.is_admin:
                     return redirect('Ecom:admin_dashboard')
@@ -689,6 +712,7 @@ def verify_otp_view(request):
         'otp_type': otp_type,
         'is_employee_creation': is_employee_creation,
     })
+
 # ==================== LOGIN ====================
 def login_view(request):
     if request.user.is_authenticated:
@@ -5811,8 +5835,7 @@ def request_return_view(request, order_id):
             bank_details = form.cleaned_data['bank_details']
             images = request.FILES.getlist('images')
             
-            # Debug - check if bank_details is received
-            print(f"Bank Details Received: {bank_details}")
+           
             
             # Process return request with bank details
             process_return_request(order, reason, description, bank_details, images, request)
@@ -6378,3 +6401,364 @@ def user_list_view(request):
     }
     
     return render(request, 'Ecom/admin/user_list.html', context)
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+
+from .forms import StaticPageForm
+from .models import StaticPage
+
+
+PAGE_CHOICES = [
+    ("about", "About Us"),
+    ("terms", "Terms of Use"),
+    ("privacy", "Privacy Policy"),
+    ("shipping", "Shipping Policy"),
+    ("return_refund", "Return & Refund Policy"),
+]
+
+
+def get_page_name(page_code):
+
+    return dict(PAGE_CHOICES).get(
+        page_code,
+        "About Us"
+    )
+
+
+def get_valid_page(page):
+
+    valid_pages = [
+        code
+        for code, name in PAGE_CHOICES
+    ]
+
+    if page in valid_pages:
+        return page
+
+    return "about"
+
+
+def get_next_order(page):
+
+    last_section = (
+        StaticPage.objects
+        .filter(page=page)
+        .order_by("-order")
+        .first()
+    )
+
+    if last_section:
+        return last_section.order + 1
+
+    return 1
+
+
+@login_required
+def manage_static_pages(request):
+
+    # =========================================================
+    # POST
+    # =========================================================
+
+    if request.method == "POST":
+
+        action = request.POST.get("action")
+
+        # =====================================================
+        # CREATE
+        # =====================================================
+
+        if action == "create":
+
+            form = StaticPageForm(
+                request.POST,
+                request.FILES
+            )
+
+            if form.is_valid():
+
+                section = form.save()
+
+                messages.success(
+                    request,
+                    f'"{section.section_title}" created successfully.'
+                )
+
+                return redirect(
+                    f"{request.path}#{section.page}"
+                )
+
+            selected_page = get_valid_page(
+                request.POST.get("page", "about")
+            )
+
+            return render_static_page_manager(
+                request,
+                selected_page,
+                form,
+                "create",
+                None,
+                True
+            )
+
+        # =====================================================
+        # UPDATE
+        # =====================================================
+
+        elif action == "update":
+
+            section_id = request.POST.get(
+                "section_id"
+            )
+
+            section = get_object_or_404(
+                StaticPage,
+                id=section_id
+            )
+
+            form = StaticPageForm(
+                request.POST,
+                request.FILES,
+                instance=section
+            )
+
+            if form.is_valid():
+
+                section = form.save()
+
+                messages.success(
+                    request,
+                    f'"{section.section_title}" updated successfully.'
+                )
+
+                return redirect(
+                    f"{request.path}#{section.page}"
+                )
+
+            return render_static_page_manager(
+                request,
+                section.page,
+                form,
+                "update",
+                section.id,
+                True
+            )
+
+        # =====================================================
+        # DELETE
+        # =====================================================
+
+        elif action == "delete":
+
+            section_id = request.POST.get(
+                "section_id"
+            )
+
+            section = get_object_or_404(
+                StaticPage,
+                id=section_id
+            )
+
+            page = section.page
+            title = section.section_title
+
+            section.delete()
+
+            messages.success(
+                request,
+                f'"{title}" deleted successfully.'
+            )
+
+            return redirect(
+                f"{request.path}#{page}"
+            )
+
+    # =========================================================
+    # GET
+    # =========================================================
+
+    selected_page = get_valid_page(
+        request.GET.get(
+            "page",
+            "about"
+        )
+    )
+
+    form = StaticPageForm(
+        initial={
+            "page": selected_page,
+            "order": get_next_order(selected_page),
+            "is_active": True,
+        }
+    )
+
+    return render_static_page_manager(
+        request,
+        selected_page,
+        form,
+        "create",
+        None,
+        False
+    )
+
+
+def render_static_page_manager(
+    request,
+    selected_page,
+    form,
+    form_action,
+    form_section_id,
+    show_form_modal
+):
+
+    sections_by_page = {}
+
+    for page_code, page_name in PAGE_CHOICES:
+
+        sections = (
+            StaticPage.objects
+            .filter(page=page_code)
+            .order_by("order", "id")
+        )
+
+        sections_by_page[page_code] = {
+            "name": page_name,
+            "sections": sections,
+            "count": sections.count(),
+        }
+
+    context = {
+        "page_choices": PAGE_CHOICES,
+
+        "sections_by_page": sections_by_page,
+
+        "selected_page": selected_page,
+
+        "page_title": get_page_name(
+            selected_page
+        ),
+
+        "form": form,
+
+        "form_action": form_action,
+
+        "form_section_id": form_section_id,
+
+        "show_form_modal": show_form_modal,
+
+        "next_order": get_next_order(
+            selected_page
+        ),
+    }
+
+    return render(
+        request,
+        "static_pages/manage.html",
+        context
+    )
+
+
+# =============================================================
+# PUBLIC PAGES
+# =============================================================
+
+def about(request):
+
+    sections = StaticPage.objects.filter(
+        page="about",
+        is_active=True
+    ).order_by(
+        "order",
+        "id"
+    )
+
+    return render(
+        request,
+        "pages/about.html",
+        {
+            "sections": sections,
+            "page_title": "About Us",
+        }
+    )
+
+
+def terms_of_use(request):
+
+    sections = StaticPage.objects.filter(
+        page="terms",
+        is_active=True
+    ).order_by(
+        "order",
+        "id"
+    )
+
+    return render(
+        request,
+        "pages/terms_of_use.html",
+        {
+            "sections": sections,
+            "page_title": "Terms of Use",
+        }
+    )
+
+
+def privacy_policy(request):
+
+    sections = StaticPage.objects.filter(
+        page="privacy",
+        is_active=True
+    ).order_by(
+        "order",
+        "id"
+    )
+
+    return render(
+        request,
+        "pages/privacy_policy.html",
+        {
+            "sections": sections,
+            "page_title": "Privacy Policy",
+        }
+    )
+
+
+def shipping_policy(request):
+
+    sections = StaticPage.objects.filter(
+        page="shipping",
+        is_active=True
+    ).order_by(
+        "order",
+        "id"
+    )
+
+    return render(
+        request,
+        "pages/shipping_policy.html",
+        {
+            "sections": sections,
+            "page_title": "Shipping Policy",
+        }
+    )
+
+
+def return_refund_policy(request):
+
+    sections = StaticPage.objects.filter(
+        page="return_refund",
+        is_active=True
+    ).order_by(
+        "order",
+        "id"
+    )
+
+    return render(
+        request,
+        "pages/return_refund_policy.html",
+        {
+            "sections": sections,
+            "page_title": "Return & Refund Policy",
+        }
+    )

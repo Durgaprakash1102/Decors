@@ -5,6 +5,7 @@ from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 from .models import OTP, Order, OrderItem, Transaction, User
+from .sms import SMSService
 
 def generate_otp():
     """Generate a 6-digit OTP"""
@@ -114,18 +115,27 @@ def send_otp_email(user_or_email, otp_code, otp_type, full_name='User'):
         fail_silently=False,
     )
 
-def create_and_send_otp(user_or_email, otp_type, full_name='User'):
+from datetime import timedelta
+from django.utils import timezone
+
+def create_and_send_otp(user_or_email, otp_type, full_name='User', phone=None):
     """
-    Create an OTP and send it via email.
-    Works for both saved users and pending signups.
+    Create OTP and send via Email + SMS.
+    Works for existing users and pending signup users.
     """
+
     if isinstance(user_or_email, User):
-        # For existing users
+
         user = user_or_email
-        # Delete existing unused OTPs for this user and type
-        OTP.objects.filter(user=user, otp_type=otp_type, is_used=False).delete()
-        
+
+        OTP.objects.filter(
+            user=user,
+            otp_type=otp_type,
+            is_used=False
+        ).delete()
+
         otp_code = generate_otp()
+
         otp = OTP.objects.create(
             user=user,
             email=user.email,
@@ -133,15 +143,30 @@ def create_and_send_otp(user_or_email, otp_type, full_name='User'):
             otp_type=otp_type,
             expires_at=timezone.now() + timedelta(minutes=5)
         )
+
         send_otp_email(user, otp_code, otp_type)
+
+        if user.phone:
+            print("Sending SMS to existing user:", user.phone)
+
+            sms = SMSService.send_otp(user.phone, otp_code)
+
+            print("SMS RESULT:", sms)
+
         return otp
+
     else:
-        # For pending signups (email string)
+
         email = user_or_email
-        # Delete any existing OTPs for this email and type
-        OTP.objects.filter(email=email, otp_type=otp_type, is_used=False).delete()
-        
+
+        OTP.objects.filter(
+            email=email,
+            otp_type=otp_type,
+            is_used=False
+        ).delete()
+
         otp_code = generate_otp()
+
         otp = OTP.objects.create(
             user=None,
             email=email,
@@ -149,9 +174,28 @@ def create_and_send_otp(user_or_email, otp_type, full_name='User'):
             otp_type=otp_type,
             expires_at=timezone.now() + timedelta(minutes=5)
         )
-        send_otp_email(email, otp_code, otp_type, full_name)
-        return otp
 
+        send_otp_email(
+            email,
+            otp_code,
+            otp_type,
+            full_name
+        )
+
+        print("Signup Phone:", phone)
+
+        if phone:
+
+            sms = SMSService.send_otp(phone, otp_code)
+
+            print("SMS RESULT:", sms)
+
+        else:
+
+            print("PHONE IS NONE")
+
+        return otp
+        
 def verify_otp(email, otp_code, otp_type):
     """
     Verify the OTP for a user.

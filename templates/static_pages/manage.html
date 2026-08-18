@@ -1,0 +1,1854 @@
+
+{% block content %}
+
+<style>
+
+/* =========================================================
+   STATIC PAGE MANAGEMENT
+========================================================= */
+
+.static-page-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 35px 25px 60px;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.static-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.static-page-title {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.static-page-subtitle {
+    margin: 6px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.sp-btn {
+    border: 0;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.sp-btn-primary {
+    background: #2563eb;
+    color: white;
+}
+
+.sp-btn-primary:hover {
+    background: #1d4ed8;
+}
+
+.sp-btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.sp-btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.sp-btn-edit {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.sp-btn-edit:hover {
+    background: #dbeafe;
+}
+
+.sp-btn-delete {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.sp-btn-delete:hover {
+    background: #fee2e2;
+}
+
+
+/* =========================================================
+   ALERTS
+========================================================= */
+
+.sp-alert {
+    padding: 13px 18px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sp-alert-success {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+.sp-alert-error {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.sp-alert-close {
+    border: 0;
+    background: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   PAGE CARD
+========================================================= */
+
+.sp-page-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+.sp-page-header {
+    width: 100%;
+    border: 0;
+    background: white;
+    padding: 20px 24px;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    text-align: left;
+}
+
+.sp-page-header:hover {
+    background: #f9fafb;
+}
+
+.sp-page-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.sp-page-icon {
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+    background: #eff6ff;
+
+    font-size: 20px;
+}
+
+.sp-page-name {
+    font-size: 17px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.sp-page-count {
+    margin-top: 3px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.sp-arrow {
+    font-size: 18px;
+    color: #6b7280;
+    transition: transform 0.2s ease;
+}
+
+.sp-page-card.open .sp-arrow {
+    transform: rotate(180deg);
+}
+
+
+/* =========================================================
+   PAGE BODY
+========================================================= */
+
+.sp-page-body {
+    display: none;
+    border-top: 1px solid #e5e7eb;
+    padding: 22px;
+    background: #fafafa;
+}
+
+.sp-page-card.open .sp-page-body {
+    display: block;
+}
+
+
+/* =========================================================
+   SECTION HEADER
+========================================================= */
+
+.sp-section-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 18px;
+}
+
+
+/* =========================================================
+   SECTION CARD
+========================================================= */
+
+.sp-section-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 12px;
+}
+
+.sp-section-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.sp-order {
+    min-width: 38px;
+    width: 38px;
+    height: 38px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #f3f4f6;
+    color: #374151;
+
+    font-weight: 700;
+}
+
+.sp-section-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.sp-section-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.sp-section-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.sp-badge {
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.sp-badge-active {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.sp-badge-inactive {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.sp-section-content {
+    margin-top: 10px;
+    color: #6b7280;
+    line-height: 1.7;
+    font-size: 14px;
+    white-space: pre-line;
+}
+
+.sp-section-image {
+    max-width: 220px;
+    max-height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-top: 14px;
+}
+
+.sp-section-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.sp-empty {
+    padding: 50px 20px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.sp-empty-icon {
+    font-size: 42px;
+    margin-bottom: 10px;
+}
+
+.sp-empty-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.sp-empty-text {
+    margin: 6px 0 18px;
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   MODAL OVERLAY
+========================================================= */
+
+.sp-modal-overlay {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(17, 24, 39, 0.65);
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    z-index: 99999;
+}
+
+.sp-modal-overlay.show {
+    display: flex;
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.sp-modal {
+    width: 100%;
+    max-width: 650px;
+
+    background: white;
+    border-radius: 14px;
+
+    box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+
+    max-height: 90vh;
+    overflow-y: auto;
+
+    animation: spModalIn 0.18s ease;
+}
+
+@keyframes spModalIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(-15px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+}
+
+
+/* =========================================================
+   MODAL HEADER
+========================================================= */
+
+.sp-modal-header {
+    padding: 20px 24px;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.sp-modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.sp-modal-subtitle {
+    margin: 5px 0 0;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.sp-modal-close {
+    width: 35px;
+    height: 35px;
+
+    border: 0;
+    background: #f3f4f6;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    font-size: 20px;
+    color: #374151;
+}
+
+.sp-modal-close:hover {
+    background: #e5e7eb;
+}
+
+
+/* =========================================================
+   MODAL BODY
+========================================================= */
+
+.sp-modal-body {
+    padding: 24px;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.sp-form-group {
+    margin-bottom: 18px;
+}
+
+.sp-form-label {
+    display: block;
+    margin-bottom: 7px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    color: #374151;
+}
+
+.sp-form-control {
+    width: 100%;
+    box-sizing: border-box;
+
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+
+    padding: 11px 12px;
+
+    font-size: 14px;
+
+    background: white;
+
+    outline: none;
+
+    transition: 0.2s ease;
+}
+
+.sp-form-control:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+.sp-content-input {
+    min-height: 180px;
+    resize: vertical;
+}
+
+.sp-help {
+    display: block;
+    margin-top: 6px;
+
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.sp-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.sp-checkbox {
+    width: 17px;
+    height: 17px;
+}
+
+
+/* =========================================================
+   FORM ERRORS
+========================================================= */
+
+.sp-errors {
+    margin-top: 5px;
+    color: #dc2626;
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   MODAL FOOTER
+========================================================= */
+
+.sp-modal-footer {
+    padding: 18px 24px;
+
+    border-top: 1px solid #e5e7eb;
+
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+
+/* =========================================================
+   DELETE MODAL
+========================================================= */
+
+.sp-delete-modal {
+    max-width: 430px;
+}
+
+.sp-delete-content {
+    text-align: center;
+    padding: 30px 24px;
+}
+
+.sp-delete-icon {
+    width: 60px;
+    height: 60px;
+
+    margin: 0 auto 18px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #fef2f2;
+    color: #dc2626;
+
+    font-size: 27px;
+}
+
+.sp-delete-title {
+    margin: 0 0 8px;
+
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.sp-delete-text {
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.sp-delete-name {
+    display: block;
+    margin: 10px 0;
+
+    color: #111827;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .static-page-wrapper {
+        padding: 20px 12px 40px;
+    }
+
+    .static-page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .sp-page-header {
+        padding: 16px;
+    }
+
+    .sp-page-body {
+        padding: 14px;
+    }
+
+    .sp-section-row {
+        flex-direction: column;
+    }
+
+    .sp-section-actions {
+        width: 100%;
+    }
+
+    .sp-section-actions .sp-btn {
+        flex: 1;
+    }
+
+    .sp-modal {
+        max-height: 95vh;
+    }
+
+}
+
+
+/* =========================================================
+   PREVENT BACKGROUND SCROLL
+========================================================= */
+
+body.sp-modal-open {
+    overflow: hidden;
+}
+
+</style>
+
+
+<div class="static-page-wrapper">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="static-page-header">
+
+        <div>
+
+            <h1 class="static-page-title">
+                Static Pages
+            </h1>
+
+            <p class="static-page-subtitle">
+                Manage your website pages and their sections.
+            </p>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="sp-btn sp-btn-primary"
+            onclick="openCreateModal('{{ selected_page }}')"
+        >
+            + Add New Section
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         MESSAGES
+    ====================================================== -->
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div
+                class="
+                    sp-alert
+                    {% if message.tags == 'success' %}
+                        sp-alert-success
+                    {% else %}
+                        sp-alert-error
+                    {% endif %}
+                "
+            >
+
+                <span>
+                    {{ message }}
+                </span>
+
+                <button
+                    type="button"
+                    class="sp-alert-close"
+                    onclick="this.parentElement.remove()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         PAGE LIST
+    ====================================================== -->
+
+    <div id="staticPagesContainer">
+
+
+        {% for page_code, page_data in sections_by_page.items %}
+
+            <div
+                class="sp-page-card {% if page_code == selected_page %}open{% endif %}"
+                id="{{ page_code }}"
+            >
+
+
+                <!-- PAGE HEADER -->
+
+                <button
+                    type="button"
+                    class="sp-page-header"
+                    onclick="togglePage('{{ page_code }}')"
+                >
+
+                    <div class="sp-page-left">
+
+                        <div class="sp-page-icon">
+
+                            {% if page_code == "about" %}
+                                ℹ️
+                            {% elif page_code == "terms" %}
+                                📄
+                            {% elif page_code == "privacy" %}
+                                🔒
+                            {% elif page_code == "shipping" %}
+                                🚚
+                            {% elif page_code == "return_refund" %}
+                                ↩️
+                            {% endif %}
+
+                        </div>
+
+
+                        <div>
+
+                            <div class="sp-page-name">
+                                {{ page_data.name }}
+                            </div>
+
+                            <div class="sp-page-count">
+                                {{ page_data.count }}
+                                section{{ page_data.count|pluralize }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="sp-arrow">
+                        ▼
+                    </div>
+
+                </button>
+
+
+                <!-- PAGE BODY -->
+
+                <div class="sp-page-body">
+
+
+                    <!-- ADD SECTION -->
+
+                    <div class="sp-section-header">
+
+                        <button
+                            type="button"
+                            class="sp-btn sp-btn-primary"
+                            onclick="openCreateModal('{{ page_code }}')"
+                        >
+                            + Add Section
+                        </button>
+
+                    </div>
+
+
+                    <!-- SECTIONS -->
+
+                    {% if page_data.sections %}
+
+
+                        {% for section in page_data.sections %}
+
+                            <div class="sp-section-card">
+
+
+                                <div class="sp-section-row">
+
+
+                                    <!-- ORDER -->
+
+                                    <div class="sp-order">
+
+                                        {{ section.order }}
+
+                                    </div>
+
+
+                                    <!-- CONTENT -->
+
+                                    <div class="sp-section-main">
+
+
+                                        <div class="sp-section-title-row">
+
+                                            <h3 class="sp-section-title">
+                                                {{ section.section_title }}
+                                            </h3>
+
+
+                                            {% if section.is_active %}
+
+                                                <span class="sp-badge sp-badge-active">
+                                                    Active
+                                                </span>
+
+                                            {% else %}
+
+                                                <span class="sp-badge sp-badge-inactive">
+                                                    Inactive
+                                                </span>
+
+                                            {% endif %}
+
+                                        </div>
+
+
+                                        {% if section.image %}
+
+                                            <img
+                                                src="{{ section.image.url }}"
+                                                alt="{{ section.section_title }}"
+                                                class="sp-section-image"
+                                            >
+
+                                        {% endif %}
+
+
+                                        {% if section.section_content %}
+
+                                            <div class="sp-section-content">
+
+                                                {{ section.section_content|truncatechars:350 }}
+
+                                            </div>
+
+                                        {% endif %}
+
+
+                                    </div>
+
+
+                                    <!-- ACTIONS -->
+
+                                    <div class="sp-section-actions">
+
+
+                                        <button
+                                            type="button"
+                                            class="sp-btn sp-btn-edit"
+                                            onclick="openEditModal(
+                                                '{{ section.id }}',
+                                                '{{ section.page }}',
+                                                '{{ section.section_title|escapejs }}',
+                                                '{{ section.section_content|default_if_none:""|escapejs }}',
+                                                '{{ section.order }}',
+                                                {{ section.is_active|yesno:"true,false" }}
+                                            )"
+                                        >
+                                            Edit
+                                        </button>
+
+
+                                        <button
+                                            type="button"
+                                            class="sp-btn sp-btn-delete"
+                                            onclick="openDeleteModal(
+                                                '{{ section.id }}',
+                                                '{{ section.section_title|escapejs }}'
+                                            )"
+                                        >
+                                            Delete
+                                        </button>
+
+
+                                    </div>
+
+
+                                </div>
+
+
+                            </div>
+
+                        {% endfor %}
+
+
+                    {% else %}
+
+
+                        <div class="sp-empty">
+
+                            <div class="sp-empty-icon">
+                                📄
+                            </div>
+
+                            <div class="sp-empty-title">
+                                No sections yet
+                            </div>
+
+                            <p class="sp-empty-text">
+                                Start adding content to this page.
+                            </p>
+
+                            <button
+                                type="button"
+                                class="sp-btn sp-btn-primary"
+                                onclick="openCreateModal('{{ page_code }}')"
+                            >
+                                + Add First Section
+                            </button>
+
+                        </div>
+
+
+                    {% endif %}
+
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     CREATE / UPDATE MODAL
+========================================================== -->
+
+<div
+    id="sectionModal"
+    class="sp-modal-overlay"
+    onclick="closeModalOnOverlay(event, 'sectionModal')"
+>
+
+
+    <div
+        class="sp-modal"
+        onclick="event.stopPropagation()"
+    >
+
+
+        <form
+            method="POST"
+            enctype="multipart/form-data"
+            id="sectionForm"
+        >
+
+            {% csrf_token %}
+
+
+            <input
+                type="hidden"
+                name="action"
+                id="formAction"
+                value="create"
+            >
+
+
+            <input
+                type="hidden"
+                name="section_id"
+                id="formSectionId"
+                value=""
+            >
+
+
+            <!-- HEADER -->
+
+            <div class="sp-modal-header">
+
+                <div>
+
+                    <h2
+                        class="sp-modal-title"
+                        id="sectionModalTitle"
+                    >
+                        Add New Section
+                    </h2>
+
+                    <p class="sp-modal-subtitle">
+                        Create or update your page section.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="sp-modal-close"
+                    onclick="closeModal('sectionModal')"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <!-- BODY -->
+
+            <div class="sp-modal-body">
+
+
+                <!-- PAGE -->
+
+                <div class="sp-form-group">
+
+                    <label class="sp-form-label">
+                        Page
+                    </label>
+
+                    <select
+                        name="page"
+                        id="formPage"
+                        class="sp-form-control"
+                        required
+                    >
+
+                        {% for page_code, page_name in page_choices %}
+
+                            <option value="{{ page_code }}">
+                                {{ page_name }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- TITLE -->
+
+                <div class="sp-form-group">
+
+                    <label class="sp-form-label">
+                        Section Title
+                    </label>
+
+                    <input
+                        type="text"
+                        name="section_title"
+                        id="formSectionTitle"
+                        class="sp-form-control"
+                        placeholder="Example: Our Mission"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- CONTENT -->
+
+                <div class="sp-form-group">
+
+                    <label class="sp-form-label">
+                        Section Content
+                    </label>
+
+                    <textarea
+                        name="section_content"
+                        id="formSectionContent"
+                        class="sp-form-control sp-content-input"
+                        placeholder="Write your section content..."
+                    ></textarea>
+
+                </div>
+
+
+                <!-- IMAGE -->
+
+                <div class="sp-form-group">
+
+                    <label class="sp-form-label">
+                        Section Image
+                    </label>
+
+                    <input
+                        type="file"
+                        name="image"
+                        id="formImage"
+                        class="sp-form-control"
+                        accept="image/*"
+                    >
+
+                    <small class="sp-help">
+                        Optional. When editing, leave empty to keep the existing image.
+                    </small>
+
+                </div>
+
+
+                <!-- ORDER -->
+
+                <div class="sp-form-group">
+
+                    <label class="sp-form-label">
+                        Display Order
+                    </label>
+
+                    <input
+                        type="number"
+                        name="order"
+                        id="formOrder"
+                        class="sp-form-control"
+                        min="1"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- ACTIVE -->
+
+                <div class="sp-form-group">
+
+                    <label class="sp-checkbox-wrapper">
+
+                        <input
+                            type="checkbox"
+                            name="is_active"
+                            id="formIsActive"
+                            class="sp-checkbox"
+                            checked
+                        >
+
+                        <span>
+                            Active
+                        </span>
+
+                    </label>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div class="sp-modal-footer">
+
+                <button
+                    type="button"
+                    class="sp-btn sp-btn-secondary"
+                    onclick="closeModal('sectionModal')"
+                >
+                    Cancel
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="sp-btn sp-btn-primary"
+                    id="formSubmitButton"
+                >
+                    Create Section
+                </button>
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     DELETE MODAL
+========================================================== -->
+
+<div
+    id="deleteModal"
+    class="sp-modal-overlay"
+    onclick="closeModalOnOverlay(event, 'deleteModal')"
+>
+
+
+    <div
+        class="sp-modal sp-delete-modal"
+        onclick="event.stopPropagation()"
+    >
+
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+
+            <input
+                type="hidden"
+                name="action"
+                value="delete"
+            >
+
+
+            <input
+                type="hidden"
+                name="section_id"
+                id="deleteSectionId"
+            >
+
+
+            <div class="sp-delete-content">
+
+
+                <div class="sp-delete-icon">
+                    !
+                </div>
+
+
+                <h2 class="sp-delete-title">
+                    Delete Section?
+                </h2>
+
+
+                <div class="sp-delete-text">
+
+                    Are you sure you want to delete this section?
+
+                    <strong
+                        id="deleteSectionTitle"
+                        class="sp-delete-name"
+                    ></strong>
+
+                    This action cannot be undone.
+
+                </div>
+
+
+            </div>
+
+
+            <div class="sp-modal-footer">
+
+
+                <button
+                    type="button"
+                    class="sp-btn sp-btn-secondary"
+                    onclick="closeModal('deleteModal')"
+                >
+                    Cancel
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="sp-btn sp-btn-delete"
+                >
+                    Yes, Delete
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================== -->
+
+<script>
+
+/*
+|--------------------------------------------------------------------------
+| PAGE ACCORDION
+|--------------------------------------------------------------------------
+*/
+
+function togglePage(pageCode) {
+
+    const card =
+        document.getElementById(pageCode);
+
+    if (!card) {
+        return;
+    }
+
+    /*
+     * Close every other page.
+     */
+
+    const allCards =
+        document.querySelectorAll(".sp-page-card");
+
+    allCards.forEach(function(item) {
+
+        if (item !== card) {
+
+            item.classList.remove("open");
+
+        }
+
+    });
+
+
+    /*
+     * Toggle selected page.
+     */
+
+    card.classList.toggle("open");
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| OPEN CREATE MODAL
+|--------------------------------------------------------------------------
+*/
+
+function openCreateModal(page) {
+
+    const modal =
+        document.getElementById("sectionModal");
+
+    const form =
+        document.getElementById("sectionForm");
+
+
+    /*
+     * Reset form.
+     */
+
+    form.reset();
+
+
+    /*
+     * Set action.
+     */
+
+    document.getElementById(
+        "formAction"
+    ).value = "create";
+
+
+    document.getElementById(
+        "formSectionId"
+    ).value = "";
+
+
+    /*
+     * Set selected page.
+     */
+
+    document.getElementById(
+        "formPage"
+    ).value = page;
+
+
+    /*
+     * Get the sections of selected page.
+     */
+
+    const pageCard =
+        document.getElementById(page);
+
+
+    let nextOrder = 1;
+
+
+    if (pageCard) {
+
+        const orderElements =
+            pageCard.querySelectorAll(".sp-order");
+
+
+        let highestOrder = 0;
+
+
+        orderElements.forEach(function(element) {
+
+            const value =
+                parseInt(
+                    element.textContent.trim()
+                );
+
+
+            if (!isNaN(value) && value > highestOrder) {
+
+                highestOrder = value;
+
+            }
+
+        });
+
+
+        nextOrder =
+            highestOrder + 1;
+
+    }
+
+
+    /*
+     * Set order.
+     */
+
+    document.getElementById(
+        "formOrder"
+    ).value = nextOrder;
+
+
+    /*
+     * Set active.
+     */
+
+    document.getElementById(
+        "formIsActive"
+    ).checked = true;
+
+
+    /*
+     * Change modal title.
+     */
+
+    document.getElementById(
+        "sectionModalTitle"
+    ).textContent = "Add New Section";
+
+
+    document.getElementById(
+        "formSubmitButton"
+    ).textContent = "Create Section";
+
+
+    /*
+     * Open.
+     */
+
+    openModal("sectionModal");
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| OPEN EDIT MODAL
+|--------------------------------------------------------------------------
+*/
+
+function openEditModal(
+    id,
+    page,
+    title,
+    content,
+    order,
+    isActive
+) {
+
+    document.getElementById(
+        "formAction"
+    ).value = "update";
+
+
+    document.getElementById(
+        "formSectionId"
+    ).value = id;
+
+
+    document.getElementById(
+        "formPage"
+    ).value = page;
+
+
+    document.getElementById(
+        "formSectionTitle"
+    ).value = title;
+
+
+    document.getElementById(
+        "formSectionContent"
+    ).value = content;
+
+
+    document.getElementById(
+        "formOrder"
+    ).value = order;
+
+
+    document.getElementById(
+        "formIsActive"
+    ).checked = isActive;
+
+
+    /*
+     * Important:
+     *
+     * We cannot programmatically set
+     * a file input's value.
+     *
+     * Empty means:
+     * keep existing image.
+     */
+
+    document.getElementById(
+        "formImage"
+    ).value = "";
+
+
+    /*
+     * Modal title.
+     */
+
+    document.getElementById(
+        "sectionModalTitle"
+    ).textContent = "Edit Section";
+
+
+    document.getElementById(
+        "formSubmitButton"
+    ).textContent = "Update Section";
+
+
+    /*
+     * Open modal.
+     */
+
+    openModal("sectionModal");
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| OPEN DELETE MODAL
+|--------------------------------------------------------------------------
+*/
+
+function openDeleteModal(
+    id,
+    title
+) {
+
+    document.getElementById(
+        "deleteSectionId"
+    ).value = id;
+
+
+    document.getElementById(
+        "deleteSectionTitle"
+    ).textContent = title;
+
+
+    openModal("deleteModal");
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| OPEN MODAL
+|--------------------------------------------------------------------------
+*/
+
+function openModal(id) {
+
+    const modal =
+        document.getElementById(id);
+
+
+    if (!modal) {
+        return;
+    }
+
+
+    modal.classList.add("show");
+
+
+    document.body.classList.add(
+        "sp-modal-open"
+    );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| CLOSE MODAL
+|--------------------------------------------------------------------------
+*/
+
+function closeModal(id) {
+
+    const modal =
+        document.getElementById(id);
+
+
+    if (!modal) {
+        return;
+    }
+
+
+    modal.classList.remove("show");
+
+
+    /*
+     * Only remove body lock when
+     * no modal is open.
+     */
+
+    const openModal =
+        document.querySelector(
+            ".sp-modal-overlay.show"
+        );
+
+
+    if (!openModal) {
+
+        document.body.classList.remove(
+            "sp-modal-open"
+        );
+
+    }
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| CLOSE WHEN CLICKING OVERLAY
+|--------------------------------------------------------------------------
+*/
+
+function closeModalOnOverlay(
+    event,
+    id
+) {
+
+    if (
+        event.target === event.currentTarget
+    ) {
+
+        closeModal(id);
+
+    }
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| ESCAPE KEY
+|--------------------------------------------------------------------------
+*/
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (event.key === "Escape") {
+
+            const openModals =
+                document.querySelectorAll(
+                    ".sp-modal-overlay.show"
+                );
+
+
+            openModals.forEach(
+                function(modal) {
+
+                    modal.classList.remove(
+                        "show"
+                    );
+
+                }
+            );
+
+
+            document.body.classList.remove(
+                "sp-modal-open"
+            );
+
+        }
+
+    }
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| AUTO OPEN MODAL AFTER VALIDATION ERROR
+|--------------------------------------------------------------------------
+*/
+
+{% if show_form_modal %}
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        {% if form_action == "update" %}
+
+            /*
+             * The server returned an update
+             * validation error.
+             */
+
+            document.getElementById(
+                "sectionModalTitle"
+            ).textContent = "Edit Section";
+
+
+            document.getElementById(
+                "formSubmitButton"
+            ).textContent = "Update Section";
+
+
+            document.getElementById(
+                "formAction"
+            ).value = "update";
+
+
+            document.getElementById(
+                "formSectionId"
+            ).value =
+                "{{ form_section_id }}";
+
+        {% else %}
+
+            document.getElementById(
+                "sectionModalTitle"
+            ).textContent = "Add New Section";
+
+
+            document.getElementById(
+                "formSubmitButton"
+            ).textContent = "Create Section";
+
+
+            document.getElementById(
+                "formAction"
+            ).value = "create";
+
+        {% endif %}
+
+
+        openModal(
+            "sectionModal"
+        );
+
+    }
+);
+
+{% endif %}
+
+
+/*
+|--------------------------------------------------------------------------
+| OPEN SELECTED PAGE ON LOAD
+|--------------------------------------------------------------------------
+*/
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        const selectedPage =
+            "{{ selected_page }}";
+
+
+        if (selectedPage) {
+
+            const selectedCard =
+                document.getElementById(
+                    selectedPage
+                );
+
+
+            if (selectedCard) {
+
+                selectedCard.classList.add(
+                    "open"
+                );
+
+            }
+
+        }
+
+    }
+);
+
+</script>
+
+{% endblock %}

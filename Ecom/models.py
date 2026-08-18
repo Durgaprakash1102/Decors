@@ -6,6 +6,61 @@ from django.utils import timezone
 from datetime import timedelta
 import random
 
+from django.db import models
+
+
+class StaticPage(models.Model):
+
+    PAGE_CHOICES = [
+        ("about", "About Us"),
+        ("terms", "Terms of Use"),
+        ("privacy", "Privacy Policy"),
+        ("shipping", "Shipping Policy"),
+        ("return_refund", "Return & Refund Policy"),
+    ]
+
+    page = models.CharField(
+        max_length=50,
+        choices=PAGE_CHOICES
+    )
+
+    section_title = models.CharField(
+        max_length=255
+    )
+
+    section_content = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    image = models.ImageField(
+        upload_to="static_pages/",
+        blank=True,
+        null=True
+    )
+
+    order = models.PositiveIntegerField(
+        default=1
+    )
+
+    is_active = models.BooleanField(
+        default=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    class Meta:
+        ordering = ["page", "order", "id"]
+
+    def __str__(self):
+        return f"{self.get_page_display()} - {self.section_title}"
+    
 # ========== CUSTOM USER MANAGER ==========
 class UserManager(BaseUserManager):
     def create_user(self, email, full_name, password=None, role='customer', **extra_fields):

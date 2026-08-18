@@ -177,3 +177,7 @@ LOGGING = {
         },
     },
 }
+
+TWO_FACTOR_API_KEY = "49982e3b-1182-11f1-bcb0-0200cd936042"
+
+SMS_ENABLED = True

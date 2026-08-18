@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="about-page py-5">
+
+    <div class="container">
+
+        <!-- HEADER -->
+
+        <div class="text-center mb-5">
+
+            <h1 class="display-5 fw-bold">
+                About Us
+            </h1>
+
+            <p class="text-muted">
+                Learn more about our journey, mission and vision.
+            </p>
+
+        </div>
+
+
+        <!-- SECTIONS -->
+
+        {% for section in sections %}
+
+            <div class="mb-5">
+
+                {% if section.image %}
+
+                    <div class="row align-items-center g-5">
+
+                        <div class="col-lg-5">
+
+                            <img
+                                src="{{ section.image.url }}"
+                                alt="{{ section.section_title }}"
+                                class="img-fluid rounded shadow-sm w-100"
+                            >
+
+                        </div>
+
+                        <div class="col-lg-7">
+
+                            <h2 class="fw-bold mb-3">
+                                {{ section.section_title }}
+                            </h2>
+
+                            <div
+                                class="text-muted"
+                                style="line-height: 1.8;"
+                            >
+                                {{ section.section_content|linebreaks }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="row">
+
+                        <div class="col-lg-10 mx-auto">
+
+                            <h2 class="fw-bold mb-3">
+                                {{ section.section_title }}
+                            </h2>
+
+                            <div
+                                class="text-muted"
+                                style="line-height: 1.8;"
+                            >
+                                {{ section.section_content|linebreaks }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            {% if not forloop.last %}
+
+                <hr class="my-5">
+
+            {% endif %}
+
+
+        {% empty %}
+
+            <div class="text-center py-5">
+
+                <h4>
+                    About Us
+                </h4>
+
+                <p class="text-muted">
+                    Content will be available soon.
+                </p>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endblock %}
