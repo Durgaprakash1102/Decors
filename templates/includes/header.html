@@ -1146,10 +1146,9 @@ a {
 
     <!-- TIER 2 : Logo + Search + Icons -->
     <div class="tier-2">
-        <div class="logo-img">
-            <img src="{% static 'images/newlogo.png' %}" alt="Hyzora" />
-        </div>
-
+       <div class="logo-img">
+    <img src="{% if site_settings and site_settings.logo %}{{ site_settings.logo.url }}{% else %}{% static 'images/newlogo.png' %}{% endif %}" alt="Hyzora" />
+</div>
         <div class="search-box">
             <form method="GET" action="{% url 'Ecom:shop' %}" id="globalSearchForm">
                 <input type="text" name="search" id="globalSearchInput" placeholder="Search for products, brands, categories..." autocomplete="off" />

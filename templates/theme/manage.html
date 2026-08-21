@@ -1,2015 +1,1469 @@
+{% extends 'includes/sidebar.html' %}
+{% load static %}
 
-{% block title %}
-Theme Settings
-{% endblock %}
-
+{% block title %}Theme Settings{% endblock %}
 
 {% block content %}
 
 <style>
-
-/* =========================================================
-   PAGE
-========================================================= */
-
-.theme-page {
-
-    max-width: 1250px;
-
-    margin: auto;
-
-    padding: 35px 25px 70px;
-
+/* ============================================================
+   ROOT VARIABLES - Using Your Theme Colors
+   ============================================================ */
+:root {
+    --ts-primary: #5c121f;
+    --ts-primary-light: #7a1a2b;
+    --ts-primary-dark: #3d0c14;
+    --ts-gold: #C9A84C;
+    --ts-gold-light: #E8D5A3;
+    --ts-gold-dark: #A8893A;
+    --ts-bg: #f5f0eb;
+    --ts-white: #ffffff;
+    --ts-border: #e8e4e0;
+    --ts-text: #1d1d1d;
+    --ts-text-light: #6d6d6d;
+    --ts-text-muted: #888888;
+    --ts-success: #2e9d57;
+    --ts-danger: #d64045;
+    --ts-warning: #f59e0b;
+    --ts-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    --ts-shadow-hover: 0 20px 50px rgba(92,18,31,0.12);
+    --ts-transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --ts-radius: 16px;
+    --ts-radius-sm: 10px;
+    --ts-radius-xs: 8px;
+    --ts-font: 'Inter', sans-serif;
 }
 
+/* ============================================================
+   MAIN WRAPPER
+   ============================================================ */
+.ts-wrapper {
+    width: 100%;
+    padding: 20px 24px 40px;
+    background: var(--ts-bg);
+    min-height: calc(100vh - 180px);
+    animation: tsFadeUp 0.5s ease;
+}
 
-/* =========================================================
+@keyframes tsFadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
    HEADER
-========================================================= */
-
-.theme-header {
-
+   ============================================================ */
+.ts-header {
     display: flex;
-
     justify-content: space-between;
-
     align-items: center;
-
-    margin-bottom: 25px;
-
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--ts-border);
+    flex-wrap: wrap;
+    gap: 16px;
 }
 
-.theme-title {
-
-    margin: 0;
-
-    font-size: 30px;
-
-    color: #111827;
-
+.ts-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
-.theme-description {
-
-    margin-top: 6px;
-
-    color: #6B7280;
-
-    font-size: 14px;
-
-}
-
-
-/* =========================================================
-   ALERT
-========================================================= */
-
-.theme-alert {
-
-    padding: 13px 16px;
-
-    border-radius: 8px;
-
-    margin-bottom: 20px;
-
-    font-size: 14px;
-
-}
-
-.theme-alert-success {
-
-    background: #ECFDF5;
-
-    border: 1px solid #A7F3D0;
-
-    color: #047857;
-
-}
-
-.theme-alert-error {
-
-    background: #FEF2F2;
-
-    border: 1px solid #FECACA;
-
-    color: #B91C1C;
-
-}
-
-
-/* =========================================================
-   CARD
-========================================================= */
-
-.theme-card {
-
-    background: #FFFFFF;
-
-    border: 1px solid #E5E7EB;
-
+.ts-header-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--ts-primary), var(--ts-primary-dark));
     border-radius: 12px;
-
-    padding: 25px;
-
-    margin-bottom: 25px;
-
-}
-
-
-/* =========================================================
-   SECTION
-========================================================= */
-
-.theme-section {
-
-    margin-bottom: 35px;
-
-}
-
-.theme-section:last-child {
-
-    margin-bottom: 0;
-
-}
-
-.theme-section-title {
-
-    font-size: 18px;
-
-    font-weight: 700;
-
-    color: #111827;
-
-    margin-bottom: 5px;
-
-}
-
-.theme-section-description {
-
-    color: #6B7280;
-
-    font-size: 13px;
-
-    margin-bottom: 20px;
-
-}
-
-
-/* =========================================================
-   THEME NAME
-========================================================= */
-
-.theme-name-field {
-
-    margin-bottom: 30px;
-
-}
-
-.theme-label {
-
-    display: block;
-
-    font-size: 13px;
-
-    font-weight: 600;
-
-    color: #374151;
-
-    margin-bottom: 7px;
-
-}
-
-.theme-input {
-
-    width: 100%;
-
-    box-sizing: border-box;
-
-    padding: 12px 13px;
-
-    border: 1px solid #D1D5DB;
-
-    border-radius: 7px;
-
-    font-size: 14px;
-
-    outline: none;
-
-}
-
-.theme-input:focus {
-
-    border-color: #2563EB;
-
-}
-
-
-/* =========================================================
-   COLOR GRID
-========================================================= */
-
-.theme-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(2, minmax(0, 1fr));
-
-    gap: 18px;
-
-}
-
-
-/* =========================================================
-   COLOR CARD
-========================================================= */
-
-.color-field {
-
-    border: 1px solid #E5E7EB;
-
-    border-radius: 9px;
-
-    padding: 15px;
-
-    background: #FFFFFF;
-
-}
-
-.color-label {
-
-    display: block;
-
-    font-size: 13px;
-
-    font-weight: 600;
-
-    color: #374151;
-
-    margin-bottom: 9px;
-
-}
-
-.color-control {
-
     display: flex;
-
     align-items: center;
-
-    gap: 10px;
-
-}
-
-.theme-color-input {
-
-    width: 52px;
-
-    height: 42px;
-
-    padding: 2px;
-
-    border: 1px solid #D1D5DB;
-
-    border-radius: 7px;
-
-    cursor: pointer;
-
-    background: transparent;
-
-}
-
-.color-value {
-
-    flex: 1;
-
-    padding: 10px 11px;
-
-    border: 1px solid #D1D5DB;
-
-    border-radius: 7px;
-
-    background: #F9FAFB;
-
-    color: #374151;
-
-    font-family: monospace;
-
-    font-size: 13px;
-
-}
-
-
-/* =========================================================
-   ACTIVE
-========================================================= */
-
-.active-field {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    margin-top: 20px;
-
-}
-
-.theme-checkbox {
-
-    width: 18px;
-
-    height: 18px;
-
-    cursor: pointer;
-
-}
-
-.active-label {
-
-    font-size: 14px;
-
-    font-weight: 600;
-
-    color: #374151;
-
-}
-
-
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-.theme-actions {
-
-    display: flex;
-
-    justify-content: flex-end;
-
-    gap: 10px;
-
-    margin-top: 30px;
-
-    padding-top: 20px;
-
-    border-top: 1px solid #E5E7EB;
-
-}
-
-.theme-btn {
-
-    border: none;
-
-    border-radius: 7px;
-
-    padding: 11px 18px;
-
-    font-size: 13px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-
-}
-
-.theme-btn-primary {
-
-    background: #2563EB;
-
-    color: #FFFFFF;
-
-}
-
-.theme-btn-primary:hover {
-
-    background: #1D4ED8;
-
-}
-
-.theme-btn-danger {
-
-    background: #FEF2F2;
-
-    color: #DC2626;
-
-}
-
-.theme-btn-secondary {
-
-    background: #F3F4F6;
-
-    color: #374151;
-
-}
-
-
-/* =========================================================
-   PREVIEW
-========================================================= */
-
-.theme-preview {
-
-    border-radius: 10px;
-
-    overflow: hidden;
-
-    border: 1px solid #E5E7EB;
-
-    margin-top: 20px;
-
-}
-
-.preview-header {
-
-    padding: 16px 20px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-}
-
-.preview-logo {
-
-    font-weight: 700;
-
-}
-
-.preview-nav {
-
-    display: flex;
-
-    gap: 15px;
-
-    font-size: 13px;
-
-}
-
-.preview-body {
-
-    padding: 35px;
-
-}
-
-.preview-body h3 {
-
-    margin-top: 0;
-
-}
-
-.preview-card {
-
-    padding: 20px;
-
-    border-radius: 9px;
-
-    margin-top: 15px;
-
-}
-
-.preview-button {
-
-    display: inline-block;
-
-    padding: 10px 18px;
-
-    border-radius: 6px;
-
-    margin-top: 15px;
-
-    font-size: 13px;
-
-    font-weight: 600;
-
-}
-
-.preview-footer {
-
-    padding: 18px 20px;
-
-    font-size: 13px;
-
-}
-
-
-/* =========================================================
-   MODAL
-========================================================= */
-
-.theme-modal-overlay {
-
-    position: fixed;
-
-    inset: 0;
-
-    background: rgba(0, 0, 0, .6);
-
-    display: none;
-
-    align-items: center;
-
     justify-content: center;
-
-    padding: 20px;
-
-    z-index: 99999;
-
+    color: var(--ts-white);
+    font-size: 22px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(92, 18, 31, 0.15);
 }
 
-.theme-modal-overlay.active {
-
-    display: flex;
-
-}
-
-.theme-modal {
-
-    background: #FFFFFF;
-
-    width: 100%;
-
-    max-width: 430px;
-
-    border-radius: 12px;
-
-    overflow: hidden;
-
-}
-
-.theme-modal-header {
-
-    padding: 20px;
-
-    border-bottom: 1px solid #E5E7EB;
-
-}
-
-.theme-modal-header h3 {
-
+.ts-header-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ts-primary);
+    font-family: var(--ts-font);
     margin: 0;
-
-    color: #111827;
-
+    letter-spacing: -0.3px;
 }
 
-.theme-modal-body {
-
-    padding: 20px;
-
-    color: #4B5563;
-
-    font-size: 14px;
-
-    line-height: 1.6;
-
+.ts-header-title span {
+    color: var(--ts-gold);
 }
 
-.theme-modal-footer {
+.ts-header-sub {
+    color: var(--ts-text-light);
+    font-size: 13px;
+    margin: 0;
+    font-family: var(--ts-font);
+}
 
-    padding: 16px 20px;
-
-    border-top: 1px solid #E5E7EB;
-
+/* ============================================================
+   ALERT
+   ============================================================ */
+.ts-alert {
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    border-radius: var(--ts-radius-sm);
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: tsFadeIn 0.4s ease;
+    border-left: 4px solid;
+}
 
-    justify-content: flex-end;
+.ts-alert-success {
+    background: #ecfdf5;
+    border-left-color: #047857;
+    color: #047857;
+}
 
+.ts-alert-error {
+    background: #fef2f2;
+    border-left-color: #dc2626;
+    color: #dc2626;
+}
+
+.ts-alert-info {
+    background: #eff6ff;
+    border-left-color: #2563eb;
+    color: #2563eb;
+}
+
+.ts-alert-close {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 22px;
+    color: inherit;
+    opacity: 0.6;
+    transition: var(--ts-transition);
+}
+
+.ts-alert-close:hover {
+    opacity: 1;
+}
+
+/* ============================================================
+   MAIN CARD
+   ============================================================ */
+.ts-card {
+    background: var(--ts-white);
+    border: 1px solid var(--ts-border);
+    border-radius: var(--ts-radius);
+    box-shadow: var(--ts-shadow);
+    overflow: hidden;
+    transition: var(--ts-transition);
+}
+
+.ts-card:hover {
+    box-shadow: var(--ts-shadow-hover);
+}
+
+/* ============================================================
+   SECTION
+   ============================================================ */
+.ts-section {
+    padding: 28px 30px;
+    border-bottom: 1px solid var(--ts-border);
+    transition: var(--ts-transition);
+}
+
+.ts-section:last-child {
+    border-bottom: none;
+}
+
+.ts-section:hover {
+    background: rgba(245, 240, 235, 0.3);
+}
+
+.ts-section-header {
+    margin-bottom: 20px;
+}
+
+.ts-section-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ts-text);
+    font-family: var(--ts-font);
+    display: flex;
+    align-items: center;
     gap: 10px;
-
 }
 
+.ts-section-title .ts-title-icon {
+    font-size: 18px;
+}
 
-/* =========================================================
+.ts-section-desc {
+    margin-top: 4px;
+    color: var(--ts-text-light);
+    font-size: 13px;
+    font-family: var(--ts-font);
+}
+
+/* ============================================================
+   THEME NAME & ACTIVE - SAME LINE
+   ============================================================ */
+.ts-name-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.ts-name-field {
+    flex: 1;
+    min-width: 200px;
+}
+
+.ts-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ts-text);
+    margin-bottom: 5px;
+    font-family: var(--ts-font);
+}
+
+.ts-label .ts-required {
+    color: var(--ts-danger);
+}
+
+.ts-input {
+    width: 100%;
+    padding: 11px 15px;
+    border: 2px solid var(--ts-border);
+    border-radius: var(--ts-radius-xs);
+    font-size: 14px;
+    font-family: var(--ts-font);
+    color: var(--ts-text);
+    background: var(--ts-white);
+    transition: var(--ts-transition);
+    outline: none;
+    box-sizing: border-box;
+}
+
+.ts-input:focus {
+    border-color: var(--ts-primary);
+    box-shadow: 0 0 0 4px rgba(92, 18, 31, 0.06);
+}
+
+.ts-input::placeholder {
+    color: var(--ts-text-muted);
+    font-weight: 300;
+}
+
+/* ============================================================
+   TOGGLE - SAME LINE WITH NAME
+   ============================================================ */
+.ts-toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 18px;
+    background: linear-gradient(135deg, rgba(245, 240, 235, 0.5), var(--ts-bg));
+    border-radius: var(--ts-radius-sm);
+    border: 1px solid var(--ts-border);
+    flex-shrink: 0;
+    min-width: 180px;
+    transition: var(--ts-transition);
+}
+
+.ts-toggle-wrap:hover {
+    border-color: var(--ts-gold);
+    box-shadow: 0 4px 16px rgba(201, 168, 76, 0.15);
+}
+
+.ts-toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.ts-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.ts-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #d1d5db;
+    transition: var(--ts-transition);
+    border-radius: 30px;
+}
+
+.ts-toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background: var(--ts-white);
+    transition: var(--ts-transition);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.ts-toggle input:checked + .ts-toggle-slider {
+    background: var(--ts-success);
+}
+
+.ts-toggle input:checked + .ts-toggle-slider::before {
+    transform: translateX(20px);
+}
+
+.ts-toggle-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ts-text);
+    font-family: var(--ts-font);
+    white-space: nowrap;
+}
+
+.ts-toggle-label .active-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    transition: var(--ts-transition);
+}
+
+.ts-toggle-label .active-dot.active {
+    background: var(--ts-success);
+    box-shadow: 0 0 12px rgba(46, 157, 87, 0.4);
+}
+
+.ts-toggle-label .active-dot.inactive {
+    background: #9ca3af;
+}
+
+/* ============================================================
+   COLOR GRID
+   ============================================================ */
+.ts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.ts-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+/* ============================================================
+   COLOR FIELD - BEAUTIFUL DESIGN
+   ============================================================ */
+.ts-color-field {
+    border: 1px solid var(--ts-border);
+    border-radius: var(--ts-radius-sm);
+    padding: 14px 16px;
+    background: var(--ts-white);
+    transition: var(--ts-transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.ts-color-field::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: transparent;
+    transition: var(--ts-transition);
+}
+
+.ts-color-field:hover::before {
+    background: linear-gradient(90deg, var(--ts-primary), var(--ts-gold));
+}
+
+.ts-color-field:hover {
+    border-color: var(--ts-primary);
+    box-shadow: 0 4px 20px rgba(92, 18, 31, 0.08);
+    transform: translateY(-2px);
+}
+
+.ts-color-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ts-text);
+    margin-bottom: 7px;
+    font-family: var(--ts-font);
+}
+
+.ts-color-label .color-swatch {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    border: 1px solid var(--ts-border);
+    flex-shrink: 0;
+}
+
+.ts-color-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ts-color-picker {
+    width: 44px;
+    height: 38px;
+    padding: 2px;
+    border: 2px solid var(--ts-border);
+    border-radius: var(--ts-radius-xs);
+    cursor: pointer;
+    background: transparent;
+    flex-shrink: 0;
+    transition: var(--ts-transition);
+}
+
+.ts-color-picker:hover {
+    border-color: var(--ts-primary);
+}
+
+.ts-color-picker::-webkit-color-swatch-wrapper {
+    padding: 2px;
+}
+
+.ts-color-picker::-webkit-color-swatch {
+    border-radius: 4px;
+    border: none;
+}
+
+.ts-color-value {
+    flex: 1;
+    padding: 8px 12px;
+    border: 2px solid var(--ts-border);
+    border-radius: var(--ts-radius-xs);
+    background: var(--ts-white);
+    color: var(--ts-text);
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    transition: var(--ts-transition);
+    outline: none;
+    min-width: 0;
+}
+
+.ts-color-value:focus {
+    border-color: var(--ts-primary);
+    box-shadow: 0 0 0 4px rgba(92, 18, 31, 0.06);
+}
+
+.ts-color-value::placeholder {
+    color: var(--ts-text-muted);
+    font-family: var(--ts-font);
+    font-size: 12px;
+}
+
+/* ============================================================
+   PREVIEW
+   ============================================================ */
+.ts-preview {
+    border-radius: var(--ts-radius-sm);
+    overflow: hidden;
+    border: 2px solid var(--ts-border);
+    margin-top: 10px;
+    transition: var(--ts-transition);
+}
+
+.ts-preview:hover {
+    border-color: var(--ts-gold);
+    box-shadow: 0 8px 32px rgba(201, 168, 76, 0.15);
+}
+
+.ts-preview-header {
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--ts-border);
+}
+
+.ts-preview-logo {
+    font-weight: 700;
+    font-size: 16px;
+    font-family: var(--ts-font);
+}
+
+.ts-preview-nav {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    font-family: var(--ts-font);
+}
+
+.ts-preview-body {
+    padding: 28px 24px;
+}
+
+.ts-preview-body h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: var(--ts-font);
+}
+
+.ts-preview-body p {
+    margin: 0 0 16px;
+    font-size: 14px;
+    font-family: var(--ts-font);
+}
+
+.ts-preview-card {
+    padding: 18px 20px;
+    border-radius: var(--ts-radius-xs);
+    border: 1px solid var(--ts-border);
+    font-size: 14px;
+    font-family: var(--ts-font);
+}
+
+.ts-preview-btn {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: var(--ts-radius-xs);
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--ts-font);
+    cursor: pointer;
+    transition: var(--ts-transition);
+    margin-top: 12px;
+}
+
+.ts-preview-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.ts-preview-footer {
+    padding: 14px 20px;
+    font-size: 13px;
+    font-family: var(--ts-font);
+    border-top: 1px solid var(--ts-border);
+    text-align: center;
+}
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+.ts-actions {
+    padding: 22px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(245, 240, 235, 0.3), var(--ts-bg));
+    border-top: 1px solid var(--ts-border);
+    border-radius: 0 0 var(--ts-radius) var(--ts-radius);
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.ts-status {
+    color: var(--ts-text-light);
+    font-size: 13px;
+    font-family: var(--ts-font);
+}
+
+.ts-status strong {
+    color: var(--ts-text);
+}
+
+.ts-actions-right {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* ============================================================
+   BUTTONS - BEAUTIFUL
+   ============================================================ */
+.ts-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: var(--ts-radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--ts-font);
+    border: none;
+    cursor: pointer;
+    transition: var(--ts-transition);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.ts-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: var(--ts-transition);
+}
+
+.ts-btn:hover::after {
+    left: 100%;
+}
+
+.ts-btn-primary {
+    background: linear-gradient(135deg, var(--ts-primary), var(--ts-primary-dark));
+    color: var(--ts-white);
+    box-shadow: 0 4px 16px rgba(92, 18, 31, 0.25);
+}
+
+.ts-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(92, 18, 31, 0.35);
+}
+
+.ts-btn-danger {
+    background: #fee2e2;
+    color: var(--ts-danger);
+}
+
+.ts-btn-danger:hover {
+    background: #fecaca;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(214, 64, 69, 0.2);
+}
+
+.ts-btn-secondary {
+    background: var(--ts-white);
+    color: var(--ts-text);
+    border: 1px solid var(--ts-border);
+}
+
+.ts-btn-secondary:hover {
+    background: var(--ts-bg);
+    transform: translateY(-2px);
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.ts-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    padding: 20px;
+}
+
+.ts-modal-overlay.active {
+    display: flex;
+}
+
+.ts-modal {
+    width: 100%;
+    max-width: 440px;
+    background: var(--ts-white);
+    border-radius: var(--ts-radius);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+    animation: tsModalSlide 0.3s ease;
+}
+
+@keyframes tsModalSlide {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.ts-modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--ts-border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ts-modal-header .ts-modal-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fee2e2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ts-danger);
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.ts-modal-title {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--ts-text);
+    font-family: var(--ts-font);
+}
+
+.ts-modal-body {
+    padding: 24px 28px;
+    color: var(--ts-text-light);
+    line-height: 1.8;
+    font-size: 14px;
+    font-family: var(--ts-font);
+}
+
+.ts-modal-body p {
+    margin: 0 0 10px;
+}
+
+.ts-modal-body p:last-child {
+    margin-bottom: 0;
+}
+
+.ts-modal-body .ts-modal-warning {
+    color: var(--ts-danger);
+    font-weight: 600;
+}
+
+.ts-modal-footer {
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--ts-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* ============================================================
    RESPONSIVE
-========================================================= */
+   ============================================================ */
 
-@media(max-width: 750px) {
-
-    .theme-grid {
-
-        grid-template-columns: 1fr;
-
-    }
-
-    .theme-header {
-
-        align-items: flex-start;
-
-        flex-direction: column;
-
-        gap: 10px;
-
-    }
-
+/* Desktop Large */
+@media (min-width: 1400px) {
+    .ts-wrapper { padding: 30px 50px 50px; }
+    .ts-section { padding: 32px 36px; }
+    .ts-actions { padding: 24px 36px; }
+    .ts-grid { gap: 20px; }
+    .ts-grid-2 { gap: 20px; }
 }
 
+/* Desktop */
+@media (max-width: 1200px) {
+    .ts-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Tablet */
+@media (max-width: 992px) {
+    .ts-wrapper { padding: 20px 20px 35px; }
+    .ts-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .ts-grid-2 { grid-template-columns: 1fr; }
+    .ts-section { padding: 20px 22px; }
+    .ts-actions { padding: 18px 22px; flex-direction: column; align-items: stretch; }
+    .ts-actions-right { justify-content: stretch; }
+    .ts-actions-right .ts-btn { flex: 1; justify-content: center; }
+    .ts-header { flex-direction: column; align-items: flex-start; }
+    .ts-header-title { font-size: 22px; }
+    .ts-name-row { flex-direction: column; align-items: stretch; }
+    .ts-toggle-wrap { min-width: auto; justify-content: center; }
+}
+
+/* Mobile Large */
+@media (max-width: 768px) {
+    .ts-wrapper { padding: 14px 14px 25px; }
+    .ts-section { padding: 16px 16px; }
+    .ts-section-header { margin-bottom: 16px; }
+    .ts-section-title { font-size: 15px; }
+    .ts-actions { padding: 16px 16px; }
+    .ts-header-title { font-size: 20px; }
+    .ts-header-icon { width: 42px; height: 42px; font-size: 18px; }
+    .ts-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .ts-grid-2 { grid-template-columns: 1fr; }
+    .ts-color-field { padding: 12px 14px; }
+    .ts-color-picker { width: 38px; height: 34px; }
+    .ts-color-value { font-size: 12px; padding: 6px 10px; }
+    .ts-input { padding: 9px 12px; font-size: 13px; }
+    .ts-name-field { min-width: auto; }
+    .ts-toggle-wrap { min-width: auto; padding: 8px 14px; }
+    .ts-preview-header { flex-direction: column; gap: 8px; text-align: center; }
+    .ts-preview-body { padding: 20px 16px; }
+    .ts-preview-body h3 { font-size: 16px; }
+    .ts-preview-body p { font-size: 13px; }
+    .ts-preview-card { font-size: 13px; padding: 14px 16px; }
+    .ts-preview-btn { font-size: 12px; padding: 7px 16px; }
+    .ts-modal { max-width: 100%; margin: 0 10px; }
+    .ts-modal-header { padding: 16px 18px; }
+    .ts-modal-body { padding: 18px 20px; font-size: 13px; }
+    .ts-modal-footer { padding: 14px 18px 16px; flex-direction: column-reverse; }
+    .ts-modal-footer .ts-btn { justify-content: center; width: 100%; }
+}
+
+/* Mobile Medium */
+@media (max-width: 576px) {
+    .ts-wrapper { padding: 10px 10px 20px; }
+    .ts-section { padding: 14px 12px; }
+    .ts-header { margin-bottom: 16px; padding-bottom: 14px; }
+    .ts-header-title { font-size: 18px; }
+    .ts-header-sub { font-size: 12px; }
+    .ts-header-icon { width: 38px; height: 38px; font-size: 16px; }
+    .ts-grid { grid-template-columns: 1fr; gap: 10px; }
+    .ts-grid-2 { grid-template-columns: 1fr; }
+    .ts-color-field { padding: 10px 12px; }
+    .ts-color-picker { width: 36px; height: 32px; }
+    .ts-color-value { font-size: 12px; padding: 5px 8px; }
+    .ts-color-label { font-size: 10px; }
+    .ts-input { padding: 8px 10px; font-size: 12px; }
+    .ts-btn { padding: 8px 16px; font-size: 12px; }
+    .ts-section-title { font-size: 14px; }
+    .ts-section-desc { font-size: 12px; }
+    .ts-label { font-size: 11px; }
+    .ts-name-row { flex-direction: column; align-items: stretch; gap: 12px; }
+    .ts-toggle-wrap { min-width: auto; justify-content: center; padding: 8px 12px; }
+    .ts-toggle-label { font-size: 12px; }
+    .ts-status { font-size: 12px; }
+    .ts-actions-right { flex-direction: column; }
+    .ts-actions-right .ts-btn { width: 100%; justify-content: center; }
+    .ts-preview-nav { gap: 10px; font-size: 12px; flex-wrap: wrap; justify-content: center; }
+    .ts-preview-logo { font-size: 14px; }
+    .ts-preview-body { padding: 16px 14px; }
+}
+
+/* Mobile Small */
+@media (max-width: 400px) {
+    .ts-wrapper { padding: 8px 8px 16px; }
+    .ts-section { padding: 12px 10px; }
+    .ts-header-title { font-size: 16px; }
+    .ts-header-icon { width: 34px; height: 34px; font-size: 14px; }
+    .ts-btn { padding: 6px 12px; font-size: 11px; }
+    .ts-color-picker { width: 32px; height: 28px; }
+    .ts-color-value { font-size: 11px; padding: 4px 6px; }
+    .ts-modal-title { font-size: 17px; }
+    .ts-modal-body { padding: 14px 16px; font-size: 12px; }
+    .ts-preview-body h3 { font-size: 14px; }
+    .ts-preview-body p { font-size: 12px; }
+    .ts-preview-card { font-size: 12px; padding: 12px 14px; }
+    .ts-toggle-wrap { padding: 6px 10px; }
+    .ts-toggle-label { font-size: 11px; }
+    .ts-toggle { width: 38px; height: 20px; }
+    .ts-toggle-slider::before { height: 14px; width: 14px; }
+    .ts-toggle input:checked + .ts-toggle-slider::before { transform: translateX(18px); }
+}
 </style>
 
+<!-- ============================================================
+   MAIN WRAPPER
+   ============================================================ -->
+<div class="ts-wrapper">
 
-<div class="theme-page">
-
-
-    <!-- =====================================================
-         HEADER
-    ====================================================== -->
-
-    <div class="theme-header">
-
-        <div>
-
-            <h1 class="theme-title">
-                Theme Settings
-            </h1>
-
-            <p class="theme-description">
-                Manage the colors used throughout your website.
-            </p>
-
+    <!-- ===== HEADER ===== -->
+    <div class="ts-header">
+        <div class="ts-header-left">
+            <div class="ts-header-icon">
+                <i class="fas fa-palette"></i>
+            </div>
+            <div>
+                <h1 class="ts-header-title">Theme <span>Settings</span></h1>
+                <p class="ts-header-sub">Customize your website colors and appearance</p>
+            </div>
         </div>
-
     </div>
 
-
-    <!-- =====================================================
-         MESSAGES
-    ====================================================== -->
-
+    <!-- ===== MESSAGES ===== -->
     {% if messages %}
-
         {% for message in messages %}
-
-            <div
-                class="
-                    theme-alert
-                    {% if message.tags == 'error' %}
-                        theme-alert-error
-                    {% else %}
-                        theme-alert-success
-                    {% endif %}
-                "
-            >
-
-                {{ message }}
-
+            <div class="ts-alert ts-alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %}">
+                <span>{{ message }}</span>
+                <button type="button" class="ts-alert-close" onclick="this.parentElement.remove()">×</button>
             </div>
-
         {% endfor %}
-
     {% endif %}
 
-
-    <!-- =====================================================
-         MAIN FORM
-    ====================================================== -->
-
-    <div class="theme-card">
-
-        <form method="POST">
-
+    <!-- ===== MAIN FORM ===== -->
+    <div class="ts-card">
+        <form method="POST" id="themeForm">
             {% csrf_token %}
-
-            <input
-                type="hidden"
-                name="action"
-                value="{% if theme %}update{% else %}create{% endif %}"
-            >
-
-
+            <input type="hidden" name="action" value="{% if theme %}update{% else %}create{% endif %}">
             {% if theme %}
-
-                <input
-                    type="hidden"
-                    name="theme_id"
-                    value="{{ theme.id }}"
-                >
-
+                <input type="hidden" name="theme_id" value="{{ theme.id }}">
             {% endif %}
 
-
-            <!-- =============================================
-                 THEME INFORMATION
-            ============================================== -->
-
-            <div class="theme-section">
-
-                <h2 class="theme-section-title">
-                    Theme Information
-                </h2>
-
-                <p class="theme-section-description">
-                    Configure the name and active status of your theme.
-                </p>
-
-
-                <div class="theme-name-field">
-
-                    <label class="theme-label">
-                        Theme Name
-                    </label>
-
-                    <input
-                        type="text"
-                        name="theme_name"
-                        class="theme-input"
-                        value="{% if theme %}{{ theme.theme_name }}{% else %}Default Theme{% endif %}"
-                        required
-                    >
-
+            <!-- ===================================================
+                 THEME INFORMATION - NAME & ACTIVE ON SAME LINE
+            ==================================================== -->
+            <div class="ts-section">
+                <div class="ts-section-header">
+                    <h2 class="ts-section-title">
+                        <span class="ts-title-icon">⚙️</span> Theme Information
+                    </h2>
+                    <p class="ts-section-desc">Configure the name and active status of your theme.</p>
                 </div>
 
+                <div class="ts-name-row">
+                    <div class="ts-name-field">
+                        <label class="ts-label">Theme Name <span class="ts-required">*</span></label>
+                        <input type="text" name="theme_name" class="ts-input" value="{% if theme %}{{ theme.theme_name }}{% else %}Default Theme{% endif %}" placeholder="Enter theme name" required>
+                    </div>
 
-                <div class="active-field">
-
-                    <input
-                        type="checkbox"
-                        name="is_active"
-                        class="theme-checkbox"
-                        {% if not theme or theme.is_active %}
-                            checked
-                        {% endif %}
-                    >
-
-                    <label class="active-label">
-                        Active Theme
-                    </label>
-
+                    <div class="ts-toggle-wrap">
+                        <!-- <label class="ts-toggle">
+                            <input type="checkbox" name="is_active" id="tsActiveToggle" {% if not theme or theme.is_active %}checked{% endif %}>
+                            <span class="ts-toggle-slider"></span>
+                        </label>
+                        <div>
+                            <div class="ts-toggle-label" id="tsStatusLabel">
+                                <span class="active-dot {% if not theme or theme.is_active %}active{% else %}inactive{% endif %}" id="tsStatusDot"></span>
+                                {% if not theme or theme.is_active %}Active{% else %}Inactive{% endif %}
+                            </div>
+                        </div> -->
+                    </div>
                 </div>
-
             </div>
 
-
-            <!-- =============================================
+            <!-- ===================================================
                  BRAND COLORS
-            ============================================== -->
+            ==================================================== -->
+            <div class="ts-section">
+                <div class="ts-section-header">
+                    <h2 class="ts-section-title">
+                        <span class="ts-title-icon">🎨</span> Brand Colors
+                    </h2>
+                    <p class="ts-section-desc">Main colors used across your website.</p>
+                </div>
 
-            <div class="theme-section">
-
-                <h2 class="theme-section-title">
-                    Brand Colors
-                </h2>
-
-                <p class="theme-section-description">
-                    Main colors used across the website.
-                </p>
-
-
-                <div class="theme-grid">
-
-
-                    <!-- PRIMARY -->
-
-                    <div class="color-field">
-
-                        <label class="color-label">
+                <div class="ts-grid">
+                    <!-- Primary -->
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#5c121f;"></span>
                             Primary Color
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="primary_color"
-                                class="theme-color-input"
-                                value="{{ theme.primary_color|default:'#2563EB' }}"
-                                data-target="primary-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="primary-text"
-                                class="color-value"
-                                value="{{ theme.primary_color|default:'#2563EB' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="primary_color" class="ts-color-picker" value="{{ theme.primary_color|default:'#5c121f' }}" data-target="primary-text">
+                            <input type="text" id="primary-text" class="ts-color-value" value="{{ theme.primary_color|default:'#5c121f' }}" placeholder="#5c121f" spellcheck="false">
                         </div>
-
                     </div>
 
-
-                    <!-- SECONDARY -->
-
-                    <div class="color-field">
-
-                        <label class="color-label">
-                            Secondary Color
+                    <!-- Secondary / Gold -->
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#C9A84C;"></span>
+                            Secondary / Gold
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="secondary_color"
-                                class="theme-color-input"
-                                value="{{ theme.secondary_color|default:'#1E40AF' }}"
-                                data-target="secondary-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="secondary-text"
-                                class="color-value"
-                                value="{{ theme.secondary_color|default:'#1E40AF' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="secondary_color" class="ts-color-picker" value="{{ theme.secondary_color|default:'#C9A84C' }}" data-target="secondary-text">
+                            <input type="text" id="secondary-text" class="ts-color-value" value="{{ theme.secondary_color|default:'#C9A84C' }}" placeholder="#C9A84C" spellcheck="false">
                         </div>
-
                     </div>
 
-
-                    <!-- ACCENT -->
-
-                    <div class="color-field">
-
-                        <label class="color-label">
+                    <!-- Accent -->
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#D97706;"></span>
                             Accent Color
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="accent_color"
-                                class="theme-color-input"
-                                value="{{ theme.accent_color|default:'#F59E0B' }}"
-                                data-target="accent-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="accent-text"
-                                class="color-value"
-                                value="{{ theme.accent_color|default:'#F59E0B' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="accent_color" class="ts-color-picker" value="{{ theme.accent_color|default:'#D97706' }}" data-target="accent-text">
+                            <input type="text" id="accent-text" class="ts-color-value" value="{{ theme.accent_color|default:'#D97706' }}" placeholder="#D97706" spellcheck="false">
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
+            <!-- ===================================================
+                 BACKGROUND COLORS
+            ==================================================== -->
+            <div class="ts-section">
+                <div class="ts-section-header">
+                    <h2 class="ts-section-title">
+                        <span class="ts-title-icon">🖼️</span> Background Colors
+                    </h2>
+                </div>
 
-            <!-- =============================================
-                 BACKGROUND
-            ============================================== -->
-
-            <div class="theme-section">
-
-                <h2 class="theme-section-title">
-                    Background Colors
-                </h2>
-
-
-                <div class="theme-grid">
-
-
-                    <div class="color-field">
-
-                        <label class="color-label">
+                <div class="ts-grid ts-grid-2">
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#FEF7ED;"></span>
                             Background Color
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="background_color"
-                                class="theme-color-input"
-                                value="{{ theme.background_color|default:'#F9FAFB' }}"
-                                data-target="background-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="background-text"
-                                class="color-value"
-                                value="{{ theme.background_color|default:'#F9FAFB' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="background_color" class="ts-color-picker" value="{{ theme.background_color|default:'#FEF7ED' }}" data-target="background-text">
+                            <input type="text" id="background-text" class="ts-color-value" value="{{ theme.background_color|default:'#FEF7ED' }}" placeholder="#FEF7ED" spellcheck="false">
                         </div>
-
                     </div>
 
-
-                    <div class="color-field">
-
-                        <label class="color-label">
-                            Surface Color
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#FFFFFF;"></span>
+                            Surface / Card Color
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="surface_color"
-                                class="theme-color-input"
-                                value="{{ theme.surface_color|default:'#FFFFFF' }}"
-                                data-target="surface-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="surface-text"
-                                class="color-value"
-                                value="{{ theme.surface_color|default:'#FFFFFF' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="surface_color" class="ts-color-picker" value="{{ theme.surface_color|default:'#FFFFFF' }}" data-target="surface-text">
+                            <input type="text" id="surface-text" class="ts-color-value" value="{{ theme.surface_color|default:'#FFFFFF' }}" placeholder="#FFFFFF" spellcheck="false">
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
+            <!-- ===================================================
+                 TEXT COLORS
+            ==================================================== -->
+            <div class="ts-section">
+                <div class="ts-section-header">
+                    <h2 class="ts-section-title">
+                        <span class="ts-title-icon">📝</span> Text Colors
+                    </h2>
+                </div>
 
-            <!-- =============================================
-                 TEXT
-            ============================================== -->
-
-            <div class="theme-section">
-
-                <h2 class="theme-section-title">
-                    Text Colors
-                </h2>
-
-
-                <div class="theme-grid">
-
-
-                    <div class="color-field">
-
-                        <label class="color-label">
+                <div class="ts-grid">
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#374151;"></span>
                             Text Color
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="text_color"
-                                class="theme-color-input"
-                                value="{{ theme.text_color|default:'#374151' }}"
-                                data-target="text-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="text-text"
-                                class="color-value"
-                                value="{{ theme.text_color|default:'#374151' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="text_color" class="ts-color-picker" value="{{ theme.text_color|default:'#374151' }}" data-target="text-text">
+                            <input type="text" id="text-text" class="ts-color-value" value="{{ theme.text_color|default:'#374151' }}" placeholder="#374151" spellcheck="false">
                         </div>
-
                     </div>
 
-
-                    <div class="color-field">
-
-                        <label class="color-label">
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#111827;"></span>
                             Heading Color
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="heading_color"
-                                class="theme-color-input"
-                                value="{{ theme.heading_color|default:'#111827' }}"
-                                data-target="heading-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="heading-text"
-                                class="color-value"
-                                value="{{ theme.heading_color|default:'#111827' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="heading_color" class="ts-color-picker" value="{{ theme.heading_color|default:'#111827' }}" data-target="heading-text">
+                            <input type="text" id="heading-text" class="ts-color-value" value="{{ theme.heading_color|default:'#111827' }}" placeholder="#111827" spellcheck="false">
                         </div>
-
                     </div>
 
-
-                    <div class="color-field">
-
-                        <label class="color-label">
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#6B7280;"></span>
                             Muted Text Color
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="muted_text_color"
-                                class="theme-color-input"
-                                value="{{ theme.muted_text_color|default:'#6B7280' }}"
-                                data-target="muted-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="muted-text"
-                                class="color-value"
-                                value="{{ theme.muted_text_color|default:'#6B7280' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="muted_text_color" class="ts-color-picker" value="{{ theme.muted_text_color|default:'#6B7280' }}" data-target="muted-text">
+                            <input type="text" id="muted-text" class="ts-color-value" value="{{ theme.muted_text_color|default:'#6B7280' }}" placeholder="#6B7280" spellcheck="false">
                         </div>
-
                     </div>
 
-
-                    <div class="color-field">
-
-                        <label class="color-label">
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#E5E7EB;"></span>
                             Border Color
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="border_color"
-                                class="theme-color-input"
-                                value="{{ theme.border_color|default:'#E5E7EB' }}"
-                                data-target="border-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="border-text"
-                                class="color-value"
-                                value="{{ theme.border_color|default:'#E5E7EB' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="border_color" class="ts-color-picker" value="{{ theme.border_color|default:'#E5E7EB' }}" data-target="border-text">
+                            <input type="text" id="border-text" class="ts-color-value" value="{{ theme.border_color|default:'#E5E7EB' }}" placeholder="#E5E7EB" spellcheck="false">
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
-
-            <!-- =============================================
+            <!-- ===================================================
                  STATUS COLORS
-            ============================================== -->
+            ==================================================== -->
+            <div class="ts-section">
+                <div class="ts-section-header">
+                    <h2 class="ts-section-title">
+                        <span class="ts-title-icon">🔵</span> Status Colors
+                    </h2>
+                </div>
 
-            <div class="theme-section">
-
-                <h2 class="theme-section-title">
-                    Status Colors
-                </h2>
-
-
-                <div class="theme-grid">
-
-
-                    <div class="color-field">
-
-                        <label class="color-label">
+                <div class="ts-grid">
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#16A34A;"></span>
                             Success Color
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="success_color"
-                                class="theme-color-input"
-                                value="{{ theme.success_color|default:'#16A34A' }}"
-                                data-target="success-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="success-text"
-                                class="color-value"
-                                value="{{ theme.success_color|default:'#16A34A' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="success_color" class="ts-color-picker" value="{{ theme.success_color|default:'#16A34A' }}" data-target="success-text">
+                            <input type="text" id="success-text" class="ts-color-value" value="{{ theme.success_color|default:'#16A34A' }}" placeholder="#16A34A" spellcheck="false">
                         </div>
-
                     </div>
 
-
-                    <div class="color-field">
-
-                        <label class="color-label">
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#F59E0B;"></span>
                             Warning Color
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="warning_color"
-                                class="theme-color-input"
-                                value="{{ theme.warning_color|default:'#F59E0B' }}"
-                                data-target="warning-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="warning-text"
-                                class="color-value"
-                                value="{{ theme.warning_color|default:'#F59E0B' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="warning_color" class="ts-color-picker" value="{{ theme.warning_color|default:'#F59E0B' }}" data-target="warning-text">
+                            <input type="text" id="warning-text" class="ts-color-value" value="{{ theme.warning_color|default:'#F59E0B' }}" placeholder="#F59E0B" spellcheck="false">
                         </div>
-
                     </div>
 
-
-                    <div class="color-field">
-
-                        <label class="color-label">
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#DC2626;"></span>
                             Danger Color
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="danger_color"
-                                class="theme-color-input"
-                                value="{{ theme.danger_color|default:'#DC2626' }}"
-                                data-target="danger-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="danger-text"
-                                class="color-value"
-                                value="{{ theme.danger_color|default:'#DC2626' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="danger_color" class="ts-color-picker" value="{{ theme.danger_color|default:'#DC2626' }}" data-target="danger-text">
+                            <input type="text" id="danger-text" class="ts-color-value" value="{{ theme.danger_color|default:'#DC2626' }}" placeholder="#DC2626" spellcheck="false">
                         </div>
-
                     </div>
 
-
-                    <div class="color-field">
-
-                        <label class="color-label">
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#2563EB;"></span>
                             Info Color
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="info_color"
-                                class="theme-color-input"
-                                value="{{ theme.info_color|default:'#2563EB' }}"
-                                data-target="info-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="info-text"
-                                class="color-value"
-                                value="{{ theme.info_color|default:'#2563EB' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="info_color" class="ts-color-picker" value="{{ theme.info_color|default:'#2563EB' }}" data-target="info-text">
+                            <input type="text" id="info-text" class="ts-color-value" value="{{ theme.info_color|default:'#2563EB' }}" placeholder="#2563EB" spellcheck="false">
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
-
-            <!-- =============================================
+            <!-- ===================================================
                  BUTTON COLORS
-            ============================================== -->
+            ==================================================== -->
+            <div class="ts-section">
+                <div class="ts-section-header">
+                    <h2 class="ts-section-title">
+                        <span class="ts-title-icon">🖱️</span> Button Colors
+                    </h2>
+                </div>
 
-            <div class="theme-section">
-
-                <h2 class="theme-section-title">
-                    Button Colors
-                </h2>
-
-
-                <div class="theme-grid">
-
-
-                    <div class="color-field">
-
-                        <label class="color-label">
+                <div class="ts-grid ts-grid-2">
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#FFFFFF;"></span>
                             Button Text Color
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="button_text_color"
-                                class="theme-color-input"
-                                value="{{ theme.button_text_color|default:'#FFFFFF' }}"
-                                data-target="button-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="button-text"
-                                class="color-value"
-                                value="{{ theme.button_text_color|default:'#FFFFFF' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="button_text_color" class="ts-color-picker" value="{{ theme.button_text_color|default:'#FFFFFF' }}" data-target="button-text">
+                            <input type="text" id="button-text" class="ts-color-value" value="{{ theme.button_text_color|default:'#FFFFFF' }}" placeholder="#FFFFFF" spellcheck="false">
                         </div>
-
                     </div>
 
-
-                    <div class="color-field">
-
-                        <label class="color-label">
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#D97706;"></span>
                             Button Hover Color
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="button_hover_color"
-                                class="theme-color-input"
-                                value="{{ theme.button_hover_color|default:'#1D4ED8' }}"
-                                data-target="button-hover-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="button-hover-text"
-                                class="color-value"
-                                value="{{ theme.button_hover_color|default:'#1D4ED8' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="button_hover_color" class="ts-color-picker" value="{{ theme.button_hover_color|default:'#D97706' }}" data-target="button-hover-text">
+                            <input type="text" id="button-hover-text" class="ts-color-value" value="{{ theme.button_hover_color|default:'#D97706' }}" placeholder="#D97706" spellcheck="false">
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
+            <!-- ===================================================
+                 HEADER COLORS
+            ==================================================== -->
+            <div class="ts-section">
+                <div class="ts-section-header">
+                    <h2 class="ts-section-title">
+                        <span class="ts-title-icon">📋</span> Header Colors
+                    </h2>
+                </div>
 
-            <!-- =============================================
-                 HEADER
-            ============================================== -->
-
-            <div class="theme-section">
-
-                <h2 class="theme-section-title">
-                    Header
-                </h2>
-
-
-                <div class="theme-grid">
-
-
-                    <div class="color-field">
-
-                        <label class="color-label">
+                <div class="ts-grid ts-grid-2">
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#FEF7ED;"></span>
                             Header Background
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="header_background_color"
-                                class="theme-color-input"
-                                value="{{ theme.header_background_color|default:'#FFFFFF' }}"
-                                data-target="header-bg-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="header-bg-text"
-                                class="color-value"
-                                value="{{ theme.header_background_color|default:'#FFFFFF' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="header_background_color" class="ts-color-picker" value="{{ theme.header_background_color|default:'#FEF7ED' }}" data-target="header-bg-text">
+                            <input type="text" id="header-bg-text" class="ts-color-value" value="{{ theme.header_background_color|default:'#FEF7ED' }}" placeholder="#FEF7ED" spellcheck="false">
                         </div>
-
                     </div>
 
-
-                    <div class="color-field">
-
-                        <label class="color-label">
-                            Header Text
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#111827;"></span>
+                            Header Text Color
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="header_text_color"
-                                class="theme-color-input"
-                                value="{{ theme.header_text_color|default:'#111827' }}"
-                                data-target="header-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="header-text"
-                                class="color-value"
-                                value="{{ theme.header_text_color|default:'#111827' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="header_text_color" class="ts-color-picker" value="{{ theme.header_text_color|default:'#111827' }}" data-target="header-text">
+                            <input type="text" id="header-text" class="ts-color-value" value="{{ theme.header_text_color|default:'#111827' }}" placeholder="#111827" spellcheck="false">
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
+            <!-- ===================================================
+                 FOOTER COLORS
+            ==================================================== -->
+            <div class="ts-section">
+                <div class="ts-section-header">
+                    <h2 class="ts-section-title">
+                        <span class="ts-title-icon">🦶</span> Footer Colors
+                    </h2>
+                </div>
 
-            <!-- =============================================
-                 FOOTER
-            ============================================== -->
-
-            <div class="theme-section">
-
-                <h2 class="theme-section-title">
-                    Footer
-                </h2>
-
-
-                <div class="theme-grid">
-
-
-                    <div class="color-field">
-
-                        <label class="color-label">
+                <div class="ts-grid ts-grid-2">
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#ffffff;"></span>
                             Footer Background
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="footer_background_color"
-                                class="theme-color-input"
-                                value="{{ theme.footer_background_color|default:'#111827' }}"
-                                data-target="footer-bg-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="footer-bg-text"
-                                class="color-value"
-                                value="{{ theme.footer_background_color|default:'#111827' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="footer_background_color" class="ts-color-picker" value="{{ theme.footer_background_color|default:'#ffffff' }}" data-target="footer-bg-text">
+                            <input type="text" id="footer-bg-text" class="ts-color-value" value="{{ theme.footer_background_color|default:'#ffffff' }}" placeholder="#ffffff" spellcheck="false">
                         </div>
-
                     </div>
 
-
-                    <div class="color-field">
-
-                        <label class="color-label">
-                            Footer Text
+                    <div class="ts-color-field">
+                        <label class="ts-color-label">
+                            <span class="color-swatch" style="background:#ccc;"></span>
+                            Footer Text Color
                         </label>
-
-                        <div class="color-control">
-
-                            <input
-                                type="color"
-                                name="footer_text_color"
-                                class="theme-color-input"
-                                value="{{ theme.footer_text_color|default:'#FFFFFF' }}"
-                                data-target="footer-text"
-                            >
-
-                            <input
-                                type="text"
-                                id="footer-text"
-                                class="color-value"
-                                value="{{ theme.footer_text_color|default:'#FFFFFF' }}"
-                                readonly
-                            >
-
+                        <div class="ts-color-control">
+                            <input type="color" name="footer_text_color" class="ts-color-picker" value="{{ theme.footer_text_color|default:'#ccc' }}" data-target="footer-text">
+                            <input type="text" id="footer-text" class="ts-color-value" value="{{ theme.footer_text_color|default:'#ccc' }}" placeholder="#ccc" spellcheck="false">
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
-
-            <!-- =============================================
+            <!-- ===================================================
                  LIVE PREVIEW
-            ============================================== -->
-
-            <div class="theme-section">
-
-                <h2 class="theme-section-title">
-                    Live Preview
-                </h2>
-
-                <p class="theme-section-description">
-                    Preview how your selected colors will look.
-                </p>
-
-
-                <div
-                    id="themePreview"
-                    class="theme-preview"
-                >
-
-                    <div
-                        id="previewHeader"
-                        class="preview-header"
-                    >
-
-                        <div
-                            id="previewLogo"
-                            class="preview-logo"
-                        >
-                            {{ theme.theme_name|default:"My Store" }}
-                        </div>
-
-                        <div class="preview-nav">
-
-                            <span>
-                                Home
-                            </span>
-
-                            <span>
-                                Shop
-                            </span>
-
-                            <span>
-                                Contact
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <div
-                        id="previewBody"
-                        class="preview-body"
-                    >
-
-                        <h3 id="previewHeading">
-                            Your Website Theme
-                        </h3>
-
-                        <p id="previewText">
-                            This is an example of your
-                            website using the selected colors.
-                        </p>
-
-
-                        <div
-                            id="previewCard"
-                            class="preview-card"
-                        >
-
-                            Example Content Card
-
-                            <br>
-
-                            <button
-                                type="button"
-                                id="previewButton"
-                                class="preview-button"
-                            >
-                                Shop Now
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <div
-                        id="previewFooter"
-                        class="preview-footer"
-                    >
-                        Website Footer
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- =============================================
+            ==================================================== -->
+           
+            <!-- ===================================================
                  ACTIONS
-            ============================================== -->
-
-            <div class="theme-actions">
-
-                {% if theme %}
-
-                    <button
-                        type="button"
-                        class="theme-btn theme-btn-danger"
-                        onclick="openDeleteModal(
-                            '{{ theme.id }}',
-                            '{{ theme.theme_name|escapejs }}'
-                        )"
-                    >
-                        Delete Theme
-                    </button>
-
-                {% endif %}
-
-
-                <button
-                    type="submit"
-                    class="
-                        theme-btn
-                        theme-btn-primary
-                    "
-                >
-
+            ==================================================== -->
+            <div class="ts-actions">
+                <div class="ts-status">
                     {% if theme %}
-                        Update Theme
+                        <i class="fas fa-clock"></i> Last updated: <strong>{{ theme.updated_at|date:"d M Y, h:i A" }}</strong>
                     {% else %}
-                        Create Theme
+                        <i class="fas fa-info-circle"></i> No theme created yet. Create one now.
                     {% endif %}
-
-                </button>
-
+                </div>
+                <div class="ts-actions-right">
+                    {% if theme %}
+                        <button type="button" class="ts-btn ts-btn-danger" onclick="openDeleteModal('{{ theme.id }}', '{{ theme.theme_name|escapejs }}')">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </button>
+                    {% endif %}
+                    <button type="submit" class="ts-btn ts-btn-primary">
+                        <i class="fas fa-save"></i>
+                        {% if theme %}Update Theme{% else %}Create Theme{% endif %}
+                    </button>
+                </div>
             </div>
 
         </form>
-
     </div>
-
 </div>
 
-
-<!-- =========================================================
-     DELETE MODAL
-========================================================== -->
-
-<div
-    id="deleteModal"
-    class="theme-modal-overlay"
-    onclick="closeDeleteOutside(event)"
->
-
-    <div
-        class="theme-modal"
-        onclick="event.stopPropagation()"
-    >
-
-        <div class="theme-modal-header">
-
-            <h3>
-                Delete Theme
-            </h3>
-
+<!-- ============================================================
+   DELETE MODAL
+   ============================================================ -->
+<div id="tsDeleteModal" class="ts-modal-overlay" onclick="closeDeleteOutside(event)">
+    <div class="ts-modal" onclick="event.stopPropagation()">
+        <div class="ts-modal-header">
+            <div class="ts-modal-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h2 class="ts-modal-title">Delete Theme</h2>
         </div>
-
-
-        <div class="theme-modal-body">
-
-            <p>
-                Are you sure you want to delete
-                <strong id="deleteThemeName"></strong>?
-            </p>
-
-            <p>
-                This action cannot be undone.
-            </p>
-
+        <div class="ts-modal-body">
+            <p>Are you sure you want to delete <strong id="tsDeleteName"></strong>?</p>
+            <p><span class="ts-modal-warning">⚠️ This action cannot be undone.</span></p>
+            <p>All theme settings will be permanently removed.</p>
         </div>
-
-
-        <div class="theme-modal-footer">
-
-            <button
-                type="button"
-                class="theme-btn theme-btn-secondary"
-                onclick="closeDeleteModal()"
-            >
-                Cancel
-            </button>
-
-
+        <div class="ts-modal-footer">
+            <button type="button" class="ts-btn ts-btn-secondary" onclick="closeDeleteModal()">Cancel</button>
             <form method="POST">
-
                 {% csrf_token %}
-
-                <input
-                    type="hidden"
-                    name="action"
-                    value="delete"
-                >
-
-                <input
-                    type="hidden"
-                    name="theme_id"
-                    id="deleteThemeId"
-                >
-
-                <button
-                    type="submit"
-                    class="theme-btn theme-btn-danger"
-                >
-                    Yes, Delete
-                </button>
-
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="theme_id" id="tsDeleteId">
+                <button type="submit" class="ts-btn ts-btn-danger"><i class="fas fa-trash-alt"></i> Yes, Delete</button>
             </form>
-
         </div>
-
     </div>
-
 </div>
-
 
 <script>
+/* ============================================================
+   COLOR PICKER SYNC
+   ============================================================ */
+document.querySelectorAll('.ts-color-picker').forEach(function(input) {
+    input.addEventListener('input', function() {
+        const target = document.getElementById(this.dataset.target);
+        if (target) {
+            target.value = this.value;
+        }
+        updatePreview();
+    });
+});
 
-/* =========================================================
-   COLOR PICKER
-========================================================= */
-
-document
-.querySelectorAll(
-    ".theme-color-input"
-)
-.forEach(
-    function(input) {
-
-        input.addEventListener(
-            "input",
-            function() {
-
-                const target =
-                    document.getElementById(
-                        this.dataset.target
-                    );
-
-                if (target) {
-
-                    target.value =
-                        this.value;
-
-                }
-
-                updatePreview();
-
+document.querySelectorAll('.ts-color-value').forEach(function(input) {
+    input.addEventListener('input', function() {
+        const value = this.value.trim();
+        if (/^#[0-9a-fA-F]{6}$/.test(value) || /^#[0-9a-fA-F]{3}$/.test(value)) {
+            const picker = document.querySelector('input[data-target="' + this.id + '"]');
+            if (picker) {
+                picker.value = value;
             }
-        );
+            updatePreview();
+        }
+    });
+});
 
+/* ============================================================
+   TOGGLE STATUS - WITH ANIMATED DOT
+   ============================================================ */
+const tsToggle = document.getElementById('tsActiveToggle');
+const tsStatusLabel = document.getElementById('tsStatusLabel');
+const tsStatusDot = document.getElementById('tsStatusDot');
+
+if (tsToggle) {
+    tsToggle.addEventListener('change', function() {
+        if (this.checked) {
+            tsStatusLabel.innerHTML = '<span class="active-dot active" id="tsStatusDot"></span> Active';
+            tsStatusLabel.style.color = '#2e9d57';
+        } else {
+            tsStatusLabel.innerHTML = '<span class="active-dot inactive" id="tsStatusDot"></span> Inactive';
+            tsStatusLabel.style.color = '#6b7280';
+        }
+    });
+
+    if (tsToggle.checked) {
+        tsStatusLabel.style.color = '#2e9d57';
+    } else {
+        tsStatusLabel.style.color = '#6b7280';
     }
-);
+}
 
-
-/* =========================================================
-   GET COLOR
-========================================================= */
-
-function getColor(name, fallback) {
-
-    const input =
-        document.querySelector(
-            'input[name="' + name + '"]'
-        );
-
-    if (
-        input &&
-        input.value
-    ) {
-
+/* ============================================================
+   GET COLOR VALUE
+   ============================================================ */
+function getColorValue(name, fallback) {
+    const input = document.querySelector('input[name="' + name + '"]');
+    if (input && input.value) {
         return input.value;
-
     }
-
     return fallback;
 }
 
-
-/* =========================================================
+/* ============================================================
    LIVE PREVIEW
-========================================================= */
-
+   ============================================================ */
 function updatePreview() {
+    const primary = getColorValue('primary_color', '#5c121f');
+    const secondary = getColorValue('secondary_color', '#C9A84C');
+    const accent = getColorValue('accent_color', '#D97706');
+    const background = getColorValue('background_color', '#FEF7ED');
+    const surface = getColorValue('surface_color', '#FFFFFF');
+    const text = getColorValue('text_color', '#374151');
+    const heading = getColorValue('heading_color', '#111827');
+    const border = getColorValue('border_color', '#E5E7EB');
+    const headerBg = getColorValue('header_background_color', '#FEF7ED');
+    const headerText = getColorValue('header_text_color', '#111827');
+    const footerBg = getColorValue('footer_background_color', '#ffffff');
+    const footerText = getColorValue('footer_text_color', '#ccc');
+    const buttonText = getColorValue('button_text_color', '#FFFFFF');
+    const buttonHover = getColorValue('button_hover_color', '#D97706');
 
-    const primary =
-        getColor(
-            "primary_color",
-            "#2563EB"
-        );
+    // Header
+    const header = document.getElementById('tsPreviewHeader');
+    header.style.background = headerBg;
+    header.style.color = headerText;
+    header.style.borderBottom = '1px solid ' + border;
 
-    const secondary =
-        getColor(
-            "secondary_color",
-            "#1E40AF"
-        );
+    // Logo
+    document.getElementById('tsPreviewLogo').style.color = primary;
 
-    const accent =
-        getColor(
-            "accent_color",
-            "#F59E0B"
-        );
+    // Body
+    const body = document.getElementById('tsPreviewBody');
+    body.style.background = background;
+    body.style.color = text;
 
-    const background =
-        getColor(
-            "background_color",
-            "#F9FAFB"
-        );
+    // Heading
+    document.getElementById('tsPreviewHeading').style.color = heading;
 
-    const surface =
-        getColor(
-            "surface_color",
-            "#FFFFFF"
-        );
+    // Text
+    document.getElementById('tsPreviewText').style.color = text;
 
-    const text =
-        getColor(
-            "text_color",
-            "#374151"
-        );
+    // Card
+    const card = document.getElementById('tsPreviewCard');
+    card.style.background = surface;
+    card.style.border = '1px solid ' + border;
+    card.style.color = text;
 
-    const heading =
-        getColor(
-            "heading_color",
-            "#111827"
-        );
+    // Button
+    const button = document.getElementById('tsPreviewBtn');
+    button.style.background = primary;
+    button.style.color = buttonText;
+    button.onmouseenter = function() {
+        this.style.background = buttonHover;
+    };
+    button.onmouseleave = function() {
+        this.style.background = primary;
+    };
 
-    const border =
-        getColor(
-            "border_color",
-            "#E5E7EB"
-        );
-
-    const headerBg =
-        getColor(
-            "header_background_color",
-            "#FFFFFF"
-        );
-
-    const headerText =
-        getColor(
-            "header_text_color",
-            "#111827"
-        );
-
-    const footerBg =
-        getColor(
-            "footer_background_color",
-            "#111827"
-        );
-
-    const footerText =
-        getColor(
-            "footer_text_color",
-            "#FFFFFF"
-        );
-
-    const buttonText =
-        getColor(
-            "button_text_color",
-            "#FFFFFF"
-        );
-
-    const buttonHover =
-        getColor(
-            "button_hover_color",
-            "#1D4ED8"
-        );
-
-
-    /* Header */
-
-    const header =
-        document.getElementById(
-            "previewHeader"
-        );
-
-    header.style.background =
-        headerBg;
-
-    header.style.color =
-        headerText;
-
-
-    /* Logo */
-
-    document.getElementById(
-        "previewLogo"
-    ).style.color =
-        primary;
-
-
-    /* Body */
-
-    const body =
-        document.getElementById(
-            "previewBody"
-        );
-
-    body.style.background =
-        background;
-
-    body.style.color =
-        text;
-
-
-    /* Heading */
-
-    document.getElementById(
-        "previewHeading"
-    ).style.color =
-        heading;
-
-
-    /* Card */
-
-    const card =
-        document.getElementById(
-            "previewCard"
-        );
-
-    card.style.background =
-        surface;
-
-    card.style.border =
-        "1px solid " + border;
-
-
-    /* Button */
-
-    const button =
-        document.getElementById(
-            "previewButton"
-        );
-
-    button.style.background =
-        primary;
-
-    button.style.color =
-        buttonText;
-
-
-    button.onmouseenter =
-        function() {
-
-            this.style.background =
-                buttonHover;
-
-        };
-
-
-    button.onmouseleave =
-        function() {
-
-            this.style.background =
-                primary;
-
-        };
-
-
-    /* Accent */
-
-    document.getElementById(
-        "previewText"
-    ).style.color =
-        text;
-
-
-    /* Footer */
-
-    const footer =
-        document.getElementById(
-            "previewFooter"
-        );
-
-    footer.style.background =
-        footerBg;
-
-    footer.style.color =
-        footerText;
-
+    // Footer
+    const footer = document.getElementById('tsPreviewFooter');
+    footer.style.background = footerBg;
+    footer.style.color = footerText;
+    footer.style.borderTop = '1px solid ' + border;
 }
 
-
-/* =========================================================
+/* ============================================================
    INITIAL PREVIEW
-========================================================= */
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', function() {
+    updatePreview();
+});
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
-
-        updatePreview();
-
-    }
-);
-
-
-/* =========================================================
+/* ============================================================
    DELETE MODAL
-========================================================= */
-
-function openDeleteModal(
-    id,
-    name
-) {
-
-    document.getElementById(
-        "deleteThemeId"
-    ).value = id;
-
-    document.getElementById(
-        "deleteThemeName"
-    ).textContent = name;
-
-    document.getElementById(
-        "deleteModal"
-    ).classList.add(
-        "active"
-    );
-
-    document.body.style.overflow =
-        "hidden";
+   ============================================================ */
+function openDeleteModal(id, name) {
+    document.getElementById('tsDeleteId').value = id;
+    document.getElementById('tsDeleteName').textContent = name;
+    document.getElementById('tsDeleteModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
 }
-
 
 function closeDeleteModal() {
-
-    document.getElementById(
-        "deleteModal"
-    ).classList.remove(
-        "active"
-    );
-
-    document.body.style.overflow =
-        "";
+    document.getElementById('tsDeleteModal').classList.remove('active');
+    document.body.style.overflow = '';
 }
-
 
 function closeDeleteOutside(event) {
-
-    if (
-        event.target ===
-        event.currentTarget
-    ) {
-
+    if (event.target === event.currentTarget) {
         closeDeleteModal();
-
     }
-
 }
 
-
-/* =========================================================
-   ESC KEY
-========================================================= */
-
-document.addEventListener(
-    "keydown",
-    function(event) {
-
-        if (
-            event.key === "Escape"
-        ) {
-
-            closeDeleteModal();
-
-        }
-
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeDeleteModal();
     }
-);
-
+});
 </script>
 
 {% endblock %}

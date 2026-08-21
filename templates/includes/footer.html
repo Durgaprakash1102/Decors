@@ -55,32 +55,6 @@
             --transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
-        /* ===== DEMO CONTENT ===== */
-        .demo-content {
-            padding: 60px 7%;
-            text-align: center;
-            background: var(--bg-light);
-            flex: 1;
-        }
-        .demo-content h3 {
-            font-family: 'Playfair Display', serif;
-            color: var(--primary);
-            font-weight: 600;
-            font-size: 28px;
-            letter-spacing: -0.3px;
-        }
-        .demo-content p {
-            color: var(--text-light);
-            max-width: 500px;
-            margin: 12px auto 0;
-            font-weight: 400;
-            line-height: 1.7;
-        }
-        .demo-content .highlight {
-            color: var(--primary);
-            font-weight: 600;
-        }
-
         /* ============================================================
                    FOOTER - TWO PART (Professional)
                    ============================================================ */
@@ -261,6 +235,31 @@
         .footer-bottom .links-section ul li a:hover {
             color: var(--primary);
             padding-left: 4px;
+        }
+
+        /* Support contact info - same font style as links */
+        .footer-bottom .links-section .contact-info li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--text-light);
+            font-weight: 400;
+            letter-spacing: 0.2px;
+            line-height: 1.6;
+        }
+
+        .footer-bottom .links-section .contact-info li i {
+            width: 18px;
+            color: var(--primary);
+            font-size: 14px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .footer-bottom .links-section .contact-info li span {
+            flex: 1;
         }
 
         .footer-bottom .copyright {
@@ -592,28 +591,48 @@
             .footer-bottom .container {
                 grid-template-columns: 1fr;
                 gap: 28px;
-                text-align: center;
+                text-align: left;
                 padding-bottom: 25px;
             }
             .footer-bottom .brand-section .logo-img {
-                justify-content: center;
+                justify-content: flex-start;
             }
             .footer-bottom .brand-section .logo-img img {
                 height: 48px;
             }
             .footer-bottom .brand-section p {
                 max-width: 100%;
-                margin: 0 auto;
-                text-align: center;
+                margin: 0;
+                text-align: left;
             }
             .footer-bottom .brand-section .footer-social {
-                justify-content: center;
+                justify-content: flex-start;
             }
             .footer-bottom .links-section ul li a:hover {
                 padding-left: 0;
             }
             .footer-bottom .links-section {
-                text-align: center;
+                text-align: left;
+            }
+
+            /* FIX: Contact info - left aligned with proper icon alignment */
+            .footer-bottom .links-section .contact-info li {
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                text-align: left;
+                justify-content: flex-start;
+            }
+
+            .footer-bottom .links-section .contact-info li i {
+                width: 20px;
+                margin-top: 3px;
+                flex-shrink: 0;
+            }
+
+            .footer-bottom .links-section .contact-info li span {
+                flex: 1;
+                word-break: break-word;
             }
 
             .whatsapp-widget .whatsapp-icon-btn {
@@ -682,6 +701,18 @@
                 padding: 24px 4% 0;
             }
 
+            /* FIX: Contact info - even smaller screens */
+            .footer-bottom .links-section .contact-info li {
+                gap: 10px;
+                font-size: 12px;
+            }
+
+            .footer-bottom .links-section .contact-info li i {
+                width: 18px;
+                font-size: 13px;
+                margin-top: 2px;
+            }
+
             .whatsapp-widget .whatsapp-icon-btn {
                 width: 44px;
                 height: 44px;
@@ -741,7 +772,7 @@
 
             <p>Hi there! 👋 Need assistance with your order or have a question? We're here to help!</p>
 
-            <a href="https://wa.me/919535311718?text=Hi!%20I%20need%20assistance%20with%20my%20order" 
+            <a href="https://wa.me/{{ site_settings.whatsapp_number|default:'919535311718'|cut:'+' }}?text=Hi!%20I%20need%20assistance%20with%20my%20order" 
                target="_blank" 
                class="whatsapp-chat-btn">
                 <i class="fa-brands fa-whatsapp"></i>
@@ -797,66 +828,41 @@
             <!-- Brand Section with Logo Image -->
             <div class="brand-section">
                 <div class="logo-img">
-                    <img src="{% static 'images/newlogo.png' %}" alt="Hyzora" />
+                    <img src="{% if site_settings and site_settings.logo %}{{ site_settings.logo.url }}{% else %}{% static 'images/newlogo.png' %}{% endif %}" alt="{{ site_settings.company_name|default:'Hyzora' }}" />
                 </div>
-                <p>Your trusted online shopping destination for premium home decor and lifestyle products.</p>
-               <div class="footer-social">
-
-    {% if site_settings.facebook_url %}
-        <a href="{{ site_settings.facebook_url }}"
-           target="_blank"
-           rel="noopener noreferrer"
-           aria-label="Facebook">
-            <i class="fa-brands fa-facebook-f"></i>
-        </a>
-    {% endif %}
-
-    {% if site_settings.instagram_url %}
-        <a href="{{ site_settings.instagram_url }}"
-           target="_blank"
-           rel="noopener noreferrer"
-           aria-label="Instagram">
-            <i class="fa-brands fa-instagram"></i>
-        </a>
-    {% endif %}
-
-    {% if site_settings.twitter_url %}
-        <a href="{{ site_settings.twitter_url }}"
-           target="_blank"
-           rel="noopener noreferrer"
-           aria-label="Twitter">
-            <i class="fa-brands fa-twitter"></i>
-        </a>
-    {% endif %}
-
-    {% if site_settings.youtube_url %}
-        <a href="{{ site_settings.youtube_url }}"
-           target="_blank"
-           rel="noopener noreferrer"
-           aria-label="YouTube">
-            <i class="fa-brands fa-youtube"></i>
-        </a>
-    {% endif %}
-
-    {% if site_settings.linkedin_url %}
-        <a href="{{ site_settings.linkedin_url }}"
-           target="_blank"
-           rel="noopener noreferrer"
-           aria-label="LinkedIn">
-            <i class="fa-brands fa-linkedin-in"></i>
-        </a>
-    {% endif %}
-
-    {% if site_settings.pinterest_url %}
-        <a href="{{ site_settings.pinterest_url }}"
-           target="_blank"
-           rel="noopener noreferrer"
-           aria-label="Pinterest">
-            <i class="fa-brands fa-pinterest-p"></i>
-        </a>
-    {% endif %}
-
-</div>
+                <p>{{ site_settings.company_description|default:'Your trusted online shopping destination offering a wide selection of quality products at competitive prices.' }}</p>
+                <div class="footer-social">
+                    {% if site_settings.facebook_url %}
+                        <a href="{{ site_settings.facebook_url }}" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                            <i class="fa-brands fa-facebook-f"></i>
+                        </a>
+                    {% endif %}
+                    {% if site_settings.instagram_url %}
+                        <a href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                    {% endif %}
+                    {% if site_settings.twitter_url %}
+                        <a href="{{ site_settings.twitter_url }}" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                            <i class="fa-brands fa-twitter"></i>
+                        </a>
+                    {% endif %}
+                    {% if site_settings.youtube_url %}
+                        <a href="{{ site_settings.youtube_url }}" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                            <i class="fa-brands fa-youtube"></i>
+                        </a>
+                    {% endif %}
+                    {% if site_settings.linkedin_url %}
+                        <a href="{{ site_settings.linkedin_url }}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                            <i class="fa-brands fa-linkedin-in"></i>
+                        </a>
+                    {% endif %}
+                    {% if site_settings.pinterest_url %}
+                        <a href="{{ site_settings.pinterest_url }}" target="_blank" rel="noopener noreferrer" aria-label="Pinterest">
+                            <i class="fa-brands fa-pinterest-p"></i>
+                        </a>
+                    {% endif %}
+                </div>
             </div>
 
             <!-- Quick Links -->
@@ -881,14 +887,32 @@
                 </ul>
             </div>
 
-            <!-- Support -->
+            <!-- Support with Address, Phone, Email -->
             <div class="links-section">
                 <h4>Support</h4>
-                <ul>
-                    <li><a href="#">FAQs</a></li>
-                    <li><a href="#">Track Order</a></li>
-                    <li><a href="#">Exchange</a></li>
-                    <li><a href="#">Customer Care</a></li>
+                <ul class="contact-info">
+                    <li>
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span>
+                            {% if site_settings.address_line_1 %}
+                                {{ site_settings.address_line_1 }},
+                                {% if site_settings.address_line_2 %}{{ site_settings.address_line_2 }},{% endif %}
+                                {{ site_settings.city|default:'' }},
+                                {{ site_settings.state|default:'' }} {{ site_settings.pincode|default:'' }},
+                                {{ site_settings.country|default:'India' }}
+                            {% else %}
+                                Shop with confidence - We deliver quality products across India with fast and reliable shipping right to your doorstep.
+                            {% endif %}
+                        </span>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-phone"></i>
+                        <span>{% if site_settings.phone %}{{ site_settings.phone }}{% else %}+91 98765 43210{% endif %}</span>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-envelope"></i>
+                        <span>{% if site_settings.email %}{{ site_settings.email }}{% else %}support@hyzora.com{% endif %}</span>
+                    </li>
                 </ul>
             </div>
 
@@ -896,7 +920,7 @@
 
         <!-- Copyright -->
         <div class="copyright">
-            <p>&copy; 2026 <span>Hyzora</span>. All Rights Reserved.</p>
+            <p>&copy; {% now "Y" %} <span>{{ site_settings.company_name|default:'Hyzora' }}</span>. All Rights Reserved.</p>
         </div>
     </footer>
 
