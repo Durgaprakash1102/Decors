@@ -100,9 +100,13 @@ body{
 .category-grid{
     display:grid;
     grid-template-columns:repeat(3,1fr);
-    gap:24px;
+    gap:15px;
 }
-
+@media (min-width: 1351px) {
+    .category-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
 .category-card{
     background:var(--white);
     border:1px solid var(--border);
