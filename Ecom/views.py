@@ -686,14 +686,13 @@ def verify_otp_view(request):
                 request.session.pop('employee_creation', None)
                 
                 # Send account created SMS
-                send_account_created_success_sms(user)
                 
                 if is_employee_creation:
                     messages.success(request, f'Employee "{user.full_name}" account created successfully!')
                     return redirect('Ecom:admin_dashboard')
                 
                 login(request, user)
-                messages.success(request, f'Account created successfully! Welcome to Hyzora, {user.full_name}!')
+                messages.success(request, f'Account created successfully! Welcome, {user.full_name}!')
                 
                 if user.is_admin:
                     return redirect('Ecom:admin_dashboard')

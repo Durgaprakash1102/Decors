@@ -1,884 +1,1316 @@
+{% extends 'includes/sidebar.html' %}
+{% load static %}
 
-
-{% block title %}
-Contact Enquiries
-{% endblock %}
-
+{% block title %}Contact Enquiries{% endblock %}
 
 {% block content %}
 
 <style>
-
-/* =========================================================
-   PAGE
-========================================================= */
-
-.contact-admin {
-    max-width: 1450px;
-    margin: auto;
-    padding: 35px 25px 60px;
+/* ============================================================
+   ROOT VARIABLES
+   ============================================================ */
+:root {
+    --ws-primary: #5c121f;
+    --ws-primary-light: #7a1a2b;
+    --ws-primary-dark: #3d0c14;
+    --ws-gold: #C9A84C;
+    --ws-gold-light: #E8D5A3;
+    --ws-gold-dark: #A8893A;
+    --ws-bg: #f5f0eb;
+    --ws-white: #ffffff;
+    --ws-border: #e8e4e0;
+    --ws-text: #1d1d1d;
+    --ws-text-light: #6d6d6d;
+    --ws-text-muted: #888888;
+    --ws-success: #2e9d57;
+    --ws-danger: #d64045;
+    --ws-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    --ws-shadow-hover: 0 20px 50px rgba(92,18,31,0.12);
+    --ws-transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --ws-radius: 16px;
+    --ws-radius-sm: 10px;
+    --ws-radius-xs: 8px;
+    --ws-font: 'Inter', sans-serif;
 }
 
+/* ============================================================
+   MAIN WRAPPER - NO PADDING
+   ============================================================ */
+.enquiries-wrapper {
+    width: 100%;
+    background: var(--ws-bg);
+    min-height: calc(100vh - 180px);
+}
 
-/* =========================================================
-   HEADER
-========================================================= */
+/* ============================================================
+   HERO / HEADER SECTION
+   ============================================================ */
+.hero-section {
+    background: linear-gradient(135deg, var(--ws-primary));
+    padding: 28px 36px;
+    border-radius: 0 0 24px 24px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
 
-.admin-header {
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hero-section::after {
+    content: '';
+    position: absolute;
+    bottom: -60%;
+    left: -5%;
+    width: 300px;
+    height: 300px;
+    background: rgba(201,168,76,0.05);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hero-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+    gap: 14px;
 }
 
-.admin-title {
-    margin: 0;
-    font-size: 30px;
-    color: #111827;
+.hero-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
-.admin-subtitle {
-    margin-top: 6px;
-    color: #6b7280;
-    font-size: 14px;
-}
-
-
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-.btn {
-    border: none;
-    border-radius: 7px;
-    padding: 9px 14px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-flex;
+.hero-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--ws-gold);
+    font-size: 22px;
+    border: 1px solid rgba(255,255,255,0.08);
 }
 
-.btn-primary {
-    background: #2563eb;
-    color: white;
+.hero-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ws-white);
+    margin: 0;
+    letter-spacing: -0.3px;
+    font-family: var(--ws-font);
 }
 
-.btn-primary:hover {
-    background: #1d4ed8;
+.hero-title span {
+    color: var(--ws-gold);
 }
 
-.btn-secondary {
-    background: #f3f4f6;
-    color: #374151;
+.hero-sub {
+    color: rgba(255,255,255,0.7);
+    font-size: 13px;
+    margin: 2px 0 0;
+    font-family: var(--ws-font);
 }
 
-.btn-edit {
-    background: #eff6ff;
-    color: #2563eb;
+.hero-right {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
-.btn-delete {
-    background: #fef2f2;
-    color: #dc2626;
+.hero-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border-radius: var(--ws-radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--ws-font);
+    border: none;
+    cursor: pointer;
+    transition: var(--ws-transition);
+    text-decoration: none;
 }
 
-.btn-reply {
-    background: #ecfdf5;
-    color: #047857;
+.hero-btn-primary {
+    background: var(--ws-gold);
+    color: var(--ws-primary);
 }
 
-
-/* =========================================================
-   ALERT
-========================================================= */
-
-.alert {
-    padding: 13px 16px;
-    border-radius: 7px;
-    margin-bottom: 18px;
-    font-size: 14px;
+.hero-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(201,168,76,0.3);
+    background: var(--ws-gold-light);
 }
 
-.alert-success {
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-    color: #047857;
+.hero-btn-outline {
+    background: rgba(255,255,255,0.08);
+    color: var(--ws-white);
+    border: 1px solid rgba(255,255,255,0.15);
 }
 
-.alert-error {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #b91c1c;
+.hero-btn-outline:hover {
+    background: rgba(255,255,255,0.15);
+    transform: translateY(-2px);
 }
 
+/* ============================================================
+   MAIN CARD - All sections inside one card
+   ============================================================ */
+.main-card {
+    background: var(--ws-white);
+    border-radius: var(--ws-radius);
+    border: 1px solid var(--ws-border);
+    box-shadow: var(--ws-shadow);
+    overflow: hidden;
+}
 
-/* =========================================================
-   STATS
-========================================================= */
+/* ============================================================
+   STATS INSIDE CARD
+   ============================================================ */
+.stats-section {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--ws-border);
+    background: var(--ws-bg);
+}
 
-.stats {
+.stats-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 15px;
-    margin-bottom: 22px;
+    gap: 14px;
 }
 
-.stat {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 18px;
+.stat-item {
+    text-align: center;
+    padding: 8px 10px;
+    background: var(--ws-white);
+    border-radius: var(--ws-radius-sm);
+    border: 1px solid var(--ws-border);
+    transition: var(--ws-transition);
 }
 
-.stat-label {
-    color: #6b7280;
-    font-size: 12px;
-    font-weight: 600;
+.stat-item:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--ws-shadow-hover);
 }
 
-.stat-value {
-    margin-top: 6px;
-    font-size: 25px;
+.stat-item .stat-number {
+    font-size: 26px;
     font-weight: 700;
-    color: #111827;
+    font-family: var(--ws-font);
+    line-height: 1.2;
 }
 
+.stat-item .stat-number.c1 { color: var(--ws-primary); }
+.stat-item .stat-number.c2 { color: #4a6cf7; }
+.stat-item .stat-number.c3 { color: #6b7280; }
+.stat-item .stat-number.c4 { color: #1a8a4a; }
+.stat-item .stat-number.c5 { color: #c0392b; }
 
-/* =========================================================
-   FILTER
-========================================================= */
+.stat-item .stat-label-text {
+    font-size: 10px;
+    color: var(--ws-text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    font-family: var(--ws-font);
+    margin-top: 2px;
+}
 
-.filter-box {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 18px;
-    margin-bottom: 20px;
+/* ============================================================
+   FILTER INSIDE CARD
+   ============================================================ */
+.filter-section {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--ws-border);
 }
 
 .filter-form {
     display: flex;
-    gap: 10px;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
-.filter-input {
+.filter-form .input-ws {
     flex: 1;
-    padding: 10px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 7px;
+    min-width: 180px;
+    padding: 9px 14px;
+    border: 2px solid var(--ws-border);
+    border-radius: var(--ws-radius-sm);
+    font-size: 13px;
+    font-family: var(--ws-font);
+    transition: var(--ws-transition);
+    outline: none;
+    background: var(--ws-white);
+    color: var(--ws-text);
+}
+
+.filter-form .input-ws:focus {
+    border-color: var(--ws-primary);
+    box-shadow: 0 0 0 3px rgba(92,18,31,0.06);
+}
+
+.filter-form .input-ws::placeholder {
+    color: var(--ws-text-muted);
+}
+
+.filter-form .select-wrap {
+    position: relative;
+    flex: 0 0 160px;
+}
+
+.filter-form .select-wrap::after {
+    content: '\f078';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ws-text-muted);
+    font-size: 10px;
+    pointer-events: none;
+}
+
+.filter-form .select-ws {
+    width: 100%;
+    padding: 9px 34px 9px 14px;
+    border: 2px solid var(--ws-border);
+    border-radius: var(--ws-radius-sm);
+    font-size: 13px;
+    font-family: var(--ws-font);
+    background: var(--ws-white);
+    color: var(--ws-text);
+    cursor: pointer;
+    appearance: none;
+    transition: var(--ws-transition);
     outline: none;
 }
 
-.filter-input:focus {
-    border-color: #2563eb;
+.filter-form .select-ws:focus {
+    border-color: var(--ws-primary);
+    box-shadow: 0 0 0 3px rgba(92,18,31,0.06);
 }
 
-.filter-select {
-    flex: 0 0 170px;
-}
-
-
-/* =========================================================
-   TABLE
-========================================================= */
-
-.table-card {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.table-wrapper {
-    overflow-x: auto;
-}
-
-.contact-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.contact-table th {
-    background: #f9fafb;
-    padding: 14px;
-    text-align: left;
-    color: #6b7280;
-    font-size: 11px;
-    text-transform: uppercase;
-    white-space: nowrap;
-}
-
-.contact-table td {
-    padding: 14px;
-    border-top: 1px solid #f0f0f0;
-    font-size: 13px;
-    color: #374151;
-}
-
-.contact-table tr:hover {
-    background: #fafafa;
-}
-
-
-/* =========================================================
-   NEW ROW
-========================================================= */
-
-.new-row {
-    background: #eff6ff;
-}
-
-.new-row:hover {
-    background: #dbeafe !important;
-}
-
-
-/* =========================================================
-   STATUS
-========================================================= */
-
-.status {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.status-new {
-    background: #dbeafe;
-    color: #1d4ed8;
-}
-
-.status-read {
-    background: #f3f4f6;
-    color: #4b5563;
-}
-
-.status-replied {
-    background: #dcfce7;
-    color: #15803d;
-}
-
-.status-closed {
-    background: #fee2e2;
-    color: #b91c1c;
-}
-
-
-/* =========================================================
-   ACTIONS
-========================================================= */
-
-.actions {
+.filter-actions {
     display: flex;
-    gap: 5px;
-    white-space: nowrap;
+    gap: 8px;
 }
 
-
-/* =========================================================
-   MODAL
-========================================================= */
-
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(17,24,39,.65);
-    display: none;
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn-premium {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    padding: 20px;
-    z-index: 99999;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: var(--ws-radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--ws-font);
+    border: none;
+    cursor: pointer;
+    transition: var(--ws-transition);
+    text-decoration: none;
 }
 
-.modal-overlay.active {
-    display: flex;
+.btn-premium-primary {
+    background: linear-gradient(135deg, var(--ws-primary), var(--ws-primary-dark));
+    color: var(--ws-white);
+    box-shadow: 0 4px 14px rgba(92,18,31,0.2);
 }
 
-.modal {
-    width: 100%;
-    max-width: 700px;
-    max-height: 92vh;
-    overflow-y: auto;
-    background: white;
-    border-radius: 12px;
+.btn-premium-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(92,18,31,0.3);
 }
 
-.modal-small {
-    max-width: 430px;
+.btn-premium-secondary {
+    background: var(--ws-white);
+    color: var(--ws-text);
+    border: 1px solid var(--ws-border);
 }
 
-.modal-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid #e5e7eb;
+.btn-premium-secondary:hover {
+    background: var(--ws-bg);
+    transform: translateY(-2px);
+}
+
+.btn-premium-view {
+    background: #eef3ff;
+    color: #4a6cf7;
+}
+
+.btn-premium-view:hover {
+    background: #4a6cf7;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.btn-premium-edit {
+    background: #fff8e7;
+    color: #b8860b;
+}
+
+.btn-premium-edit:hover {
+    background: #b8860b;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.btn-premium-reply {
+    background: #e8f5ed;
+    color: #1a8a4a;
+}
+
+.btn-premium-reply:hover {
+    background: #1a8a4a;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.btn-premium-danger {
+    background: #fde8e8;
+    color: #c0392b;
+}
+
+.btn-premium-danger:hover {
+    background: #c0392b;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.btn-premium-sm {
+    padding: 5px 10px;
+    font-size: 11px;
+    border-radius: var(--ws-radius-xs);
+    gap: 3px;
+}
+
+/* ============================================================
+   ALERT
+   ============================================================ */
+.alert-premium {
+    padding: 12px 18px;
+    border-radius: var(--ws-radius-sm);
+    margin-bottom: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.modal-title {
-    margin: 0;
-    font-size: 20px;
-    color: #111827;
-}
-
-.modal-close {
-    border: none;
-    background: #f3f4f6;
-    width: 34px;
-    height: 34px;
-    border-radius: 7px;
-    cursor: pointer;
-    font-size: 20px;
-}
-
-.modal-body {
-    padding: 24px;
-}
-
-.modal-footer {
-    padding: 18px 24px;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-
-/* =========================================================
-   FORM
-========================================================= */
-
-.form-group {
-    margin-bottom: 17px;
-}
-
-.form-label {
-    display: block;
-    margin-bottom: 6px;
     font-size: 13px;
-    font-weight: 600;
-    color: #374151;
+    font-family: var(--ws-font);
+    border-left: 4px solid;
 }
 
-.admin-input {
+.alert-premium-success {
+    background: #ecfdf5;
+    border-left-color: #047857;
+    color: #047857;
+}
+
+.alert-premium-error {
+    background: #fef2f2;
+    border-left-color: #dc2626;
+    color: #dc2626;
+}
+
+.alert-premium-info {
+    background: #eff6ff;
+    border-left-color: #2563eb;
+    color: #2563eb;
+}
+
+.alert-premium-close {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 18px;
+    opacity: 0.5;
+    transition: var(--ws-transition);
+    padding: 0 4px;
+}
+
+.alert-premium-close:hover {
+    opacity: 1;
+}
+
+.alert-wrapper {
+    padding: 16px 24px 0;
+}
+
+/* ============================================================
+   TABLE - Premium Design
+   ============================================================ */
+.table-section {
+    padding: 0;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+.table-premium {
     width: 100%;
-    box-sizing: border-box;
-    padding: 11px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 7px;
-    outline: none;
+    border-collapse: collapse;
+    font-family: var(--ws-font);
+}
+
+.table-premium thead {
+    background: var(--ws-bg);
+}
+
+.table-premium th {
+    padding: 12px 18px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--ws-text-muted);
+    border-bottom: 2px solid var(--ws-border);
+    white-space: nowrap;
+}
+
+.table-premium td {
+    padding: 12px 18px;
+    border-top: 1px solid var(--ws-border);
+    font-size: 13px;
+    color: var(--ws-text);
+    vertical-align: middle;
+}
+
+.table-premium tbody tr {
+    transition: var(--ws-transition);
+}
+
+.table-premium tbody tr:hover {
+    background: rgba(245,240,235,0.5);
+}
+
+.table-premium .row-new {
+    background: #f0f4ff;
+}
+
+.table-premium .row-new:hover {
+    background: #e4ebff !important;
+}
+
+.customer-name {
+    font-weight: 600;
+    color: var(--ws-primary);
     font-size: 14px;
 }
 
-.admin-input:focus {
-    border-color: #2563eb;
-}
-
-.admin-textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-
-/* =========================================================
-   VIEW
-========================================================= */
-
-.view-field {
-    margin-bottom: 20px;
-}
-
-.view-label {
+.customer-phone {
     display: block;
     font-size: 11px;
-    color: #6b7280;
-    text-transform: uppercase;
-    font-weight: 700;
-    margin-bottom: 6px;
+    color: var(--ws-text-muted);
+    font-weight: 400;
+    margin-top: 1px;
 }
 
-.view-value {
-    color: #111827;
-    font-size: 14px;
-}
-
-.message-box {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 15px;
-    white-space: pre-line;
-    line-height: 1.7;
-}
-
-
-/* =========================================================
-   PAGINATION
-========================================================= */
-
-.pagination {
-    display: flex;
-    justify-content: center;
-    gap: 7px;
-    padding: 20px;
-}
-
-.page-link {
-    padding: 7px 11px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
+.email-link {
+    color: var(--ws-primary);
     text-decoration: none;
-    color: #374151;
+    font-weight: 500;
     font-size: 13px;
 }
 
-.page-active {
-    background: #2563eb;
-    color: white;
-    border-color: #2563eb;
+.email-link:hover {
+    text-decoration: underline;
 }
 
+.subject-text {
+    font-weight: 500;
+    color: var(--ws-text);
+}
 
-/* =========================================================
+/* ============================================================
+   STATUS BADGE
+   ============================================================ */
+.badge-premium {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 12px;
+    border-radius: 30px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    font-family: var(--ws-font);
+}
+
+.badge-premium .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.badge-new {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+.badge-new .dot { background: #1d4ed8; animation: pulse-dot 1.5s infinite; }
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.badge-read {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+.badge-read .dot { background: #4b5563; }
+
+.badge-replied {
+    background: #dcfce7;
+    color: #15803d;
+}
+.badge-replied .dot { background: #15803d; }
+
+.badge-closed {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+.badge-closed .dot { background: #b91c1c; }
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+.actions-group {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* ============================================================
+   PAGINATION
+   ============================================================ */
+.pagination-premium {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    padding: 14px 18px;
+    border-top: 1px solid var(--ws-border);
+    background: var(--ws-bg);
+}
+
+.page-link-premium {
+    padding: 6px 14px;
+    border: 1px solid var(--ws-border);
+    border-radius: var(--ws-radius-xs);
+    text-decoration: none;
+    color: var(--ws-text);
+    font-size: 13px;
+    font-family: var(--ws-font);
+    transition: var(--ws-transition);
+    background: var(--ws-white);
+}
+
+.page-link-premium:hover {
+    background: var(--ws-bg);
+    border-color: var(--ws-primary);
+}
+
+.page-link-premium.active {
+    background: var(--ws-primary);
+    color: var(--ws-white);
+    border-color: var(--ws-primary);
+}
+
+/* ============================================================
+   MODALS - REDUCED HEIGHT
+   ============================================================ */
+.modal-overlay-premium {
+    position: fixed;
+    inset: 0;
+    background: rgba(17,24,39,0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    padding: 16px;
+}
+
+.modal-overlay-premium.active {
+    display: flex;
+}
+
+.modal-premium {
+    background: var(--ws-white);
+    border-radius: var(--ws-radius);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: modalSlide 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    max-height: 70vh;
+    border: 1px solid var(--ws-border);
+}
+
+.modal-premium-sm {
+    max-width: 400px;
+    width: 100%;
+}
+
+@keyframes modalSlide {
+    from { opacity: 0; transform: scale(0.95) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-premium-header {
+    padding: 14px 18px;
+    border-bottom: 2px solid var(--ws-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    background: var(--ws-bg);
+    border-radius: var(--ws-radius) var(--ws-radius) 0 0;
+}
+
+.modal-premium-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ws-primary);
+    font-family: var(--ws-font);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-premium-title i {
+    color: var(--ws-gold);
+    font-size: 16px;
+}
+
+.modal-premium-close {
+    border: none;
+    background: var(--ws-white);
+    width: 28px;
+    height: 28px;
+    border-radius: var(--ws-radius-xs);
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--ws-text-muted);
+    transition: var(--ws-transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--ws-border);
+}
+
+.modal-premium-close:hover {
+    background: var(--ws-danger);
+    color: var(--ws-white);
+    border-color: var(--ws-danger);
+}
+
+.modal-premium-body {
+    padding: 14px 18px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-premium-body-scroll {
+    max-height: 35vh;
+    overflow-y: auto;
+    padding-right: 3px;
+}
+
+.modal-premium-body-scroll::-webkit-scrollbar {
+    width: 3px;
+}
+
+.modal-premium-body-scroll::-webkit-scrollbar-track {
+    background: var(--ws-bg);
+    border-radius: 10px;
+}
+
+.modal-premium-body-scroll::-webkit-scrollbar-thumb {
+    background: var(--ws-border);
+    border-radius: 10px;
+}
+
+.modal-premium-footer {
+    padding: 12px 18px 16px;
+    border-top: 1px solid var(--ws-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    background: var(--ws-bg);
+    border-radius: 0 0 var(--ws-radius) var(--ws-radius);
+}
+
+/* ============================================================
+   FORM FIELDS - Compact
+   ============================================================ */
+.field-premium {
+    margin-bottom: 12px;
+}
+
+.field-premium:last-child {
+    margin-bottom: 0;
+}
+
+.label-premium {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ws-text);
+    margin-bottom: 4px;
+    font-family: var(--ws-font);
+}
+
+.label-premium .required {
+    color: var(--ws-danger);
+    margin-left: 2px;
+}
+
+.input-premium {
+    width: 100%;
+    padding: 7px 12px;
+    border: 2px solid var(--ws-border);
+    border-radius: var(--ws-radius-xs);
+    font-size: 13px;
+    font-family: var(--ws-font);
+    color: var(--ws-text);
+    background: var(--ws-white);
+    transition: var(--ws-transition);
+    outline: none;
+    box-sizing: border-box;
+}
+
+.input-premium:focus {
+    border-color: var(--ws-primary);
+    box-shadow: 0 0 0 3px rgba(92,18,31,0.06);
+}
+
+.input-premium[readonly] {
+    background: var(--ws-bg);
+    cursor: default;
+}
+
+.textarea-premium {
+    width: 100%;
+    padding: 7px 12px;
+    border: 2px solid var(--ws-border);
+    border-radius: var(--ws-radius-xs);
+    font-size: 13px;
+    font-family: var(--ws-font);
+    color: var(--ws-text);
+    background: var(--ws-white);
+    transition: var(--ws-transition);
+    outline: none;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 60px;
+    line-height: 1.5;
+}
+
+.textarea-premium:focus {
+    border-color: var(--ws-primary);
+    box-shadow: 0 0 0 3px rgba(92,18,31,0.06);
+}
+
+.textarea-premium-mini {
+    min-height: 50px;
+}
+
+.textarea-premium-large {
+    min-height: 100px;
+}
+
+/* ============================================================
+   VIEW DETAILS - Compact
+   ============================================================ */
+.detail-premium-row {
+    display: flex;
+    padding: 5px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-premium-row:last-child {
+    border-bottom: none;
+}
+
+.detail-premium-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ws-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    min-width: 75px;
+    flex-shrink: 0;
+}
+
+.detail-premium-value {
+    font-size: 13px;
+    color: var(--ws-text);
+    word-break: break-word;
+}
+
+.detail-premium-box {
+    background: var(--ws-bg);
+    border: 1px solid var(--ws-border);
+    border-radius: var(--ws-radius-xs);
+    padding: 8px 12px;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    font-size: 13px;
+    max-height: 100px;
+    overflow-y: auto;
+    margin-top: 2px;
+}
+
+.detail-premium-box::-webkit-scrollbar {
+    width: 3px;
+}
+
+.detail-premium-box::-webkit-scrollbar-thumb {
+    background: var(--ws-border);
+    border-radius: 10px;
+}
+
+.detail-premium-empty {
+    color: var(--ws-text-muted);
+    font-style: italic;
+    font-size: 12px;
+}
+
+.info-note-premium {
+    background: #eff6ff;
+    color: #1d4ed8;
+    padding: 8px 12px;
+    border-radius: var(--ws-radius-xs);
+    font-size: 12px;
+    line-height: 1.5;
+    margin-top: 10px;
+    border-left: 3px solid #1d4ed8;
+}
+
+/* ============================================================
    RESPONSIVE
-========================================================= */
-
-@media(max-width: 1000px) {
-
-    .stats {
+   ============================================================ */
+@media (max-width: 1200px) {
+    .stats-grid {
         grid-template-columns: repeat(3, 1fr);
     }
-
 }
 
-@media(max-width: 700px) {
+@media (max-width: 992px) {
+    .hero-section {
+        padding: 20px 24px;
+        border-radius: 0 0 18px 18px;
+    }
+    .main-card {
+        margin: 0 20px 30px;
+    }
+    .hero-title {
+        font-size: 20px;
+    }
+    .hero-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 18px;
+    }
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+    .stat-item .stat-number {
+        font-size: 22px;
+    }
+}
 
-    .admin-header {
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 16px 18px;
+        border-radius: 0 0 14px 14px;
+    }
+    .hero-content {
         flex-direction: column;
-        align-items: stretch;
-        gap: 15px;
+        align-items: flex-start;
     }
-
-    .stats {
+    .hero-right {
+        width: 100%;
+    }
+    .hero-right .hero-btn {
+        flex: 1;
+        justify-content: center;
+        font-size: 12px;
+        padding: 8px 16px;
+    }
+    .main-card {
+        margin: 0 14px 24px;
+    }
+    .hero-title {
+        font-size: 18px;
+    }
+    .hero-sub {
+        font-size: 12px;
+    }
+    .hero-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 16px;
+        border-radius: 10px;
+    }
+    .stats-section {
+        padding: 14px 16px;
+    }
+    .stats-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
     }
-
+    .stat-item {
+        padding: 6px 8px;
+    }
+    .stat-item .stat-number {
+        font-size: 20px;
+    }
+    .stat-item .stat-label-text {
+        font-size: 9px;
+    }
+    .filter-section {
+        padding: 12px 16px;
+    }
     .filter-form {
         flex-direction: column;
     }
-
-    .filter-select {
+    .filter-form .input-ws {
+        min-width: auto;
+        width: 100%;
+    }
+    .filter-form .select-wrap {
         flex: auto;
+        width: 100%;
     }
-
+    .filter-actions {
+        width: 100%;
+    }
+    .filter-actions .btn-premium {
+        flex: 1;
+        justify-content: center;
+        font-size: 12px;
+        padding: 8px 14px;
+    }
+    .table-premium th,
+    .table-premium td {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+    .modal-premium {
+        max-width: 100%;
+        margin: 0 6px;
+        max-height: 75vh;
+    }
+    .modal-premium-body-scroll {
+        max-height: 30vh;
+    }
+    .actions-group .btn-premium-sm {
+        font-size: 10px;
+        padding: 3px 7px;
+    }
+    .detail-premium-label {
+        min-width: 65px;
+        font-size: 9px;
+    }
+    .detail-premium-value {
+        font-size: 12px;
+    }
+    .modal-premium-header {
+        padding: 12px 14px;
+    }
+    .modal-premium-title {
+        font-size: 15px;
+    }
+    .modal-premium-body {
+        padding: 12px 14px;
+    }
+    .modal-premium-footer {
+        padding: 10px 14px 14px;
+        flex-direction: column-reverse;
+    }
+    .modal-premium-footer .btn-premium {
+        justify-content: center;
+        width: 100%;
+        font-size: 12px;
+        padding: 8px 14px;
+    }
 }
 
-@media(max-width: 450px) {
-
-    .stats {
-        grid-template-columns: 1fr;
+@media (max-width: 480px) {
+    .hero-section {
+        padding: 14px 14px;
+        border-radius: 0 0 12px 12px;
     }
-
+    .main-card {
+        margin: 0 8px 16px;
+        border-radius: var(--ws-radius-sm);
+    }
+    .hero-title {
+        font-size: 16px;
+    }
+    .hero-icon {
+        width: 34px;
+        height: 34px;
+        font-size: 14px;
+    }
+    .hero-btn {
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+    .stats-section {
+        padding: 10px 12px;
+    }
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+    .stat-item {
+        padding: 4px 6px;
+    }
+    .stat-item .stat-number {
+        font-size: 17px;
+    }
+    .stat-item .stat-label-text {
+        font-size: 8px;
+    }
+    .filter-section {
+        padding: 10px 12px;
+    }
+    .filter-form .input-ws {
+        font-size: 12px;
+        padding: 7px 10px;
+    }
+    .filter-form .select-ws {
+        font-size: 12px;
+        padding: 7px 30px 7px 10px;
+    }
+    .table-premium th,
+    .table-premium td {
+        padding: 5px 6px;
+        font-size: 10px;
+    }
+    .btn-premium {
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+    .btn-premium-sm {
+        font-size: 9px;
+        padding: 2px 5px;
+    }
+    .modal-premium {
+        max-height: 80vh;
+    }
+    .modal-premium-body-scroll {
+        max-height: 25vh;
+    }
+    .modal-premium-title {
+        font-size: 14px;
+    }
+    .modal-premium-body {
+        padding: 10px 12px;
+    }
+    .detail-premium-row {
+        flex-direction: column;
+        padding: 4px 0;
+    }
+    .detail-premium-label {
+        min-width: auto;
+        margin-bottom: 1px;
+    }
+    .detail-premium-box {
+        max-height: 70px;
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+    .pagination-premium .page-link-premium {
+        padding: 4px 10px;
+        font-size: 12px;
+    }
 }
-
 </style>
 
+<!-- ============================================================
+   MAIN WRAPPER - NO PADDING
+   ============================================================ -->
+<div class="enquiries-wrapper">
 
-<div class="contact-admin">
-
-
-    <!-- =====================================================
-         HEADER
-    ====================================================== -->
-
-    <div class="admin-header">
-
-        <div>
-
-            <h1 class="admin-title">
-                Contact Enquiries
-            </h1>
-
-            <p class="admin-subtitle">
-                Manage customer enquiries and replies.
-            </p>
-
+    <!-- ===== HERO SECTION ===== -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="hero-left">
+                <div class="hero-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div>
+                    <h1 class="hero-title">Contact <span>Enquiries</span></h1>
+                    <p class="hero-sub">Manage customer enquiries and replies</p>
+                </div>
+            </div>
+            <div class="hero-right">
+                <button type="button" class="hero-btn hero-btn-primary" onclick="openCreateModal()">
+                    <i class="fas fa-plus"></i> New Enquiry
+                </button>
+                <button type="button" class="hero-btn hero-btn-outline" onclick="window.location.reload()">
+                    <i class="fas fa-sync"></i>
+                </button>
+            </div>
         </div>
-
-
-        <button
-            type="button"
-            class="btn btn-primary"
-            onclick="openCreateModal()"
-        >
-            + New Enquiry
-        </button>
-
     </div>
 
+    <!-- ===== MAIN CARD ===== -->
+    <div class="main-card">
 
-    <!-- =====================================================
-         MESSAGES
-    ====================================================== -->
-
-    {% if messages %}
-
-        {% for message in messages %}
-
-            <div
-                class="
-                    alert
-                    {% if message.tags == 'error' %}
-                        alert-error
-                    {% else %}
-                        alert-success
-                    {% endif %}
-                "
-            >
-                {{ message }}
+        <!-- ===== ALERT ===== -->
+        {% if messages %}
+            <div class="alert-wrapper">
+                {% for message in messages %}
+                    <div class="alert-premium alert-premium-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %}">
+                        <span>{{ message }}</span>
+                        <button type="button" class="alert-premium-close" onclick="this.parentElement.remove()">×</button>
+                    </div>
+                {% endfor %}
             </div>
+        {% endif %}
 
-        {% endfor %}
-
-    {% endif %}
-
-
-    <!-- =====================================================
-         STATISTICS
-    ====================================================== -->
-
-    <div class="stats">
-
-
-        <div class="stat">
-
-            <div class="stat-label">
-                Total
+        <!-- ===== STATS ===== -->
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number c1">{{ total_messages }}</div>
+                    <div class="stat-label-text">Total</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number c2">{{ new_messages }}</div>
+                    <div class="stat-label-text">New</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number c3">{{ read_messages }}</div>
+                    <div class="stat-label-text">Read</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number c4">{{ replied_messages }}</div>
+                    <div class="stat-label-text">Replied</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number c5">{{ closed_messages }}</div>
+                    <div class="stat-label-text">Closed</div>
+                </div>
             </div>
-
-            <div class="stat-value">
-                {{ total_messages }}
-            </div>
-
         </div>
 
+        <!-- ===== FILTER ===== -->
+        <div class="filter-section">
+            <form method="GET" class="filter-form">
+                <input type="text" name="search" class="input-ws" placeholder="🔍 Search name, email, phone, subject..." value="{{ search }}">
 
-        <div class="stat">
+                <div class="select-wrap">
+                    <select name="status" class="select-ws">
+                        <option value="">All Status</option>
+                        <option value="new" {% if status_filter == "new" %}selected{% endif %}>New</option>
+                        <option value="read" {% if status_filter == "read" %}selected{% endif %}>Read</option>
+                        <option value="replied" {% if status_filter == "replied" %}selected{% endif %}>Replied</option>
+                        <option value="closed" {% if status_filter == "closed" %}selected{% endif %}>Closed</option>
+                    </select>
+                </div>
 
-            <div class="stat-label">
-                New
-            </div>
-
-            <div class="stat-value">
-                {{ new_messages }}
-            </div>
-
+                <div class="filter-actions">
+                    <button type="submit" class="btn-premium btn-premium-primary"><i class="fas fa-search"></i> Search</button>
+                    <a href="{% url 'Ecom:manage_contact_messages' %}" class="btn-premium btn-premium-secondary"><i class="fas fa-undo"></i> Reset</a>
+                </div>
+            </form>
         </div>
 
-
-        <div class="stat">
-
-            <div class="stat-label">
-                Read
-            </div>
-
-            <div class="stat-value">
-                {{ read_messages }}
-            </div>
-
-        </div>
-
-
-        <div class="stat">
-
-            <div class="stat-label">
-                Replied
-            </div>
-
-            <div class="stat-value">
-                {{ replied_messages }}
-            </div>
-
-        </div>
-
-
-        <div class="stat">
-
-            <div class="stat-label">
-                Closed
-            </div>
-
-            <div class="stat-value">
-                {{ closed_messages }}
-            </div>
-
-        </div>
-
-
-    </div>
-
-
-    <!-- =====================================================
-         FILTER
-    ====================================================== -->
-
-    <div class="filter-box">
-
-        <form
-            method="GET"
-            class="filter-form"
-        >
-
-            <input
-                type="text"
-                name="search"
-                class="filter-input"
-                placeholder="Search name, email, phone, subject..."
-                value="{{ search }}"
-            >
-
-
-            <select
-                name="status"
-                class="filter-input filter-select"
-            >
-
-                <option value="">
-                    All Status
-                </option>
-
-                <option
-                    value="new"
-                    {% if status_filter == "new" %}
-                        selected
-                    {% endif %}
-                >
-                    New
-                </option>
-
-                <option
-                    value="read"
-                    {% if status_filter == "read" %}
-                        selected
-                    {% endif %}
-                >
-                    Read
-                </option>
-
-                <option
-                    value="replied"
-                    {% if status_filter == "replied" %}
-                        selected
-                    {% endif %}
-                >
-                    Replied
-                </option>
-
-                <option
-                    value="closed"
-                    {% if status_filter == "closed" %}
-                        selected
-                    {% endif %}
-                >
-                    Closed
-                </option>
-
-            </select>
-
-
-            <button
-                type="submit"
-                class="btn btn-primary"
-            >
-                Search
-            </button>
-
-
-            <a
-                href="{% url 'Ecom:manage_contact_messages' %}"
-                class="btn btn-secondary"
-            >
-                Reset
-            </a>
-
-        </form>
-
-    </div>
-
-
-    <!-- =====================================================
-         TABLE
-    ====================================================== -->
-
-    <div class="table-card">
-
-        <div class="table-wrapper">
-
-            <table class="contact-table">
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            Customer
-                        </th>
-
-                        <th>
-                            Email
-                        </th>
-
-                        <th>
-                            Subject
-                        </th>
-
-                        <th>
-                            Status
-                        </th>
-
-                        <th>
-                            Date
-                        </th>
-
-                        <th>
-                            Actions
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody>
-
-
-                    {% for item in contact_messages %}
-
-                        <tr
-                            id="row-{{ item.id }}"
-                            class="
-                                {% if item.status == 'new' %}
-                                    new-row
-                                {% endif %}
-                            "
-                        >
-
-
-                            <td>
-
-                                <strong>
-                                    {{ item.name }}
-                                </strong>
-
-                                {% if item.phone %}
-
-                                    <br>
-
-                                    <small>
-                                        {{ item.phone }}
-                                    </small>
-
-                                {% endif %}
-
-                            </td>
-
-
-                            <td>
-
-                                <a
-                                    href="mailto:{{ item.email }}"
-                                    style="
-                                        color:#2563eb;
-                                        text-decoration:none;
-                                    "
-                                >
-                                    {{ item.email }}
-                                </a>
-
-                            </td>
-
-
-                            <td>
-                                {{ item.subject|truncatechars:45 }}
-                            </td>
-
-
-                            <td>
-
-                                <span
-                                    id="status-{{ item.id }}"
-                                    class="
-                                        status
-                                        {% if item.status == 'new' %}
-                                            status-new
-                                        {% elif item.status == 'read' %}
-                                            status-read
-                                        {% elif item.status == 'replied' %}
-                                            status-replied
-                                        {% elif item.status == 'closed' %}
-                                            status-closed
-                                        {% endif %}
-                                    "
-                                >
-
-                                    {{ item.get_status_display }}
-
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                {{ item.created_at|date:"d M Y" }}
-
-                                <br>
-
-                                <small>
-                                    {{ item.created_at|date:"h:i A" }}
-                                </small>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="actions">
-
-
-                                    <!-- VIEW -->
-
-                                    <button
-                                        type="button"
-                                        class="btn btn-secondary"
-                                        onclick="viewEnquiry(
+        <!-- ===== TABLE ===== -->
+        <div class="table-section">
+            <div class="table-scroll">
+                <table class="table-premium">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Email</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th style="text-align:center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in contact_messages %}
+                            <tr id="row-{{ item.id }}" class="{% if item.status == 'new' %}row-new{% endif %}">
+                                <td>
+                                    <div class="customer-name">{{ item.name }}</div>
+                                    {% if item.phone %}
+                                        <div class="customer-phone"><i class="fas fa-phone-alt" style="font-size:9px;"></i> {{ item.phone }}</div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="mailto:{{ item.email }}" class="email-link">{{ item.email }}</a>
+                                </td>
+                                <td>
+                                    <span class="subject-text">{{ item.subject|truncatechars:40 }}</span>
+                                </td>
+                                <td>
+                                    <span id="status-{{ item.id }}" class="badge-premium
+                                        {% if item.status == 'new' %}badge-new
+                                        {% elif item.status == 'read' %}badge-read
+                                        {% elif item.status == 'replied' %}badge-replied
+                                        {% elif item.status == 'closed' %}badge-closed{% endif %}">
+                                        <span class="dot"></span>
+                                        {{ item.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style="font-weight:500;font-size:13px;">{{ item.created_at|date:"d M Y" }}</div>
+                                    <div style="font-size:11px;color:var(--ws-text-muted);">{{ item.created_at|date:"h:i A" }}</div>
+                                </td>
+                                <td style="text-align:center;">
+                                    <div class="actions-group">
+                                        <button type="button" class="btn-premium btn-premium-view btn-premium-sm" onclick="viewEnquiry(
                                             '{{ item.id }}',
                                             '{{ item.name|escapejs }}',
                                             '{{ item.email|escapejs }}',
                                             '{{ item.phone|default_if_none:""|escapejs }}',
-                                            '{{ item.subject|escapejs }}',
                                             '{{ item.message|escapejs }}',
-                                            '{{ item.get_status_display|escapejs }}',
                                             '{{ item.admin_notes|default_if_none:""|escapejs }}',
                                             '{{ item.admin_reply|default_if_none:""|escapejs }}',
-                                            '{{ item.replied_at|date:"d M Y, h:i A" }}'
-                                        )"
-                                    >
-                                        View
-                                    </button>
+                                            '{{ item.replied_at|date:"d M Y, h:i A" }}',
+                                            '{{ item.created_at|date:"d M Y, h:i A" }}'
+                                        )" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
 
-
-                                    <!-- EDIT -->
-
-                                    <button
-                                        type="button"
-                                        class="btn btn-edit"
-                                        onclick="openEditModal(
+                                        <button type="button" class="btn-premium btn-premium-edit btn-premium-sm" onclick="openEditModal(
                                             '{{ item.id }}',
                                             '{{ item.name|escapejs }}',
                                             '{{ item.email|escapejs }}',
@@ -886,1222 +1318,397 @@ Contact Enquiries
                                             '{{ item.subject|escapejs }}',
                                             '{{ item.message|escapejs }}',
                                             '{{ item.admin_notes|default_if_none:""|escapejs }}'
-                                        )"
-                                    >
-                                        Edit
-                                    </button>
+                                        )" title="Edit">
+                                            <i class="fas fa-pen"></i>
+                                        </button>
 
-
-                                    <!-- REPLY -->
-
-                                    {% if item.status != "replied" %}
-
-                                        <button
-                                            type="button"
-                                            class="btn btn-reply"
-                                            onclick="openReplyModal(
+                                        {% if item.status != "replied" and item.status != "closed" %}
+                                            <button type="button" class="btn-premium btn-premium-reply btn-premium-sm" onclick="openReplyModal(
                                                 '{{ item.id }}',
                                                 '{{ item.name|escapejs }}',
                                                 '{{ item.email|escapejs }}'
-                                            )"
-                                        >
-                                            Reply
-                                        </button>
+                                            )" title="Reply">
+                                                <i class="fas fa-reply"></i>
+                                            </button>
+                                        {% endif %}
 
-                                    {% endif %}
-
-
-                                    <!-- DELETE -->
-
-                                    <button
-                                        type="button"
-                                        class="btn btn-delete"
-                                        onclick="openDeleteModal(
+                                        <button type="button" class="btn-premium btn-premium-danger btn-premium-sm" onclick="openDeleteModal(
                                             '{{ item.id }}',
                                             '{{ item.name|escapejs }}'
-                                        )"
-                                    >
-                                        Delete
-                                    </button>
+                                        )" title="Delete">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" style="text-align:center; padding:50px 20px;">
+                                    <i class="fas fa-inbox" style="font-size:40px; display:block; margin-bottom:12px; color:var(--ws-border);"></i>
+                                    <div style="font-size:16px;font-weight:600;color:var(--ws-text);margin-bottom:4px;">No enquiries found</div>
+                                    <div style="font-size:13px;color:var(--ws-text-muted);">Create your first enquiry</div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-
-                    {% empty %}
-
-                        <tr>
-
-                            <td
-                                colspan="6"
-                                style="
-                                    text-align:center;
-                                    padding:60px;
-                                "
-                            >
-                                No enquiries found.
-                            </td>
-
-                        </tr>
-
-                    {% endfor %}
-
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-
-        <!-- =================================================
-             PAGINATION
-        ================================================== -->
-
-        {% if page_obj.has_other_pages %}
-
-            <div class="pagination">
-
-
-                {% if page_obj.has_previous %}
-
-                    <a
-                        class="page-link"
-                        href="?page={{ page_obj.previous_page_number }}&search={{ search }}&status={{ status_filter }}"
-                    >
-                        Previous
-                    </a>
-
-                {% endif %}
-
-
-                {% for page_num in page_obj.paginator.page_range %}
-
-                    {% if page_num == page_obj.number %}
-
-                        <span
-                            class="
-                                page-link
-                                page-active
-                            "
-                        >
-                            {{ page_num }}
-                        </span>
-
-                    {% else %}
-
-                        <a
-                            class="page-link"
-                            href="?page={{ page_num }}&search={{ search }}&status={{ status_filter }}"
-                        >
-                            {{ page_num }}
-                        </a>
-
+            <!-- ===== PAGINATION ===== -->
+            {% if page_obj.has_other_pages %}
+                <div class="pagination-premium">
+                    {% if page_obj.has_previous %}
+                        <a class="page-link-premium" href="?page={{ page_obj.previous_page_number }}&search={{ search }}&status={{ status_filter }}">‹</a>
                     {% endif %}
 
-                {% endfor %}
+                    {% for page_num in page_obj.paginator.page_range %}
+                        {% if page_num == page_obj.number %}
+                            <span class="page-link-premium active">{{ page_num }}</span>
+                        {% else %}
+                            <a class="page-link-premium" href="?page={{ page_num }}&search={{ search }}&status={{ status_filter }}">{{ page_num }}</a>
+                        {% endif %}
+                    {% endfor %}
 
-
-                {% if page_obj.has_next %}
-
-                    <a
-                        class="page-link"
-                        href="?page={{ page_obj.next_page_number }}&search={{ search }}&status={{ status_filter }}"
-                    >
-                        Next
-                    </a>
-
-                {% endif %}
-
-
-            </div>
-
-        {% endif %}
-
+                    {% if page_obj.has_next %}
+                        <a class="page-link-premium" href="?page={{ page_obj.next_page_number }}&search={{ search }}&status={{ status_filter }}">›</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
     </div>
-
 </div>
 
-
-<!-- =========================================================
-     CREATE / EDIT MODAL
-========================================================== -->
-
-<div
-    id="formModal"
-    class="modal-overlay"
-    onclick="overlayClose(event, 'formModal')"
->
-
-    <div
-        class="modal"
-        onclick="event.stopPropagation()"
-    >
-
+<!-- ============================================================
+   CREATE / EDIT MODAL - Reduced Height
+   ============================================================ -->
+<div id="formModal" class="modal-overlay-premium" onclick="overlayClose(event, 'formModal')">
+    <div class="modal-premium modal-premium-sm" onclick="event.stopPropagation()">
         <form method="POST">
-
             {% csrf_token %}
+            <input type="hidden" name="action" id="formAction" value="create">
+            <input type="hidden" name="message_id" id="formMessageId">
 
-            <input
-                type="hidden"
-                name="action"
-                id="formAction"
-                value="create"
-            >
-
-            <input
-                type="hidden"
-                name="message_id"
-                id="formMessageId"
-            >
-
-
-            <div class="modal-header">
-
-                <h2
-                    id="formTitle"
-                    class="modal-title"
-                >
-                    New Enquiry
-                </h2>
-
-                <button
-                    type="button"
-                    class="modal-close"
-                    onclick="closeModal('formModal')"
-                >
-                    ×
-                </button>
-
+            <div class="modal-premium-header">
+                <h2 id="formTitle" class="modal-premium-title"><i class="fas fa-pen"></i> New Enquiry</h2>
+                <button type="button" class="modal-premium-close" onclick="closeModal('formModal')">×</button>
             </div>
 
+            <div class="modal-premium-body">
+                <div class="modal-premium-body-scroll">
+                    <div class="field-premium">
+                        <label class="label-premium">Name <span class="required">*</span></label>
+                        <input type="text" name="name" id="formName" class="input-premium" placeholder="Customer name" required>
+                    </div>
 
-            <div class="modal-body">
+                    <div class="field-premium">
+                        <label class="label-premium">Email <span class="required">*</span></label>
+                        <input type="email" name="email" id="formEmail" class="input-premium" placeholder="customer@example.com" required>
+                    </div>
 
+                    <div class="field-premium">
+                        <label class="label-premium">Phone</label>
+                        <input type="text" name="phone" id="formPhone" class="input-premium" placeholder="+91 12345 67890">
+                    </div>
 
-                <div class="form-group">
+                    <div class="field-premium">
+                        <label class="label-premium">Subject <span class="required">*</span></label>
+                        <input type="text" name="subject" id="formSubject" class="input-premium" placeholder="Subject" required>
+                    </div>
 
-                    <label class="form-label">
-                        Name *
-                    </label>
+                    <div class="field-premium">
+                        <label class="label-premium">Message <span class="required">*</span></label>
+                        <textarea name="message" id="formMessage" class="textarea-premium textarea-premium-mini" placeholder="Message..." required></textarea>
+                    </div>
 
-                    <input
-                        type="text"
-                        name="name"
-                        id="formName"
-                        class="admin-input"
-                        required
-                    >
-
+                    <div class="field-premium">
+                        <label class="label-premium">Admin Notes</label>
+                        <textarea name="admin_notes" id="formNotes" class="textarea-premium textarea-premium-mini" placeholder="Private notes"></textarea>
+                    </div>
                 </div>
-
-
-                <div class="form-group">
-
-                    <label class="form-label">
-                        Email *
-                    </label>
-
-                    <input
-                        type="email"
-                        name="email"
-                        id="formEmail"
-                        class="admin-input"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label class="form-label">
-                        Phone
-                    </label>
-
-                    <input
-                        type="text"
-                        name="phone"
-                        id="formPhone"
-                        class="admin-input"
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label class="form-label">
-                        Subject *
-                    </label>
-
-                    <input
-                        type="text"
-                        name="subject"
-                        id="formSubject"
-                        class="admin-input"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label class="form-label">
-                        Customer Message *
-                    </label>
-
-                    <textarea
-                        name="message"
-                        id="formMessage"
-                        class="admin-input admin-textarea"
-                        required
-                    ></textarea>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label class="form-label">
-                        Admin Notes
-                    </label>
-
-                    <textarea
-                        name="admin_notes"
-                        id="formNotes"
-                        class="admin-input admin-textarea"
-                        placeholder="Private notes..."
-                    ></textarea>
-
-                </div>
-
-
             </div>
 
-
-            <div class="modal-footer">
-
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    onclick="closeModal('formModal')"
-                >
-                    Cancel
-                </button>
-
-                <button
-                    type="submit"
-                    class="btn btn-primary"
-                >
-                    <span id="formSubmitText">
-                        Create
-                    </span>
-                </button>
-
+            <div class="modal-premium-footer">
+                <button type="button" class="btn-premium btn-premium-secondary" onclick="closeModal('formModal')">Cancel</button>
+                <button type="submit" class="btn-premium btn-premium-primary"><span id="formSubmitText">Create</span></button>
             </div>
-
         </form>
-
     </div>
-
 </div>
 
-
-<!-- =========================================================
-     VIEW MODAL
-========================================================== -->
-
-<div
-    id="viewModal"
-    class="modal-overlay"
-    onclick="overlayClose(event, 'viewModal')"
->
-
-    <div
-        class="modal"
-        onclick="event.stopPropagation()"
-    >
-
-        <div class="modal-header">
-
-            <h2 class="modal-title">
-                Enquiry Details
-            </h2>
-
-            <button
-                type="button"
-                class="modal-close"
-                onclick="closeModal('viewModal')"
-            >
-                ×
-            </button>
-
+<!-- ============================================================
+   VIEW MODAL - Reduced Height (Only extra details)
+   ============================================================ -->
+<div id="viewModal" class="modal-overlay-premium" onclick="overlayClose(event, 'viewModal')">
+    <div class="modal-premium modal-premium-sm" onclick="event.stopPropagation()">
+        <div class="modal-premium-header">
+            <h2 class="modal-premium-title"><i class="fas fa-eye"></i> Enquiry Details</h2>
+            <button type="button" class="modal-premium-close" onclick="closeModal('viewModal')">×</button>
         </div>
 
+        <div class="modal-premium-body">
+            <div class="modal-premium-body-scroll">
+                <div class="detail-premium-row">
+                    <span class="detail-premium-label">Customer</span>
+                    <span class="detail-premium-value" id="viewName"></span>
+                </div>
 
-        <div class="modal-body">
+                <div class="detail-premium-row">
+                    <span class="detail-premium-label">Email</span>
+                    <span class="detail-premium-value" id="viewEmail"></span>
+                </div>
 
+                <div class="detail-premium-row">
+                    <span class="detail-premium-label">Phone</span>
+                    <span class="detail-premium-value" id="viewPhone"></span>
+                </div>
 
-            <div class="view-field">
+                <div style="margin-top:10px;">
+                    <span class="detail-premium-label" style="display:block;margin-bottom:3px;">Message</span>
+                    <div class="detail-premium-box" id="viewMessage"></div>
+                </div>
 
-                <span class="view-label">
-                    Customer
-                </span>
+                <div style="margin-top:10px;">
+                    <span class="detail-premium-label" style="display:block;margin-bottom:3px;">Admin Notes</span>
+                    <div class="detail-premium-box" id="viewNotes"></div>
+                </div>
 
-                <div
-                    id="viewName"
-                    class="view-value"
-                ></div>
+                <div style="margin-top:10px;">
+                    <span class="detail-premium-label" style="display:block;margin-bottom:3px;">Admin Reply</span>
+                    <div class="detail-premium-box" id="viewReply"></div>
+                </div>
 
+                <div class="detail-premium-row" style="margin-top:10px;">
+                    <span class="detail-premium-label">Replied At</span>
+                    <span class="detail-premium-value" id="viewRepliedAt"></span>
+                </div>
+
+                <div class="detail-premium-row">
+                    <span class="detail-premium-label">Created</span>
+                    <span class="detail-premium-value" id="viewCreatedAt"></span>
+                </div>
             </div>
-
-
-            <div class="view-field">
-
-                <span class="view-label">
-                    Email
-                </span>
-
-                <div
-                    id="viewEmail"
-                    class="view-value"
-                ></div>
-
-            </div>
-
-
-            <div class="view-field">
-
-                <span class="view-label">
-                    Phone
-                </span>
-
-                <div
-                    id="viewPhone"
-                    class="view-value"
-                ></div>
-
-            </div>
-
-
-            <div class="view-field">
-
-                <span class="view-label">
-                    Subject
-                </span>
-
-                <div
-                    id="viewSubject"
-                    class="view-value"
-                ></div>
-
-            </div>
-
-
-            <div class="view-field">
-
-                <span class="view-label">
-                    Status
-                </span>
-
-                <div
-                    id="viewStatus"
-                    class="view-value"
-                ></div>
-
-            </div>
-
-
-            <div class="view-field">
-
-                <span class="view-label">
-                    Customer Message
-                </span>
-
-                <div
-                    id="viewMessage"
-                    class="message-box"
-                ></div>
-
-            </div>
-
-
-            <div class="view-field">
-
-                <span class="view-label">
-                    Admin Notes
-                </span>
-
-                <div
-                    id="viewNotes"
-                    class="message-box"
-                ></div>
-
-            </div>
-
-
-            <div class="view-field">
-
-                <span class="view-label">
-                    Admin Reply
-                </span>
-
-                <div
-                    id="viewReply"
-                    class="message-box"
-                ></div>
-
-            </div>
-
-
-            <div class="view-field">
-
-                <span class="view-label">
-                    Replied At
-                </span>
-
-                <div
-                    id="viewRepliedAt"
-                    class="view-value"
-                ></div>
-
-            </div>
-
-
         </div>
 
-
-        <div class="modal-footer">
-
-            <button
-                type="button"
-                class="btn btn-secondary"
-                onclick="closeModal('viewModal')"
-            >
-                Close
-            </button>
-
+        <div class="modal-premium-footer">
+            <button type="button" class="btn-premium btn-premium-secondary" onclick="closeModal('viewModal')">Close</button>
         </div>
-
     </div>
-
 </div>
 
-
-<!-- =========================================================
-     REPLY MODAL
-========================================================== -->
-
-<div
-    id="replyModal"
-    class="modal-overlay"
-    onclick="overlayClose(event, 'replyModal')"
->
-
-    <div
-        class="modal"
-        onclick="event.stopPropagation()"
-    >
-
+<!-- ============================================================
+   REPLY MODAL - Reduced Height
+   ============================================================ -->
+<div id="replyModal" class="modal-overlay-premium" onclick="overlayClose(event, 'replyModal')">
+    <div class="modal-premium modal-premium-sm" onclick="event.stopPropagation()">
         <form method="POST">
-
             {% csrf_token %}
+            <input type="hidden" name="action" value="send_reply">
+            <input type="hidden" name="message_id" id="replyMessageId">
 
-            <input
-                type="hidden"
-                name="action"
-                value="send_reply"
-            >
-
-            <input
-                type="hidden"
-                name="message_id"
-                id="replyMessageId"
-            >
-
-
-            <div class="modal-header">
-
-                <h2 class="modal-title">
-                    Reply to Customer
-                </h2>
-
-                <button
-                    type="button"
-                    class="modal-close"
-                    onclick="closeModal('replyModal')"
-                >
-                    ×
-                </button>
-
+            <div class="modal-premium-header">
+                <h2 class="modal-premium-title"><i class="fas fa-reply"></i> Reply</h2>
+                <button type="button" class="modal-premium-close" onclick="closeModal('replyModal')">×</button>
             </div>
 
+            <div class="modal-premium-body">
+                <div class="modal-premium-body-scroll">
+                    <div class="field-premium">
+                        <label class="label-premium">Customer</label>
+                        <input type="text" id="replyCustomerName" class="input-premium" readonly>
+                    </div>
 
-            <div class="modal-body">
+                    <div class="field-premium">
+                        <label class="label-premium">Send To</label>
+                        <input type="email" id="replyCustomerEmail" class="input-premium" readonly>
+                    </div>
 
+                    <div class="field-premium">
+                        <label class="label-premium">Reply <span class="required">*</span></label>
+                        <textarea name="admin_reply" id="replyText" class="textarea-premium textarea-premium-large" placeholder="Write your reply..." required></textarea>
+                    </div>
 
-                <div class="form-group">
-
-                    <label class="form-label">
-                        Customer
-                    </label>
-
-                    <input
-                        type="text"
-                        id="replyCustomerName"
-                        class="admin-input"
-                        readonly
-                    >
-
+                    <div class="info-note-premium">
+                        <i class="fas fa-info-circle"></i> Status changes to <strong>Replied</strong>
+                    </div>
                 </div>
-
-
-                <div class="form-group">
-
-                    <label class="form-label">
-                        Send To
-                    </label>
-
-                    <input
-                        type="email"
-                        id="replyCustomerEmail"
-                        class="admin-input"
-                        readonly
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label class="form-label">
-                        Your Reply *
-                    </label>
-
-                    <textarea
-                        name="admin_reply"
-                        id="replyText"
-                        class="admin-input admin-textarea"
-                        style="min-height:180px;"
-                        placeholder="Write your reply to the customer..."
-                        required
-                    ></textarea>
-
-                </div>
-
-
-                <div
-                    style="
-                        background:#eff6ff;
-                        color:#1d4ed8;
-                        padding:12px;
-                        border-radius:7px;
-                        font-size:13px;
-                    "
-                >
-
-                    When the email is successfully sent,
-                    this enquiry will automatically change
-                    from <strong>Read</strong> to
-                    <strong>Replied</strong>.
-
-                </div>
-
-
             </div>
 
-
-            <div class="modal-footer">
-
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    onclick="closeModal('replyModal')"
-                >
-                    Cancel
-                </button>
-
-                <button
-                    type="submit"
-                    class="btn btn-reply"
-                >
-                    Send Reply
-                </button>
-
+            <div class="modal-premium-footer">
+                <button type="button" class="btn-premium btn-premium-secondary" onclick="closeModal('replyModal')">Cancel</button>
+                <button type="submit" class="btn-premium btn-premium-reply"><i class="fas fa-paper-plane"></i> Send</button>
             </div>
-
         </form>
-
     </div>
-
 </div>
 
-
-<!-- =========================================================
-     DELETE MODAL
-========================================================== -->
-
-<div
-    id="deleteModal"
-    class="modal-overlay"
-    onclick="overlayClose(event, 'deleteModal')"
->
-
-    <div
-        class="modal modal-small"
-        onclick="event.stopPropagation()"
-    >
-
+<!-- ============================================================
+   DELETE MODAL - Reduced Height
+   ============================================================ -->
+<div id="deleteModal" class="modal-overlay-premium" onclick="overlayClose(event, 'deleteModal')">
+    <div class="modal-premium modal-premium-sm" onclick="event.stopPropagation()">
         <form method="POST">
-
             {% csrf_token %}
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="message_id" id="deleteMessageId">
 
-            <input
-                type="hidden"
-                name="action"
-                value="delete"
-            >
-
-            <input
-                type="hidden"
-                name="message_id"
-                id="deleteMessageId"
-            >
-
-
-            <div class="modal-header">
-
-                <h2 class="modal-title">
-                    Delete Enquiry
-                </h2>
-
+            <div class="modal-premium-header">
+                <h2 class="modal-premium-title"><i class="fas fa-trash-alt" style="color:var(--ws-danger);"></i> Delete</h2>
             </div>
 
-
-            <div class="modal-body">
-
-                <p>
-                    Are you sure you want to delete this enquiry?
-                </p>
-
-                <strong id="deleteCustomerName"></strong>
-
-                <p
-                    style="
-                        color:#dc2626;
-                        font-size:13px;
-                    "
-                >
-                    This action cannot be undone.
-                </p>
-
+            <div class="modal-premium-body">
+                <p style="font-size:14px;color:var(--ws-text);margin-bottom:6px;">Delete this enquiry?</p>
+                <p style="font-weight:700;color:var(--ws-primary);font-size:15px;margin-bottom:6px;" id="deleteCustomerName"></p>
+                <p style="color:var(--ws-danger);font-size:12px;"><i class="fas fa-exclamation-triangle"></i> Cannot be undone</p>
             </div>
 
-
-            <div class="modal-footer">
-
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    onclick="closeModal('deleteModal')"
-                >
-                    Cancel
-                </button>
-
-                <button
-                    type="submit"
-                    class="btn btn-delete"
-                >
-                    Yes, Delete
-                </button>
-
+            <div class="modal-premium-footer">
+                <button type="button" class="btn-premium btn-premium-secondary" onclick="closeModal('deleteModal')">Cancel</button>
+                <button type="submit" class="btn-premium btn-premium-danger"><i class="fas fa-trash-alt"></i> Delete</button>
             </div>
-
         </form>
-
     </div>
-
 </div>
 
+<!-- ============================================================
+   CSRF TOKEN
+   ============================================================ -->
+<form style="display:none;" id="csrf-form">
+    {% csrf_token %}
+    <input type="hidden" id="csrf-main" value="{{ csrf_token }}">
+</form>
 
 <script>
-
-/* =========================================================
-   OPEN MODAL
-========================================================= */
-
+/* ============================================================
+   MODAL HELPERS
+   ============================================================ */
 function openModal(id) {
-
-    document
-        .getElementById(id)
-        .classList
-        .add("active");
-
-    document.body.style.overflow = "hidden";
+    document.getElementById(id).classList.add('active');
+    document.body.style.overflow = 'hidden';
 }
-
-
-/* =========================================================
-   CLOSE MODAL
-========================================================= */
 
 function closeModal(id) {
-
-    document
-        .getElementById(id)
-        .classList
-        .remove("active");
-
-    document.body.style.overflow = "";
+    document.getElementById(id).classList.remove('active');
+    document.body.style.overflow = '';
 }
 
-
-/* =========================================================
-   OVERLAY CLOSE
-========================================================= */
-
-function overlayClose(
-    event,
-    id
-) {
-
-    if (
-        event.target ===
-        event.currentTarget
-    ) {
-
+function overlayClose(event, id) {
+    if (event.target === event.currentTarget) {
         closeModal(id);
-
     }
-
 }
 
-
-/* =========================================================
+/* ============================================================
    CREATE
-========================================================= */
-
+   ============================================================ */
 function openCreateModal() {
-
-    document.getElementById(
-        "formAction"
-    ).value = "create";
-
-    document.getElementById(
-        "formMessageId"
-    ).value = "";
-
-    document.getElementById(
-        "formTitle"
-    ).textContent = "New Enquiry";
-
-    document.getElementById(
-        "formSubmitText"
-    ).textContent = "Create";
-
-
-    document.getElementById(
-        "formName"
-    ).value = "";
-
-    document.getElementById(
-        "formEmail"
-    ).value = "";
-
-    document.getElementById(
-        "formPhone"
-    ).value = "";
-
-    document.getElementById(
-        "formSubject"
-    ).value = "";
-
-    document.getElementById(
-        "formMessage"
-    ).value = "";
-
-    document.getElementById(
-        "formNotes"
-    ).value = "";
-
-
-    openModal(
-        "formModal"
-    );
+    document.getElementById('formAction').value = 'create';
+    document.getElementById('formMessageId').value = '';
+    document.getElementById('formTitle').innerHTML = '<i class="fas fa-pen"></i> New Enquiry';
+    document.getElementById('formSubmitText').textContent = 'Create';
+    document.getElementById('formName').value = '';
+    document.getElementById('formEmail').value = '';
+    document.getElementById('formPhone').value = '';
+    document.getElementById('formSubject').value = '';
+    document.getElementById('formMessage').value = '';
+    document.getElementById('formNotes').value = '';
+    openModal('formModal');
 }
 
-
-/* =========================================================
+/* ============================================================
    EDIT
-========================================================= */
-
-function openEditModal(
-    id,
-    name,
-    email,
-    phone,
-    subject,
-    message,
-    notes
-) {
-
-    document.getElementById(
-        "formAction"
-    ).value = "update";
-
-    document.getElementById(
-        "formMessageId"
-    ).value = id;
-
-    document.getElementById(
-        "formTitle"
-    ).textContent = "Edit Enquiry";
-
-    document.getElementById(
-        "formSubmitText"
-    ).textContent = "Update";
-
-
-    document.getElementById(
-        "formName"
-    ).value = name;
-
-    document.getElementById(
-        "formEmail"
-    ).value = email;
-
-    document.getElementById(
-        "formPhone"
-    ).value = phone;
-
-    document.getElementById(
-        "formSubject"
-    ).value = subject;
-
-    document.getElementById(
-        "formMessage"
-    ).value = message;
-
-    document.getElementById(
-        "formNotes"
-    ).value = notes;
-
-
-    openModal(
-        "formModal"
-    );
+   ============================================================ */
+function openEditModal(id, name, email, phone, subject, message, notes) {
+    document.getElementById('formAction').value = 'update';
+    document.getElementById('formMessageId').value = id;
+    document.getElementById('formTitle').innerHTML = '<i class="fas fa-pen"></i> Edit Enquiry';
+    document.getElementById('formSubmitText').textContent = 'Update';
+    document.getElementById('formName').value = name;
+    document.getElementById('formEmail').value = email;
+    document.getElementById('formPhone').value = phone || '';
+    document.getElementById('formSubject').value = subject;
+    document.getElementById('formMessage').value = message;
+    document.getElementById('formNotes').value = notes || '';
+    openModal('formModal');
 }
 
-
-/* =========================================================
-   VIEW ENQUIRY
-========================================================= */
-
-function viewEnquiry(
-    id,
-    name,
-    email,
-    phone,
-    subject,
-    message,
-    status,
-    notes,
-    reply,
-    repliedAt
-) {
-
-    document.getElementById(
-        "viewName"
-    ).textContent = name;
-
-    document.getElementById(
-        "viewEmail"
-    ).textContent = email;
-
-    document.getElementById(
-        "viewPhone"
-    ).textContent =
-        phone || "Not provided";
-
-    document.getElementById(
-        "viewSubject"
-    ).textContent = subject;
-
-    document.getElementById(
-        "viewStatus"
-    ).textContent = status;
-
-    document.getElementById(
-        "viewMessage"
-    ).textContent = message;
-
-    document.getElementById(
-        "viewNotes"
-    ).textContent =
-        notes || "No admin notes.";
-
-    document.getElementById(
-        "viewReply"
-    ).textContent =
-        reply || "No reply sent.";
-
-    document.getElementById(
-        "viewRepliedAt"
-    ).textContent =
-        repliedAt || "Not replied yet";
-
-
-    openModal(
-        "viewModal"
-    );
-
-
-    /*
-     * Automatically mark NEW as READ.
-     */
-
+/* ============================================================
+   VIEW
+   ============================================================ */
+function viewEnquiry(id, name, email, phone, message, notes, reply, repliedAt, createdAt) {
+    document.getElementById('viewName').textContent = name;
+    document.getElementById('viewEmail').textContent = email;
+    document.getElementById('viewPhone').textContent = phone || 'Not provided';
+    document.getElementById('viewMessage').textContent = message;
+    document.getElementById('viewNotes').textContent = notes || 'No admin notes.';
+    document.getElementById('viewReply').textContent = reply || 'No reply sent.';
+    document.getElementById('viewRepliedAt').textContent = repliedAt || 'Not replied yet';
+    document.getElementById('viewCreatedAt').textContent = createdAt || 'Unknown';
+    openModal('viewModal');
     markAsRead(id);
 }
 
-
-/* =========================================================
+/* ============================================================
    MARK AS READ
-========================================================= */
-
+   ============================================================ */
 function markAsRead(id) {
+    const csrfToken = document.getElementById('csrf-main').value;
+    const formData = new FormData();
+    formData.append('action', 'mark_read');
+    formData.append('message_id', id);
+    formData.append('csrfmiddlewaretoken', csrfToken);
 
-    const csrfToken =
-        document.querySelector(
-            "#csrf-main"
-        ).value;
+    fetch("{% url 'Ecom:manage_contact_messages' %}", {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) return;
 
-
-    const formData =
-        new FormData();
-
-    formData.append(
-        "action",
-        "mark_read"
-    );
-
-    formData.append(
-        "message_id",
-        id
-    );
-
-    formData.append(
-        "csrfmiddlewaretoken",
-        csrfToken
-    );
-
-
-    fetch(
-        "{% url 'Ecom:manage_contact_messages' %}",
-        {
-            method: "POST",
-            body: formData,
-
-            headers: {
-                "X-Requested-With":
-                    "XMLHttpRequest"
-            }
+        const badge = document.getElementById('status-' + id);
+        if (badge && data.status === 'read') {
+            badge.className = 'badge-premium badge-read';
+            badge.innerHTML = '<span class="dot"></span> Read';
         }
-    )
-    .then(
-        response =>
-            response.json()
-    )
-    .then(
-        data => {
 
-            if (!data.success) {
-                return;
-            }
-
-
-            /*
-             * Update status badge
-             */
-
-            const badge =
-                document.getElementById(
-                    "status-" + id
-                );
-
-
-            if (badge) {
-
-                if (
-                    data.status === "read"
-                ) {
-
-                    badge.textContent =
-                        "Read";
-
-                    badge.className =
-                        "status status-read";
-
-                }
-
-            }
-
-
-            /*
-             * Remove NEW row highlighting
-             */
-
-            const row =
-                document.getElementById(
-                    "row-" + id
-                );
-
-
-            if (row) {
-
-                row.classList.remove(
-                    "new-row"
-                );
-
-            }
-
-
-            /*
-             * Update modal status
-             */
-
-            document.getElementById(
-                "viewStatus"
-            ).textContent =
-                data.status_display;
-
-        }
-    )
-    .catch(
-        error => {
-            console.error(
-                "Read status error:",
-                error
-            );
-        }
-    );
+        const row = document.getElementById('row-' + id);
+        if (row) row.classList.remove('row-new');
+    })
+    .catch(error => console.error('Error:', error));
 }
 
-
-/* =========================================================
+/* ============================================================
    REPLY
-========================================================= */
-
-function openReplyModal(
-    id,
-    name,
-    email
-) {
-
-    document.getElementById(
-        "replyMessageId"
-    ).value = id;
-
-    document.getElementById(
-        "replyCustomerName"
-    ).value = name;
-
-    document.getElementById(
-        "replyCustomerEmail"
-    ).value = email;
-
-    document.getElementById(
-        "replyText"
-    ).value = "";
-
-
-    openModal(
-        "replyModal"
-    );
+   ============================================================ */
+function openReplyModal(id, name, email) {
+    document.getElementById('replyMessageId').value = id;
+    document.getElementById('replyCustomerName').value = name;
+    document.getElementById('replyCustomerEmail').value = email;
+    document.getElementById('replyText').value = '';
+    openModal('replyModal');
 }
 
-
-/* =========================================================
+/* ============================================================
    DELETE
-========================================================= */
-
-function openDeleteModal(
-    id,
-    name
-) {
-
-    document.getElementById(
-        "deleteMessageId"
-    ).value = id;
-
-    document.getElementById(
-        "deleteCustomerName"
-    ).textContent = name;
-
-
-    openModal(
-        "deleteModal"
-    );
+   ============================================================ */
+function openDeleteModal(id, name) {
+    document.getElementById('deleteMessageId').value = id;
+    document.getElementById('deleteCustomerName').textContent = name;
+    openModal('deleteModal');
 }
 
-
-/* =========================================================
-   ESCAPE
-========================================================= */
-
-document.addEventListener(
-    "keydown",
-    function(event) {
-
-        if (
-            event.key === "Escape"
-        ) {
-
-            document
-                .querySelectorAll(
-                    ".modal-overlay.active"
-                )
-                .forEach(
-                    modal => {
-                        modal.classList.remove(
-                            "active"
-                        );
-                    }
-                );
-
-            document.body.style.overflow =
-                "";
-
-        }
-
+/* ============================================================
+   ESCAPE KEY
+   ============================================================ */
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay-premium.active').forEach(modal => {
+            modal.classList.remove('active');
+        });
+        document.body.style.overflow = '';
     }
-);
-
+});
 </script>
-
-
-<!-- =========================================================
-     GLOBAL CSRF TOKEN FOR AJAX
-========================================================== -->
-
-<form
-    style="display:none;"
-    id="csrf-form"
->
-
-    {% csrf_token %}
-
-    <input
-        type="hidden"
-        id="csrf-main"
-        value="{{ csrf_token }}"
-    >
-
-</form>
 
 {% endblock %}

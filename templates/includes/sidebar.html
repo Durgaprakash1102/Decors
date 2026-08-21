@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hyzora · {% if user.role == 'admin' %}Admin{% else %}Employee{% endif %} Sidebar</title>
+    <title>{% if user.role == 'admin' %}Admin{% else %}Employee{% endif %} Sidebar</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1351,6 +1351,24 @@
                     <span class="nav-text">Banners</span>
                 </a>
 
+               <a href="{% url 'Ecom:manage_static_pages' %}"
+   class="submenu-item {% if request.resolver_match.url_name == 'manage_static_pages' %}active{% endif %}">
+    <i class="fa-solid fa-file-lines"></i>
+    <span class="nav-text">Website Content</span>
+</a>
+
+<a href="{% url 'Ecom:manage_contact_messages' %}"
+   class="submenu-item {% if request.resolver_match.url_name == 'manage_contact_messages' %}active{% endif %}">
+    <i class="fa-solid fa-envelope"></i>
+    <span class="nav-text">Contact Messages</span>
+</a>
+
+<a href="{% url 'Ecom:manage_site_settings' %}"
+   class="submenu-item {% if request.resolver_match.url_name == 'manage_site_settings' %}active{% endif %}">
+    <i class="fa-solid fa-gear"></i>
+    <span class="nav-text">Site Settings</span>
+</a>
+
                 <div class="section-divider">
                     <span class="divider-dot"></span>
                 </div>
@@ -1378,27 +1396,39 @@
                 <a href="{% url 'offline_sales:offline_sale' %}"
                    class="nav-item {% if request.resolver_match.url_name == 'offline_sale' %}active{% endif %}">
                     <i class="fa-solid fa-cash-register"></i>
-                    <span class="nav-text">Offline Sale</span>
+                    <span class="nav-text">POS</span>
                 </a>
 
                
 
 
-                <a href="{% url 'offline_sales:orders_list' %}"
-                   class="nav-item {% if request.resolver_match.url_name == 'orders_list' %}active{% endif %}">
-                    <i class="fa-solid fa-file-invoice"></i>
-                    <span class="nav-text">Offline Orders</span>
-                </a>
+               <!-- ============================================================
+   OFFLINE ORDER MANAGEMENT - ROLE BASED NAMES
+   ============================================================ -->
 
-                
+<!-- Admin: "Offline Orders" | Employee: "Orders" -->
+{% if user.role == 'admin' %}
+    <a href="{% url 'offline_sales:orders_list' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'orders_list' %}active{% endif %}">
+        <i class="fa-solid fa-file-invoice"></i>
+        <span class="nav-text">Offline Orders</span>
+    </a>
+{% elif user.role == 'employee' %}
+    <a href="{% url 'offline_sales:orders_list' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'orders_list' %}active{% endif %}">
+        <i class="fa-solid fa-file-invoice"></i>
+        <span class="nav-text">Orders</span>
+    </a>
+{% endif %}
 
-
-                <a href="{% url 'offline_sales:customer_list' %}"
-                   class="nav-item {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}">
-                    <i class="fa-solid fa-users"></i>
-                    <span class="nav-text">Offline Customers</span>
-                </a>
-
+<!-- Admin: "Offline Customers" | Employee: Hidden -->
+{% if user.role == 'admin' %}
+    <a href="{% url 'offline_sales:customer_list' %}"
+       class="nav-item {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}">
+        <i class="fa-solid fa-users"></i>
+        <span class="nav-text">Offline Customers</span>
+    </a>
+{% endif %}
             <!-- Admin-only extra links (Unchanged) -->
             <div class="admin-only">
                 <div class="section-divider">

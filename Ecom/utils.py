@@ -68,7 +68,7 @@ def send_otp_email(user_or_email, otp_code, otp_type, full_name='User'):
     <body>
         <div class="container">
             <div class="header">
-                <h1>Hyzora</h1>
+                <h1> Greetings, User </h1>
             </div>
             <div class="content">
                 <h2>{data['heading']}</h2>
@@ -82,7 +82,7 @@ def send_otp_email(user_or_email, otp_code, otp_type, full_name='User'):
                 </p>
             </div>
             <div class="footer">
-                <p>&copy; 2026 Hyzora. All rights reserved.</p>
+                <p>&copy; 2026 . All rights reserved.</p>
                 <p>This is an automated email, please do not reply.</p>
             </div>
         </div>

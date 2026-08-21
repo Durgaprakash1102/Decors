@@ -1,114 +1,616 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}About Us{% endblock %}
 
 {% block content %}
 
-<section class="about-page py-5">
+<style>
+/* ============================================================
+   ABOUT PAGE - BUBBLE SHAPES HERO
+   ============================================================ */
+.about-page {
+    width: 100%;
+    background: #f5f0eb;
+    min-height: calc(100vh - 200px);
+    padding: 0;
+}
 
-    <div class="container">
+/* ============================================================
+   HERO / BANNER SECTION - BUBBLES & SHAPES
+   ============================================================ */
+.about-hero {
+    background: linear-gradient(135deg, #5c121f 0%, #3d0c14 50%, #1a050a 100%);
+    padding: 55px 20px 50px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 340px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-        <!-- HEADER -->
+/* ===== BUBBLES & SHAPES ===== */
 
-        <div class="text-center mb-5">
+/* 1. Transparent Bubbles */
+.about-hero .bubble {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    border: 2px solid rgba(201,168,76,0.06);
+    background: rgba(201,168,76,0.02);
+    animation: bubbleFloat 6s ease-in-out infinite;
+}
 
-            <h1 class="display-5 fw-bold">
-                About Us
-            </h1>
+.about-hero .bubble-1 {
+    width: 120px;
+    height: 120px;
+    top: 10%;
+    right: 8%;
+    animation-delay: 0s;
+}
 
-            <p class="text-muted">
-                Learn more about our journey, mission and vision.
-            </p>
+.about-hero .bubble-2 {
+    width: 80px;
+    height: 80px;
+    bottom: 15%;
+    left: 10%;
+    animation-delay: 1s;
+}
 
+.about-hero .bubble-3 {
+    width: 60px;
+    height: 60px;
+    top: 45%;
+    left: 5%;
+    animation-delay: 2s;
+}
+
+.about-hero .bubble-4 {
+    width: 100px;
+    height: 100px;
+    bottom: 30%;
+    right: 15%;
+    animation-delay: 0.5s;
+}
+
+.about-hero .bubble-5 {
+    width: 40px;
+    height: 40px;
+    top: 25%;
+    left: 20%;
+    animation-delay: 1.5s;
+}
+
+@keyframes bubbleFloat {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+    50% { transform: translateY(-15px) scale(1.05); opacity: 0.8; }
+}
+
+/* 2. Gold Circles */
+.about-hero .gold-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(201,168,76,0.05);
+    pointer-events: none;
+}
+
+.about-hero .gold-ring-1 { width: 280px; height: 280px; top: -80px; right: -40px; }
+.about-hero .gold-ring-2 { width: 180px; height: 180px; bottom: -50px; left: -30px; }
+.about-hero .gold-ring-3 { width: 100px; height: 100px; top: 35%; left: 15%; }
+
+/* 3. Small Dots */
+.about-hero .dot {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(201,168,76,0.05);
+    pointer-events: none;
+}
+
+.about-hero .dot-1 { width: 8px; height: 8px; top: 15%; left: 30%; }
+.about-hero .dot-2 { width: 6px; height: 6px; bottom: 20%; right: 35%; }
+.about-hero .dot-3 { width: 10px; height: 10px; top: 50%; right: 40%; }
+.about-hero .dot-4 { width: 5px; height: 5px; bottom: 40%; left: 25%; }
+.about-hero .dot-5 { width: 7px; height: 7px; top: 70%; left: 35%; }
+
+/* 4. Sparkle Stars */
+.about-hero .spark {
+    position: absolute;
+    color: rgba(201,168,76,0.06);
+    pointer-events: none;
+    font-size: 18px;
+    animation: sparkFloat 4s ease-in-out infinite;
+}
+
+.about-hero .spark-1 { top: 12%; left: 12%; font-size: 22px; animation-delay: 0s; }
+.about-hero .spark-2 { bottom: 10%; right: 12%; font-size: 16px; animation-delay: 1s; }
+.about-hero .spark-3 { top: 45%; left: 25%; font-size: 14px; animation-delay: 2s; }
+.about-hero .spark-4 { bottom: 35%; right: 25%; font-size: 28px; animation-delay: 0.5s; }
+
+@keyframes sparkFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.1; }
+    50% { transform: translateY(-15px) rotate(20deg); opacity: 0.5; }
+}
+
+/* 5. Diagonal Lines Pattern */
+.about-hero .diag-pattern {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.02;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 25px,
+        #C9A84C 25px,
+        #C9A84C 26px
+    );
+}
+
+/* 6. Hero Content */
+.about-hero .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 750px;
+    margin: 0 auto;
+}
+
+.about-hero .hero-content .hero-badge {
+    display: inline-block;
+    background: rgba(201,168,76,0.06);
+    border: 1px solid rgba(201,168,76,0.06);
+    padding: 4px 22px;
+    border-radius: 50px;
+    font-size: 10px;
+    color: #C9A84C;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+
+.about-hero .hero-content .hero-icon {
+    font-size: 32px;
+    color: #C9A84C;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.about-hero .hero-content h1 {
+    font-size: 36px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 8px;
+    letter-spacing: -0.5px;
+    font-family: 'Inter', sans-serif;
+}
+
+.about-hero .hero-content h1 .gold {
+    color: #C9A84C;
+}
+
+.about-hero .hero-content .hero-line {
+    width: 50px;
+    height: 3px;
+    background: #C9A84C;
+    margin: 0 auto 10px;
+    border-radius: 2px;
+}
+
+.about-hero .hero-content p {
+    color: rgba(255,255,255,0.5);
+    font-size: 15px;
+    margin: 0 auto;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.8;
+    max-width: 480px;
+}
+
+/* ============================================================
+   CONTENT WRAPPER
+   ============================================================ */
+.about-wrapper {
+    max-width: 1200px;
+    margin: -28px auto 50px;
+    padding: 0 24px;
+    position: relative;
+    z-index: 2;
+}
+
+/* ============================================================
+   3 COLUMN GRID
+   ============================================================ */
+.about-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    align-items: stretch;
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.about-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 0;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.04);
+    border: 1px solid #e8e4e0;
+    transition: 0.4s;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.about-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 30px 80px rgba(92,18,31,0.10);
+}
+
+.about-card .card-accent {
+    height: 4px;
+    flex-shrink: 0;
+    background: linear-gradient(90deg, #5c121f, #C9A84C);
+}
+
+.about-card .card-accent.gold {
+    background: linear-gradient(90deg, #C9A84C, #5c121f);
+}
+
+.about-card .card-body {
+    padding: 22px 20px 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.about-card .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.about-card .card-header .card-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: #C9A84C;
+    font-family: 'Inter', sans-serif;
+    background: #f5f0eb;
+    padding: 2px 14px;
+    border-radius: 30px;
+}
+
+.about-card .card-header .card-tag {
+    font-size: 9px;
+    color: #5c121f;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #f5f0eb;
+    padding: 2px 14px;
+    border-radius: 20px;
+}
+
+.about-card .card-header .card-tag.gold {
+    background: linear-gradient(135deg, #C9A84C, #B8963A);
+    color: #ffffff;
+}
+
+.about-card .card-img {
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    border: 1px solid #e8e4e0;
+    background: #faf8f7;
+}
+
+.about-card .card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: 0.3s;
+}
+
+.about-card .card-img img:hover {
+    transform: scale(1.03);
+}
+
+.about-card .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1d1d1d;
+    margin: 0 0 8px;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.3px;
+}
+
+.about-card .card-text {
+    color: #4a4a4a;
+    font-size: 13px;
+    line-height: 1.8;
+    font-family: 'Inter', sans-serif;
+    flex: 1;
+}
+
+.about-card .card-text p {
+    margin-bottom: 8px;
+}
+
+.about-card .card-text p:last-child {
+    margin-bottom: 0;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.about-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    background: #ffffff;
+    border-radius: 18px;
+    border: 2px dashed #e8e4e0;
+}
+
+.about-empty .empty-icon {
+    font-size: 48px;
+    color: #e8e4e0;
+    display: block;
+    margin-bottom: 16px;
+}
+
+.about-empty h4 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1d1d1d;
+    font-family: 'Inter', sans-serif;
+    margin: 0 0 8px;
+}
+
+.about-empty p {
+    color: #6d6d6d;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+/* Large Desktop */
+@media (min-width: 1400px) {
+    .about-wrapper { max-width: 1300px; padding: 0 40px; }
+    .about-grid { gap: 30px; }
+    .about-card .card-img { height: 180px; }
+    .about-card .card-title { font-size: 20px; }
+}
+
+/* Tablet */
+@media (max-width: 992px) {
+    .about-hero h1 { font-size: 32px; }
+    .about-hero { padding: 40px 20px 35px; min-height: 300px; }
+    .about-grid { grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .about-card .card-img { height: 150px; }
+    .about-card .card-title { font-size: 17px; }
+    
+    .about-hero .bubble-4,
+    .about-hero .bubble-5 { display: none; }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .about-hero { 
+        padding: 35px 16px 30px; 
+        min-height: 270px;
+    }
+    .about-hero h1 { font-size: 28px; }
+    .about-hero p { font-size: 14px; }
+    .about-hero .hero-content .hero-icon { font-size: 28px; }
+    .about-hero .hero-content .hero-badge { 
+        font-size: 9px; 
+        padding: 4px 16px;
+        margin-bottom: 10px;
+    }
+    .about-hero .hero-content .hero-line { 
+        width: 40px; 
+        margin-bottom: 10px;
+    }
+    .about-wrapper { padding: 0 14px; margin-top: -22px; }
+    .about-grid { grid-template-columns: 1fr; gap: 16px; }
+    .about-card .card-body { padding: 18px 16px 16px; }
+    .about-card .card-img { height: 160px; }
+    .about-card .card-title { font-size: 17px; }
+    .about-card .card-text { font-size: 13px; }
+    
+    .about-hero .bubble-1,
+    .about-hero .bubble-2,
+    .about-hero .bubble-3,
+    .about-hero .bubble-4,
+    .about-hero .bubble-5,
+    .about-hero .gold-ring-1,
+    .about-hero .gold-ring-2,
+    .about-hero .gold-ring-3,
+    .about-hero .dot-1,
+    .about-hero .dot-2,
+    .about-hero .dot-3,
+    .about-hero .dot-4,
+    .about-hero .dot-5,
+    .about-hero .spark-1,
+    .about-hero .spark-2,
+    .about-hero .spark-3,
+    .about-hero .spark-4 { display: none; }
+    .about-hero .diag-pattern { opacity: 0.04; }
+}
+
+/* Mobile Small */
+@media (max-width: 480px) {
+    .about-hero { 
+        padding: 28px 12px 24px; 
+        min-height: 230px;
+    }
+    .about-hero h1 { font-size: 24px; }
+    .about-hero p { font-size: 13px; }
+    .about-hero .hero-content .hero-icon { font-size: 24px; }
+    .about-hero .hero-content .hero-badge { 
+        font-size: 8px; 
+        padding: 3px 14px;
+        margin-bottom: 8px;
+    }
+    .about-hero .hero-content .hero-line { 
+        width: 30px; 
+        height: 2px;
+        margin-bottom: 8px;
+    }
+    .about-wrapper { padding: 0 10px; margin-top: -18px; }
+    .about-grid { gap: 14px; }
+    .about-card .card-body { padding: 14px 12px 12px; }
+    .about-card .card-img { height: 140px; }
+    .about-card .card-title { font-size: 16px; }
+    .about-card .card-text { font-size: 12px; }
+    .about-card .card-header .card-num { font-size: 10px; padding: 1px 10px; }
+    .about-card .card-header .card-tag { font-size: 8px; padding: 1px 10px; }
+    .about-empty { padding: 40px 16px; }
+    .about-empty .empty-icon { font-size: 36px; }
+    .about-empty h4 { font-size: 18px; }
+}
+
+/* Mobile Very Small */
+@media (max-width: 360px) {
+    .about-hero { 
+        padding: 24px 10px 20px; 
+        min-height: 190px;
+    }
+    .about-hero h1 { font-size: 20px; }
+    .about-hero p { font-size: 12px; }
+    .about-hero .hero-content .hero-icon { font-size: 20px; }
+}
+</style>
+
+<!-- ============================================================
+   ABOUT PAGE
+   ============================================================ -->
+<div class="about-page">
+
+    <!-- ===== HERO / BANNER SECTION ===== -->
+    <div class="about-hero">
+
+        <!-- Diagonal Pattern -->
+        <div class="diag-pattern"></div>
+
+        <!-- Bubbles -->
+        <div class="bubble bubble-1"></div>
+        <div class="bubble bubble-2"></div>
+        <div class="bubble bubble-3"></div>
+        <div class="bubble bubble-4"></div>
+        <div class="bubble bubble-5"></div>
+
+        <!-- Gold Rings -->
+        <div class="gold-ring gold-ring-1"></div>
+        <div class="gold-ring gold-ring-2"></div>
+        <div class="gold-ring gold-ring-3"></div>
+
+        <!-- Small Dots -->
+        <div class="dot dot-1"></div>
+        <div class="dot dot-2"></div>
+        <div class="dot dot-3"></div>
+        <div class="dot dot-4"></div>
+        <div class="dot dot-5"></div>
+
+        <!-- Sparkles -->
+        <span class="spark spark-1">✦</span>
+        <span class="spark spark-2">✦</span>
+        <span class="spark spark-3">✦</span>
+        <span class="spark spark-4">✦</span>
+
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fas fa-flag"></i> Our Story
+            </div>
+            <span class="hero-icon">
+                <i class="fas fa-crown"></i>
+            </span>
+            <div class="hero-line"></div>
+            <h1>About <span class="gold">Us</span></h1>
+            <p>Learn more about our journey, mission and vision.</p>
         </div>
+    </div>
 
+    <!-- ===== CONTENT WRAPPER ===== -->
+    <div class="about-wrapper">
 
-        <!-- SECTIONS -->
+        {% if sections %}
 
-        {% for section in sections %}
+            <div class="about-grid">
 
-            <div class="mb-5">
+                {% for section in sections %}
 
-                {% if section.image %}
+                    {% if section.image %}
 
-                    <div class="row align-items-center g-5">
-
-                        <div class="col-lg-5">
-
-                            <img
-                                src="{{ section.image.url }}"
-                                alt="{{ section.section_title }}"
-                                class="img-fluid rounded shadow-sm w-100"
-                            >
-
-                        </div>
-
-                        <div class="col-lg-7">
-
-                            <h2 class="fw-bold mb-3">
-                                {{ section.section_title }}
-                            </h2>
-
-                            <div
-                                class="text-muted"
-                                style="line-height: 1.8;"
-                            >
-                                {{ section.section_content|linebreaks }}
+                        <div class="about-card">
+                            <div class="card-accent"></div>
+                            <div class="card-body">
+                                <div class="card-header">
+                                    <span class="card-num">0{{ forloop.counter }}</span>
+                                    <span class="card-tag">
+                                        <i class="fas fa-flag"></i> Story
+                                    </span>
+                                </div>
+                                <div class="card-img">
+                                    <img src="{{ section.image.url }}" alt="{{ section.section_title }}">
+                                </div>
+                                <h3 class="card-title">{{ section.section_title }}</h3>
+                                <div class="card-text">
+                                    {{ section.section_content|linebreaks }}
+                                </div>
                             </div>
-
                         </div>
 
-                    </div>
+                    {% else %}
 
-                {% else %}
-
-                    <div class="row">
-
-                        <div class="col-lg-10 mx-auto">
-
-                            <h2 class="fw-bold mb-3">
-                                {{ section.section_title }}
-                            </h2>
-
-                            <div
-                                class="text-muted"
-                                style="line-height: 1.8;"
-                            >
-                                {{ section.section_content|linebreaks }}
+                        <div class="about-card">
+                            <div class="card-accent gold"></div>
+                            <div class="card-body">
+                                <div class="card-header">
+                                    <span class="card-num">0{{ forloop.counter }}</span>
+                                    <span class="card-tag gold">
+                                        <i class="fas fa-bullseye"></i> Mission
+                                    </span>
+                                </div>
+                                <h3 class="card-title">{{ section.section_title }}</h3>
+                                <div class="card-text">
+                                    {{ section.section_content|linebreaks }}
+                                </div>
                             </div>
-
                         </div>
 
-                    </div>
+                    {% endif %}
 
-                {% endif %}
+                {% endfor %}
 
             </div>
 
+        {% else %}
 
-            {% if not forloop.last %}
-
-                <hr class="my-5">
-
-            {% endif %}
-
-
-        {% empty %}
-
-            <div class="text-center py-5">
-
-                <h4>
-                    About Us
-                </h4>
-
-                <p class="text-muted">
-                    Content will be available soon.
-                </p>
-
+            <div class="about-grid">
+                <div class="about-empty">
+                    <span class="empty-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </span>
+                    <h4>About Us</h4>
+                    <p>Content will be available soon.</p>
+                </div>
             </div>
 
-        {% endfor %}
+        {% endif %}
 
     </div>
 
-</section>
+</div>
 
 {% endblock %}

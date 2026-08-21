@@ -1,1281 +1,1527 @@
+{% extends 'includes/sidebar.html' %}
+{% load static %}
+
+{% block title %}Website Settings{% endblock %}
 
 {% block content %}
 
 <style>
-
-/* =========================================================
-   PAGE
-========================================================= */
-
-.settings-wrapper {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 35px 25px 60px;
+/* ============================================================
+   ROOT VARIABLES
+   ============================================================ */
+:root {
+    --ws-primary: #5c121f;
+    --ws-primary-light: #7a1a2b;
+    --ws-primary-dark: #3d0c14;
+    --ws-gold: #C9A84C;
+    --ws-gold-light: #E8D5A3;
+    --ws-gold-dark: #A8893A;
+    --ws-bg: #f5f0eb;
+    --ws-white: #ffffff;
+    --ws-border: #e8e4e0;
+    --ws-text: #1d1d1d;
+    --ws-text-light: #6d6d6d;
+    --ws-text-muted: #888888;
+    --ws-success: #2e9d57;
+    --ws-danger: #d64045;
+    --ws-warning: #f59e0b;
+    --ws-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    --ws-shadow-hover: 0 20px 50px rgba(92,18,31,0.12);
+    --ws-transition: 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --ws-radius: 16px;
+    --ws-radius-sm: 10px;
+    --ws-radius-xs: 8px;
+    --ws-font: 'Inter', sans-serif;
 }
 
+/* ============================================================
+   MAIN WRAPPER
+   ============================================================ */
+.ws-wrapper {
+    width: 100%;
+    padding: 10px 20px 30px;
+    background: var(--ws-bg);
+    min-height: calc(100vh - 200px);
+    animation: wsFadeUp 0.5s ease;
+}
 
-/* =========================================================
-   HEADER
-========================================================= */
-
-.settings-header {
+/* ============================================================
+   HEADER SECTION
+   ============================================================ */
+.ws-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--ws-border);
+    flex-wrap: wrap;
+    gap: 16px;
 }
 
-.settings-title {
-    margin: 0;
-    font-size: 30px;
+.ws-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.ws-header-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--ws-primary), var(--ws-primary-dark));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ws-white);
+    font-size: 22px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(92, 18, 31, 0.15);
+}
+
+.ws-header-title {
+    font-size: 24px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-primary);
+    font-family: var(--ws-font);
+    margin: 0;
+    letter-spacing: -0.3px;
 }
 
-.settings-subtitle {
-    margin-top: 6px;
-    color: #6b7280;
-    font-size: 14px;
+.ws-header-sub {
+    color: var(--ws-text-light);
+    font-size: 13px;
+    margin: 0;
+    font-family: var(--ws-font);
 }
 
+.ws-header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
 
-/* =========================================================
-   BUTTON
-========================================================= */
-
-.settings-btn {
-    border: none;
-    border-radius: 8px;
-    padding: 11px 20px;
-    font-size: 14px;
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.ws-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: var(--ws-radius-sm);
+    font-size: 13px;
     font-weight: 600;
+    font-family: var(--ws-font);
+    border: none;
     cursor: pointer;
-    transition: 0.2s ease;
+    transition: var(--ws-transition);
+    text-decoration: none;
+    white-space: nowrap;
 }
 
-.settings-btn-primary {
-    background: #2563eb;
-    color: white;
+.ws-btn-primary {
+    background: linear-gradient(135deg, var(--ws-primary), var(--ws-primary-dark));
+    color: var(--ws-white);
+    box-shadow: 0 4px 16px rgba(92, 18, 31, 0.15);
 }
 
-.settings-btn-primary:hover {
-    background: #1d4ed8;
+.ws-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(92, 18, 31, 0.25);
 }
 
-.settings-btn-secondary {
-    background: #f3f4f6;
-    color: #374151;
-}
-
-.settings-btn-danger {
+.ws-btn-danger {
     background: #fee2e2;
-    color: #dc2626;
+    color: var(--ws-danger);
 }
 
-.settings-btn-danger:hover {
+.ws-btn-danger:hover {
     background: #fecaca;
+    transform: translateY(-2px);
 }
 
+.ws-btn-secondary {
+    background: var(--ws-white);
+    color: var(--ws-text);
+    border: 1px solid var(--ws-border);
+}
 
-/* =========================================================
-   ALERT
-========================================================= */
+.ws-btn-secondary:hover {
+    background: var(--ws-bg);
+    transform: translateY(-2px);
+}
 
-.settings-alert {
-    padding: 14px 18px;
+/* ============================================================
+   ALERT MESSAGES
+   ============================================================ */
+.ws-alert {
+    padding: 14px 20px;
     margin-bottom: 20px;
-    border-radius: 8px;
-    background: #ecfdf5;
-    color: #047857;
-    border: 1px solid #a7f3d0;
-
+    border-radius: var(--ws-radius-sm);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    animation: wsFadeIn 0.4s ease;
 }
 
-.settings-alert-close {
+.ws-alert-success {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #047857;
+}
+
+.ws-alert-error {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+}
+
+.ws-alert-info {
+    background: #eff6ff;
+    border: 1px solid #93c5fd;
+    color: #2563eb;
+}
+
+.ws-alert-close {
     border: none;
     background: none;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 22px;
+    color: inherit;
+    opacity: 0.6;
+    transition: var(--ws-transition);
 }
 
+.ws-alert-close:hover {
+    opacity: 1;
+}
 
-/* =========================================================
+/* ============================================================
    MAIN CARD
-========================================================= */
-
-.settings-card {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.04);
+   ============================================================ */
+.ws-card {
+    background: var(--ws-white);
+    border: 1px solid var(--ws-border);
+    border-radius: var(--ws-radius);
+    box-shadow: var(--ws-shadow);
+    overflow: hidden;
 }
 
-
-/* =========================================================
+/* ============================================================
    SECTION
-========================================================= */
-
-.settings-section {
-    padding: 28px;
-    border-bottom: 1px solid #e5e7eb;
+   ============================================================ */
+.ws-section {
+    padding: 28px 30px;
+    border-bottom: 1px solid var(--ws-border);
+    transition: var(--ws-transition);
 }
 
-.settings-section:last-child {
+.ws-section:last-child {
     border-bottom: none;
 }
 
-.settings-section-header {
+.ws-section:hover {
+    background: rgba(245, 240, 235, 0.3);
+}
+
+.ws-section-header {
     margin-bottom: 22px;
 }
 
-.settings-section-title {
+.ws-section-title {
     margin: 0;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-text);
+    font-family: var(--ws-font);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.settings-section-description {
-    margin-top: 5px;
-    color: #6b7280;
+.ws-section-title .ws-title-icon {
+    font-size: 18px;
+}
+
+.ws-section-desc {
+    margin-top: 4px;
+    color: var(--ws-text-light);
     font-size: 13px;
+    font-family: var(--ws-font);
 }
 
-
-/* =========================================================
+/* ============================================================
    GRID
-========================================================= */
-
-.settings-grid {
+   ============================================================ */
+.ws-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
 }
 
-.settings-grid-three {
+.ws-grid-3 {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
 }
 
+.ws-full {
+    grid-column: 1 / -1;
+}
 
-/* =========================================================
-   FIELD
-========================================================= */
-
-.settings-field {
+/* ============================================================
+   FORM FIELDS - STYLED INPUTS
+   ============================================================ */
+.ws-field {
     display: flex;
     flex-direction: column;
 }
 
-.settings-field-full {
-    grid-column: 1 / -1;
-}
-
-.settings-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 7px;
-}
-
-.settings-input {
-    width: 100%;
-    box-sizing: border-box;
-
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-
-    padding: 11px 12px;
-
-    font-size: 14px;
-    color: #111827;
-
-    outline: none;
-
-    background: white;
-
-    transition: 0.2s ease;
-}
-
-.settings-input:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
-}
-
-.settings-textarea {
-    resize: vertical;
-    min-height: 120px;
-}
-
-.settings-help {
-    margin-top: 5px;
+.ws-label {
     font-size: 12px;
-    color: #6b7280;
+    font-weight: 600;
+    color: var(--ws-text);
+    margin-bottom: 5px;
+    font-family: var(--ws-font);
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
+.ws-label .ws-required {
+    color: var(--ws-danger);
+}
 
-/* =========================================================
-   IMAGE
-========================================================= */
+.ws-label .ws-hint {
+    font-weight: 400;
+    color: var(--ws-text-muted);
+    font-size: 11px;
+}
 
-.settings-image-preview {
+/* --- Input Fields --- */
+.ws-input,
+.ws-input-text,
+.ws-input-email,
+.ws-input-tel,
+.ws-input-url,
+.ws-input-number,
+.ws-input-password,
+.ws-select {
+    width: 100%;
+    padding: 11px 15px;
+    border: 2px solid var(--ws-border);
+    border-radius: var(--ws-radius-xs);
+    font-size: 14px;
+    font-family: var(--ws-font);
+    color: var(--ws-text);
+    background: var(--ws-white);
+    transition: var(--ws-transition);
+    outline: none;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.ws-input:focus,
+.ws-input-text:focus,
+.ws-input-email:focus,
+.ws-input-tel:focus,
+.ws-input-url:focus,
+.ws-input-number:focus,
+.ws-input-password:focus,
+.ws-select:focus {
+    border-color: var(--ws-primary);
+    box-shadow: 0 0 0 4px rgba(92, 18, 31, 0.06);
+}
+
+.ws-input::placeholder,
+.ws-input-text::placeholder,
+.ws-input-email::placeholder,
+.ws-input-tel::placeholder,
+.ws-input-url::placeholder,
+.ws-input-number::placeholder,
+.ws-input-password::placeholder {
+    color: var(--ws-text-muted);
+    font-weight: 300;
+}
+
+.ws-input:disabled,
+.ws-input-text:disabled,
+.ws-input-email:disabled,
+.ws-input-tel:disabled,
+.ws-input-url:disabled,
+.ws-input-number:disabled,
+.ws-input-password:disabled,
+.ws-select:disabled {
+    background: var(--ws-bg);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* --- Textarea --- */
+.ws-textarea {
+    width: 100%;
+    padding: 11px 15px;
+    border: 2px solid var(--ws-border);
+    border-radius: var(--ws-radius-xs);
+    font-size: 14px;
+    font-family: var(--ws-font);
+    color: var(--ws-text);
+    background: var(--ws-white);
+    transition: var(--ws-transition);
+    outline: none;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+}
+
+.ws-textarea:focus {
+    border-color: var(--ws-primary);
+    box-shadow: 0 0 0 4px rgba(92, 18, 31, 0.06);
+}
+
+.ws-textarea::placeholder {
+    color: var(--ws-text-muted);
+    font-weight: 300;
+}
+
+/* --- Select with custom arrow --- */
+.ws-select-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.ws-select-wrap::after {
+    content: '\f078';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ws-text-muted);
+    font-size: 12px;
+    pointer-events: none;
+}
+
+.ws-select {
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+.ws-select option {
+    padding: 8px;
+}
+
+/* --- Error States --- */
+.ws-error {
+    border-color: var(--ws-danger) !important;
+    background: #fff5f5 !important;
+}
+
+.ws-error:focus {
+    box-shadow: 0 0 0 4px rgba(214, 64, 69, 0.1) !important;
+}
+
+.ws-error-msg {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--ws-danger);
+    margin-top: 4px;
+    font-weight: 500;
+    font-family: var(--ws-font);
+}
+
+.ws-help {
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--ws-text-muted);
+    font-family: var(--ws-font);
+}
+
+/* ============================================================
+   FILE UPLOAD
+   ============================================================ */
+.ws-file-area {
+    border: 2px dashed var(--ws-border);
+    border-radius: var(--ws-radius-sm);
+    padding: 20px;
+    text-align: center;
+    transition: var(--ws-transition);
+    cursor: pointer;
+    background: var(--ws-bg);
+    position: relative;
+}
+
+.ws-file-area:hover {
+    border-color: var(--ws-primary);
+    background: rgba(92, 18, 31, 0.02);
+}
+
+.ws-file-area .ws-upload-icon {
+    font-size: 32px;
+    color: var(--ws-text-muted);
+    margin-bottom: 6px;
+}
+
+.ws-file-area .ws-upload-text {
+    font-size: 13px;
+    color: var(--ws-text-light);
+    font-family: var(--ws-font);
+}
+
+.ws-file-area .ws-upload-text strong {
+    color: var(--ws-primary);
+}
+
+.ws-file-area .ws-upload-hint {
+    font-size: 11px;
+    color: var(--ws-text-muted);
+    margin-top: 4px;
+    font-family: var(--ws-font);
+}
+
+.ws-file-area input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.ws-preview {
+    display: none;
     margin-top: 12px;
 }
 
-.settings-image-preview img {
-    max-width: 180px;
-    max-height: 100px;
-    object-fit: contain;
-
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 5px;
+.ws-preview.ws-has-img {
+    display: block;
 }
 
+.ws-preview img {
+    max-width: 140px;
+    max-height: 100px;
+    border-radius: var(--ws-radius-xs);
+    border: 2px solid var(--ws-border);
+    object-fit: contain;
+    padding: 4px;
+    background: var(--ws-white);
+}
 
-/* =========================================================
-   CHECKBOX
-========================================================= */
+.ws-preview .ws-file-name {
+    font-size: 12px;
+    color: var(--ws-text-light);
+    margin-top: 4px;
+    font-family: var(--ws-font);
+}
 
-.settings-checkbox-wrapper {
+/* ============================================================
+   CHECKBOX / TOGGLE
+   ============================================================ */
+.ws-toggle-wrap {
     display: flex;
     align-items: center;
-    gap: 9px;
-    margin-top: 10px;
+    gap: 14px;
+    padding: 10px 16px;
+    background: var(--ws-bg);
+    border-radius: var(--ws-radius-xs);
+    border: 1px solid var(--ws-border);
 }
 
-.settings-checkbox {
-    width: 17px;
-    height: 17px;
+.ws-toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+    cursor: pointer;
 }
 
+.ws-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
 
-/* =========================================================
+.ws-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #ccc;
+    transition: var(--ws-transition);
+    border-radius: 30px;
+}
+
+.ws-toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background: var(--ws-white);
+    transition: var(--ws-transition);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.ws-toggle input:checked + .ws-toggle-slider {
+    background: var(--ws-success);
+}
+
+.ws-toggle input:checked + .ws-toggle-slider::before {
+    transform: translateX(20px);
+}
+
+.ws-toggle-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ws-text);
+    font-family: var(--ws-font);
+}
+
+.ws-toggle-desc {
+    font-size: 11px;
+    color: var(--ws-text-muted);
+    font-family: var(--ws-font);
+}
+
+/* ============================================================
    FOOTER ACTIONS
-========================================================= */
-
-.settings-actions {
-    padding: 24px 28px;
-
+   ============================================================ */
+.ws-actions {
+    padding: 22px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-
-    background: #f9fafb;
-
-    border-radius: 0 0 14px 14px;
+    background: linear-gradient(135deg, rgba(245, 240, 235, 0.3), var(--ws-bg));
+    border-top: 1px solid var(--ws-border);
+    border-radius: 0 0 var(--ws-radius) var(--ws-radius);
+    flex-wrap: wrap;
+    gap: 16px;
 }
 
-.settings-status {
-    color: #6b7280;
+.ws-status {
+    color: var(--ws-text-light);
     font-size: 13px;
+    font-family: var(--ws-font);
 }
 
+.ws-status strong {
+    color: var(--ws-text);
+}
 
-/* =========================================================
+.ws-actions-right {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* ============================================================
    MODAL
-========================================================= */
-
-.settings-modal-overlay {
+   ============================================================ */
+.ws-modal-overlay {
     position: fixed;
     inset: 0;
-
-    background: rgba(17,24,39,0.65);
-
+    background: rgba(17, 24, 39, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     display: none;
     align-items: center;
     justify-content: center;
-
     z-index: 99999;
-
     padding: 20px;
 }
 
-.settings-modal-overlay.show {
+.ws-modal-overlay.show {
     display: flex;
 }
 
-.settings-modal {
+.ws-modal {
     width: 100%;
-    max-width: 430px;
-
-    background: white;
-
-    border-radius: 14px;
-
+    max-width: 440px;
+    background: var(--ws-white);
+    border-radius: var(--ws-radius);
     box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+    animation: wsModalSlide 0.3s ease;
 }
 
-.settings-modal-header {
+@keyframes wsModalSlide {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.ws-modal-header {
     padding: 20px 24px;
-
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--ws-border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-.settings-modal-title {
+.ws-modal-header .ws-modal-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fee2e2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ws-danger);
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.ws-modal-title {
     margin: 0;
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 700;
+    color: var(--ws-text);
+    font-family: var(--ws-font);
 }
 
-.settings-modal-body {
-    padding: 25px;
-
-    text-align: center;
-
-    color: #6b7280;
-    line-height: 1.7;
+.ws-modal-body {
+    padding: 24px 28px;
+    color: var(--ws-text-light);
+    line-height: 1.8;
+    font-size: 14px;
+    font-family: var(--ws-font);
 }
 
-.settings-modal-footer {
-    padding: 18px 24px;
+.ws-modal-body p {
+    margin: 0 0 10px 0;
+}
 
-    border-top: 1px solid #e5e7eb;
+.ws-modal-body p:last-child {
+    margin-bottom: 0;
+}
 
+.ws-modal-body .ws-modal-warning {
+    color: var(--ws-danger);
+    font-weight: 600;
+}
+
+.ws-modal-footer {
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--ws-border);
     display: flex;
     justify-content: flex-end;
     gap: 10px;
 }
 
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes wsFadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
-/* =========================================================
+@keyframes wsFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ============================================================
    RESPONSIVE
-========================================================= */
+   ============================================================ */
 
-@media(max-width: 900px) {
-
-    .settings-grid,
-    .settings-grid-three {
-        grid-template-columns: 1fr;
-    }
-
+/* Desktop Large */
+@media (min-width: 1400px) {
+    .ws-wrapper { padding: 40px 60px 50px; }
+    .ws-section { padding: 32px 36px; }
+    .ws-actions { padding: 24px 36px; }
+    .ws-grid { gap: 24px; }
+    .ws-grid-3 { gap: 24px; }
 }
 
-@media(max-width: 600px) {
-
-    .settings-wrapper {
-        padding: 20px 12px 40px;
-    }
-
-    .settings-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 15px;
-    }
-
-    .settings-section {
-        padding: 20px;
-    }
-
-    .settings-actions {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 15px;
-    }
-
+/* Desktop */
+@media (max-width: 1200px) {
+    .ws-grid { gap: 18px; }
+    .ws-grid-3 { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* Tablet */
+@media (max-width: 992px) {
+    .ws-wrapper { padding: 24px 24px 40px; }
+    .ws-grid { grid-template-columns: 1fr; }
+    .ws-grid-3 { grid-template-columns: 1fr; }
+    .ws-section { padding: 22px 24px; }
+    .ws-actions { padding: 18px 24px; flex-direction: column; align-items: stretch; }
+    .ws-actions-right { justify-content: stretch; }
+    .ws-actions-right .ws-btn { flex: 1; justify-content: center; }
+    .ws-header { flex-direction: column; align-items: flex-start; }
+    .ws-header-actions { width: 100%; }
+    .ws-header-actions .ws-btn { flex: 1; justify-content: center; }
+}
+
+/* Mobile Large */
+@media (max-width: 768px) {
+    .ws-wrapper { padding: 16px 16px 30px; }
+    .ws-section { padding: 18px 16px; }
+    .ws-section-header { margin-bottom: 16px; }
+    .ws-section-title { font-size: 15px; }
+    .ws-actions { padding: 16px 16px; }
+    .ws-header-title { font-size: 20px; }
+    .ws-header-icon { width: 42px; height: 42px; font-size: 18px; }
+    .ws-grid { gap: 14px; }
+    .ws-input,
+    .ws-input-text,
+    .ws-input-email,
+    .ws-input-tel,
+    .ws-input-url,
+    .ws-input-number,
+    .ws-input-password,
+    .ws-select,
+    .ws-textarea { padding: 9px 12px; font-size: 13px; }
+    .ws-textarea { min-height: 80px; }
+    .ws-modal { max-width: 100%; margin: 0 10px; }
+}
+
+/* Mobile Medium */
+@media (max-width: 576px) {
+    .ws-wrapper { padding: 12px 12px 24px; }
+    .ws-section { padding: 14px 12px; }
+    .ws-header { margin-bottom: 20px; padding-bottom: 14px; }
+    .ws-header-title { font-size: 18px; }
+    .ws-header-sub { font-size: 12px; }
+    .ws-header-icon { width: 38px; height: 38px; font-size: 16px; }
+    .ws-btn { padding: 8px 16px; font-size: 12px; }
+    .ws-input,
+    .ws-input-text,
+    .ws-input-email,
+    .ws-input-tel,
+    .ws-input-url,
+    .ws-input-number,
+    .ws-input-password,
+    .ws-select,
+    .ws-textarea { padding: 8px 10px; font-size: 12px; }
+    .ws-textarea { min-height: 60px; }
+    .ws-label { font-size: 11px; }
+    .ws-section-title { font-size: 14px; }
+    .ws-section-desc { font-size: 12px; }
+    .ws-file-area { padding: 14px; }
+    .ws-file-area .ws-upload-text { font-size: 12px; }
+    .ws-file-area .ws-upload-hint { font-size: 10px; }
+    .ws-toggle-wrap { padding: 8px 12px; flex-wrap: wrap; }
+    .ws-toggle-label { font-size: 12px; }
+    .ws-toggle-desc { font-size: 10px; }
+    .ws-modal-header { padding: 16px 18px; }
+    .ws-modal-body { padding: 18px 20px; font-size: 13px; }
+    .ws-modal-footer { padding: 14px 18px 16px; flex-direction: column-reverse; }
+    .ws-modal-footer .ws-btn { justify-content: center; }
+    .ws-status { font-size: 12px; }
+    .ws-actions-right { flex-direction: column; }
+    .ws-actions-right .ws-btn { width: 100%; justify-content: center; }
+    .ws-grid-3 { gap: 12px; }
+    .ws-select-wrap::after { font-size: 10px; right: 10px; }
+}
+
+/* Mobile Small */
+@media (max-width: 400px) {
+    .ws-wrapper { padding: 8px 8px 16px; }
+    .ws-section { padding: 12px 10px; }
+    .ws-header-title { font-size: 16px; }
+    .ws-header-icon { width: 34px; height: 34px; font-size: 14px; }
+    .ws-btn { padding: 6px 12px; font-size: 11px; }
+    .ws-input,
+    .ws-input-text,
+    .ws-input-email,
+    .ws-input-tel,
+    .ws-input-url,
+    .ws-input-number,
+    .ws-input-password,
+    .ws-select,
+    .ws-textarea { padding: 6px 8px; font-size: 12px; }
+    .ws-textarea { min-height: 50px; }
+    .ws-file-area .ws-upload-icon { font-size: 24px; }
+    .ws-file-area .ws-upload-text { font-size: 11px; }
+    .ws-modal-title { font-size: 17px; }
+    .ws-modal-body { padding: 14px 16px; font-size: 12px; }
+}
 </style>
 
+<!-- ============================================================
+   MAIN WRAPPER
+   ============================================================ -->
+<div class="ws-wrapper">
 
-<div class="settings-wrapper">
-
-
-    <!-- =====================================================
-         HEADER
-    ====================================================== -->
-
-    <div class="settings-header">
-
-        <div>
-
-            <h1 class="settings-title">
-                Website Settings
-            </h1>
-
-            <p class="settings-subtitle">
-                Manage your company information, contact details,
-                social links and website configuration.
-            </p>
-
+    <!-- ===== HEADER ===== -->
+    <div class="ws-header">
+        <div class="ws-header-left">
+            <div class="ws-header-icon">
+                <i class="fas fa-cog"></i>
+            </div>
+            <div>
+                <h1 class="ws-header-title">Website Settings</h1>
+                <p class="ws-header-sub">
+                    Manage your company information, contact details,
+                    social links and website configuration.
+                </p>
+            </div>
         </div>
-
-
-        {% if settings_obj %}
-
-            <button
-                type="button"
-                class="settings-btn settings-btn-danger"
-                onclick="openDeleteModal()"
-            >
-                Delete Settings
-            </button>
-
-        {% endif %}
-
+        <div class="ws-header-actions">
+            {% if settings_obj %}
+                <button type="button" class="ws-btn ws-btn-danger" onclick="openDeleteModal()">
+                    <i class="fas fa-trash-alt"></i> Delete Settings
+                </button>
+            {% endif %}
+        </div>
     </div>
 
-
-    <!-- =====================================================
-         MESSAGES
-    ====================================================== -->
-
+    <!-- ===== MESSAGES ===== -->
     {% if messages %}
-
         {% for message in messages %}
-
-            <div class="settings-alert">
-
-                <span>
-                    {{ message }}
-                </span>
-
-                <button
-                    type="button"
-                    class="settings-alert-close"
-                    onclick="this.parentElement.remove()"
-                >
-                    ×
-                </button>
-
+            <div class="ws-alert ws-alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %}">
+                <span>{{ message }}</span>
+                <button type="button" class="ws-alert-close" onclick="this.parentElement.remove()">×</button>
             </div>
-
         {% endfor %}
-
     {% endif %}
 
-
-    <!-- =====================================================
-         FORM
-    ====================================================== -->
-
-    <form
-        method="POST"
-        enctype="multipart/form-data"
-        id="settingsForm"
-    >
-
+    <!-- ===== FORM ===== -->
+    <form method="POST" enctype="multipart/form-data" id="settingsForm">
         {% csrf_token %}
-
-        <input
-            type="hidden"
-            name="action"
-            value="{{ form_action }}"
-        >
-
-
+        <input type="hidden" name="action" value="{{ form_action }}">
         {% if settings_obj %}
-
-            <input
-                type="hidden"
-                name="settings_id"
-                value="{{ settings_obj.id }}"
-            >
-
+            <input type="hidden" name="settings_id" value="{{ settings_obj.id }}">
         {% endif %}
 
-
-        <div class="settings-card">
-
+        <div class="ws-card">
 
             <!-- =================================================
-                 COMPANY
+                 COMPANY INFORMATION
             ================================================== -->
-
-            <div class="settings-section">
-
-                <div class="settings-section-header">
-
-                    <h2 class="settings-section-title">
-                        🏢 Company Information
+            <div class="ws-section">
+                <div class="ws-section-header">
+                    <h2 class="ws-section-title">
+                        <span class="ws-title-icon">🏢</span> Company Information
                     </h2>
-
-                    <p class="settings-section-description">
-                        Basic information about your company or store.
-                    </p>
-
+                    <p class="ws-section-desc">Basic information about your company or store.</p>
                 </div>
-
-
-                <div class="settings-grid">
-
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            Company Name *
+                <div class="ws-grid">
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_company_name">
+                            Company Name <span class="ws-required">*</span>
                         </label>
-
-                        {{ form.company_name }}
-
+                        <input type="text" 
+                               name="company_name" 
+                               id="id_company_name"
+                               class="ws-input {% if form.company_name.errors %}ws-error{% endif %}"
+                               placeholder="Enter your company name"
+                               value="{{ form.company_name.value|default:'' }}"
+                               maxlength="255"
+                               required>
                         {% if form.company_name.errors %}
-                            <small class="settings-help">
-                                {{ form.company_name.errors }}
-                            </small>
-                        {% endif %}
-
-                    </div>
-
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            Company Tagline
-                        </label>
-
-                        {{ form.company_tagline }}
-
-                    </div>
-
-
-                    <div class="settings-field settings-field-full">
-
-                        <label class="settings-label">
-                            Company Description
-                        </label>
-
-                        {{ form.company_description }}
-
-                    </div>
-
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            Logo
-                        </label>
-
-                        {{ form.logo }}
-
-                        {% if settings_obj.logo %}
-
-                            <div class="settings-image-preview">
-
-                                <img
-                                    src="{{ settings_obj.logo.url }}"
-                                    alt="Company Logo"
-                                >
-
+                            <div class="ws-error-msg">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.company_name.errors|join:", " }}
                             </div>
-
                         {% endif %}
-
-                        <small class="settings-help">
-                            Upload your company logo.
-                        </small>
-
                     </div>
 
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_company_tagline">Company Tagline</label>
+                        <input type="text" 
+                               name="company_tagline" 
+                               id="id_company_tagline"
+                               class="ws-input"
+                               placeholder="e.g., Premium Furniture Store"
+                               value="{{ form.company_tagline.value|default:'' }}"
+                               maxlength="255">
+                    </div>
 
-                    <div class="settings-field">
+                    <div class="ws-field ws-full">
+                        <label class="ws-label" for="id_company_description">Company Description</label>
+                        <textarea name="company_description" 
+                                  id="id_company_description"
+                                  class="ws-textarea"
+                                  placeholder="Describe your company, mission, and values..."
+                                  rows="3">{{ form.company_description.value|default:'' }}</textarea>
+                    </div>
 
-                        <label class="settings-label">
-                            Favicon
-                        </label>
-
-                        {{ form.favicon }}
-
-                        {% if settings_obj.favicon %}
-
-                            <div class="settings-image-preview">
-
-                                <img
-                                    src="{{ settings_obj.favicon.url }}"
-                                    alt="Favicon"
-                                >
-
+                    <div class="ws-field">
+                        <label class="ws-label">Logo</label>
+                        <div class="ws-file-area" id="logoUploadArea">
+                            <i class="fas fa-cloud-upload-alt ws-upload-icon"></i>
+                            <div class="ws-upload-text">
+                                <strong>Click to upload</strong> or drag and drop
                             </div>
-
+                            <div class="ws-upload-hint">Recommended: 200x200px (JPG, PNG, WebP)</div>
+                            <input type="file" name="logo" id="logoUpload" accept="image/*">
+                            <div class="ws-preview {% if settings_obj.logo %}ws-has-img{% endif %}" id="logoPreviewWrapper">
+                                {% if settings_obj.logo %}
+                                    <img src="{{ settings_obj.logo.url }}" alt="Company Logo">
+                                    <div class="ws-file-name">Current logo</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if form.logo.errors %}
+                            <div class="ws-error-msg">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.logo.errors|join:", " }}
+                            </div>
                         {% endif %}
-
                     </div>
 
-
+                    <div class="ws-field">
+                        <label class="ws-label">Favicon</label>
+                        <div class="ws-file-area" id="faviconUploadArea">
+                            <i class="fas fa-cloud-upload-alt ws-upload-icon"></i>
+                            <div class="ws-upload-text">
+                                <strong>Click to upload</strong> or drag and drop
+                            </div>
+                            <div class="ws-upload-hint">Recommended: 16x16px or 32x32px (ICO, PNG)</div>
+                            <input type="file" name="favicon" id="faviconUpload" accept="image/*">
+                            <div class="ws-preview {% if settings_obj.favicon %}ws-has-img{% endif %}" id="faviconPreviewWrapper">
+                                {% if settings_obj.favicon %}
+                                    <img src="{{ settings_obj.favicon.url }}" alt="Favicon">
+                                    <div class="ws-file-name">Current favicon</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if form.favicon.errors %}
+                            <div class="ws-error-msg">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.favicon.errors|join:", " }}
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
-
             </div>
-
 
             <!-- =================================================
-                 CONTACT
+                 CONTACT INFORMATION
             ================================================== -->
-
-            <div class="settings-section">
-
-                <div class="settings-section-header">
-
-                    <h2 class="settings-section-title">
-                        📞 Contact Information
+            <div class="ws-section">
+                <div class="ws-section-header">
+                    <h2 class="ws-section-title">
+                        <span class="ws-title-icon">📞</span> Contact Information
                     </h2>
-
-                    <p class="settings-section-description">
-                        Phone numbers and email addresses displayed
-                        throughout your website.
-                    </p>
-
+                    <p class="ws-section-desc">Phone numbers and email addresses displayed throughout your website.</p>
                 </div>
-
-
-                <div class="settings-grid">
-
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            Phone
-                        </label>
-
-                        {{ form.phone }}
-
+                <div class="ws-grid">
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_phone">Phone</label>
+                        <input type="tel" 
+                               name="phone" 
+                               id="id_phone"
+                               class="ws-input"
+                               placeholder="+91 12345 67890"
+                               value="{{ form.phone.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            Alternate Phone
-                        </label>
-
-                        {{ form.alternate_phone }}
-
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_alternate_phone">Alternate Phone</label>
+                        <input type="tel" 
+                               name="alternate_phone" 
+                               id="id_alternate_phone"
+                               class="ws-input"
+                               placeholder="+91 98765 43210"
+                               value="{{ form.alternate_phone.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            Email
-                        </label>
-
-                        {{ form.email }}
-
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_email">Email</label>
+                        <input type="email" 
+                               name="email" 
+                               id="id_email"
+                               class="ws-input"
+                               placeholder="contact@company.com"
+                               value="{{ form.email.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            Support Email
-                        </label>
-
-                        {{ form.support_email }}
-
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_support_email">Support Email</label>
+                        <input type="email" 
+                               name="support_email" 
+                               id="id_support_email"
+                               class="ws-input"
+                               placeholder="support@company.com"
+                               value="{{ form.support_email.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            WhatsApp Number
-                        </label>
-
-                        {{ form.whatsapp_number }}
-
-                        <small class="settings-help">
-                            Example: 919876543210
-                        </small>
-
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_whatsapp_number">WhatsApp Number</label>
+                        <input type="text" 
+                               name="whatsapp_number" 
+                               id="id_whatsapp_number"
+                               class="ws-input"
+                               placeholder="919876543210"
+                               value="{{ form.whatsapp_number.value|default:'' }}">
+                        <span class="ws-help">Example: 919876543210</span>
                     </div>
-
-
                 </div>
-
             </div>
-
 
             <!-- =================================================
-                 ADDRESS
+                 BUSINESS ADDRESS
             ================================================== -->
-
-            <div class="settings-section">
-
-                <div class="settings-section-header">
-
-                    <h2 class="settings-section-title">
-                        📍 Business Address
+            <div class="ws-section">
+                <div class="ws-section-header">
+                    <h2 class="ws-section-title">
+                        <span class="ws-title-icon">📍</span> Business Address
                     </h2>
-
-                    <p class="settings-section-description">
-                        Your registered or store address.
-                    </p>
-
+                    <p class="ws-section-desc">Your registered or store address.</p>
                 </div>
-
-
-                <div class="settings-grid">
-
-
-                    <div class="settings-field settings-field-full">
-
-                        <label class="settings-label">
-                            Address Line 1
-                        </label>
-
-                        {{ form.address_line_1 }}
-
+                <div class="ws-grid">
+                    <div class="ws-field ws-full">
+                        <label class="ws-label" for="id_address_line_1">Address Line 1</label>
+                        <input type="text" 
+                               name="address_line_1" 
+                               id="id_address_line_1"
+                               class="ws-input"
+                               placeholder="123 Main Street"
+                               value="{{ form.address_line_1.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field settings-field-full">
-
-                        <label class="settings-label">
-                            Address Line 2
-                        </label>
-
-                        {{ form.address_line_2 }}
-
+                    <div class="ws-field ws-full">
+                        <label class="ws-label" for="id_address_line_2">Address Line 2</label>
+                        <input type="text" 
+                               name="address_line_2" 
+                               id="id_address_line_2"
+                               class="ws-input"
+                               placeholder="Suite/Building/Floor"
+                               value="{{ form.address_line_2.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            City
-                        </label>
-
-                        {{ form.city }}
-
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_city">City</label>
+                        <input type="text" 
+                               name="city" 
+                               id="id_city"
+                               class="ws-input"
+                               placeholder="Mumbai"
+                               value="{{ form.city.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            State
-                        </label>
-
-                        {{ form.state }}
-
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_state">State</label>
+                        <input type="text" 
+                               name="state" 
+                               id="id_state"
+                               class="ws-input"
+                               placeholder="Maharashtra"
+                               value="{{ form.state.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            Country
-                        </label>
-
-                        {{ form.country }}
-
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_country">Country</label>
+                        <input type="text" 
+                               name="country" 
+                               id="id_country"
+                               class="ws-input"
+                               placeholder="India"
+                               value="{{ form.country.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            Pincode
-                        </label>
-
-                        {{ form.pincode }}
-
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_pincode">Pincode</label>
+                        <input type="text" 
+                               name="pincode" 
+                               id="id_pincode"
+                               class="ws-input"
+                               placeholder="400001"
+                               value="{{ form.pincode.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field settings-field-full">
-
-                        <label class="settings-label">
-                            Google Maps URL
-                        </label>
-
-                        {{ form.google_maps_url }}
-
+                    <div class="ws-field ws-full">
+                        <label class="ws-label" for="id_google_maps_url">Google Maps URL</label>
+                        <input type="url" 
+                               name="google_maps_url" 
+                               id="id_google_maps_url"
+                               class="ws-input"
+                               placeholder="https://maps.google.com/..."
+                               value="{{ form.google_maps_url.value|default:'' }}">
+                        <span class="ws-help">Paste the full Google Maps embed or share URL.</span>
                     </div>
-
-
                 </div>
-
             </div>
-
 
             <!-- =================================================
-                 BUSINESS
+                 BUSINESS INFORMATION
             ================================================== -->
-
-            <div class="settings-section">
-
-                <div class="settings-section-header">
-
-                    <h2 class="settings-section-title">
-                        🧾 Business Information
+            <div class="ws-section">
+                <div class="ws-section-header">
+                    <h2 class="ws-section-title">
+                        <span class="ws-title-icon">🧾</span> Business Information
                     </h2>
-
                 </div>
-
-
-                <div class="settings-grid">
-
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            GST Number
-                        </label>
-
-                        {{ form.gst_number }}
-
+                <div class="ws-grid">
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_gst_number">GST Number</label>
+                        <input type="text" 
+                               name="gst_number" 
+                               id="id_gst_number"
+                               class="ws-input"
+                               placeholder="22AAAAA0000A1Z5"
+                               value="{{ form.gst_number.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            Registration Number
-                        </label>
-
-                        {{ form.business_registration_number }}
-
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_business_registration_number">Registration Number</label>
+                        <input type="text" 
+                               name="business_registration_number" 
+                               id="id_business_registration_number"
+                               class="ws-input"
+                               placeholder="U12345MH2023PTC123456"
+                               value="{{ form.business_registration_number.value|default:'' }}">
                     </div>
-
-
                 </div>
-
             </div>
-
 
             <!-- =================================================
                  SOCIAL MEDIA
             ================================================== -->
-
-            <div class="settings-section">
-
-                <div class="settings-section-header">
-
-                    <h2 class="settings-section-title">
-                        📱 Social Media
+            <div class="ws-section">
+                <div class="ws-section-header">
+                    <h2 class="ws-section-title">
+                        <span class="ws-title-icon">📱</span> Social Media
                     </h2>
-
-                    <p class="settings-section-description">
-                        Add your social media profile links.
-                    </p>
-
+                    <p class="ws-section-desc">Add your social media profile links.</p>
                 </div>
-
-
-                <div class="settings-grid">
-
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            Facebook
+                <div class="ws-grid">
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_facebook_url">
+                            <i class="fab fa-facebook" style="color:#1877f2;"></i> Facebook
                         </label>
-
-                        {{ form.facebook_url }}
-
+                        <input type="url" 
+                               name="facebook_url" 
+                               id="id_facebook_url"
+                               class="ws-input"
+                               placeholder="https://facebook.com/yourpage"
+                               value="{{ form.facebook_url.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            Instagram
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_instagram_url">
+                            <i class="fab fa-instagram" style="color:#e4405f;"></i> Instagram
                         </label>
-
-                        {{ form.instagram_url }}
-
+                        <input type="url" 
+                               name="instagram_url" 
+                               id="id_instagram_url"
+                               class="ws-input"
+                               placeholder="https://instagram.com/yourprofile"
+                               value="{{ form.instagram_url.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            YouTube
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_youtube_url">
+                            <i class="fab fa-youtube" style="color:#ff0000;"></i> YouTube
                         </label>
-
-                        {{ form.youtube_url }}
-
+                        <input type="url" 
+                               name="youtube_url" 
+                               id="id_youtube_url"
+                               class="ws-input"
+                               placeholder="https://youtube.com/@yourchannel"
+                               value="{{ form.youtube_url.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            LinkedIn
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_linkedin_url">
+                            <i class="fab fa-linkedin" style="color:#0a66c2;"></i> LinkedIn
                         </label>
-
-                        {{ form.linkedin_url }}
-
+                        <input type="url" 
+                               name="linkedin_url" 
+                               id="id_linkedin_url"
+                               class="ws-input"
+                               placeholder="https://linkedin.com/company/yourcompany"
+                               value="{{ form.linkedin_url.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            X / Twitter
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_twitter_url">
+                            <i class="fab fa-x-twitter"></i> X / Twitter
                         </label>
-
-                        {{ form.twitter_url }}
-
+                        <input type="url" 
+                               name="twitter_url" 
+                               id="id_twitter_url"
+                               class="ws-input"
+                               placeholder="https://twitter.com/yourhandle"
+                               value="{{ form.twitter_url.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            Pinterest
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_pinterest_url">
+                            <i class="fab fa-pinterest" style="color:#bd081c;"></i> Pinterest
                         </label>
-
-                        {{ form.pinterest_url }}
-
+                        <input type="url" 
+                               name="pinterest_url" 
+                               id="id_pinterest_url"
+                               class="ws-input"
+                               placeholder="https://pinterest.com/yourprofile"
+                               value="{{ form.pinterest_url.value|default:'' }}">
                     </div>
-
-
                 </div>
-
             </div>
-
 
             <!-- =================================================
                  APP LINKS
             ================================================== -->
-
-            <div class="settings-section">
-
-                <div class="settings-section-header">
-
-                    <h2 class="settings-section-title">
-                        📲 App Links
+            <div class="ws-section">
+                <div class="ws-section-header">
+                    <h2 class="ws-section-title">
+                        <span class="ws-title-icon">📲</span> App Links
                     </h2>
-
                 </div>
-
-
-                <div class="settings-grid">
-
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            App Store
+                <div class="ws-grid">
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_app_store_url">
+                            <i class="fab fa-apple" style="color:#555;"></i> App Store
                         </label>
-
-                        {{ form.app_store_url }}
-
+                        <input type="url" 
+                               name="app_store_url" 
+                               id="id_app_store_url"
+                               class="ws-input"
+                               placeholder="https://apps.apple.com/app/id123456789"
+                               value="{{ form.app_store_url.value|default:'' }}">
                     </div>
 
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            Google Play Store
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_play_store_url">
+                            <i class="fab fa-google-play" style="color:#3ddc84;"></i> Google Play Store
                         </label>
-
-                        {{ form.play_store_url }}
-
+                        <input type="url" 
+                               name="play_store_url" 
+                               id="id_play_store_url"
+                               class="ws-input"
+                               placeholder="https://play.google.com/store/apps/details?id=com.app"
+                               value="{{ form.play_store_url.value|default:'' }}">
                     </div>
-
-
                 </div>
-
             </div>
-
 
             <!-- =================================================
-                 PAYMENT
+                 PAYMENT SETTINGS
             ================================================== -->
-
-            <div class="settings-section">
-
-                <div class="settings-section-header">
-
-                    <h2 class="settings-section-title">
-                        💳 Payment Settings
+            <div class="ws-section">
+                <div class="ws-section-header">
+                    <h2 class="ws-section-title">
+                        <span class="ws-title-icon">💳</span> Payment Settings
                     </h2>
-
-                    <p class="settings-section-description">
-                        Non-sensitive payment configuration.
-                    </p>
-
+                    <p class="ws-section-desc">Non-sensitive payment configuration.</p>
                 </div>
-
-
-                <div class="settings-grid">
-
-
-                    <div class="settings-field">
-
-                        <label class="settings-label">
-                            Currency
-                        </label>
-
-                        {{ form.payment_currency }}
-
-                        <small class="settings-help">
-                            Example: INR
-                        </small>
-
+                <div class="ws-grid">
+                    <div class="ws-field">
+                        <label class="ws-label" for="id_payment_currency">Currency</label>
+                        <input type="text" 
+                               name="payment_currency" 
+                               id="id_payment_currency"
+                               class="ws-input"
+                               placeholder="INR"
+                               value="{{ form.payment_currency.value|default:'INR' }}">
+                        <span class="ws-help">Example: INR, USD, EUR</span>
                     </div>
-
-
                 </div>
-
             </div>
-
 
             <!-- =================================================
-                 FOOTER
+                 FOOTER INFORMATION
             ================================================== -->
-
-            <div class="settings-section">
-
-                <div class="settings-section-header">
-
-                    <h2 class="settings-section-title">
-                        🦶 Footer Information
+            <div class="ws-section">
+                <div class="ws-section-header">
+                    <h2 class="ws-section-title">
+                        <span class="ws-title-icon">🦶</span> Footer Information
                     </h2>
-
                 </div>
-
-
-                <div class="settings-grid">
-
-
-                    <div class="settings-field settings-field-full">
-
-                        <label class="settings-label">
-                            Footer Text
-                        </label>
-
-                        {{ form.footer_text }}
-
+                <div class="ws-grid">
+                    <div class="ws-field ws-full">
+                        <label class="ws-label" for="id_footer_text">Footer Text</label>
+                        <textarea name="footer_text" 
+                                  id="id_footer_text"
+                                  class="ws-textarea"
+                                  placeholder="Your footer text here..."
+                                  rows="2">{{ form.footer_text.value|default:'' }}</textarea>
                     </div>
 
-
-                    <div class="settings-field settings-field-full">
-
-                        <label class="settings-label">
-                            Copyright Text
-                        </label>
-
-                        {{ form.copyright_text }}
-
+                    <div class="ws-field ws-full">
+                        <label class="ws-label" for="id_copyright_text">Copyright Text</label>
+                        <input type="text" 
+                               name="copyright_text" 
+                               id="id_copyright_text"
+                               class="ws-input"
+                               placeholder="© 2025 Your Company. All rights reserved."
+                               value="{{ form.copyright_text.value|default:'' }}">
                     </div>
-
-
                 </div>
-
             </div>
-
 
             <!-- =================================================
                  STATUS
             ================================================== -->
-
-            <div class="settings-section">
-
-                <div class="settings-checkbox-wrapper">
-
-                    {{ form.is_active }}
-
-                    <label class="settings-label"
-                           style="margin:0;">
-                        Active Website Settings
-                    </label>
-
+            <div class="ws-section">
+                <div class="ws-section-header">
+                    <h2 class="ws-section-title">
+                        <span class="ws-title-icon">⚡</span> Status
+                    </h2>
                 </div>
-
+                <div class="ws-toggle-wrap">
+                    <label class="ws-toggle">
+                        <input type="checkbox" name="is_active" id="id_is_active" {% if form.is_active.value or not settings_obj %}checked{% endif %}>
+                        <span class="ws-toggle-slider"></span>
+                    </label>
+                    <div>
+                        <div class="ws-toggle-label" id="statusLabel">
+                            {% if form.is_active.value or not settings_obj %}Active{% else %}Inactive{% endif %}
+                        </div>
+                        <div class="ws-toggle-desc" id="statusDescription">
+                            {% if form.is_active.value or not settings_obj %}Visible to customers{% else %}Hidden from customers{% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
-
 
             <!-- =================================================
                  ACTIONS
             ================================================== -->
-
-            <div class="settings-actions">
-
-                <div class="settings-status">
-
+            <div class="ws-actions">
+                <div class="ws-status">
                     {% if settings_obj %}
-
-                        Last updated:
-                        {{ settings_obj.updated_at|date:"d M Y, h:i A" }}
-
+                        <i class="fas fa-clock"></i> Last updated: <strong>{{ settings_obj.updated_at|date:"d M Y, h:i A" }}</strong>
                     {% else %}
-
-                        No settings have been created yet.
-
+                        <i class="fas fa-info-circle"></i> No settings have been created yet.
                     {% endif %}
-
                 </div>
-
-
-                <button
-                    type="submit"
-                    class="settings-btn settings-btn-primary"
-                >
-
-                    {% if settings_obj %}
-
-                        Update Settings
-
-                    {% else %}
-
-                        Create Settings
-
-                    {% endif %}
-
-                </button>
-
+                <div class="ws-actions-right">
+                    <button type="submit" class="ws-btn ws-btn-primary">
+                        <i class="fas fa-save"></i>
+                        {% if settings_obj %}Update Settings{% else %}Create Settings{% endif %}
+                    </button>
+                </div>
             </div>
 
-
         </div>
-
     </form>
 
 </div>
 
-
-<!-- =========================================================
-     DELETE MODAL
-========================================================= -->
-
-<div
-    id="deleteSettingsModal"
-    class="settings-modal-overlay"
-    onclick="closeDeleteModal(event)"
->
-
-
-    <div
-        class="settings-modal"
-        onclick="event.stopPropagation()"
-    >
-
-
-        <div class="settings-modal-header">
-
-            <h2 class="settings-modal-title">
-                Delete Website Settings
-            </h2>
-
+<!-- ============================================================
+   DELETE MODAL
+   ============================================================ -->
+<div id="deleteSettingsModal" class="ws-modal-overlay" onclick="closeDeleteModal(event)">
+    <div class="ws-modal" onclick="event.stopPropagation()">
+        <div class="ws-modal-header">
+            <div class="ws-modal-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h2 class="ws-modal-title">Delete Website Settings</h2>
         </div>
-
-
-        <div class="settings-modal-body">
-
-            <p>
-                Are you sure you want to delete your website settings?
-            </p>
-
-            <p>
-                Your company information, logo, contact details,
-                social links and footer configuration will be removed.
-            </p>
-
+        <div class="ws-modal-body">
+            <p>Are you sure you want to delete your website settings?</p>
+            <p><span class="ws-modal-warning">⚠️ This action cannot be undone.</span></p>
+            <p>Your company information, logo, contact details, social links and footer configuration will be permanently removed.</p>
         </div>
-
-
-        <div class="settings-modal-footer">
-
-            <button
-                type="button"
-                class="settings-btn settings-btn-secondary"
-                onclick="closeDeleteModal()"
-            >
-                Cancel
+        <div class="ws-modal-footer">
+            <button type="button" class="ws-btn ws-btn-secondary" onclick="closeDeleteModal()">
+                <i class="fas fa-times"></i> Cancel
             </button>
-
-
             <form method="POST">
-
                 {% csrf_token %}
-
-                <input
-                    type="hidden"
-                    name="action"
-                    value="delete"
-                >
-
-                <input
-                    type="hidden"
-                    name="settings_id"
-                    value="{{ settings_obj.id }}"
-                >
-
-                <button
-                    type="submit"
-                    class="settings-btn settings-btn-danger"
-                >
-                    Yes, Delete
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="settings_id" value="{{ settings_obj.id }}">
+                <button type="submit" class="ws-btn ws-btn-danger">
+                    <i class="fas fa-trash-alt"></i> Yes, Delete
                 </button>
-
             </form>
-
         </div>
-
     </div>
-
 </div>
 
-
+<!-- ============================================================
+   JAVASCRIPT
+   ============================================================ -->
 <script>
+document.addEventListener('DOMContentLoaded', function() {
 
-/* =========================================================
-   DELETE MODAL
-========================================================= */
+    // ===== Image Upload Preview =====
+    function setupImageUpload(inputId, previewId) {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
 
+        if (input) {
+            input.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        preview.innerHTML = `
+                            <img src="${event.target.result}" alt="Preview">
+                            <div class="ws-file-name">${file.name}</div>
+                        `;
+                        preview.classList.add('ws-has-img');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    }
+
+    setupImageUpload('logoUpload', 'logoPreviewWrapper');
+    setupImageUpload('faviconUpload', 'faviconPreviewWrapper');
+
+    // ===== Toggle Status =====
+    const toggleCheckbox = document.getElementById('id_is_active');
+    const statusLabel = document.getElementById('statusLabel');
+    const statusDescription = document.getElementById('statusDescription');
+
+    if (toggleCheckbox) {
+        toggleCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                statusLabel.textContent = 'Active';
+                statusDescription.textContent = 'Visible to customers';
+                statusLabel.style.color = 'var(--ws-success)';
+            } else {
+                statusLabel.textContent = 'Inactive';
+                statusDescription.textContent = 'Hidden from customers';
+                statusLabel.style.color = 'var(--ws-text-muted)';
+            }
+        });
+
+        if (toggleCheckbox.checked) {
+            statusLabel.style.color = 'var(--ws-success)';
+        } else {
+            statusLabel.style.color = 'var(--ws-text-muted)';
+        }
+    }
+
+    // ===== Auto-focus first field =====
+    const firstInput = document.getElementById('id_company_name');
+    if (firstInput && !firstInput.value) {
+        setTimeout(() => firstInput.focus(), 300);
+    }
+
+});
+
+// ===== Delete Modal =====
 function openDeleteModal() {
-
-    const modal =
-        document.getElementById(
-            "deleteSettingsModal"
-        );
-
-    modal.classList.add("show");
-
-    document.body.style.overflow = "hidden";
+    const modal = document.getElementById('deleteSettingsModal');
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
 }
-
 
 function closeDeleteModal(event) {
-
-    if (
-        event &&
-        event.target !== event.currentTarget
-    ) {
-        return;
-    }
-
-    const modal =
-        document.getElementById(
-            "deleteSettingsModal"
-        );
-
-    modal.classList.remove("show");
-
-    document.body.style.overflow = "";
+    if (event && event.target !== event.currentTarget) return;
+    const modal = document.getElementById('deleteSettingsModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
 }
 
-
-/* =========================================================
-   ESCAPE KEY
-========================================================= */
-
-document.addEventListener(
-    "keydown",
-    function(event) {
-
-        if (event.key === "Escape") {
-
-            const modal =
-                document.getElementById(
-                    "deleteSettingsModal"
-                );
-
-            modal.classList.remove("show");
-
-            document.body.style.overflow = "";
-
-        }
-
+// ===== Escape Key =====
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const modal = document.getElementById('deleteSettingsModal');
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
     }
-);
-
+});
 </script>
 
 {% endblock %}

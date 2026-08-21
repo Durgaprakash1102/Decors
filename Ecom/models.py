@@ -2401,27 +2401,27 @@ class ThemeSettings(models.Model):
 
     primary_color = models.CharField(
         max_length=20,
-        default="#2563EB"
+        default="#5c121f"
     )
 
     secondary_color = models.CharField(
         max_length=20,
-        default="#1E40AF"
+        default="#F4B400"
     )
 
     accent_color = models.CharField(
         max_length=20,
-        default="#F59E0B"
+        default="#D97706"
     )
 
     background_color = models.CharField(
         max_length=20,
-        default="#F9FAFB"
+        default="#FEF7ED"
     )
 
     surface_color = models.CharField(
         max_length=20,
-        default="#FFFFFF"
+        default="#ffffff"
     )
 
     text_color = models.CharField(
@@ -2441,7 +2441,7 @@ class ThemeSettings(models.Model):
 
     border_color = models.CharField(
         max_length=20,
-        default="#E5E7EB"
+        default="#5c121f"
     )
 
     success_color = models.CharField(
@@ -2466,17 +2466,17 @@ class ThemeSettings(models.Model):
 
     button_text_color = models.CharField(
         max_length=20,
-        default="#FFFFFF"
+        default="#ccc"
     )
 
     button_hover_color = models.CharField(
         max_length=20,
-        default="#1D4ED8"
+        default="#D97706"
     )
 
     header_background_color = models.CharField(
         max_length=20,
-        default="#FFFFFF"
+        default="#FEF7ED"
     )
 
     header_text_color = models.CharField(
@@ -2486,12 +2486,12 @@ class ThemeSettings(models.Model):
 
     footer_background_color = models.CharField(
         max_length=20,
-        default="#111827"
+        default="#ffffff"
     )
 
     footer_text_color = models.CharField(
         max_length=20,
-        default="#FFFFFF"
+        default="#ccc"
     )
 
     is_active = models.BooleanField(

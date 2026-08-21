@@ -275,6 +275,10 @@ TWO_FACTOR_API_KEY = os.getenv(
     "TWO_FACTOR_API_KEY",
     ""
 )
+ADMIN_SECRET_KEY = os.getenv(
+    "ADMIN_SECRET_KEY",
+    ""
+)
 
 SMS_ENABLED = (
     os.getenv(

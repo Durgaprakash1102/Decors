@@ -1,110 +1,722 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}Return & Refund Policy{% endblock %}
 
 {% block content %}
 
-<section class="py-5">
+<style>
+/* ============================================================
+   RETURN & REFUND POLICY - MODERN FRESH DESIGN
+   ============================================================ */
 
-    <div class="container">
+/* ============================================================
+   FONTS
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,600&display=swap');
 
-        <div class="text-center mb-5">
+/* ============================================================
+   GLOBAL
+   ============================================================ */
+.refund-page {
+    width: 100%;
+    background: #f7f5f2;
+    min-height: calc(100vh - 200px);
+    padding: 0;
+    position: relative;
+}
 
-            <h1 class="display-5 fw-bold">
-                Return & Refund Policy
-            </h1>
+/* ============================================================
+   HERO SECTION - WAVY & COLORFUL
+   ============================================================ */
+.refund-hero {
+    background: linear-gradient(160deg, #5c121f);
+    padding: 60px 20px 120px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
 
-            <p class="text-muted">
-                Information about returns, refunds and cancellations.
-            </p>
+/* Wavy Shape Bottom */
+.refund-hero .wave-shape {
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: #f7f5f2;
+    clip-path: ellipse(70% 100% at 50% 100%);
+}
 
+/* Floating Shapes */
+.refund-hero .float-shape {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.refund-hero .float-shape-1 {
+    width: 300px;
+    height: 300px;
+    top: -80px;
+    right: -60px;
+    background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+    animation: floatAnim 8s ease-in-out infinite alternate;
+}
+
+.refund-hero .float-shape-2 {
+    width: 200px;
+    height: 200px;
+    bottom: 20px;
+    left: -40px;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    animation: floatAnim 10s ease-in-out infinite alternate-reverse;
+}
+
+.refund-hero .float-shape-3 {
+    width: 150px;
+    height: 150px;
+    top: 30%;
+    right: 15%;
+    background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+    animation: floatAnim 6s ease-in-out infinite alternate;
+}
+
+.refund-hero .float-shape-4 {
+    width: 100px;
+    height: 100px;
+    bottom: 40%;
+    left: 10%;
+    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+    animation: floatAnim 12s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes floatAnim {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(30px, -20px) scale(1.1); }
+}
+
+/* Hero Content */
+.refund-hero .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.refund-hero .hero-content .hero-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 12px;
+}
+
+.refund-hero .hero-content h1 {
+    font-size: 48px;
+    font-weight: 300;
+    color: #ffffff;
+    margin: 0 0 6px;
+    font-family: 'Playfair Display', serif;
+    letter-spacing: -0.5px;
+}
+
+.refund-hero .hero-content h1 .gold {
+    font-weight: 700;
+    color:goldenrod;
+    text-shadow: 0 0 40px rgba(245, 230, 184, 0.2);
+}
+
+.refund-hero .hero-content .hero-dash {
+    width: 50px;
+    height: 3px;
+    background: rgba(255,255,255,0.4);
+    margin: 12px auto 16px;
+}
+
+.refund-hero .hero-content .hero-sub {
+    color: rgba(255,255,255,0.65);
+    font-size: 17px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+}
+
+/* ============================================================
+   CONTENT WRAPPER
+   ============================================================ */
+.refund-wrapper {
+    max-width: 1100px;
+    margin: -40px auto 60px;
+    padding: 0 20px;
+    position: relative;
+    z-index: 3;
+}
+
+/* ============================================================
+   TOP STATS - MINIMAL
+   ============================================================ */
+.refund-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.refund-stats .stat-item {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px 16px;
+    text-align: center;
+    border: 1px solid #ede8e0;
+    transition: all 0.3s ease;
+}
+
+.refund-stats .stat-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(92, 18, 31, 0.06);
+    border-color: #C9A84C;
+}
+
+.refund-stats .stat-item .stat-num {
+    font-size: 24px;
+    font-weight: 600;
+    color: #5c121f;
+    font-family: 'Playfair Display', serif;
+    display: block;
+}
+
+.refund-stats .stat-item .stat-label {
+    font-size: 11px;
+    color: #8a7a6a;
+    font-family: 'Inter', sans-serif;
+    margin-top: 2px;
+}
+
+/* ============================================================
+   2 COLUMN CARDS
+   ============================================================ */
+.refund-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+}
+
+/* ============================================================
+   CARDS - MODERN
+   ============================================================ */
+.refund-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 0;
+    border: 1px solid #ede8e0;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 200px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+}
+
+.refund-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 56px rgba(92, 18, 31, 0.08);
+    border-color: #C9A84C;
+}
+
+/* Card Top */
+.refund-card .card-top {
+    height: 5px;
+    flex-shrink: 0;
+}
+
+.refund-card:nth-child(1) .card-top { background: linear-gradient(90deg, #5c121f, #C9A84C); }
+.refund-card:nth-child(2) .card-top { background: linear-gradient(90deg, #C9A84C, #5c121f); }
+.refund-card:nth-child(3) .card-top { background: linear-gradient(90deg, #5c121f, #C9A84C); }
+.refund-card:nth-child(4) .card-top { background: linear-gradient(90deg, #C9A84C, #5c121f); }
+.refund-card:nth-child(5) .card-top { background: linear-gradient(90deg, #5c121f, #C9A84C); }
+.refund-card:nth-child(6) .card-top { background: linear-gradient(90deg, #C9A84C, #5c121f); }
+
+/* Card Inner */
+.refund-card .card-inner {
+    padding: 26px 24px 22px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Card Badge - Left side decorative */
+.refund-card .card-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+.refund-card .card-badge .badge-num {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+    background: #5c121f;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+}
+
+.refund-card:nth-child(2) .card-badge .badge-num { background: #C9A84C; }
+.refund-card:nth-child(4) .card-badge .badge-num { background: #C9A84C; }
+.refund-card:nth-child(6) .card-badge .badge-num { background: #C9A84C; }
+
+.refund-card .card-badge .badge-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, #5c121f, transparent);
+}
+
+.refund-card:nth-child(2) .card-badge .badge-line { background: linear-gradient(90deg, #C9A84C, transparent); }
+.refund-card:nth-child(4) .card-badge .badge-line { background: linear-gradient(90deg, #C9A84C, transparent); }
+.refund-card:nth-child(6) .card-badge .badge-line { background: linear-gradient(90deg, #C9A84C, transparent); }
+
+/* Card Title */
+.refund-card .card-title {
+    font-size: 19px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 4px;
+    font-family: 'Playfair Display', serif;
+    line-height: 1.3;
+}
+
+.refund-card .card-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #C9A84C;
+    font-family: 'Inter', sans-serif;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.refund-card:nth-child(2) .card-label { color: #5c121f; }
+.refund-card:nth-child(4) .card-label { color: #5c121f; }
+.refund-card:nth-child(6) .card-label { color: #5c121f; }
+
+/* Card Body */
+.refund-card .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.refund-card .card-body .card-text {
+    color: #4a4540;
+    font-size: 14px;
+    line-height: 1.9;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    flex: 1;
+}
+
+.refund-card .card-body .card-text p {
+    margin-bottom: 10px;
+}
+
+.refund-card .card-body .card-text p:last-child {
+    margin-bottom: 0;
+}
+
+.refund-card .card-body .card-text strong {
+    color: #1a1a1a;
+    font-weight: 500;
+}
+
+/* Card Image */
+.refund-card .card-body .card-image {
+    margin-top: 12px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #ede8e0;
+    flex-shrink: 0;
+}
+
+.refund-card .card-body .card-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 140px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.refund-card .card-body .card-image:hover img {
+    transform: scale(1.02);
+}
+
+/* Card Footer */
+.refund-card .card-footer {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #f0ece6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.refund-card .card-footer .footer-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #8a7a6a;
+    font-family: 'Inter', sans-serif;
+}
+
+.refund-card .card-footer .footer-left i {
+    color: #C9A84C;
+    font-size: 12px;
+}
+
+.refund-card .card-footer .footer-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #5c121f;
+}
+
+.refund-card:nth-child(2) .card-footer .footer-dot { background: #C9A84C; }
+.refund-card:nth-child(4) .card-footer .footer-dot { background: #C9A84C; }
+.refund-card:nth-child(6) .card-footer .footer-dot { background: #C9A84C; }
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.refund-empty {
+    text-align: center;
+    padding: 60px 30px;
+    grid-column: 1 / -1;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 2px dashed #ede8e0;
+}
+
+.refund-empty .empty-icon {
+    font-size: 44px;
+    color: #d4cec8;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.refund-empty h4 {
+    font-size: 20px;
+    font-weight: 400;
+    color: #1a1a1a;
+    font-family: 'Playfair Display', serif;
+    margin: 0 0 4px;
+}
+
+.refund-empty p {
+    color: #8a7a6a;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+/* Tablet */
+@media (max-width: 992px) {
+    .refund-hero { padding: 50px 20px 70px; }
+    .refund-hero .hero-content h1 { font-size: 38px; }
+    .refund-hero .float-shape-1 { width: 220px; height: 220px; }
+    .refund-hero .float-shape-2 { width: 160px; height: 160px; }
+    .refund-wrapper { padding: 0 16px; margin: -30px auto 50px; }
+    .refund-stats { gap: 12px; }
+    .refund-stats .stat-item { padding: 16px 12px; }
+    .refund-grid { gap: 18px; }
+    .refund-card .card-inner { padding: 20px 18px 18px; }
+    .refund-card .card-title { font-size: 17px; }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .refund-hero { 
+        padding: 40px 16px 60px; 
+    }
+    .refund-hero .hero-content h1 { 
+        font-size: 32px; 
+    }
+    .refund-hero .hero-content .hero-sub { 
+        font-size: 15px; 
+    }
+    .refund-hero .wave-shape { height: 50px; }
+    .refund-hero .float-shape-1 { width: 160px; height: 160px; top: -40px; }
+    .refund-hero .float-shape-2 { width: 120px; height: 120px; bottom: 10px; }
+    
+    .refund-wrapper { 
+        padding: 0 12px; 
+        margin: -24px auto 40px;
+    }
+    
+    .refund-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .refund-stats .stat-item {
+        padding: 14px 10px;
+    }
+    
+    .refund-stats .stat-item .stat-num {
+        font-size: 20px;
+    }
+    
+    .refund-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .refund-card { 
+        min-height: 170px;
+        border-radius: 12px;
+    }
+    .refund-card .card-inner { 
+        padding: 18px 16px 16px; 
+    }
+    .refund-card .card-title { 
+        font-size: 16px; 
+    }
+    .refund-card .card-body .card-text { 
+        font-size: 14px; 
+        line-height: 1.8; 
+    }
+    .refund-card .card-body .card-image img { 
+        max-height: 120px; 
+    }
+    .refund-card .card-badge .badge-num {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+}
+
+/* Mobile Small */
+@media (max-width: 480px) {
+    .refund-hero { 
+        padding: 30px 12px 50px; 
+    }
+    .refund-hero .hero-content h1 { 
+        font-size: 26px; 
+    }
+    .refund-hero .hero-content .hero-sub { 
+        font-size: 13px; 
+    }
+    .refund-hero .hero-content .hero-dash { 
+        width: 30px; 
+    }
+    .refund-hero .wave-shape { height: 35px; }
+    .refund-hero .float-shape-1 { width: 120px; height: 120px; top: -30px; right: -30px; }
+    .refund-hero .float-shape-2 { width: 90px; height: 90px; bottom: 5px; left: -20px; }
+    
+    .refund-wrapper { 
+        padding: 0 8px; 
+        margin: -18px auto 30px;
+    }
+    
+    .refund-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    
+    .refund-stats .stat-item {
+        padding: 12px 8px;
+        border-radius: 8px;
+    }
+    
+    .refund-stats .stat-item .stat-num {
+        font-size: 18px;
+    }
+    
+    .refund-stats .stat-item .stat-label {
+        font-size: 10px;
+    }
+    
+    .refund-grid { gap: 12px; }
+    
+    .refund-card { 
+        min-height: 150px;
+        border-radius: 10px;
+    }
+    .refund-card .card-inner { 
+        padding: 14px 12px 12px; 
+    }
+    .refund-card .card-title { 
+        font-size: 15px; 
+    }
+    .refund-card .card-label {
+        font-size: 8px;
+        margin-bottom: 4px;
+    }
+    .refund-card .card-body .card-text { 
+        font-size: 13px; 
+        line-height: 1.7; 
+    }
+    .refund-card .card-body .card-image img { 
+        max-height: 100px; 
+    }
+    .refund-card .card-badge .badge-num {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+    }
+    .refund-card .card-footer .footer-left {
+        font-size: 10px;
+    }
+    .refund-card .card-footer .footer-dot {
+        width: 6px;
+        height: 6px;
+    }
+    
+    .refund-empty { 
+        padding: 28px 14px; 
+    }
+    .refund-empty .empty-icon { 
+        font-size: 32px; 
+    }
+    .refund-empty h4 { 
+        font-size: 17px; 
+    }
+}
+</style>
+
+<!-- ============================================================
+   RETURN & REFUND PAGE - FRESH MODERN DESIGN
+   ============================================================ -->
+<div class="refund-page">
+
+    <!-- ===== HERO ===== -->
+    <div class="refund-hero">
+        <!-- Floating Shapes -->
+        <div class="float-shape float-shape-1"></div>
+        <div class="float-shape float-shape-2"></div>
+        <div class="float-shape float-shape-3"></div>
+        <div class="float-shape float-shape-4"></div>
+        
+        <!-- Wavy Bottom -->
+        <div class="wave-shape"></div>
+
+        <div class="hero-content">
+            <span class="hero-tag">✦ Customer Protection</span>
+            <h1>Return &amp; <span class="gold">Refund</span></h1>
+            <div class="hero-dash"></div>
+            <p class="hero-sub">Information about returns, refunds and cancellations.</p>
         </div>
+    </div>
 
+    <!-- ===== CONTENT ===== -->
+    <div class="refund-wrapper">
 
-        <div class="row">
+        {% if sections %}
 
-            <div class="col-lg-9 mx-auto">
+            <!-- Stats -->
+            <div class="refund-stats">
+                <div class="stat-item">
+                    <span class="stat-num">{{ sections|length }}</span>
+                    <span class="stat-label">Policy Sections</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">24/7</span>
+                    <span class="stat-label">Support</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">100%</span>
+                    <span class="stat-label">Money Back</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">✓</span>
+                    <span class="stat-label">Secure Process</span>
+                </div>
+            </div>
+
+            <!-- Cards -->
+            <div class="refund-grid">
 
                 {% for section in sections %}
 
-                    <article class="mb-5">
-
-                        <div class="d-flex gap-3">
-
-                            <!-- NUMBER -->
-
-                            <div
-                                class="flex-shrink-0 rounded-circle bg-light d-flex align-items-center justify-content-center"
-                                style="
-                                    width: 45px;
-                                    height: 45px;
-                                "
-                            >
-
-                                <strong>
-                                    {{ forloop.counter }}
-                                </strong>
-
+                    <div class="refund-card">
+                        <div class="card-top"></div>
+                        <div class="card-inner">
+                            <div class="card-badge">
+                                <span class="badge-num">{{ forloop.counter }}</span>
+                                <span class="badge-line"></span>
                             </div>
-
-
-                            <!-- CONTENT -->
-
-                            <div class="flex-grow-1">
-
-                                <h2 class="fw-bold mb-3">
-                                    {{ section.section_title }}
-                                </h2>
-
-
-                                {% if section.image %}
-
-                                    <img
-                                        src="{{ section.image.url }}"
-                                        alt="{{ section.section_title }}"
-                                        class="img-fluid rounded mb-4"
-                                    >
-
-                                {% endif %}
-
-
-                                <div
-                                    class="text-muted"
-                                    style="line-height: 1.9;"
-                                >
+                            <span class="card-label">
+                                {% if forloop.counter == 1 %}Policy
+                                {% elif forloop.counter == 2 %}Timeline
+                                {% elif forloop.counter == 3 %}Payment
+                                {% elif forloop.counter == 4 %}Return
+                                {% elif forloop.counter == 5 %}Process
+                                {% else %}Complete{% endif %}
+                            </span>
+                            <h3 class="card-title">{{ section.section_title }}</h3>
+                            <div class="card-body">
+                                <div class="card-text">
                                     {{ section.section_content|linebreaks }}
                                 </div>
-
+                                {% if section.image %}
+                                    <div class="card-image">
+                                        <img src="{{ section.image.url }}" alt="{{ section.section_title }}">
+                                    </div>
+                                {% endif %}
                             </div>
-
+                            <div class="card-footer">
+                                <span class="footer-left">
+                                    <i class="fas fa-arrow-right"></i>
+                                    {% if forloop.counter == 1 %}Start
+                                    {% elif forloop.counter == 2 %}Next
+                                    {% elif forloop.counter == 3 %}Process
+                                    {% elif forloop.counter == 4 %}Track
+                                    {% elif forloop.counter == 5 %}Final
+                                    {% else %}Done{% endif %}
+                                </span>
+                                <span class="footer-dot"></span>
+                            </div>
                         </div>
-
-                    </article>
-
-
-                    {% if not forloop.last %}
-
-                        <hr class="my-4">
-
-                    {% endif %}
-
-
-                {% empty %}
-
-                    <div class="text-center py-5">
-
-                        <p class="text-muted">
-                            Content will be available soon.
-                        </p>
-
                     </div>
 
                 {% endfor %}
 
             </div>
 
-        </div>
+        {% else %}
+
+            <div class="refund-empty">
+                <span class="empty-icon">
+                    <i class="fas fa-undo-alt"></i>
+                </span>
+                <h4>Return & Refund Policy</h4>
+                <p>Content will be available soon.</p>
+            </div>
+
+        {% endif %}
 
     </div>
 
-</section>
+</div>
 
 {% endblock %}

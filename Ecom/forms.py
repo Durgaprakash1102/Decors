@@ -2,6 +2,8 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from .models import User, Profile, Address
+from django.conf import settings
+
 
 
 User = get_user_model()
@@ -73,15 +75,17 @@ class AdminSignupForm(forms.ModelForm):
     
     def clean(self):
         cleaned_data = super().clean()
+
         password = cleaned_data.get('password')
         confirm_password = cleaned_data.get('confirm_password')
         admin_secret_key = cleaned_data.get('admin_secret_key')
-        
+
         if password and confirm_password and password != confirm_password:
             raise forms.ValidationError('Passwords do not match')
-        
-        if admin_secret_key != 'ADMIN@123':
+
+        if admin_secret_key != settings.ADMIN_SECRET_KEY:
             raise forms.ValidationError('Invalid admin secret key')
+
         return cleaned_data
     
     def clean_email(self):

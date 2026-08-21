@@ -1,72 +1,925 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}Shipping Policy{% endblock %}
 
 {% block content %}
 
-<section class="py-5">
+<style>
+/* ============================================================
+   SHIPPING POLICY - PREMIUM DESIGN
+   ============================================================ */
 
-    <div class="container">
+/* ============================================================
+   FONTS
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,600&display=swap');
 
-        <div class="text-center mb-5">
+/* ============================================================
+   GLOBAL
+   ============================================================ */
+.shipping-page {
+    width: 100%;
+    background: #f8f6f3;
+    min-height: calc(100vh - 200px);
+    padding: 0;
+    position: relative;
+}
 
-            <h1 class="display-5 fw-bold">
-                Shipping Policy
-            </h1>
+/* ============================================================
+   HERO SECTION - THEME COLORS
+   ============================================================ */
+.shipping-hero {
+    background: linear-gradient(135deg, #5c121f 0%, #3d0a13 50%, #1a0408 100%);
+    padding: 70px 20px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 3px solid #C9A84C;
+}
 
-            <p class="text-muted">
-                Information about shipping, delivery and order processing.
-            </p>
+.shipping-hero .hero-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.04;
+    background-image: 
+        linear-gradient(30deg, #C9A84C 1px, transparent 1px),
+        linear-gradient(-30deg, #C9A84C 1px, transparent 1px);
+    background-size: 50px 50px;
+}
 
+.shipping-hero .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.shipping-hero .hero-content .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #C9A84C;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 16px;
+}
+
+.shipping-hero .hero-content .hero-badge .line {
+    width: 30px;
+    height: 2px;
+    background: #C9A84C;
+}
+
+.shipping-hero .hero-content h1 {
+    font-size: 52px;
+    font-weight: 300;
+    color: #ffffff;
+    margin: 0 0 6px;
+    font-family: 'Playfair Display', serif;
+    letter-spacing: -0.5px;
+}
+
+.shipping-hero .hero-content h1 .gold {
+    font-weight: 700;
+    color: #C9A84C;
+}
+
+.shipping-hero .hero-content .hero-line {
+    width: 60px;
+    height: 3px;
+    background: #C9A84C;
+    margin: 12px auto 16px;
+}
+
+.shipping-hero .hero-content .hero-sub {
+    color: rgba(255,255,255,0.45);
+    font-size: 17px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.3px;
+}
+
+/* ============================================================
+   CONTENT WRAPPER - RESPONSIVE WIDTH
+   ============================================================ */
+.shipping-wrapper {
+    max-width: 1100px;
+    margin: -30px auto 60px;
+    padding: 0 20px;
+    position: relative;
+    z-index: 2;
+}
+
+/* ============================================================
+   FEATURES - TOP ROW
+   ============================================================ */
+.shipping-features {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.shipping-features .feature-box {
+    text-align: center;
+    padding: 28px 16px 24px;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e8e3dd;
+    transition: all 0.4s ease;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+}
+
+.shipping-features .feature-box:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(92, 18, 31, 0.08);
+    border-color: #C9A84C;
+}
+
+.shipping-features .feature-box .feature-icon {
+    width: 56px;
+    height: 56px;
+    background: #5c121f;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    color: #C9A84C;
+    font-size: 24px;
+    transition: all 0.5s ease;
+}
+
+.shipping-features .feature-box:hover .feature-icon {
+    background: #C9A84C;
+    color: #5c121f;
+    transform: rotate(360deg) scale(1.05);
+}
+
+.shipping-features .feature-box .feature-number {
+    font-size: 30px;
+    font-weight: 300;
+    color: #5c121f;
+    font-family: 'Playfair Display', serif;
+    display: block;
+    line-height: 1.2;
+}
+
+.shipping-features .feature-box .feature-label {
+    font-size: 12px;
+    color: #8a7a6a;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* ============================================================
+   2 COLUMN GRID FOR CONTENT CARDS
+   ============================================================ */
+.shipping-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+}
+
+/* ============================================================
+   PREMIUM CONTENT CARDS
+   ============================================================ */
+.shipping-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 0;
+    border: 1px solid #e8e3dd;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 220px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+}
+
+.shipping-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 56px rgba(92, 18, 31, 0.10);
+    border-color: #C9A84C;
+}
+
+/* Card Top Accent */
+.shipping-card .card-accent {
+    height: 5px;
+    flex-shrink: 0;
+}
+
+/* Alternating accent colors */
+.shipping-card:nth-child(1) .card-accent {
+    background: linear-gradient(90deg, #5c121f, #C9A84C);
+}
+
+.shipping-card:nth-child(2) .card-accent {
+    background: linear-gradient(90deg, #C9A84C, #5c121f);
+}
+
+.shipping-card:nth-child(3) .card-accent {
+    background: linear-gradient(90deg, #5c121f, #C9A84C);
+}
+
+.shipping-card:nth-child(4) .card-accent {
+    background: linear-gradient(90deg, #C9A84C, #5c121f);
+}
+
+.shipping-card:nth-child(5) .card-accent {
+    background: linear-gradient(90deg, #5c121f, #C9A84C);
+}
+
+.shipping-card:nth-child(6) .card-accent {
+    background: linear-gradient(90deg, #C9A84C, #5c121f);
+}
+
+/* Card Inner */
+.shipping-card .card-inner {
+    padding: 28px 26px 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Card Icon */
+.shipping-card .card-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    flex-shrink: 0;
+}
+
+.shipping-card .card-icon-wrap .card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    transition: all 0.4s ease;
+}
+
+/* Icon Colors */
+.shipping-card:nth-child(1) .card-icon {
+    background: #5c121f;
+    color: #C9A84C;
+}
+
+.shipping-card:nth-child(2) .card-icon {
+    background: #C9A84C;
+    color: #ffffff;
+}
+
+.shipping-card:nth-child(3) .card-icon {
+    background: #5c121f;
+    color: #C9A84C;
+}
+
+.shipping-card:nth-child(4) .card-icon {
+    background: #C9A84C;
+    color: #ffffff;
+}
+
+.shipping-card:nth-child(5) .card-icon {
+    background: #5c121f;
+    color: #C9A84C;
+}
+
+.shipping-card:nth-child(6) .card-icon {
+    background: #C9A84C;
+    color: #ffffff;
+}
+
+.shipping-card:hover .card-icon-wrap .card-icon {
+    transform: scale(1.08) rotate(-3deg);
+}
+
+.shipping-card .card-icon-wrap .card-number {
+    font-size: 12px;
+    font-weight: 600;
+    color: #b0a8a0;
+    font-family: 'Inter', sans-serif;
+    background: #f5f2ef;
+    padding: 3px 16px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.shipping-card:hover .card-icon-wrap .card-number {
+    background: #5c121f;
+    color: #ffffff;
+}
+
+/* Card Title */
+.shipping-card .card-title {
+    font-size: 19px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 3px;
+    font-family: 'Playfair Display', serif;
+    line-height: 1.3;
+}
+
+.shipping-card .card-subtitle {
+    font-size: 11px;
+    color: #C9A84C;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.shipping-card .card-subtitle i {
+    margin-right: 4px;
+}
+
+/* Card Body */
+.shipping-card .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.shipping-card .card-body .card-text {
+    color: #4a4540;
+    font-size: 14px;
+    line-height: 1.9;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    flex: 1;
+}
+
+.shipping-card .card-body .card-text p {
+    margin-bottom: 10px;
+}
+
+.shipping-card .card-body .card-text p:last-child {
+    margin-bottom: 0;
+}
+
+.shipping-card .card-body .card-text strong {
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
+/* Card Image */
+.shipping-card .card-body .card-image {
+    margin-top: 14px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #ede8e0;
+    flex-shrink: 0;
+}
+
+.shipping-card .card-body .card-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 130px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.shipping-card .card-body .card-image:hover img {
+    transform: scale(1.03);
+}
+
+/* Card Footer */
+.shipping-card .card-footer {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #f0ece6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.shipping-card .card-footer .card-tag {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #ffffff;
+    padding: 4px 14px;
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+}
+
+.shipping-card:nth-child(1) .card-footer .card-tag {
+    background: #5c121f;
+}
+
+.shipping-card:nth-child(2) .card-footer .card-tag {
+    background: #C9A84C;
+}
+
+.shipping-card:nth-child(3) .card-footer .card-tag {
+    background: #5c121f;
+}
+
+.shipping-card:nth-child(4) .card-footer .card-tag {
+    background: #C9A84C;
+}
+
+.shipping-card:nth-child(5) .card-footer .card-tag {
+    background: #5c121f;
+}
+
+.shipping-card:nth-child(6) .card-footer .card-tag {
+    background: #C9A84C;
+}
+
+.shipping-card .card-footer .card-tag i {
+    margin-right: 4px;
+}
+
+.shipping-card .card-footer .card-time {
+    font-size: 12px;
+    color: #b0a8a0;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.shipping-card .card-footer .card-time i {
+    color: #C9A84C;
+    font-size: 13px;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.shipping-empty {
+    text-align: center;
+    padding: 60px 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 2px dashed #e8e3dd;
+}
+
+.shipping-empty .empty-icon {
+    font-size: 48px;
+    color: #d4cec8;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.shipping-empty h4 {
+    font-size: 20px;
+    font-weight: 400;
+    color: #1a1a1a;
+    font-family: 'Playfair Display', serif;
+    margin: 0 0 4px;
+}
+
+.shipping-empty p {
+    color: #8a7a6a;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+}
+
+/* ============================================================
+   RESPONSIVE - DEVICE WIDTH SPECIFIC
+   ============================================================ */
+
+/* Large Desktop - 1350px and above */
+@media (min-width: 1350px) {
+    .shipping-wrapper {
+        max-width: 1250px;
+        padding: 0 30px;
+    }
+    .shipping-features {
+        gap: 24px;
+    }
+    .shipping-features .feature-box {
+        padding: 32px 20px 28px;
+    }
+    .shipping-features .feature-box .feature-icon {
+        width: 64px;
+        height: 64px;
+        font-size: 28px;
+    }
+    .shipping-features .feature-box .feature-number {
+        font-size: 34px;
+    }
+    .shipping-grid {
+        gap: 28px;
+    }
+    .shipping-card .card-inner {
+        padding: 32px 30px 28px;
+    }
+    .shipping-card .card-title {
+        font-size: 21px;
+    }
+    .shipping-card .card-icon-wrap .card-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 22px;
+    }
+    .shipping-card .card-body .card-text {
+        font-size: 15px;
+    }
+}
+
+/* Desktop - 1250px to 1350px */
+@media (min-width: 1250px) and (max-width: 1349px) {
+    .shipping-wrapper {
+        max-width: 1150px;
+        padding: 0 25px;
+    }
+    .shipping-features {
+        gap: 22px;
+    }
+    .shipping-grid {
+        gap: 24px;
+    }
+}
+
+/* Tablet Large - 992px to 1249px */
+@media (max-width: 1249px) and (min-width: 993px) {
+    .shipping-wrapper {
+        max-width: 960px;
+        padding: 0 20px;
+    }
+    .shipping-features {
+        gap: 18px;
+    }
+    .shipping-features .feature-box {
+        padding: 24px 14px 20px;
+    }
+    .shipping-features .feature-box .feature-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+    .shipping-features .feature-box .feature-number {
+        font-size: 26px;
+    }
+    .shipping-grid {
+        gap: 20px;
+    }
+    .shipping-card .card-inner {
+        padding: 24px 22px 20px;
+    }
+    .shipping-card .card-title {
+        font-size: 18px;
+    }
+    .shipping-card .card-icon-wrap .card-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 18px;
+    }
+}
+
+/* Tablet - 768px to 992px */
+@media (max-width: 992px) {
+    .shipping-hero { padding: 50px 20px 40px; }
+    .shipping-hero .hero-content h1 { font-size: 40px; }
+    .shipping-wrapper { 
+        max-width: 100%;
+        padding: 0 16px; 
+        margin: -24px auto 50px; 
+    }
+    .shipping-features { 
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .shipping-features .feature-box {
+        padding: 22px 14px 18px;
+    }
+    .shipping-features .feature-box .feature-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+    }
+    .shipping-features .feature-box .feature-number {
+        font-size: 24px;
+    }
+    .shipping-grid { 
+        grid-template-columns: 1fr 1fr;
+        gap: 18px; 
+    }
+    .shipping-card { min-height: 200px; }
+    .shipping-card .card-inner { padding: 22px 20px 18px; }
+    .shipping-card .card-title { font-size: 18px; }
+    .shipping-card .card-icon-wrap .card-icon { width: 44px; height: 44px; font-size: 18px; }
+}
+
+/* Mobile - 576px to 768px */
+@media (max-width: 768px) {
+    .shipping-hero { 
+        padding: 35px 16px 28px; 
+    }
+    .shipping-hero .hero-content h1 { 
+        font-size: 30px; 
+    }
+    .shipping-hero .hero-content .hero-sub { 
+        font-size: 14px; 
+    }
+    .shipping-hero .hero-content .hero-badge {
+        font-size: 10px;
+        letter-spacing: 2px;
+    }
+    .shipping-hero .hero-content .hero-badge .line {
+        width: 20px;
+    }
+    
+    .shipping-wrapper { 
+        max-width: 100%;
+        padding: 0 12px; 
+        margin: -20px auto 40px;
+    }
+    
+    .shipping-features {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .shipping-features .feature-box {
+        padding: 20px 12px 16px;
+    }
+    
+    .shipping-features .feature-box .feature-number {
+        font-size: 22px;
+    }
+    
+    .shipping-features .feature-box .feature-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+    }
+    
+    .shipping-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .shipping-card { 
+        min-height: 180px;
+        border-radius: 12px;
+    }
+    .shipping-card .card-inner { 
+        padding: 20px 18px 16px; 
+    }
+    .shipping-card .card-title { 
+        font-size: 17px; 
+    }
+    .shipping-card .card-subtitle { font-size: 10px; margin-bottom: 8px; }
+    .shipping-card .card-body .card-text { 
+        font-size: 13.5px; 
+        line-height: 1.8; 
+    }
+    .shipping-card .card-footer .card-tag { font-size: 8px; padding: 3px 12px; }
+    .shipping-card .card-footer .card-time { font-size: 11px; }
+    .shipping-card .card-body .card-image img { 
+        max-height: 110px; 
+    }
+    .shipping-card .card-icon-wrap .card-number { font-size: 10px; padding: 2px 12px; }
+}
+
+/* Mobile Small - below 576px */
+@media (max-width: 576px) {
+    .shipping-hero { 
+        padding: 28px 12px 22px; 
+    }
+    .shipping-hero .hero-content h1 { 
+        font-size: 26px; 
+    }
+    .shipping-hero .hero-content .hero-line { 
+        width: 40px; 
+    }
+    .shipping-hero .hero-content .hero-sub { 
+        font-size: 13px; 
+    }
+    
+    .shipping-wrapper { 
+        max-width: 100%;
+        padding: 0 8px; 
+        margin: -16px auto 30px;
+    }
+    
+    .shipping-features {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    
+    .shipping-features .feature-box {
+        padding: 16px 10px 14px;
+        border-radius: 10px;
+    }
+    
+    .shipping-features .feature-box .feature-number {
+        font-size: 20px;
+    }
+    
+    .shipping-features .feature-box .feature-label {
+        font-size: 10px;
+    }
+    
+    .shipping-features .feature-box .feature-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 17px;
+        margin-bottom: 6px;
+    }
+    
+    .shipping-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .shipping-card { 
+        min-height: 160px;
+        border-radius: 10px;
+    }
+    .shipping-card .card-inner { 
+        padding: 16px 14px 14px; 
+    }
+    .shipping-card .card-icon-wrap .card-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 16px;
+        border-radius: 8px;
+    }
+    .shipping-card .card-title { 
+        font-size: 15px; 
+    }
+    .shipping-card .card-subtitle { font-size: 9px; margin-bottom: 6px; }
+    .shipping-card .card-body .card-text { 
+        font-size: 12.5px; 
+        line-height: 1.7; 
+    }
+    .shipping-card .card-footer { 
+        margin-top: 10px; 
+        padding-top: 8px;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    .shipping-card .card-footer .card-tag { font-size: 7px; padding: 2px 10px; }
+    .shipping-card .card-footer .card-time { font-size: 10px; }
+    .shipping-card .card-body .card-image img { 
+        max-height: 90px; 
+    }
+    .shipping-card .card-icon-wrap .card-number { font-size: 9px; padding: 1px 8px; }
+    
+    .shipping-empty { 
+        padding: 28px 14px; 
+    }
+    .shipping-empty .empty-icon { 
+        font-size: 30px; 
+    }
+    .shipping-empty h4 { 
+        font-size: 16px; 
+    }
+    .shipping-empty p { 
+        font-size: 13px; 
+    }
+}
+</style>
+
+<!-- ============================================================
+   SHIPPING PAGE - FEATURES TOP + 2 COLUMN CARDS
+   ============================================================ -->
+<div class="shipping-page">
+
+    <!-- ===== HERO ===== -->
+    <div class="shipping-hero">
+        <div class="hero-pattern"></div>
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="line"></span>
+                Shipping Information
+                <span class="line"></span>
+            </div>
+            <h1>Shipping <span class="gold">Policy</span></h1>
+            <div class="hero-line"></div>
+            <p class="hero-sub">Information about shipping, delivery and order processing.</p>
         </div>
+    </div>
 
+    <!-- ===== CONTENT ===== -->
+    <div class="shipping-wrapper">
 
-        {% for section in sections %}
+        {% if sections %}
 
-            <div class="card border-0 shadow-sm mb-4">
+            <!-- ===== FEATURES - TOP ROW ===== -->
+            <div class="shipping-features">
+                <div class="feature-box">
+                    <div class="feature-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <span class="feature-number">{{ sections|length }}</span>
+                    <span class="feature-label">Process Steps</span>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <span class="feature-number">24h</span>
+                    <span class="feature-label">Processing Time</span>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">
+                        <i class="fas fa-globe-americas"></i>
+                    </div>
+                    <span class="feature-number">100+</span>
+                    <span class="feature-label">Countries</span>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <span class="feature-number">✓</span>
+                    <span class="feature-label">Secure Tracking</span>
+                </div>
+            </div>
 
-                <div class="card-body p-4 p-lg-5">
+            <!-- ===== CONTENT CARDS - 2 COLUMN ===== -->
+            <div class="shipping-grid">
 
-                    <h2 class="fw-bold mb-3">
-                        {{ section.section_title }}
-                    </h2>
+                {% for section in sections %}
 
+                    <div class="shipping-card">
+                        <div class="card-accent"></div>
+                        <div class="card-inner">
+                            <div class="card-icon-wrap">
+                                <div class="card-icon">
+                                    {% if forloop.counter == 1 %}
+                                        <i class="fas fa-box"></i>
+                                    {% elif forloop.counter == 2 %}
+                                        <i class="fas fa-truck"></i>
+                                    {% elif forloop.counter == 3 %}
+                                        <i class="fas fa-clock"></i>
+                                    {% elif forloop.counter == 4 %}
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    {% elif forloop.counter == 5 %}
+                                        <i class="fas fa-file-alt"></i>
+                                    {% elif forloop.counter == 6 %}
+                                        <i class="fas fa-check-circle"></i>
+                                    {% else %}
+                                        <i class="fas fa-info-circle"></i>
+                                    {% endif %}
+                                </div>
+                                <span class="card-number">0{{ forloop.counter }}</span>
+                            </div>
 
-                    {% if section.image %}
+                           
 
-                        <img
-                            src="{{ section.image.url }}"
-                            alt="{{ section.section_title }}"
-                            class="img-fluid rounded mb-4"
-                        >
+                            <div class="card-body">
+                                <div class="card-text">
+                                    {{ section.section_content|linebreaks }}
+                                </div>
+                                {% if section.image %}
+                                    <div class="card-image">
+                                        <img src="{{ section.image.url }}" alt="{{ section.section_title }}">
+                                    </div>
+                                {% endif %}
+                            </div>
 
-                    {% endif %}
-
-
-                    <div
-                        class="text-muted"
-                        style="line-height: 1.9;"
-                    >
-                        {{ section.section_content|linebreaks }}
+                        </div>
                     </div>
 
-                </div>
+                {% endfor %}
 
             </div>
 
+        {% else %}
 
-        {% empty %}
-
-            <div class="text-center py-5">
-
-                <p class="text-muted">
-                    Content will be available soon.
-                </p>
-
+            <div class="shipping-empty">
+                <span class="empty-icon">
+                    <i class="fas fa-shipping-fast"></i>
+                </span>
+                <h4>Shipping Policy</h4>
+                <p>Content will be available soon.</p>
             </div>
 
-        {% endfor %}
+        {% endif %}
 
     </div>
 
-</section>
+</div>
 
 {% endblock %}

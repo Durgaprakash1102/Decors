@@ -1,83 +1,714 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}Terms of Use{% endblock %}
 
 {% block content %}
 
-<section class="py-5">
+<style>
+/* ============================================================
+   TERMS PAGE - EDITORIAL LAYOUT WITH THEME
+   ============================================================ */
 
-    <div class="container">
+/* ============================================================
+   GLOBAL
+   ============================================================ */
+.terms-page {
+    width: 100%;
+    background: #ffffff;
+    min-height: calc(100vh - 200px);
+    padding: 0;
+    position: relative;
+}
 
-        <div class="text-center mb-5">
+/* ============================================================
+   TOP STRIP - THEME COLORS
+   ============================================================ */
+.terms-strip {
+    background: #5c121f;
+    padding: 14px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-            <h1 class="display-5 fw-bold">
-                Terms of Use
-            </h1>
+.terms-strip .strip-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
 
-            <p class="text-muted">
-                Please read these terms carefully before using our website.
-            </p>
+.terms-strip .strip-left .strip-logo {
+    color: #C9A84C;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 1px;
+}
 
+.terms-strip .strip-left .strip-divider {
+    width: 1px;
+    height: 18px;
+    background: rgba(255,255,255,0.12);
+}
+
+.terms-strip .strip-left .strip-label {
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.terms-strip .strip-right {
+    color: rgba(255,255,255,0.3);
+    font-size: 11px;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ============================================================
+   MAIN LAYOUT - SPLIT
+   ============================================================ */
+.terms-main {
+    display: flex;
+    min-height: 70vh;
+}
+
+/* ============================================================
+   LEFT SIDEBAR - THEME
+   ============================================================ */
+.terms-sidebar {
+    width: 300px;
+    flex-shrink: 0;
+    background: #f8f5f0;
+    padding: 50px 32px 40px;
+    border-right: 1px solid #ede8e0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.terms-sidebar .sidebar-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #5c121f;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 28px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #5c121f;
+}
+
+.terms-sidebar .sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.terms-sidebar .sidebar-nav li {
+    margin-bottom: 2px;
+}
+
+.terms-sidebar .sidebar-nav li a {
+    display: block;
+    padding: 10px 14px;
+    color: #6b6560;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s;
+    font-weight: 400;
+    border-left: 3px solid transparent;
+}
+
+.terms-sidebar .sidebar-nav li a .num {
+    color: #b0a89e;
+    font-size: 11px;
+    margin-right: 10px;
+    font-weight: 600;
+}
+
+.terms-sidebar .sidebar-nav li a:hover {
+    background: rgba(92, 18, 31, 0.05);
+    color: #1a1a1a;
+    border-left-color: #C9A84C;
+}
+
+.terms-sidebar .sidebar-nav li a.active {
+    background: #5c121f;
+    color: #ffffff;
+    border-left-color: #C9A84C;
+}
+
+.terms-sidebar .sidebar-nav li a.active .num {
+    color: rgba(255,255,255,0.5);
+}
+
+/* ============================================================
+   RIGHT CONTENT - MAIN
+   ============================================================ */
+.terms-content {
+    flex: 1;
+    padding: 50px 60px 70px;
+    background: #ffffff;
+    min-height: 100vh;
+}
+
+/* ============================================================
+   HERO INSIDE CONTENT - THEME
+   ============================================================ */
+.terms-content .content-hero {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 2px solid #ede8e0;
+}
+
+.terms-content .content-hero .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #C9A84C;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 6px;
+}
+
+.terms-content .content-hero h1 {
+    font-size: 40px;
+    font-weight: 300;
+    color: #1a1a1a;
+    margin: 0 0 4px;
+    font-family: 'Georgia', serif;
+}
+
+.terms-content .content-hero h1 span {
+    font-weight: 700;
+    color: #5c121f;
+}
+
+.terms-content .content-hero .hero-meta {
+    color: #8a7a6a;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+}
+
+/* ============================================================
+   SECTION BLOCKS - THEME
+   ============================================================ */
+.terms-content .section-block {
+    padding: 36px 0 32px;
+    border-bottom: 1px solid #f0ece6;
+    scroll-margin-top: 20px;
+}
+
+.terms-content .section-block:last-child {
+    border-bottom: none;
+}
+
+.terms-content .section-block .block-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+.terms-content .section-block .block-header .block-number {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+    background: #5c121f;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+}
+
+.terms-content .section-block .block-header h2 {
+    font-size: 20px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin: 0;
+    font-family: 'Georgia', serif;
+}
+
+.terms-content .section-block .block-header h2 .highlight {
+    color: #5c121f;
+}
+
+.terms-content .section-block .block-body {
+    padding-left: 46px;
+}
+
+.terms-content .section-block .block-body .block-text {
+    color: #3d3d3d;
+    font-size: 15px;
+    line-height: 1.9;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+}
+
+.terms-content .section-block .block-body .block-text p {
+    margin-bottom: 12px;
+}
+
+.terms-content .section-block .block-body .block-text p:last-child {
+    margin-bottom: 0;
+}
+
+.terms-content .section-block .block-body .block-text strong {
+    color: #1a1a1a;
+    font-weight: 500;
+}
+
+/* Block Image */
+.terms-content .section-block .block-body .block-image {
+    margin-top: 16px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #ede8e0;
+    background: #faf8f5;
+}
+
+.terms-content .section-block .block-body .block-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 240px;
+    object-fit: cover;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.terms-empty {
+    text-align: center;
+    padding: 70px 40px;
+}
+
+.terms-empty .empty-icon {
+    font-size: 44px;
+    color: #d4cec8;
+    display: block;
+    margin-bottom: 14px;
+}
+
+.terms-empty h4 {
+    font-size: 20px;
+    font-weight: 400;
+    color: #1a1a1a;
+    font-family: 'Georgia', serif;
+    margin: 0 0 6px;
+}
+
+.terms-empty p {
+    color: #8a7a6a;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+}
+
+/* ============================================================
+   SIDEBAR TOGGLE - MOBILE
+   ============================================================ */
+.terms-sidebar-toggle {
+    display: none;
+    background: #5c121f;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    margin: 12px 16px 0;
+    width: fit-content;
+}
+
+.terms-sidebar-toggle:hover {
+    background: #7a1e2e;
+}
+
+.terms-sidebar-toggle .toggle-icon {
+    margin-right: 8px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+/* Tablet */
+@media (max-width: 992px) {
+    .terms-strip { 
+        padding: 12px 30px; 
+    }
+    .terms-sidebar { 
+        width: 240px; 
+        padding: 36px 20px 30px; 
+    }
+    .terms-content { 
+        padding: 36px 32px 50px; 
+    }
+    .terms-content .content-hero h1 { 
+        font-size: 34px; 
+    }
+    .terms-content .section-block .block-header h2 { 
+        font-size: 18px; 
+    }
+    .terms-content .section-block .block-body { 
+        padding-left: 36px; 
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .terms-strip { 
+        padding: 10px 16px; 
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    .terms-strip .strip-left .strip-logo { 
+        font-size: 12px; 
+    }
+    .terms-strip .strip-left .strip-label { 
+        font-size: 10px; 
+        letter-spacing: 1px;
+    }
+    .terms-strip .strip-right { 
+        font-size: 10px; 
+    }
+    
+    .terms-main {
+        flex-direction: column;
+    }
+    
+    .terms-sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 16px 16px 12px;
+        border-right: none;
+        border-bottom: 2px solid #5c121f;
+        display: none;
+    }
+    
+    .terms-sidebar .sidebar-title {
+        margin-bottom: 12px;
+        font-size: 9px;
+        padding-bottom: 8px;
+    }
+    
+    .terms-sidebar .sidebar-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    
+    .terms-sidebar .sidebar-nav li {
+        margin-bottom: 0;
+    }
+    
+    .terms-sidebar .sidebar-nav li a {
+        padding: 6px 12px;
+        font-size: 12px;
+        border-radius: 4px;
+        border-left: none;
+    }
+    
+    .terms-sidebar .sidebar-nav li a .num {
+        font-size: 10px;
+        margin-right: 6px;
+    }
+    
+    .terms-sidebar .sidebar-nav li a.active {
+        border-left: none;
+    }
+    
+    .terms-sidebar-toggle {
+        display: flex !important;
+        align-items: center;
+    }
+    
+    .terms-content {
+        padding: 20px 16px 32px;
+        min-height: auto;
+    }
+    
+    .terms-content .content-hero {
+        margin-bottom: 28px;
+        padding-bottom: 20px;
+    }
+    
+    .terms-content .content-hero h1 {
+        font-size: 28px;
+    }
+    
+    .terms-content .content-hero .hero-label {
+        font-size: 10px;
+        letter-spacing: 2px;
+    }
+    
+    .terms-content .content-hero .hero-meta {
+        font-size: 13px;
+    }
+    
+    .terms-content .section-block {
+        padding: 24px 0 20px;
+    }
+    
+    .terms-content .section-block .block-header {
+        gap: 12px;
+    }
+    
+    .terms-content .section-block .block-header .block-number {
+        width: 26px;
+        height: 26px;
+        font-size: 11px;
+    }
+    
+    .terms-content .section-block .block-header h2 {
+        font-size: 17px;
+    }
+    
+    .terms-content .section-block .block-body {
+        padding-left: 26px;
+    }
+    
+    .terms-content .section-block .block-body .block-text {
+        font-size: 14px;
+        line-height: 1.8;
+    }
+    
+    .terms-content .section-block .block-body .block-image img {
+        max-height: 180px;
+    }
+}
+
+/* Mobile Small */
+@media (max-width: 480px) {
+    .terms-strip { 
+        padding: 8px 12px; 
+    }
+    .terms-strip .strip-left { 
+        gap: 10px; 
+    }
+    .terms-strip .strip-left .strip-logo { 
+        font-size: 11px; 
+    }
+    .terms-strip .strip-left .strip-label { 
+        font-size: 9px; 
+        letter-spacing: 0.5px; 
+    }
+    .terms-strip .strip-right { 
+        font-size: 9px; 
+    }
+    
+    .terms-sidebar-toggle {
+        font-size: 12px;
+        padding: 8px 14px;
+        margin: 8px 12px 0;
+    }
+    
+    .terms-content { 
+        padding: 16px 12px 24px; 
+    }
+    .terms-content .content-hero h1 { 
+        font-size: 24px; 
+    }
+    .terms-content .content-hero .hero-meta { 
+        font-size: 12px; 
+    }
+    
+    .terms-content .section-block { 
+        padding: 18px 0 16px; 
+    }
+    .terms-content .section-block .block-header .block-number {
+        width: 22px;
+        height: 22px;
+        font-size: 10px;
+    }
+    .terms-content .section-block .block-header h2 { 
+        font-size: 15px; 
+    }
+    .terms-content .section-block .block-body { 
+        padding-left: 18px; 
+    }
+    .terms-content .section-block .block-body .block-text { 
+        font-size: 13px; 
+        line-height: 1.7; 
+    }
+    .terms-content .section-block .block-body .block-image img { 
+        max-height: 140px; 
+    }
+    
+    .terms-empty { 
+        padding: 32px 12px; 
+    }
+    .terms-empty .empty-icon { 
+        font-size: 32px; 
+    }
+    .terms-empty h4 { 
+        font-size: 17px; 
+    }
+}
+
+/* ============================================================
+   SIDEBAR OPEN STATE
+   ============================================================ */
+.terms-sidebar.open {
+    display: block !important;
+}
+</style>
+
+<!-- ============================================================
+   TERMS PAGE - EDITORIAL WITH THEME
+   ============================================================ -->
+<div class="terms-page">
+
+    <!-- ===== TOP STRIP ===== -->
+    <div class="terms-strip">
+        <div class="strip-left">
+            <span class="strip-logo">✦ LEGAL</span>
+            <span class="strip-divider"></span>
+            <span class="strip-label">Terms of Use</span>
         </div>
+        <div class="strip-right">
+            Effective: {% now "F j, Y" %}
+        </div>
+    </div>
 
+    <!-- ===== MOBILE TOGGLE ===== -->
+    <button class="terms-sidebar-toggle" onclick="toggleSidebar()">
+        <span class="toggle-icon">☰</span> Sections
+    </button>
 
-        <div class="row">
+    <!-- ===== MAIN LAYOUT ===== -->
+    <div class="terms-main">
 
-            <div class="col-lg-9 mx-auto">
+        <!-- ===== SIDEBAR ===== -->
+        <aside class="terms-sidebar" id="sidebar">
+            <div class="sidebar-title">Contents</div>
+            <ul class="sidebar-nav">
+                {% if sections %}
+                    {% for section in sections %}
+                        <li>
+                            <a href="#section-{{ forloop.counter }}" class="{% if forloop.first %}active{% endif %}" onclick="setActive(this)">
+                                <span class="num">0{{ forloop.counter }}</span>
+                                {{ section.section_title|truncatechars:30 }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li><a href="#">No sections available</a></li>
+                {% endif %}
+            </ul>
+        </aside>
+
+        <!-- ===== CONTENT ===== -->
+        <main class="terms-content">
+
+            <!-- Hero -->
+            <div class="content-hero">
+                <div class="hero-label">✦ Agreement</div>
+                <h1>Terms of <span>Use</span></h1>
+                <div class="hero-meta">Please read these terms carefully before using our services.</div>
+            </div>
+
+            {% if sections %}
 
                 {% for section in sections %}
 
-                    <article class="mb-5">
-
-                        <h2 class="fw-bold mb-3">
-                            {{ section.section_title }}
-                        </h2>
-
-
-                        {% if section.image %}
-
-                            <img
-                                src="{{ section.image.url }}"
-                                alt="{{ section.section_title }}"
-                                class="img-fluid rounded mb-4"
-                            >
-
-                        {% endif %}
-
-
-                        <div
-                            class="text-muted"
-                            style="line-height: 1.9;"
-                        >
-                            {{ section.section_content|linebreaks }}
+                    <div class="section-block" id="section-{{ forloop.counter }}">
+                        <div class="block-header">
+                            <span class="block-number">{{ forloop.counter }}</span>
+                            <h2>{{ section.section_title }}</h2>
                         </div>
-
-                    </article>
-
-
-                    {% if not forloop.last %}
-
-                        <hr class="my-4">
-
-                    {% endif %}
-
-
-                {% empty %}
-
-                    <div class="text-center py-5">
-
-                        <p class="text-muted">
-                            Content will be available soon.
-                        </p>
-
+                        <div class="block-body">
+                            <div class="block-text">
+                                {{ section.section_content|linebreaks }}
+                            </div>
+                            {% if section.image %}
+                                <div class="block-image">
+                                    <img src="{{ section.image.url }}" alt="{{ section.section_title }}">
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
 
                 {% endfor %}
 
-            </div>
+            {% else %}
 
-        </div>
+                <div class="terms-empty">
+                    <span class="empty-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </span>
+                    <h4>Terms of Use</h4>
+                    <p>Content will be available soon.</p>
+                </div>
+
+            {% endif %}
+
+        </main>
 
     </div>
 
-</section>
+</div>
+
+<script>
+// ============================================================
+// SIDEBAR FUNCTIONALITY
+// ============================================================
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('open');
+}
+
+function setActive(el) {
+    // Remove active from all
+    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+    el.classList.add('active');
+    
+    // Close sidebar on mobile
+    if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('open');
+    }
+}
+
+// Scroll spy - highlight active section
+document.addEventListener('scroll', function() {
+    const sections = document.querySelectorAll('.section-block');
+    const navLinks = document.querySelectorAll('.sidebar-nav a');
+    
+    let current = '';
+    sections.forEach((section, index) => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= 150) {
+            current = navLinks[index]?.getAttribute('href') || '';
+        }
+    });
+    
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === current) {
+            link.classList.add('active');
+        }
+    });
+});
+
+// Close sidebar on escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.getElementById('sidebar').classList.remove('open');
+    }
+});
+</script>
 
 {% endblock %}

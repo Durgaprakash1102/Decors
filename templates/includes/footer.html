@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hyzora · Professional Footer</title>
+    <title>Footer</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -767,7 +767,7 @@
                 <i class="fa-solid fa-truck-fast"></i>
                 <div class="value-content">
                     <h4>Fast Delivery</h4>
-                    <p>Free shipping on orders above ₹999</p>
+                    <p>Free shipping on all orders</p>
                 </div>
             </div>
 
@@ -800,13 +800,63 @@
                     <img src="{% static 'images/newlogo.png' %}" alt="Hyzora" />
                 </div>
                 <p>Your trusted online shopping destination for premium home decor and lifestyle products.</p>
-                <div class="footer-social">
-                    <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#"><i class="fa-brands fa-twitter"></i></a>
-                    <a href="#"><i class="fa-brands fa-youtube"></i></a>
-                    <a href="#"><i class="fa-brands fa-pinterest-p"></i></a>
-                </div>
+               <div class="footer-social">
+
+    {% if site_settings.facebook_url %}
+        <a href="{{ site_settings.facebook_url }}"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Facebook">
+            <i class="fa-brands fa-facebook-f"></i>
+        </a>
+    {% endif %}
+
+    {% if site_settings.instagram_url %}
+        <a href="{{ site_settings.instagram_url }}"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Instagram">
+            <i class="fa-brands fa-instagram"></i>
+        </a>
+    {% endif %}
+
+    {% if site_settings.twitter_url %}
+        <a href="{{ site_settings.twitter_url }}"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Twitter">
+            <i class="fa-brands fa-twitter"></i>
+        </a>
+    {% endif %}
+
+    {% if site_settings.youtube_url %}
+        <a href="{{ site_settings.youtube_url }}"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="YouTube">
+            <i class="fa-brands fa-youtube"></i>
+        </a>
+    {% endif %}
+
+    {% if site_settings.linkedin_url %}
+        <a href="{{ site_settings.linkedin_url }}"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="LinkedIn">
+            <i class="fa-brands fa-linkedin-in"></i>
+        </a>
+    {% endif %}
+
+    {% if site_settings.pinterest_url %}
+        <a href="{{ site_settings.pinterest_url }}"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Pinterest">
+            <i class="fa-brands fa-pinterest-p"></i>
+        </a>
+    {% endif %}
+
+</div>
             </div>
 
             <!-- Quick Links -->
@@ -814,9 +864,9 @@
                 <h4>Quick Links</h4>
                 <ul>
                     <li><a href="/">Home</a></li>
-                    <li><a href="/products/">Products</a></li>
-                    <li><a href="/about/">About Us</a></li>
-                    <li><a href="/contact/">Contact</a></li>
+                    <li><a href="{% url 'Ecom:shop' %}">Products</a></li>
+                    <li><a href="{% url 'Ecom:about' %}">About Us</a></li>
+                    <li><a href="{% url 'Ecom:contact' %}">Contact</a></li>
                 </ul>
             </div>
 
@@ -824,10 +874,10 @@
             <div class="links-section">
                 <h4>Policies</h4>
                 <ul>
-                    <li><a href="#">Terms of Service</a></li>
-                    <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Return Policy</a></li>
-                    <li><a href="#">Shipping Policy</a></li>
+                    <li><a href="{% url 'Ecom:terms_of_use' %}">Terms of Service</a></li>
+                    <li><a href="{% url 'Ecom:privacy_policy' %}">Privacy Policy</a></li>
+                    <li><a href="{% url 'Ecom:shipping_policy' %}">Shipping Policy</a></li>
+                    <li><a href="{% url 'Ecom:return_refund_policy' %}">Return & Refund Policy</a></li>
                 </ul>
             </div>
 
